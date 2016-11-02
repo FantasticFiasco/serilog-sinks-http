@@ -33,27 +33,31 @@ namespace Serilog.Sinks.Http
     {
         private readonly string requestUri;
         private readonly ITextFormatter formatter;
-        private readonly Encoding encoding;
 
         private HttpClient client;
 
         /// <summary>
+        /// The default batch posting limit.
+        /// </summary>
+        public static readonly int DefaultBatchPostingLimit = 1000;
+
+        /// <summary>
+        /// The default period.
+        /// </summary>
+        public static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(2);
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="HttpSink"/> class.
         /// </summary>
-        /// <param name="requestUri">The Uri the request is sent to.</param>
+        /// <param name="requestUri">The URI the request is sent to.</param>
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="encoding">
-        /// Character encoding used to write the data on request payload. The default is
-        /// <see cref="Encoding.GetEncoding(int)"/>.
-        /// </param>
         public HttpSink(
             string requestUri,
             int batchPostingLimit,
             TimeSpan period,
-            IFormatProvider formatProvider,
-            Encoding encoding = null)
+            IFormatProvider formatProvider)
             : base(batchPostingLimit, period)
         {
             if (requestUri == null)
@@ -62,7 +66,6 @@ namespace Serilog.Sinks.Http
                 throw new ArgumentNullException(nameof(formatProvider));
 
             this.requestUri = requestUri;
-            this.encoding = encoding ?? Encoding.GetEncoding(0);
 
             formatter = new JsonFormatter(formatProvider: formatProvider, renderMessage: true);
             client = new HttpClient();
@@ -77,7 +80,7 @@ namespace Serilog.Sinks.Http
         protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
         {
             var payload = FormatPayload(events);
-            var content = new StringContent(payload, encoding, "application/json");
+            var content = new StringContent(payload, Encoding.UTF8, "application/json");
 
             var result = await client.PostAsync(requestUri, content).ConfigureAwait(false);
             if (!result.IsSuccessStatusCode)
