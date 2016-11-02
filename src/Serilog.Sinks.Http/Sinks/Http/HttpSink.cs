@@ -62,8 +62,6 @@ namespace Serilog.Sinks.Http
         {
             if (requestUri == null)
                 throw new ArgumentNullException(nameof(requestUri));
-            if (formatProvider == null)
-                throw new ArgumentNullException(nameof(formatProvider));
 
             this.requestUri = requestUri;
 
