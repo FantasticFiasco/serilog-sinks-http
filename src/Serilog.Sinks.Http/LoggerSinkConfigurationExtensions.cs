@@ -54,7 +54,9 @@ namespace Serilog
             if (sinkConfiguration == null)
                 throw new ArgumentNullException(nameof(sinkConfiguration));
 
+            var client = new HttpClientWrapper();
             var sink = new HttpSink(
+                client,
                 requestUri,
                 batchPostingLimit ?? HttpSink.DefaultBatchPostingLimit,
                 period ?? HttpSink.DefaultPeriod,

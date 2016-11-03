@@ -34,7 +34,7 @@ namespace Serilog.Sinks.Http
         private readonly string requestUri;
         private readonly ITextFormatter formatter;
 
-        private HttpClient client;
+        private IHttpClient client;
 
         /// <summary>
         /// The default batch posting limit.
@@ -49,24 +49,28 @@ namespace Serilog.Sinks.Http
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpSink"/> class.
         /// </summary>
+        /// <param name="client">The client responsible for sending HTTP POST requests.</param>
         /// <param name="requestUri">The URI the request is sent to.</param>
         /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
         /// <param name="period">The time to wait between checking for event batches.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
         public HttpSink(
+            IHttpClient client,
             string requestUri,
             int batchPostingLimit,
             TimeSpan period,
             IFormatProvider formatProvider)
             : base(batchPostingLimit, period)
         {
+            if (client == null)
+                throw new ArgumentNullException(nameof(client));
             if (requestUri == null)
                 throw new ArgumentNullException(nameof(requestUri));
 
+            this.client = client;
             this.requestUri = requestUri;
-
+            
             formatter = new JsonFormatter(formatProvider: formatProvider, renderMessage: true);
-            client = new HttpClient();
         }
 
         #region PeriodicBatchingSink Members
@@ -80,7 +84,10 @@ namespace Serilog.Sinks.Http
             var payload = FormatPayload(events);
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
 
-            var result = await client.PostAsync(requestUri, content).ConfigureAwait(false);
+            var result = await client
+                .PostAsync(requestUri, content)
+                .ConfigureAwait(false);
+
             if (!result.IsSuccessStatusCode)
                 throw new LoggingFailedException($"Received failed result {result.StatusCode} when posting events to {requestUri}");
         }
