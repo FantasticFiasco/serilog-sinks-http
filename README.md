@@ -53,6 +53,20 @@ The sink is batching multiple events into a single request, and the following hy
 }
 ```
 
+### Typical use case
+
+Producing log events is only half the story. Unless you are consuming them in a matter that benefits you in development or operations, there is really no need to produce them in the first place.
+
+Integration with [Elastic Stack](https://www.elastic.co/products) (formerly know as ELK, an acronym for Elasticsearch, Logstash and Kibana) is powerful beyond belief, but there are many alternatives to get the log events into Elasticsearch.
+
+#### Send log events to Elasticsearch
+
+The log events can be sent directly to Elasticsearch using [Serilog.Sinks.Elasticsearch](https://github.com/serilog/serilog-sinks-elasticsearch). In this case you've solved your problem without using this sink, and all is well in the world.
+
+#### Send log events to Logstash
+
+If you would like to send the log events to Logstash for further processing instead of sending them directly to Elasticsearch, this sink in combination with the [Logstash HTTP input plugin](https://www.elastic.co/blog/introducing-logstash-input-http-plugin) is the perfect match for you. It is a much better solution than having to install [Filebeat](https://www.elastic.co/products/beats/filebeat) on all your instances, mainly because it involves fewer moving parts.
+
 ### Install via NuGet
 
 If you want to include the HTTP POST sink in your project, you can [install it directly from NuGet](https://www.nuget.org/packages/Serilog.Sinks.Http/).
