@@ -42,19 +42,24 @@ namespace Serilog
         /// The minimum level for events passed through the sink. The default is
         /// <see cref="LevelAlias.Minimum"/>.
         /// </param>
-        /// <returns>Logger configuration, allowing configuration to continue.</returns>
+        /// <param name="httpClient">
+        /// A custom <see cref="IHttpClient"/> implementation.
+        /// </param>
+        ///  <returns>Logger configuration, allowing configuration to continue.</returns>
         public static LoggerConfiguration Http(
             this LoggerSinkConfiguration sinkConfiguration,
             string requestUri,
             int? batchPostingLimit = null,
             TimeSpan? period = null,
             IFormatProvider formatProvider = null,
-            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum)
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            IHttpClient httpClient = null)
         {
             if (sinkConfiguration == null)
                 throw new ArgumentNullException(nameof(sinkConfiguration));
 
-            var client = new HttpClientWrapper();
+            var client = httpClient ?? new HttpClientWrapper();
+
             var sink = new HttpSink(
                 client,
                 requestUri,
