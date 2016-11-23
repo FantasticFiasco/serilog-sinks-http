@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Serilog.Sinks.Http
@@ -6,7 +7,7 @@ namespace Serilog.Sinks.Http
     /// <summary>
     /// Interface responsible for posting HTTP requests.
     /// </summary>
-    public interface IHttpClient
+    public interface IHttpClient : IDisposable
     {
         /// <summary>
         /// Sends a POST request to the specified Uri as an asynchronous operation.
@@ -15,11 +16,5 @@ namespace Serilog.Sinks.Http
         /// <param name="content">The HTTP request content sent to the server.</param>
         /// <returns>The task object representing the asynchronous operation.</returns>
         Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content);
-
-        /// <summary>
-        /// Releases the unmanaged resources and disposes of the managed resources used by the
-        /// <see cref="IHttpClient"/>.
-        /// </summary>
-        void Dispose();
     }
 }
