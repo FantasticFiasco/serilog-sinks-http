@@ -10,7 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ### Changed
 
-- Custom implementation of `IHttpClient` can be passed to sink when creating it
+- Custom implementation of `IHttpClient` can be passed to sink when creating it (contribution by [@lhaussknecht](https://github.com/lhaussknecht))
 
 ## 1.0.0 2016-11-03
 
