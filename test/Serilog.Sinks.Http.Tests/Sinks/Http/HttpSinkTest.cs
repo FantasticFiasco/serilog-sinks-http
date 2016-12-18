@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using Moq;
 using Serilog.Sinks.Http.Tests.Support;
 using Xunit;
@@ -26,15 +27,19 @@ namespace Serilog.Sinks.Http.Tests.Sinks.Http
         [Fact]
         public void RequestUri()
         {
+            // Arrange
+            var counter = new Counter(1);
+
+            client
+                .Setup(mock => mock.PostAsync(requestUri, It.IsAny<HttpContent>()))
+                .Callback(() => counter.Increment());
+
             // Act
             sink.Emit(Some.DebugEvent());
 
+
             // Assert
-            client.Verify(
-                mock => mock.PostAsync(
-                    requestUri,
-                    It.IsAny<HttpContent>()),
-                Times.Once);
+            counter.Wait(TimeSpan.FromSeconds(10));
         }
     }
 }
