@@ -76,3 +76,7 @@ To install the sink, run the following command in the Package Manager Console:
 ```
 PM> Install-Package Serilog.Sinks.Http
 ```
+
+### Credit
+
+Thank you [JetBrains](https://www.jetbrains.com/) for your important initiative to support the open source community with free licenses to your products.
