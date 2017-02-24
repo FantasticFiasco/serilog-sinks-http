@@ -1,35 +1,35 @@
 {
-    "version": "2.0.0-*",
-    "description": "Serilog event sink that sends HTTP POST requests over the network.",
-    "authors": [
-        "Mattias Kindborg"
+  "version": "2.0.0-*",
+  "description": "Serilog event sink that sends HTTP POST requests over the network.",
+  "authors": [
+    "Mattias Kindborg"
+  ],
+  "packOptions": {
+    "tags": [
+      "serilog",
+      "http"
     ],
-    "packOptions": {
-        "tags": [
-            "serilog",
-            "http"
-        ],
-        "projectUrl": "http://serilog.net",
-        "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0",
-        "iconUrl": "http://serilog.net/images/serilog-sink-nuget.png"
+    "projectUrl": "http://serilog.net",
+    "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0",
+    "iconUrl": "http://serilog.net/images/serilog-sink-nuget.png"
+  },
+  "dependencies": {
+    "Serilog": "*",
+    "Serilog.Sinks.PeriodicBatching": "*",
+    "System.Net.Http": "4.1.0"
+  },
+  "buildOptions": {
+    "keyFile": "../../Serilog.snk",
+    "xmlDoc": true
+  },
+  "frameworks": {
+    "net4.5": {
+      "buildOptions": {
+        "define": [ "NET4" ]
+      }
     },
-    "dependencies": {
-        "Serilog": "*",
-        "Serilog.Sinks.PeriodicBatching": "*",
-        "System.Net.Http": "4.1.0"
-    },
-    "buildOptions": {
-        "keyFile": "../../Serilog.snk",
-        "xmlDoc": true
-    },
-    "frameworks": {
-        "net4.5": {
-            "buildOptions": {
-                "define": [ "NET4" ]
-            }
-        },
-        "netstandard1.5": {
-            "dependencies": {}
-        }
+    "netstandard1.5": {
+      "dependencies": {}
     }
+  }
 }

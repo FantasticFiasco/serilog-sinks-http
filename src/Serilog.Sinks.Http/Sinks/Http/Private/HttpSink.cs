@@ -24,12 +24,12 @@ using Serilog.Formatting;
 using Serilog.Formatting.Json;
 using Serilog.Sinks.PeriodicBatching;
 
-namespace Serilog.Sinks.Http
+namespace Serilog.Sinks.Http.Private
 {
     /// <summary>
     /// Send log events using HTTP POST over the network.
     /// </summary>
-    public sealed class HttpSink : PeriodicBatchingSink
+    internal class HttpSink : PeriodicBatchingSink
     {
         private readonly string requestUri;
         private readonly ITextFormatter formatter;

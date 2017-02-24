@@ -2,7 +2,7 @@
 using System.Threading;
 using Xunit;
 
-namespace Serilog.Sinks.Http.Tests.Support
+namespace Serilog.Sinks.Http.Support
 {
     internal class Counter
     {

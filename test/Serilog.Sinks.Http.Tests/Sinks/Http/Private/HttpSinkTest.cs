@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Net.Http;
 using Moq;
-using Serilog.Sinks.Http.Tests.Support;
+using Serilog.Sinks.Http.Private;
+using Serilog.Sinks.Http.Support;
 using Xunit;
 
-namespace Serilog.Sinks.Http.Tests.Sinks.Http
+namespace Serilog.Sinks.Http.Sinks.Http.Private
 {
     public class HttpSinkTest
     {
