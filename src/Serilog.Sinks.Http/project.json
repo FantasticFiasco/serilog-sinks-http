@@ -13,23 +13,28 @@
     "licenseUrl": "http://www.apache.org/licenses/LICENSE-2.0",
     "iconUrl": "http://serilog.net/images/serilog-sink-nuget.png"
   },
-  "dependencies": {
-    "Serilog": "*",
-    "Serilog.Sinks.PeriodicBatching": "*",
-    "System.Net.Http": "4.1.0"
-  },
   "buildOptions": {
     "keyFile": "../../Serilog.snk",
+    "warningsAsErrors": true,
     "xmlDoc": true
   },
   "frameworks": {
     "net4.5": {
-      "buildOptions": {
-        "define": [ "NET4" ]
+      "frameworkAssemblies": {
+        "System.Net.Http": ""
+      },
+      "dependencies": {
+        "Serilog": "*",
+        "Serilog.Sinks.PeriodicBatching": "*"
       }
     },
-    "netstandard1.5": {
-      "dependencies": {}
+    "netstandard1.3": {
+      "dependencies": {
+        "Serilog": "*",
+        "Serilog.Sinks.PeriodicBatching": "*",
+        "System.Net.Http": "4.1.0",
+        "System.Threading.Timer": "4.0.1"
+      }
     }
   }
 }
