@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Moq;
+using Newtonsoft.Json;
 using Serilog.Sinks.Http.Private;
 using Serilog.Sinks.Http.Support;
 using Xunit;
@@ -20,27 +24,58 @@ namespace Serilog.Sinks.Http.Sinks.Http.Private
             sink = new HttpSink(
                 client.Object,
                 requestUri,
-                HttpSink.DefaultBatchPostingLimit,
-                HttpSink.DefaultPeriod,
-                null);
+				100,							// batchPostingLimit
+				TimeSpan.FromMilliseconds(50),	// period
+				null);
         }
 
-        [Fact]
-        public void RequestUri()
+        [Theory]
+		[InlineData(1)]			// 1 batch
+		[InlineData(10)]		// 1 batch
+		[InlineData(100)]		// ~1 batch
+		[InlineData(1000)]		// ~10 batches
+		[InlineData(10000)]		// ~100 batches
+		[InlineData(100000)]	// ~1000 batches
+		public void Emit(int numberOfEvents)
         {
             // Arrange
-            var counter = new Counter(1);
+            var counter = new Counter(numberOfEvents);
 
-            client
-                .Setup(mock => mock.PostAsync(requestUri, It.IsAny<HttpContent>()))
-                .Callback(() => counter.Increment());
+			SetupCountingPostedEvents(counter);
 
             // Act
-            sink.Emit(Some.DebugEvent());
+			Send(numberOfEvents);
 
-
-            // Assert
-            counter.Wait(TimeSpan.FromSeconds(10));
+			// Assert
+            counter.Wait();
         }
+
+	    private void SetupCountingPostedEvents(Counter counter)
+	    {
+			client
+				.Setup(mock => mock.PostAsync(requestUri, It.IsAny<HttpContent>()))
+				.Callback<string, HttpContent>(
+					async (_, httpContent) =>
+					{
+						int count = await ReadNumberOfEventsAsync(httpContent);
+						counter.Add(count);
+					})
+				.ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK));
+		}
+
+	    private void Send(int numberOfEvents)
+	    {
+			for (int i = 0; i < numberOfEvents; i++)
+			{
+				sink.Emit(Some.DebugEvent());
+			}
+		}
+
+		private static async Task<int> ReadNumberOfEventsAsync(HttpContent httpContent)
+	    {
+		    var eventsDto = JsonConvert.DeserializeObject<EventsDto>(await httpContent.ReadAsStringAsync());
+
+			return eventsDto.events.Count();
+	    }
     }
 }
