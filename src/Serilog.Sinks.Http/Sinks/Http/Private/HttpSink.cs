@@ -81,7 +81,7 @@ namespace Serilog.Sinks.Http.Private
         /// <param name="events">The events to emit.</param>
         protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
         {
-            var payload = FormatPayload(events);
+            var payload = FormatPayload(events, formatter);
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
 
             var result = await client
@@ -107,13 +107,12 @@ namespace Serilog.Sinks.Http.Private
             {
                 client.Dispose();
                 client = null;
-
             }
         }
 
         #endregion
 
-        private string FormatPayload(IEnumerable<LogEvent> events)
+        internal static string FormatPayload(IEnumerable<LogEvent> events, ITextFormatter formatter)
         {
             var payload = new StringWriter();
             payload.Write("{\"events\":[");
