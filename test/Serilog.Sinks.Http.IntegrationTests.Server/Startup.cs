@@ -16,8 +16,6 @@ namespace Serilog.Sinks.Http.IntegrationTests.Server
 				.SetBasePath(env.ContentRootPath)
 				.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 			
-			builder.AddEnvironmentVariables();
-
 			configuration = builder.Build();
 		}
 		
@@ -31,9 +29,8 @@ namespace Serilog.Sinks.Http.IntegrationTests.Server
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
 		{
-			loggerFactory.AddConsole(configuration.GetSection("Logging"));
 			loggerFactory.AddDebug();
-			
+
 			app.UseMvc();
 		}
 	}

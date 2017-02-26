@@ -7,7 +7,7 @@ namespace Serilog.Sinks.Http.IntegrationTests.Server.Controllers
     {
 		// POST api/values
 		[HttpPost]
-		public void Post([FromBody]string value)
+		public void Post([FromBody]LogDto value)
 		{
 		}
 	}

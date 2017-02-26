@@ -1,13 +1,27 @@
 ﻿{
-  "version": "1.0.0-*",
-
+  "testRunner": "xunit",
   "dependencies": {
-    "NETStandard.Library": "1.6.0"
+    "dotnet-test-xunit": "2.2.0-preview2-build1029",
+    "Microsoft.AspNetCore.TestHost": "1.1.0",
+    "NETStandard.Library": "1.6.1",
+    "Serilog.Sinks.Http.IntegrationTests.Server": { "target": "project" },
+    "xunit": "2.2.0"
   },
-
+  "buildOptions": {
+    "warningsAsErrors": true
+  },
   "frameworks": {
-    "netstandard1.6": {
-      "imports": "dnxcore50"
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.0"
+        }
+      },
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
     }
   }
 }
