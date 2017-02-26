@@ -20,18 +20,21 @@
   },
   "frameworks": {
     "net4.5": {
+      "buildOptions": {
+        "define": [ "HRESULTS" ]
+      },
       "frameworkAssemblies": {
         "System.Net.Http": ""
       },
       "dependencies": {
-        "Serilog": "*",
-        "Serilog.Sinks.PeriodicBatching": "*"
+        "Serilog.Sinks.File": "*",
+        "Serilog.Sinks.RollingFile": "*"
       }
     },
     "netstandard1.3": {
       "dependencies": {
-        "Serilog": "*",
-        "Serilog.Sinks.PeriodicBatching": "*",
+        "Serilog.Sinks.File": "*",
+        "Serilog.Sinks.RollingFile": "*",
         "System.Net.Http": "4.1.0",
         "System.Threading.Timer": "4.0.1"
       }

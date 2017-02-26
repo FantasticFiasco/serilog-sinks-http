@@ -15,104 +15,61 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
 using System.Text;
-using System.Threading.Tasks;
-using Serilog.Debugging;
+using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Formatting.Json;
-using Serilog.Sinks.PeriodicBatching;
+using Serilog.Sinks.RollingFile;
 
 namespace Serilog.Sinks.Http.Private
 {
-    /// <summary>
-    /// Send log events using HTTP POST over the network.
-    /// </summary>
-    internal class HttpSink : PeriodicBatchingSink
-    {
-        private readonly string requestUri;
-        private readonly ITextFormatter formatter;
+    internal class HttpSink : ILogEventSink, IDisposable
+	{
+		private readonly HttpLogShipper shipper;
+		private readonly RollingFileSink sink;
 
-        private IHttpClient client;
-
-        /// <summary>
-        /// The default batch posting limit.
-        /// </summary>
-        public static readonly int DefaultBatchPostingLimit = 1000;
-
-        /// <summary>
-        /// The default period.
-        /// </summary>
-        public static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(2);
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpSink"/> class.
-        /// </summary>
-        /// <param name="client">The client responsible for sending HTTP POST requests.</param>
-        /// <param name="requestUri">The URI the request is sent to.</param>
-        /// <param name="batchPostingLimit">The maximum number of events to post in a single batch.</param>
-        /// <param name="period">The time to wait between checking for event batches.</param>
-        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        public HttpSink(
+		public HttpSink(
             IHttpClient client,
             string requestUri,
-            int batchPostingLimit,
-            TimeSpan period,
-            IFormatProvider formatProvider)
-            : base(batchPostingLimit, period)
+			string bufferBaseFilename,
+			int batchPostingLimit,
+			TimeSpan period,
+			long? bufferFileSizeLimitBytes,
+			long? eventBodyLimitBytes,
+			IFormatProvider formatProvider)
         {
-            if (client == null)
-                throw new ArgumentNullException(nameof(client));
-            if (requestUri == null)
-                throw new ArgumentNullException(nameof(requestUri));
+			if (bufferFileSizeLimitBytes.HasValue && bufferFileSizeLimitBytes < 0)
+				throw new ArgumentOutOfRangeException(nameof(bufferFileSizeLimitBytes), "Negative value provided; file size limit must be non-negative.");
 
-            this.client = client;
-            this.requestUri = requestUri;
-            
-            formatter = new JsonFormatter(formatProvider: formatProvider, renderMessage: true);
+			shipper = new HttpLogShipper(
+				client,
+				requestUri,
+				bufferBaseFilename,
+				batchPostingLimit,
+				period,
+				eventBodyLimitBytes);
+
+			sink = new RollingFileSink(
+				bufferBaseFilename + "-{Date}.json",
+				new JsonFormatter(formatProvider: formatProvider, renderMessage: true),
+				bufferFileSizeLimitBytes,
+				null,
+				Encoding.UTF8);
         }
 
-        #region PeriodicBatchingSink Members
+		public void Emit(LogEvent logEvent)
+		{
+			sink.Emit(logEvent);
+		}
 
-        /// <summary>
-        /// Emit a batch of log events, running asynchronously.
-        /// </summary>
-        /// <param name="events">The events to emit.</param>
-        protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
-        {
-            var payload = FormatPayload(events, formatter);
-            var content = new StringContent(payload, Encoding.UTF8, "application/json");
+		public void Dispose()
+		{
+			sink.Dispose();
+			shipper.Dispose();
+		}
 
-            var result = await client
-                .PostAsync(requestUri, content)
-                .ConfigureAwait(false);
-
-            if (!result.IsSuccessStatusCode)
-                throw new LoggingFailedException($"Received failed result {result.StatusCode} when posting events to {requestUri}");
-        }
-
-        /// <summary>
-        /// Free resources held by the sink.
-        /// </summary>
-        /// <param name="disposing">
-        /// If true, called because the object is being disposed; if false, the object is being
-        /// disposed from the finalizer.
-        /// </param>
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-
-            if (disposing && client != null)
-            {
-                client.Dispose();
-                client = null;
-            }
-        }
-
-        #endregion
-
-        internal static string FormatPayload(IEnumerable<LogEvent> events, ITextFormatter formatter)
+		internal static string FormatPayload(IEnumerable<LogEvent> events, ITextFormatter formatter)
         {
             var payload = new StringWriter();
             payload.Write("{\"events\":[");
@@ -130,5 +87,5 @@ namespace Serilog.Sinks.Http.Private
             payload.Write("]}");
             return payload.ToString();
         }
-    }
+	}
 }

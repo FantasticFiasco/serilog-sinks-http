@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Net.Http;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.Http;
@@ -25,47 +26,66 @@ namespace Serilog
     /// </summary>
     public static class LoggerSinkConfigurationExtensions
     {
-        /// <summary>
-        /// Adds a sink that sends log events using HTTP POST over the network.
-        /// </summary>
-        /// <param name="sinkConfiguration">The logger configuration.</param>
-        /// <param name="requestUri">The URI the request is sent to.</param>
-        /// <param name="batchPostingLimit">
-        /// The maximum number of events to post in a single batch. The default is
-        /// <see cref="HttpSink.DefaultBatchPostingLimit"/>.
-        /// </param>
-        /// <param name="period">
-        /// The time to wait between checking for event batches. The default is
-        /// <see cref="HttpSink.DefaultPeriod"/>.
-        /// </param>
-        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="restrictedToMinimumLevel">
-        /// The minimum level for events passed through the sink. The default is
-        /// <see cref="LevelAlias.Minimum"/>.
-        /// </param>
-        /// <param name="httpClient">
-        /// A custom <see cref="IHttpClient"/> implementation.
-        /// </param>
-        ///  <returns>Logger configuration, allowing configuration to continue.</returns>
-        public static LoggerConfiguration Http(
+		/// <summary>
+		/// Adds a sink that sends log events using HTTP POST over the network.
+		/// </summary>
+		/// <param name="sinkConfiguration">The logger configuration.</param>
+		/// <param name="requestUri">The URI the request is sent to.</param>
+		/// <param name="batchPostingLimit">
+		/// The maximum number of events to post in a single batch. The default is 1000.
+		/// </param>
+		/// <param name="period">
+		/// The time to wait between checking for event batches. The default is 2 seconds.
+		/// </param>
+		/// <param name="bufferBaseFilename">
+		/// Path for a set of files that will be used to buffer events until they can be successfully
+		/// transmitted across the network. Individual files will be created using the pattern
+		/// <paramref name="bufferBaseFilename"/>-{Date}.json.
+		/// </param>
+		/// <param name="bufferFileSizeLimitBytes">
+		/// The maximum size, in bytes, to which the buffer log file for a specific date will be
+		/// allowed to grow. By default no limit will be applied.
+		/// </param>
+		/// <param name="eventBodyLimitBytes">
+		/// The maximum size, in bytes, that the JSON representation of an event may take before it is
+		/// dropped rather than being sent to the Seq server. Specify null for no limit. The default is
+		/// 265 KB.
+		/// </param>
+		/// <param name="formatProvider">
+		/// Supplies culture-specific formatting information, or null.
+		/// </param>
+		/// <param name="restrictedToMinimumLevel">
+		/// The minimum level for events passed through the sink. The default is
+		/// <see cref="LevelAlias.Minimum"/>.
+		/// </param>
+		/// <param name="httpClient">
+		/// A custom <see cref="IHttpClient"/> implementation. Default value is
+		/// <see cref="HttpClient"/>.
+		/// </param>
+		/// <returns>Logger configuration, allowing configuration to continue.</returns>
+		public static LoggerConfiguration Http(
             this LoggerSinkConfiguration sinkConfiguration,
             string requestUri,
-            int? batchPostingLimit = null,
+			string bufferBaseFilename,
+			int batchPostingLimit = 1000,
             TimeSpan? period = null,
-            IFormatProvider formatProvider = null,
+			long? bufferFileSizeLimitBytes = null,
+			long? eventBodyLimitBytes = 256 * 1024,
+			IFormatProvider formatProvider = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             IHttpClient httpClient = null)
         {
             if (sinkConfiguration == null)
                 throw new ArgumentNullException(nameof(sinkConfiguration));
-
-            var client = httpClient ?? new HttpClientWrapper();
-
+			
             var sink = new HttpSink(
-                client,
+				httpClient ?? new HttpClientWrapper(),
                 requestUri,
-                batchPostingLimit ?? HttpSink.DefaultBatchPostingLimit,
-                period ?? HttpSink.DefaultPeriod,
+				bufferBaseFilename,
+                batchPostingLimit,
+                period ?? TimeSpan.FromSeconds(2),
+				bufferFileSizeLimitBytes,
+				eventBodyLimitBytes,
                 formatProvider);
 
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
