@@ -1,57 +1,45 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Text;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using Newtonsoft.Json;
 using Serilog.Sinks.Http.IntegrationTests.Server;
-using Serilog.Sinks.Http.IntegrationTests.Server.Controllers;
 using Xunit;
 
 namespace Serilog.Sinks.Http.IntegrationTests
 {
     public class Temp
     {
-		private readonly TestServer _server;
-		private readonly HttpClient _client;
+		private readonly TestServer server;
+	    private readonly ApiModel api;
 
 		public Temp()
 		{
-			// Arrange
-			_server = new TestServer(new WebHostBuilder()
+			server = new TestServer(new WebHostBuilder()
 				.UseStartup<Startup>());
-			_client = _server.CreateClient();
+
+			api = new ApiModel(server.CreateClient());
 		}
 
 		[Fact]
 		public async Task ReturnHelloWorld()
 		{
-			// Act
-			var request = new EventBatchRequestDto
+			await api.AddAsync(new[]
 			{
-				Events = new[]
-				{
-					new EventDto { Payload = "Kalle" },
-					new EventDto { Payload = "Olle" }
-				}
-			};
-
-			var response = await _client.PostAsync(
-				"/api/events/batch",
-				new StringContent(JsonConvert.SerializeObject(request),
-				Encoding.UTF8,
-				"application/json"));
-
-			Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-			response = await _client.GetAsync("api/events");
-
-			var events = JsonConvert.DeserializeObject<IEnumerable<EventDto>>(await response.Content.ReadAsStringAsync());
-
+				new Event("Kalle" ),
+				new Event("Olle")
+			});
+			
+			var events = await api.GetAsync();
+			
 			Assert.Equal(2, events.Count());
+		}
+
+		[Fact]
+		public async Task ReturnHelloWorld2()
+		{
+			var events = await api.GetAsync();
+
+			Assert.Equal(0, events.Count());
 		}
 	}
 }
