@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,22 +30,28 @@ namespace Serilog.Sinks.Http.IntegrationTests
 		public async Task ReturnHelloWorld()
 		{
 			// Act
-			var dto = new LogDto
+			var request = new EventBatchRequestDto
 			{
-				Events = new string[]
+				Events = new[]
 				{
-					"Kalle",
-					"Olle"
+					new EventDto { Payload = "Kalle" },
+					new EventDto { Payload = "Olle" }
 				}
 			};
 
 			var response = await _client.PostAsync(
-				"/api/logs",
-				new StringContent(JsonConvert.SerializeObject(dto),
+				"/api/events/batch",
+				new StringContent(JsonConvert.SerializeObject(request),
 				Encoding.UTF8,
 				"application/json"));
 
 			Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+			response = await _client.GetAsync("api/events");
+
+			var events = JsonConvert.DeserializeObject<IEnumerable<EventDto>>(await response.Content.ReadAsStringAsync());
+
+			Assert.Equal(2, events.Count());
 		}
 	}
 }

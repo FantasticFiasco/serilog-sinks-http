@@ -2,8 +2,8 @@
 
 namespace Serilog.Sinks.Http.IntegrationTests.Server.Controllers
 {
-    public class LogDto
+    public class EventBatchRequestDto
     {
-	    public IEnumerable<string> Events { get; set; }
+	    public IEnumerable<EventDto> Events { get; set; }
     }
 }
