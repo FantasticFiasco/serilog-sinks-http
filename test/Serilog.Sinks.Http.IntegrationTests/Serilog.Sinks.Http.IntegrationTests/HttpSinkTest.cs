@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Serilog.Core;
 using Serilog.Events;
+using Serilog.Sinks.Http.IntegrationTests.Support;
 using Xunit;
 
 namespace Serilog.Sinks.Http.IntegrationTests
@@ -39,7 +41,7 @@ namespace Serilog.Sinks.Http.IntegrationTests
 			logger.Write(level, "Some message");
 
 			// Assert
-			await Api.WaitForEventCountAsync(1);
+			await Api.WaitAndGetAsync(1);
 		}
 
 		[Theory]
@@ -56,7 +58,22 @@ namespace Serilog.Sinks.Http.IntegrationTests
 			}
 
 			// Assert
-			await Api.WaitForEventCountAsync(numberOfEvents);
+			await Api.WaitAndGetAsync(numberOfEvents);
+		}
+
+		[Fact]
+		public async Task EventsAreFormattedIntoJsonPayloads()
+		{
+			// Arrange
+			var expected = Some.LogEvent("Hello, {Name}!", "Alice");
+
+			// Act
+			logger.Write(expected);
+
+			// Assert
+			var events = await Api.WaitAndGetAsync(1);
+
+			Assert.Equal(expected.RenderMessage(), events.First().RenderedMessage);
 		}
 
 		void IDisposable.Dispose()

@@ -54,17 +54,19 @@ namespace Serilog.Sinks.Http.IntegrationTests
 			return events.Select(PayloadConvert.FromDto);
 		}
 
-		public Task WaitForEventCountAsync(int expected)
+		public Task<IEnumerable<Event>> WaitAndGetAsync(int expectedEventCount)
 		{
 			return waitPolicy.ExecuteAsync(
 				async () =>
 				{
-					var actual = (await GetAsync()).Count();
+					var actual = await GetAsync();
 
-					if (actual != expected)
+					if (actual.Count() != expectedEventCount)
 					{
 						throw new XunitException();
 					}
+
+					return actual;
 				});
 		}
 	}
