@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Serilog.Core;
+using Serilog.Events;
 using Xunit;
 
 namespace Serilog.Sinks.Http.IntegrationTests
 {
-    public class HttpSinkTest : TestServerFixture
+    public class HttpSinkTest : TestServerFixture, IDisposable
     {
-	    private readonly ILogger logger;
+	    private readonly Logger logger;
 		
 		public HttpSinkTest()
 		{
 			ClearBufferFiles();
 
 			logger = new LoggerConfiguration()
+				.MinimumLevel.Verbose()
 				.WriteTo
 				.Http(
 					"api/batches",
@@ -23,14 +26,25 @@ namespace Serilog.Sinks.Http.IntegrationTests
 				.CreateLogger();
 		}
 
-	    [Fact]
-	    public async Task Error()
-	    {
-		    // Act
-			logger.Error("Some message");
+		[Theory]
+		[InlineData(LogEventLevel.Verbose)]
+		[InlineData(LogEventLevel.Debug)]
+		[InlineData(LogEventLevel.Information)]
+		[InlineData(LogEventLevel.Warning)]
+		[InlineData(LogEventLevel.Error)]
+		[InlineData(LogEventLevel.Fatal)]
+		public async Task Write(LogEventLevel level)
+		{
+			// Act
+			logger.Write(level, "Some message");
 
 			// Assert
-		    Assert.True(await Api.WaitForEventCount(1));
+			await Api.WaitForEventCountAsync(1);
+		}
+
+	    void IDisposable.Dispose()
+	    {
+		    logger?.Dispose();
 	    }
-	}
+    }
 }
