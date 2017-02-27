@@ -4,6 +4,7 @@
     "dotnet-test-xunit": "2.2.0-preview2-build1029",
     "Microsoft.AspNetCore.TestHost": "1.1.0",
     "NETStandard.Library": "1.6.1",
+    "Serilog.Sinks.Http": { "target": "project" },
     "Serilog.Sinks.Http.IntegrationTests.Server": { "target": "project" },
     "xunit": "2.2.0"
   },

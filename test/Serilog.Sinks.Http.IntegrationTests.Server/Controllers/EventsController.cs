@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Serilog.Sinks.Http.IntegrationTests.Server.Controllers
 {
+	[Route("api/[controller]")]
 	public class EventsController : Controller
 	{
 		private readonly IEventService eventService;
@@ -13,22 +14,12 @@ namespace Serilog.Sinks.Http.IntegrationTests.Server.Controllers
 			this.eventService = eventService;
 		}
 
-		// POST /api/events/batch
-		[HttpPost]
-		[Route("api/events/batch")]
-		public void Post([FromBody] EventBatchRequestDto batch)
-		{
-			var events = batch.Events.Select(@event => new Event(@event.Payload));
-			eventService.Add(events);
-		}
-
 		// GET /api/events
 		[HttpGet]
-		[Route("api/events")]
 	    public IEnumerable<EventDto> Get()
 	    {
 		    return eventService.Get()
-				.Select(@event => new EventDto { Payload = @event.Payload });
+				.Select(PayloadConvert.ToDto);
 	    }
 	}
 }
