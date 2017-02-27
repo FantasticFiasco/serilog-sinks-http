@@ -33,7 +33,7 @@ namespace Serilog.Sinks.Http.IntegrationTests
 		[InlineData(LogEventLevel.Warning)]
 		[InlineData(LogEventLevel.Error)]
 		[InlineData(LogEventLevel.Fatal)]
-		public async Task Write(LogEventLevel level)
+		public async Task Level(LogEventLevel level)
 		{
 			// Act
 			logger.Write(level, "Some message");
@@ -42,7 +42,24 @@ namespace Serilog.Sinks.Http.IntegrationTests
 			await Api.WaitForEventCountAsync(1);
 		}
 
-	    void IDisposable.Dispose()
+		[Theory]
+		[InlineData(1)]         // 1 batch
+		[InlineData(10)]        // 1 batch
+		[InlineData(100)]       // ~1 batch
+		[InlineData(1000)]      // ~10 batches
+		public async Task Emit(int numberOfEvents)
+		{
+			// Act
+			for (int i = 0; i < numberOfEvents; i++)
+			{
+				logger.Information("Some message");
+			}
+
+			// Assert
+			await Api.WaitForEventCountAsync(numberOfEvents);
+		}
+
+		void IDisposable.Dispose()
 	    {
 		    logger?.Dispose();
 	    }
