@@ -13,32 +13,29 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using Serilog.Core;
 using Serilog.Events;
-using Serilog.Formatting;
 using Serilog.Formatting.Json;
 using Serilog.Sinks.RollingFile;
 
 namespace Serilog.Sinks.Http.Private
 {
-    internal class HttpSink : ILogEventSink, IDisposable
+	internal class HttpSink : ILogEventSink, IDisposable
 	{
 		private readonly HttpLogShipper shipper;
 		private readonly RollingFileSink sink;
 
 		public HttpSink(
-            IHttpClient client,
-            string requestUri,
+			IHttpClient client,
+			string requestUri,
 			string bufferBaseFilename,
 			int batchPostingLimit,
 			TimeSpan period,
 			long? bufferFileSizeLimitBytes,
 			long? eventBodyLimitBytes,
 			IFormatProvider formatProvider)
-        {
+		{
 			if (bufferFileSizeLimitBytes.HasValue && bufferFileSizeLimitBytes < 0)
 				throw new ArgumentOutOfRangeException(nameof(bufferFileSizeLimitBytes), "Negative value provided; file size limit must be non-negative.");
 
@@ -56,7 +53,7 @@ namespace Serilog.Sinks.Http.Private
 				bufferFileSizeLimitBytes,
 				null,
 				Encoding.UTF8);
-        }
+		}
 
 		public void Emit(LogEvent logEvent)
 		{
@@ -68,24 +65,5 @@ namespace Serilog.Sinks.Http.Private
 			sink.Dispose();
 			shipper.Dispose();
 		}
-
-		internal static string FormatPayload(IEnumerable<LogEvent> events, ITextFormatter formatter)
-        {
-            var payload = new StringWriter();
-            payload.Write("{\"events\":[");
-
-            var delimStart = "";
-
-            foreach (var logEvent in events)
-            {
-                payload.Write(delimStart);
-                formatter.Format(logEvent, payload);
-
-                delimStart = ",";
-            }
-
-            payload.Write("]}");
-            return payload.ToString();
-        }
 	}
 }
