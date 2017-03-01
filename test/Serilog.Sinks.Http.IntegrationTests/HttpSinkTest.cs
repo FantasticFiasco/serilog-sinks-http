@@ -8,9 +8,9 @@ using Xunit;
 
 namespace Serilog.Sinks.Http.IntegrationTests
 {
-    public class HttpSinkTest : TestServerFixture, IDisposable
-    {
-	    private readonly Logger logger;
+	public class HttpSinkTest : TestServerFixture, IDisposable
+	{
+		private readonly Logger logger;
 		
 		public HttpSinkTest()
 		{
@@ -77,8 +77,8 @@ namespace Serilog.Sinks.Http.IntegrationTests
 		}
 
 		void IDisposable.Dispose()
-	    {
-		    logger?.Dispose();
-	    }
-    }
+		{
+			logger?.Dispose();
+		}
+	}
 }

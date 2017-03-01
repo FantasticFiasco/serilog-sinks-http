@@ -7,10 +7,10 @@ using IOFile = System.IO.File;
 
 namespace Serilog.Sinks.Http.IntegrationTests
 {
-    public abstract class TestServerFixture
-    {
+	public abstract class TestServerFixture
+	{
 		protected TestServerFixture()
-	    {
+		{
 			Server = new TestServer(new WebHostBuilder()
 				.UseStartup<Startup>());
 

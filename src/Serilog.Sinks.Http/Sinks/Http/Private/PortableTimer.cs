@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace Serilog.Sinks.Http.Private
 {
-    internal class PortableTimer : IDisposable
+	internal class PortableTimer : IDisposable
 	{
 		private readonly object stateLock = new object();
 		private readonly Func<Task> onTick;
@@ -34,7 +34,7 @@ namespace Serilog.Sinks.Http.Private
 
 			this.onTick = onTick;
 
-            timer = new Timer(_ => OnTick(), null, Timeout.Infinite, Timeout.Infinite);
+			timer = new Timer(_ => OnTick(), null, Timeout.Infinite, Timeout.Infinite);
 		}
 
 		public void Start(TimeSpan interval)
@@ -47,7 +47,7 @@ namespace Serilog.Sinks.Http.Private
 				if (disposed)
 					throw new ObjectDisposedException(nameof(PortableTimer));
 				
-                timer.Change(interval, Timeout.InfiniteTimeSpan);
+				timer.Change(interval, Timeout.InfiniteTimeSpan);
 			}
 		}
 
@@ -65,7 +65,7 @@ namespace Serilog.Sinks.Http.Private
 					Monitor.Wait(stateLock);
 				}
 
-                timer.Dispose();
+				timer.Dispose();
 
 				disposed = true;
 			}

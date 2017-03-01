@@ -21,11 +21,11 @@ using Serilog.Sinks.Http.Private;
 
 namespace Serilog
 {
-    /// <summary>
-    /// Adds the WriteTo.Http() extension method to <see cref="LoggerConfiguration"/>.
-    /// </summary>
-    public static class LoggerSinkConfigurationExtensions
-    {
+	/// <summary>
+	/// Adds the WriteTo.Http() extension method to <see cref="LoggerConfiguration"/>.
+	/// </summary>
+	public static class LoggerSinkConfigurationExtensions
+	{
 		/// <summary>
 		/// Adds a sink that sends log events using HTTP POST over the network.
 		/// </summary>
@@ -64,31 +64,31 @@ namespace Serilog
 		/// </param>
 		/// <returns>Logger configuration, allowing configuration to continue.</returns>
 		public static LoggerConfiguration Http(
-            this LoggerSinkConfiguration sinkConfiguration,
-            string requestUri,
+			this LoggerSinkConfiguration sinkConfiguration,
+			string requestUri,
 			string bufferBaseFilename,
 			int batchPostingLimit = 1000,
-            TimeSpan? period = null,
+			TimeSpan? period = null,
 			long? bufferFileSizeLimitBytes = null,
 			long? eventBodyLimitBytes = 256 * 1024,
 			IFormatProvider formatProvider = null,
-            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IHttpClient httpClient = null)
-        {
-            if (sinkConfiguration == null)
-                throw new ArgumentNullException(nameof(sinkConfiguration));
+			LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+			IHttpClient httpClient = null)
+		{
+			if (sinkConfiguration == null)
+				throw new ArgumentNullException(nameof(sinkConfiguration));
 			
-            var sink = new HttpSink(
+			var sink = new HttpSink(
 				httpClient ?? new HttpClientWrapper(),
-                requestUri,
+				requestUri,
 				bufferBaseFilename,
-                batchPostingLimit,
-                period ?? TimeSpan.FromSeconds(2),
+				batchPostingLimit,
+				period ?? TimeSpan.FromSeconds(2),
 				bufferFileSizeLimitBytes,
 				eventBodyLimitBytes,
-                formatProvider);
+				formatProvider);
 
-            return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
-        }
-    }
+			return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
+		}
+	}
 }

@@ -2,10 +2,10 @@
 
 namespace Serilog.Sinks.Http.IntegrationTests.Server
 {
-    public interface IEventService
-    {
-	    void Add(IEnumerable<Event> events);
+	public interface IEventService
+	{
+		void Add(IEnumerable<Event> events);
 
-	    IEnumerable<Event> Get();
-    }
+		IEnumerable<Event> Get();
+	}
 }

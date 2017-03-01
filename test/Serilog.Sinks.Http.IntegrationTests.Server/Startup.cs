@@ -7,8 +7,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Serilog.Sinks.Http.IntegrationTests.Server
 {
-    public class Startup
-    {
+	public class Startup
+	{
 		private readonly IConfigurationRoot configuration;
 
 		public Startup(IHostingEnvironment env)

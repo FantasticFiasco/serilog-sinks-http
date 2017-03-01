@@ -16,8 +16,8 @@ using System;
 
 namespace Serilog.Sinks.Http.Private
 {
-    internal class ExponentialBackoffConnectionSchedule
-    {
+	internal class ExponentialBackoffConnectionSchedule
+	{
 		private static readonly TimeSpan MinimumBackoffPeriod = TimeSpan.FromSeconds(5);
 		private static readonly TimeSpan MaximumBackoffInterval = TimeSpan.FromMinutes(10);
 

@@ -1,7 +1,7 @@
 ﻿namespace Serilog.Sinks.Http.IntegrationTests.Server.Controllers
 {
-    public static class PayloadConvert
-    {
+	public static class PayloadConvert
+	{
 		public static Event FromDto(EventDto @event)
 		{
 			return new Event(

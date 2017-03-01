@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Serilog.Sinks.Http.IntegrationTests
 {
-    public class TestServerHttpClient : IHttpClient
+	public class TestServerHttpClient : IHttpClient
 	{
 		private readonly HttpClient client;
 

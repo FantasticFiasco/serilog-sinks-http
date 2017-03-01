@@ -26,7 +26,7 @@ using System.Runtime.InteropServices;
 
 namespace Serilog.Sinks.Http.Private
 {
-    internal class HttpLogShipper : IDisposable
+	internal class HttpLogShipper : IDisposable
 	{
 		private static readonly TimeSpan RequiredLevelCheckInterval = TimeSpan.FromMinutes(2);
 
@@ -254,10 +254,10 @@ namespace Serilog.Sinks.Http.Private
 				}
 			}
 #else
-            catch (IOException)
-            {
-                // Where no HRESULT is available, assume IOExceptions indicate a locked file
-            }
+			catch (IOException)
+			{
+				// Where no HRESULT is available, assume IOExceptions indicate a locked file
+			}
 #endif
 			catch (Exception ex)
 			{
