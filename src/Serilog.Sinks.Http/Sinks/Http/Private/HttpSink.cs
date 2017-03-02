@@ -115,11 +115,6 @@ namespace Serilog.Sinks.Http.Private
 					payload.Write(json);
 					delimStart = ",";
 				}
-				
-				payload.Write(delimStart);
-				formatter.Format(logEvent, payload);
-
-				delimStart = ",";
 			}
 
 			payload.Write("]}");

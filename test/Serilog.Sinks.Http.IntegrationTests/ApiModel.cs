@@ -60,8 +60,14 @@ namespace Serilog.Sinks.Http.IntegrationTests
 				async () =>
 				{
 					var actual = await GetAsync();
+					int actualCount = actual.Count();
 
-					if (actual.Count() != expectedEventCount)
+					if (actualCount > expectedEventCount)
+					{
+						throw new Exception($"Expected {expectedEventCount} but got {actualCount}");
+					}
+
+					if (actualCount != expectedEventCount)
 					{
 						throw new XunitException();
 					}
