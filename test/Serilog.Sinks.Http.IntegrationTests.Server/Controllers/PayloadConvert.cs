@@ -8,7 +8,7 @@
 				@event.Timestamp,
 				@event.Level,
 				@event.MessageTemplate,
-				@event.RenderedMessage);
+				@event.Exception);
 		}
 
 		public static EventDto ToDto(Event @event)
@@ -18,7 +18,7 @@
 				Timestamp = @event.Timestamp,
 				Level = @event.Level,
 				MessageTemplate = @event.MessageTemplate,
-				RenderedMessage = @event.RenderedMessage
+				Exception = @event.Exception
 			};
 		}
 	}

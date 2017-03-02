@@ -4,12 +4,16 @@ namespace Serilog.Sinks.Http.IntegrationTests.Server
 {
 	public class Event
 	{
-		public Event(DateTime timestamp, string level, string messageTemplate, string renderedMessage)
+		public Event(
+			DateTime timestamp,
+			string level,
+			string messageTemplate,
+			string exception)
 		{
 			Timestamp = timestamp;
 			Level = level;
 			MessageTemplate = messageTemplate;
-			RenderedMessage = renderedMessage;
+			Exception = exception;
 		}
 
 		public DateTime Timestamp { get; }
@@ -18,6 +22,6 @@ namespace Serilog.Sinks.Http.IntegrationTests.Server
 
 		public string MessageTemplate { get; }
 
-		public string RenderedMessage { get; }
+		public string Exception { get; set; }
 	}
 }

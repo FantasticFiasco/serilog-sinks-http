@@ -18,6 +18,12 @@
     "warningsAsErrors": true,
     "xmlDoc": true
   },
+  "dependencies": {
+    "Serilog.Formatting.Compact": "*",
+    "Serilog.Sinks.File": "*",
+    "Serilog.Sinks.PeriodicBatching": "*",
+    "Serilog.Sinks.RollingFile": "*"
+  },
   "frameworks": {
     "net4.5": {
       "buildOptions": {
@@ -25,18 +31,10 @@
       },
       "frameworkAssemblies": {
         "System.Net.Http": ""
-      },
-      "dependencies": {
-        "Serilog.Sinks.File": "*",
-        "Serilog.Sinks.PeriodicBatching": "*",
-        "Serilog.Sinks.RollingFile": "*"
       }
     },
     "netstandard1.3": {
       "dependencies": {
-        "Serilog.Sinks.File": "*",
-        "Serilog.Sinks.RollingFile": "*",
-        "Serilog.Sinks.PeriodicBatching": "*",
         "System.Net.Http": "4.1.0",
         "System.Threading.Timer": "4.0.1"
       }

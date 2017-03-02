@@ -47,7 +47,7 @@ namespace Serilog.Sinks.Http.IntegrationTests
 		[InlineData(100)]       // ~1 batch
 		[InlineData(1000)]      // ~10 batches
 		[InlineData(10000)]     // ~100 batches
-		public async Task Emit(int numberOfEvents)
+		public async Task Batches(int numberOfEvents)
 		{
 			// Act
 			for (int i = 0; i < numberOfEvents; i++)
@@ -60,7 +60,7 @@ namespace Serilog.Sinks.Http.IntegrationTests
 		}
 
 		[Fact]
-		public async Task EventsAreFormattedIntoJsonPayloads()
+		public async Task Payload()
 		{
 			// Arrange
 			var expected = Some.LogEvent("Hello, {Name}!", "Alice");
@@ -69,9 +69,49 @@ namespace Serilog.Sinks.Http.IntegrationTests
 			logger.Write(expected);
 
 			// Assert
-			var events = await Api.WaitAndGetAsync(1);
+			var @event = (await Api.WaitAndGetAsync(1)).Single();
 
-			Assert.Equal(expected.RenderMessage(), events.First().RenderedMessage);
+			Assert.Equal(expected.Timestamp, @event.Timestamp);
+			Assert.Null(@event.Level);
+			Assert.Equal(expected.MessageTemplate.Text, @event.MessageTemplate);
+			Assert.Null(@event.Exception);
+		}
+
+		[Fact]
+		public async Task Exception()
+		{
+			// Arrange
+			var expected = Some.LogEvent(LogEventLevel.Error, new Exception("Some exception"), "Some error message");
+
+			// Act
+			logger.Write(expected);
+
+			// Assert
+			var @event = (await Api.WaitAndGetAsync(1)).Single();
+
+			Assert.Equal(expected.Timestamp, @event.Timestamp);
+			Assert.Equal(expected.Level.ToString(), @event.Level);
+			Assert.Equal(expected.MessageTemplate.Text, @event.MessageTemplate);
+			Assert.Equal(expected.Exception.ToString(), @event.Exception);
+		}
+
+		[Fact]
+		public async Task DropNastyException()
+		{
+			// Arrange
+			var nasty = Some.LogEvent(LogEventLevel.Error, new NastyException(), "Some error message");
+			var expected = Some.LogEvent("Some message");
+
+			// Act
+			logger.Write(nasty);
+			logger.Write(expected);
+
+			// Assert
+			var @event = (await Api.WaitAndGetAsync(1)).Single();
+
+			Assert.Equal(expected.Timestamp, @event.Timestamp);
+			Assert.Equal(expected.MessageTemplate.Text, @event.MessageTemplate);
+			Assert.Null(@event.Exception);
 		}
 
 		void IDisposable.Dispose()
