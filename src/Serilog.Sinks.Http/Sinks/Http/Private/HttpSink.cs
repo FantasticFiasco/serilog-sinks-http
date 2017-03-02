@@ -27,9 +27,11 @@ using Serilog.Sinks.PeriodicBatching;
 namespace Serilog.Sinks.Http.Private
 {
     internal class HttpSink : PeriodicBatchingSink
-	{
+    {
+	    private static readonly string ContentType = "application/json";
+
 		private readonly string requestUri;
-		private long? eventBodyLimitBytes;
+		private readonly long? eventBodyLimitBytes;
 		private readonly ITextFormatter formatter;
 
 		private IHttpClient client;
@@ -57,7 +59,7 @@ namespace Serilog.Sinks.Http.Private
 		protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
 		{
 			var payload = FormatPayload(events);
-			var content = new StringContent(payload, Encoding.UTF8, "application/json");
+			var content = new StringContent(payload, Encoding.UTF8, ContentType);
 
 			var result = await client
 				.PostAsync(requestUri, content)

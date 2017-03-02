@@ -29,6 +29,7 @@ namespace Serilog.Sinks.Http.Private
 	internal class HttpLogShipper : IDisposable
 	{
 		private static readonly TimeSpan RequiredLevelCheckInterval = TimeSpan.FromMinutes(2);
+		private static readonly string ContentType = "application/json";
 
 		private readonly string requestUri;
 		private readonly int batchPostingLimit;
@@ -133,7 +134,7 @@ namespace Serilog.Sinks.Http.Private
 								nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
 							}
 
-							var content = new StringContent(payload, Encoding.UTF8, "application/json");
+							var content = new StringContent(payload, Encoding.UTF8, ContentType);
 
 							var result = await client.PostAsync(requestUri, content).ConfigureAwait(false);
 							if (result.IsSuccessStatusCode)
