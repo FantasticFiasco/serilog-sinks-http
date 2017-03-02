@@ -21,12 +21,12 @@ using Serilog.Sinks.RollingFile;
 
 namespace Serilog.Sinks.Http.Private
 {
-	internal class HttpSink : ILogEventSink, IDisposable
+	internal class DurableHttpSink : ILogEventSink, IDisposable
 	{
 		private readonly HttpLogShipper shipper;
 		private readonly RollingFileSink sink;
 
-		public HttpSink(
+		public DurableHttpSink(
 			IHttpClient client,
 			string requestUri,
 			string bufferBaseFilename,

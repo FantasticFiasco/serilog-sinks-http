@@ -8,18 +8,18 @@ using Xunit;
 
 namespace Serilog.Sinks.Http.IntegrationTests
 {
-	public class HttpSinkTest : TestServerFixture, IDisposable
+	public class DurableHttpSinkTest : TestServerFixture, IDisposable
 	{
 		private readonly Logger logger;
 		
-		public HttpSinkTest()
+		public DurableHttpSinkTest()
 		{
 			ClearBufferFiles();
 
 			logger = new LoggerConfiguration()
 				.MinimumLevel.Verbose()
 				.WriteTo
-				.Http(
+				.DurableHttp(
 					"api/batches",
 					BufferBaseFilename,
 					batchPostingLimit: 100,
@@ -49,6 +49,7 @@ namespace Serilog.Sinks.Http.IntegrationTests
 		[InlineData(10)]        // 1 batch
 		[InlineData(100)]       // ~1 batch
 		[InlineData(1000)]      // ~10 batches
+		[InlineData(10000)]     // ~100 batches
 		public async Task Emit(int numberOfEvents)
 		{
 			// Act

@@ -22,7 +22,7 @@ using Serilog.Sinks.Http.Private;
 namespace Serilog
 {
 	/// <summary>
-	/// Adds the WriteTo.Http() extension method to <see cref="LoggerConfiguration"/>.
+	/// Adds the WriteTo.DurableHttp() extension method to <see cref="LoggerConfiguration"/>.
 	/// </summary>
 	public static class LoggerSinkConfigurationExtensions
 	{
@@ -63,7 +63,7 @@ namespace Serilog
 		/// <see cref="HttpClient"/>.
 		/// </param>
 		/// <returns>Logger configuration, allowing configuration to continue.</returns>
-		public static LoggerConfiguration Http(
+		public static LoggerConfiguration DurableHttp(
 			this LoggerSinkConfiguration sinkConfiguration,
 			string requestUri,
 			string bufferBaseFilename,
@@ -78,7 +78,7 @@ namespace Serilog
 			if (sinkConfiguration == null)
 				throw new ArgumentNullException(nameof(sinkConfiguration));
 			
-			var sink = new HttpSink(
+			var sink = new DurableHttpSink(
 				httpClient ?? new HttpClientWrapper(),
 				requestUri,
 				bufferBaseFilename,
