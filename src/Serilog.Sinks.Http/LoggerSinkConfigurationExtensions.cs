@@ -22,12 +22,62 @@ using Serilog.Sinks.Http.Private;
 namespace Serilog
 {
 	/// <summary>
-	/// Adds the WriteTo.DurableHttp() extension method to <see cref="LoggerConfiguration"/>.
+	/// Adds the WriteTo.Http() and WriteTo.DurableHttp() extension method to
+	/// <see cref="LoggerConfiguration"/>.
 	/// </summary>
 	public static class LoggerSinkConfigurationExtensions
 	{
 		/// <summary>
-		/// Adds a sink that sends log events using HTTP POST over the network.
+		/// Adds a sink that sends volatile log events using HTTP POST over the network.
+		/// </summary>
+		/// <param name="sinkConfiguration">The logger configuration.</param>
+		/// <param name="requestUri">The URI the request is sent to.</param>
+		/// <param name="batchPostingLimit">
+		/// The maximum number of events to post in a single batch. The default is 1000.
+		/// </param>
+		/// <param name="period">
+		/// The time to wait between checking for event batches. The default is 2 seconds.
+		/// </param>
+		/// <param name="eventBodyLimitBytes">
+		/// The maximum size, in bytes, that the JSON representation of an event may take before it is
+		/// dropped rather than being sent to the server. Specify null for no limit. The default is
+		/// 265 KB.
+		/// </param>
+		/// <param name="restrictedToMinimumLevel">
+		/// The minimum level for events passed through the sink. The default is
+		/// <see cref="LevelAlias.Minimum"/>.
+		/// </param>
+		/// <param name="httpClient">
+		/// A custom <see cref="IHttpClient"/> implementation. Default value is
+		/// <see cref="HttpClient"/>.
+		/// </param>
+		///  <returns>Logger configuration, allowing configuration to continue.</returns>
+		public static LoggerConfiguration Http(
+			this LoggerSinkConfiguration sinkConfiguration,
+			string requestUri,
+			int? batchPostingLimit = 1000,
+			TimeSpan? period = null,
+			long? eventBodyLimitBytes = 256 * 1024,
+			LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+			IHttpClient httpClient = null)
+		{
+			if (sinkConfiguration == null)
+				throw new ArgumentNullException(nameof(sinkConfiguration));
+			if (batchPostingLimit == null)
+				throw new ArgumentNullException(nameof(batchPostingLimit));
+
+			var sink = new HttpSink(
+				httpClient ?? new HttpClientWrapper(),
+				requestUri,
+				batchPostingLimit.Value,
+				period ?? TimeSpan.FromSeconds(2),
+				eventBodyLimitBytes);
+
+			return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
+		}
+
+		/// <summary>
+		/// Adds a sink that sends durable log events using HTTP POST over the network.
 		/// </summary>
 		/// <param name="sinkConfiguration">The logger configuration.</param>
 		/// <param name="requestUri">The URI the request is sent to.</param>
@@ -48,11 +98,8 @@ namespace Serilog
 		/// </param>
 		/// <param name="eventBodyLimitBytes">
 		/// The maximum size, in bytes, that the JSON representation of an event may take before it is
-		/// dropped rather than being sent to the Seq server. Specify null for no limit. The default is
+		/// dropped rather than being sent to the server. Specify null for no limit. The default is
 		/// 265 KB.
-		/// </param>
-		/// <param name="formatProvider">
-		/// Supplies culture-specific formatting information, or null.
 		/// </param>
 		/// <param name="restrictedToMinimumLevel">
 		/// The minimum level for events passed through the sink. The default is
@@ -67,26 +114,26 @@ namespace Serilog
 			this LoggerSinkConfiguration sinkConfiguration,
 			string requestUri,
 			string bufferBaseFilename,
-			int batchPostingLimit = 1000,
+			int? batchPostingLimit = 1000,
 			TimeSpan? period = null,
 			long? bufferFileSizeLimitBytes = null,
 			long? eventBodyLimitBytes = 256 * 1024,
-			IFormatProvider formatProvider = null,
 			LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
 			IHttpClient httpClient = null)
 		{
 			if (sinkConfiguration == null)
 				throw new ArgumentNullException(nameof(sinkConfiguration));
-			
+			if (batchPostingLimit == null)
+				throw new ArgumentNullException(nameof(batchPostingLimit));
+
 			var sink = new DurableHttpSink(
 				httpClient ?? new HttpClientWrapper(),
 				requestUri,
 				bufferBaseFilename,
-				batchPostingLimit,
+				batchPostingLimit.Value,
 				period ?? TimeSpan.FromSeconds(2),
 				bufferFileSizeLimitBytes,
-				eventBodyLimitBytes,
-				formatProvider);
+				eventBodyLimitBytes);
 
 			return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
 		}

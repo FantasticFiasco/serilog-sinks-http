@@ -28,6 +28,7 @@
       },
       "dependencies": {
         "Serilog.Sinks.File": "*",
+        "Serilog.Sinks.PeriodicBatching": "*",
         "Serilog.Sinks.RollingFile": "*"
       }
     },
@@ -35,6 +36,7 @@
       "dependencies": {
         "Serilog.Sinks.File": "*",
         "Serilog.Sinks.RollingFile": "*",
+        "Serilog.Sinks.PeriodicBatching": "*",
         "System.Net.Http": "4.1.0",
         "System.Threading.Timer": "4.0.1"
       }
