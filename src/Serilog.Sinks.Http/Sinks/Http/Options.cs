@@ -22,24 +22,26 @@ namespace Serilog.Sinks.Http
 	public class Options
 	{
 		/// <summary>
-		/// The URI the request is sent to.
+		/// Gets or sets the URI the request is sent to.
 		/// </summary>
 		public string RequestUri { get; set; }
 
 		/// <summary>
-		/// The maximum number of events to post in a single batch. The default is 1000.
+		/// Gets or sets the maximum number of events to post in a single batch. The default is
+		/// 1000.
 		/// </summary>
 		public int BatchPostingLimit { get; set; } = 1000;
 
 		/// <summary>
-		/// The time to wait between checking for event batches. The default is 2 seconds.
+		/// Gets or sets the time to wait between checking for event batches. The default is 2
+		/// seconds.
 		/// </summary>
 		public TimeSpan Period { get; set; } = TimeSpan.FromSeconds(2);
 
 		/// <summary>
-		/// The maximum size, in bytes, that the JSON representation of an event may take before it
-		/// is dropped rather than being sent to the server. Specify null for no limit. The default
-		/// is 265 KB.
+		/// Gets or sets the maximum size, in bytes, that the JSON representation of an event may
+		/// take before it is dropped rather than being sent to the server. Specify null for no limit.
+		/// The default is 265 KB.
 		/// </summary>
 		public long? EventBodyLimitBytes { get; set; } = 256 * 1024;
 	}

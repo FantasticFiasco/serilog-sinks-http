@@ -28,28 +28,23 @@ namespace Serilog.Sinks.Http.Private
 
 		public DurableHttpSink(
 			IHttpClient client,
-			string requestUri,
-			string bufferBaseFilename,
-			int batchPostingLimit,
-			TimeSpan period,
-			long? bufferFileSizeLimitBytes,
-			long? eventBodyLimitBytes)
+			DurableOptions options)
 		{
-			if (bufferFileSizeLimitBytes.HasValue && bufferFileSizeLimitBytes < 0)
-				throw new ArgumentOutOfRangeException(nameof(bufferFileSizeLimitBytes), "Negative value provided; file size limit must be non-negative.");
+			if (options.BufferFileSizeLimitBytes.HasValue && options.BufferFileSizeLimitBytes < 0)
+				throw new ArgumentOutOfRangeException(nameof(options.BufferFileSizeLimitBytes), "Negative value provided; file size limit must be non-negative.");
 
 			shipper = new HttpLogShipper(
 				client,
-				requestUri,
-				bufferBaseFilename,
-				batchPostingLimit,
-				period,
-				eventBodyLimitBytes);
+				options.RequestUri,
+				options.BufferBaseFilename,
+				options.BatchPostingLimit,
+				options.Period,
+				options.EventBodyLimitBytes);
 
 			sink = new RollingFileSink(
-				bufferBaseFilename + "-{Date}.json",
+				options.BufferBaseFilename + "-{Date}.json",
 				new CompactJsonFormatter(),
-				bufferFileSizeLimitBytes,
+				options.BufferFileSizeLimitBytes,
 				null,
 				Encoding.UTF8);
 		}

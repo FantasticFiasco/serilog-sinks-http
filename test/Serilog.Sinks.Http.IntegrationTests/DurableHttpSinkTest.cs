@@ -20,10 +20,13 @@ namespace Serilog.Sinks.Http.IntegrationTests
 				.MinimumLevel.Verbose()
 				.WriteTo
 				.DurableHttp(
-					"api/batches",
-					BufferBaseFilename,
-					batchPostingLimit: 100,
-					period: TimeSpan.FromMilliseconds(1),
+					new DurableOptions
+					{
+						RequestUri = "api/batches",
+						BufferBaseFilename = BufferBaseFilename,
+						BatchPostingLimit = 100,
+						Period = TimeSpan.FromMilliseconds(1)
+					},
 					httpClient: new TestServerHttpClient(Server.CreateClient()))
 				.CreateLogger();
 		}

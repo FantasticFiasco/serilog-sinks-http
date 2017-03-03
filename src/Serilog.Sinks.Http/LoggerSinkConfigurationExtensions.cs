@@ -63,27 +63,7 @@ namespace Serilog
 		/// Adds a sink that sends durable log events using HTTP POST over the network.
 		/// </summary>
 		/// <param name="sinkConfiguration">The logger configuration.</param>
-		/// <param name="requestUri">The URI the request is sent to.</param>
-		/// <param name="batchPostingLimit">
-		/// The maximum number of events to post in a single batch. The default is 1000.
-		/// </param>
-		/// <param name="period">
-		/// The time to wait between checking for event batches. The default is 2 seconds.
-		/// </param>
-		/// <param name="bufferBaseFilename">
-		/// Path for a set of files that will be used to buffer events until they can be successfully
-		/// transmitted across the network. Individual files will be created using the pattern
-		/// <paramref name="bufferBaseFilename"/>-{Date}.json.
-		/// </param>
-		/// <param name="bufferFileSizeLimitBytes">
-		/// The maximum size, in bytes, to which the buffer log file for a specific date will be
-		/// allowed to grow. By default no limit will be applied.
-		/// </param>
-		/// <param name="eventBodyLimitBytes">
-		/// The maximum size, in bytes, that the JSON representation of an event may take before it is
-		/// dropped rather than being sent to the server. Specify null for no limit. The default is
-		/// 265 KB.
-		/// </param>
+		/// <param name="options">The sink options.</param>
 		/// <param name="restrictedToMinimumLevel">
 		/// The minimum level for events passed through the sink. The default is
 		/// <see cref="LevelAlias.Minimum"/>.
@@ -95,28 +75,18 @@ namespace Serilog
 		/// <returns>Logger configuration, allowing configuration to continue.</returns>
 		public static LoggerConfiguration DurableHttp(
 			this LoggerSinkConfiguration sinkConfiguration,
-			string requestUri,
-			string bufferBaseFilename,
-			int? batchPostingLimit = 1000,
-			TimeSpan? period = null,
-			long? bufferFileSizeLimitBytes = null,
-			long? eventBodyLimitBytes = 256 * 1024,
+			DurableOptions options,
 			LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
 			IHttpClient httpClient = null)
 		{
 			if (sinkConfiguration == null)
 				throw new ArgumentNullException(nameof(sinkConfiguration));
-			if (batchPostingLimit == null)
-				throw new ArgumentNullException(nameof(batchPostingLimit));
+			if (options == null)
+				throw new ArgumentNullException(nameof(options));
 
 			var sink = new DurableHttpSink(
 				httpClient ?? new HttpClientWrapper(),
-				requestUri,
-				bufferBaseFilename,
-				batchPostingLimit.Value,
-				period ?? TimeSpan.FromSeconds(2),
-				bufferFileSizeLimitBytes,
-				eventBodyLimitBytes);
+				options);
 
 			return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
 		}
