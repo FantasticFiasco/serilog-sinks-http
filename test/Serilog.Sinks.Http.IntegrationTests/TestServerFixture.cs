@@ -1,13 +1,13 @@
-﻿using System.IO;
-using System.Linq;
+﻿using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using Serilog.ApiModels;
 using Serilog.Sinks.Http.IntegrationTests.Server;
-using IOFile = System.IO.File;
+
 
 namespace Serilog
 {
-	public abstract class TestServerFixture
+	public abstract class TestServerFixture : IDisposable
 	{
 		protected TestServerFixture()
 		{
@@ -21,15 +21,9 @@ namespace Serilog
 
 		protected ApiModel Api { get; }
 
-		protected void ClearBufferFiles()
+		public virtual void Dispose()
 		{
-			var files = Directory.GetFiles(Directory.GetCurrentDirectory(), "Buffer*")
-				.ToArray();
-
-			foreach (var file in files)
-			{
-				IOFile.Delete(file);
-			}
+			Server?.Dispose();
 		}
 	}
 }
