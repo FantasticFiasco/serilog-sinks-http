@@ -5,7 +5,7 @@ using Xunit.Sdk;
 
 namespace Serilog.Support
 {
-	internal static class Some
+	public static class Some
 	{
 		public static LogEvent LogEvent(
 			string messageTemplate,

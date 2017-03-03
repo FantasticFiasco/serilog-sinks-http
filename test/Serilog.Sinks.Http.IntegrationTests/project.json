@@ -6,6 +6,7 @@
     "NETStandard.Library": "1.6.1",
     "Polly": "5.0.6",
     "Serilog.Sinks.Http": { "target": "project" },
+    "Serilog.Sinks.Http.Tests": { "target": "project" },
     "Serilog.Sinks.Http.IntegrationTests.Server": { "target": "project" },
     "xunit": "2.2.0"
   },

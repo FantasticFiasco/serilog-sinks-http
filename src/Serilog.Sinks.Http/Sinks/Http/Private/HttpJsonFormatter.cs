@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Formatting.Json;
@@ -29,8 +30,18 @@ namespace Serilog.Sinks.Http.Private
 
 		public void Format(LogEvent logEvent, TextWriter output)
 		{
-			FormatContent(logEvent, output);
-			output.WriteLine();
+			try
+			{
+				var buffer = new StringWriter();
+				FormatContent(logEvent, buffer);
+
+				// If formatting was successful, write to output
+				output.WriteLine(buffer.ToString());
+			}
+			catch (Exception e)
+			{
+				LogNonFormattableEvent(logEvent, e);
+			}
 		}
 
 		private static void FormatContent(LogEvent logEvent, TextWriter output)
@@ -130,6 +141,15 @@ namespace Serilog.Sinks.Http.Private
 			}
 
 			output.Write('}');
+		}
+
+		private static void LogNonFormattableEvent(LogEvent logEvent, Exception e)
+		{
+			SelfLog.WriteLine(
+				"Event at {0} with message template {1} could not be formatted into JSON for Seq and will be dropped: {2}",
+				logEvent.Timestamp.ToString("o"),
+				logEvent.MessageTemplate.Text,
+				e);
 		}
 	}
 }

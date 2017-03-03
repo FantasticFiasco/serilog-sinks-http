@@ -8,6 +8,18 @@ namespace Serilog.Sinks.Http.Private
 {
     public class HttpJsonFormatterTest
     {
+	    private readonly ILogger logger;
+	    private readonly StringWriter output;
+
+		public HttpJsonFormatterTest()
+	    {
+			output = new StringWriter();
+			var formatter = new HttpJsonFormatter();
+			logger = new LoggerConfiguration()
+				.WriteTo.Sink(new TextWriterSink(output, formatter))
+				.CreateLogger();
+		}
+
 		[Fact]
 		public void EmptyEvent()
 		{
@@ -50,21 +62,29 @@ namespace Serilog.Sinks.Http.Private
 			AssertValidJson(log => log.Information("Rendering {First:x8} and {Second:x8}", 1, 2));
 		}
 
-		private static void AssertValidJson(Action<ILogger> act)
+	    [Fact]
+	    public void NastyException()
+	    {
+			AssertIsDropped(log => log.Information(new NastyException(), "With exception"));
+		}
+
+		private void AssertValidJson(Action<ILogger> act)
 		{
-			var output = new StringWriter();
-			var formatter = new HttpJsonFormatter();
-			var log = new LoggerConfiguration()
-				.WriteTo.Sink(new TextWriterSink(output, formatter))
-				.CreateLogger();
+			// Act
+			act(logger);
 
-			act(log);
+			// Assert - Unfortunately this will not detect all JSON formatting issues; better than
+			// nothing however
+			JObject.Parse(output.ToString());
+		}
 
-			var json = output.ToString();
+	    private void AssertIsDropped(Action<ILogger> act)
+	    {
+			// Act
+			act(logger);
 
-			// Unfortunately this will not detect all JSON formatting issues; better than nothing
-			// however
-			JObject.Parse(json);
+			// Assert
+			Assert.Equal(string.Empty, output.ToString());
 		}
 	}
 }

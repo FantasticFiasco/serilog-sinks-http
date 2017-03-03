@@ -96,14 +96,10 @@ namespace Serilog.Sinks.Http.Private
 			foreach (var logEvent in events)
 			{
 				var buffer = new StringWriter();
+				formatter.Format(logEvent, buffer);
 
-				try
+				if (string.IsNullOrEmpty(buffer.ToString()))
 				{
-					formatter.Format(logEvent, buffer);
-				}
-				catch (Exception e)
-				{
-					LogNonFormattableEvent(logEvent, e);
 					continue;
 				}
 
@@ -117,6 +113,7 @@ namespace Serilog.Sinks.Http.Private
 			}
 
 			payload.Write("]}");
+
 			return payload.ToString();
 		}
 
@@ -134,15 +131,6 @@ namespace Serilog.Sinks.Http.Private
 			}
 
 			return true;
-		}
-
-		private static void LogNonFormattableEvent(LogEvent logEvent, Exception e)
-		{
-			SelfLog.WriteLine(
-				"Event at {0} with message template {1} could not be formatted into JSON for Seq and will be dropped: {2}",
-				logEvent.Timestamp.ToString("o"),
-				logEvent.MessageTemplate.Text,
-				e);
 		}
 	}
 }
