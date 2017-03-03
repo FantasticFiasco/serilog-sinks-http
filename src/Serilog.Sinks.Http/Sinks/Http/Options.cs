@@ -22,13 +22,13 @@ namespace Serilog.Sinks.Http
 	public class Options
 	{
 		/// <summary>
-		/// Gets or sets the maximum number of events to post in a single batch. The default is
+		/// Gets or sets the maximum number of events to post in a single batch. Default value is
 		/// 1000.
 		/// </summary>
 		public int BatchPostingLimit { get; set; } = 1000;
 
 		/// <summary>
-		/// Gets or sets the time to wait between checking for event batches. The default is 2
+		/// Gets or sets the time to wait between checking for event batches. Default value is 2
 		/// seconds.
 		/// </summary>
 		public TimeSpan Period { get; set; } = TimeSpan.FromSeconds(2);
@@ -36,7 +36,7 @@ namespace Serilog.Sinks.Http
 		/// <summary>
 		/// Gets or sets the maximum size, in bytes, that the JSON representation of an event may
 		/// take before it is dropped rather than being sent to the server. Specify null for no limit.
-		/// The default is 265 KB.
+		/// Default value is 265 KB.
 		/// </summary>
 		public long? EventBodyLimitBytes { get; set; } = 256 * 1024;
 	}
