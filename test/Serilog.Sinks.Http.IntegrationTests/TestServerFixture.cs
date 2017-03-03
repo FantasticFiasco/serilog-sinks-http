@@ -21,11 +21,9 @@ namespace Serilog.Sinks.Http.IntegrationTests
 
 		protected ApiModel Api { get; }
 
-		protected string BufferBaseFilename => "Buffer";
-
 		protected void ClearBufferFiles()
 		{
-			var files = Directory.GetFiles(Directory.GetCurrentDirectory(), $"{BufferBaseFilename}*")
+			var files = Directory.GetFiles(Directory.GetCurrentDirectory(), "Buffer*")
 				.ToArray();
 
 			foreach (var file in files)

@@ -22,11 +22,6 @@ namespace Serilog.Sinks.Http
 	public class Options
 	{
 		/// <summary>
-		/// Gets or sets the URI the request is sent to.
-		/// </summary>
-		public string RequestUri { get; set; }
-
-		/// <summary>
 		/// Gets or sets the maximum number of events to post in a single batch. The default is
 		/// 1000.
 		/// </summary>

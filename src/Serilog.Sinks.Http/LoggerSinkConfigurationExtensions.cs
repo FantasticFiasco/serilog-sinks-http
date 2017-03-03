@@ -31,29 +31,30 @@ namespace Serilog
 		/// Adds a sink that sends volatile log events using HTTP POST over the network.
 		/// </summary>
 		/// <param name="sinkConfiguration">The logger configuration.</param>
+		/// <param name="requestUri">The URI the request is sent to.</param>
 		/// <param name="options">The sink options.</param>
 		/// <param name="restrictedToMinimumLevel">
-		/// The minimum level for events passed through the sink. The default is
+		/// The minimum level for events passed through the sink. Default value is
 		/// <see cref="LevelAlias.Minimum"/>.
 		/// </param>
 		/// <param name="httpClient">
 		/// A custom <see cref="IHttpClient"/> implementation. Default value is
 		/// <see cref="HttpClient"/>.
 		/// </param>
-		///  <returns>Logger configuration, allowing configuration to continue.</returns>
+		/// <returns>Logger configuration, allowing configuration to continue.</returns>
 		public static LoggerConfiguration Http(
 			this LoggerSinkConfiguration sinkConfiguration,
+			string requestUri,
 			Options options,
 			LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
 			IHttpClient httpClient = null)
 		{
 			if (sinkConfiguration == null)
 				throw new ArgumentNullException(nameof(sinkConfiguration));
-			if (options == null)
-				throw new ArgumentNullException(nameof(options));
 
 			var sink = new HttpSink(
 				httpClient ?? new HttpClientWrapper(),
+				requestUri,
 				options);
 
 			return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
@@ -63,9 +64,10 @@ namespace Serilog
 		/// Adds a sink that sends durable log events using HTTP POST over the network.
 		/// </summary>
 		/// <param name="sinkConfiguration">The logger configuration.</param>
+		/// <param name="requestUri">The URI the request is sent to.</param>
 		/// <param name="options">The sink options.</param>
 		/// <param name="restrictedToMinimumLevel">
-		/// The minimum level for events passed through the sink. The default is
+		/// The minimum level for events passed through the sink. Default value is
 		/// <see cref="LevelAlias.Minimum"/>.
 		/// </param>
 		/// <param name="httpClient">
@@ -75,17 +77,17 @@ namespace Serilog
 		/// <returns>Logger configuration, allowing configuration to continue.</returns>
 		public static LoggerConfiguration DurableHttp(
 			this LoggerSinkConfiguration sinkConfiguration,
+			string requestUri,
 			DurableOptions options,
 			LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
 			IHttpClient httpClient = null)
 		{
 			if (sinkConfiguration == null)
 				throw new ArgumentNullException(nameof(sinkConfiguration));
-			if (options == null)
-				throw new ArgumentNullException(nameof(options));
 
 			var sink = new DurableHttpSink(
 				httpClient ?? new HttpClientWrapper(),
+				requestUri,
 				options);
 
 			return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);

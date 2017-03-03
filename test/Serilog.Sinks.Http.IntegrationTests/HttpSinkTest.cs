@@ -18,9 +18,9 @@ namespace Serilog.Sinks.Http.IntegrationTests
 				.MinimumLevel.Verbose()
 				.WriteTo
 				.Http(
+					"api/batches",
 					new Options
 					{
-						RequestUri = "api/batches",
 						BatchPostingLimit = 100,
 						Period = TimeSpan.FromMilliseconds(1)
 					},

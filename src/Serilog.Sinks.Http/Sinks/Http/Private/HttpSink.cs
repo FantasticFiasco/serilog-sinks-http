@@ -30,6 +30,7 @@ namespace Serilog.Sinks.Http.Private
     {
 	    private static readonly string ContentType = "application/json";
 
+	    private readonly string requestUri;
 		private readonly Options options;
 		private readonly ITextFormatter formatter;
 
@@ -37,15 +38,19 @@ namespace Serilog.Sinks.Http.Private
 
 		public HttpSink(
 			IHttpClient client,
+			string requestUri,
 			Options options)
 			: base(options.BatchPostingLimit, options.Period)
 		{
 			if (client == null)
 				throw new ArgumentNullException(nameof(client));
+			if (requestUri == null)
+				throw new ArgumentNullException(nameof(requestUri));
 			if (options == null)
 				throw new ArgumentNullException(nameof(options));
 
 			this.client = client;
+			this.requestUri = requestUri;
 			this.options = options;
 
 			formatter = new CompactJsonFormatter();
@@ -57,11 +62,11 @@ namespace Serilog.Sinks.Http.Private
 			var content = new StringContent(payload, Encoding.UTF8, ContentType);
 
 			var result = await client
-				.PostAsync(options.RequestUri, content)
+				.PostAsync(requestUri, content)
 				.ConfigureAwait(false);
 
 			if (!result.IsSuccessStatusCode)
-				throw new LoggingFailedException($"Received failed result {result.StatusCode} when posting events to {options.RequestUri}");
+				throw new LoggingFailedException($"Received failed result {result.StatusCode} when posting events to {requestUri}");
 		}
 
 		/// <summary>

@@ -28,6 +28,7 @@ namespace Serilog.Sinks.Http.Private
 
 		public DurableHttpSink(
 			IHttpClient client,
+			string requestUri,
 			DurableOptions options)
 		{
 			if (options.BufferFileSizeLimitBytes.HasValue && options.BufferFileSizeLimitBytes < 0)
@@ -35,7 +36,7 @@ namespace Serilog.Sinks.Http.Private
 
 			shipper = new HttpLogShipper(
 				client,
-				options.RequestUri,
+				requestUri,
 				options.BufferBaseFilename,
 				options.BatchPostingLimit,
 				options.Period,

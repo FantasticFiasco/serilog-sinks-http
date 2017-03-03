@@ -22,9 +22,10 @@ namespace Serilog.Sinks.Http
 		/// <summary>
 		/// Gets or sets the path for a set of files that will be used to buffer events until they
 		/// can be successfully transmitted across the network. Individual files will be created
-		/// using the pattern <see cref="BufferBaseFilename"/>-{Date}.json.
+		/// using the pattern <see cref="BufferBaseFilename"/>-{Date}.json. Default value is
+		/// 'Buffer'.
 		/// </summary>
-		public string BufferBaseFilename { get; set; }
+		public string BufferBaseFilename { get; set; } = "Buffer";
 
 		/// <summary>
 		/// Gets or sets the maximum size, in bytes, to which the buffer log file for a specific date
