@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.TestHost;
 using Serilog.Sinks.Http.IntegrationTests.Server;
 using IOFile = System.IO.File;
 
-namespace Serilog.Sinks.Http.IntegrationTests
+namespace Serilog
 {
 	public abstract class TestServerFixture
 	{

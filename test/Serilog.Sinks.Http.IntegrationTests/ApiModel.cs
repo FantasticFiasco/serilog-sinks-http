@@ -11,7 +11,7 @@ using Serilog.Sinks.Http.IntegrationTests.Server.Controllers;
 using Xunit;
 using Xunit.Sdk;
 
-namespace Serilog.Sinks.Http.IntegrationTests
+namespace Serilog
 {
 	public class ApiModel
 	{

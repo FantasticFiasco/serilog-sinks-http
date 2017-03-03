@@ -19,7 +19,6 @@
     "xmlDoc": true
   },
   "dependencies": {
-    "Serilog.Formatting.Compact": "*",
     "Serilog.Sinks.File": "*",
     "Serilog.Sinks.PeriodicBatching": "*",
     "Serilog.Sinks.RollingFile": "*"

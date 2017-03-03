@@ -21,7 +21,6 @@ using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
-using Serilog.Formatting.Compact;
 using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.Http.Private
@@ -53,7 +52,7 @@ namespace Serilog.Sinks.Http.Private
 			this.requestUri = requestUri;
 			this.options = options;
 
-			formatter = new CompactJsonFormatter();
+			formatter = new HttpJsonFormatter();
 		}
 
 		protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)

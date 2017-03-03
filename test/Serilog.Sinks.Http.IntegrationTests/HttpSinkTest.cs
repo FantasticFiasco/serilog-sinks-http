@@ -3,10 +3,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Serilog.Core;
 using Serilog.Events;
-using Serilog.Sinks.Http.IntegrationTests.Support;
+using Serilog.Sinks.Http;
+using Serilog.Support;
 using Xunit;
 
-namespace Serilog.Sinks.Http.IntegrationTests
+namespace Serilog
 {
     public class HttpSinkTest : TestServerFixture, IDisposable
 	{
@@ -75,8 +76,9 @@ namespace Serilog.Sinks.Http.IntegrationTests
 			var @event = (await Api.WaitAndGetAsync(1)).Single();
 
 			Assert.Equal(expected.Timestamp, @event.Timestamp);
-			Assert.Null(@event.Level);
+			Assert.Equal(expected.Level.ToString(), @event.Level);
 			Assert.Equal(expected.MessageTemplate.Text, @event.MessageTemplate);
+			Assert.Equal(expected.Properties["Name"].ToString().Trim('"'), @event.Properties["Name"]);
 			Assert.Null(@event.Exception);
 		}
 
@@ -113,6 +115,7 @@ namespace Serilog.Sinks.Http.IntegrationTests
 			var @event = (await Api.WaitAndGetAsync(1)).Single();
 
 			Assert.Equal(expected.Timestamp, @event.Timestamp);
+			Assert.Equal(expected.Level.ToString(), @event.Level);
 			Assert.Equal(expected.MessageTemplate.Text, @event.MessageTemplate);
 			Assert.Null(@event.Exception);
 		}

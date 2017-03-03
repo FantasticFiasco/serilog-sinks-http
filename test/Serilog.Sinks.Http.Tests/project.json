@@ -1,0 +1,27 @@
+﻿{
+  "testRunner": "xunit",
+  "dependencies": {
+    "dotnet-test-xunit": "2.2.0-preview2-build1029",
+    "NETStandard.Library": "1.6.1",
+    "Serilog.Sinks.Http": { "target": "project" },
+    "xunit": "2.2.0"
+  },
+  "buildOptions": {
+    "keyFile": "../../Serilog.snk",
+    "warningsAsErrors": true
+  },
+  "frameworks": {
+    "netcoreapp1.0": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.0"
+        }
+      },
+      "imports": [
+        "dnxcore50",
+        "portable-net45+win8"
+      ]
+    }
+  }
+}

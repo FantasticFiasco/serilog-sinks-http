@@ -16,7 +16,6 @@ using System;
 using System.Text;
 using Serilog.Core;
 using Serilog.Events;
-using Serilog.Formatting.Compact;
 using Serilog.Sinks.RollingFile;
 
 namespace Serilog.Sinks.Http.Private
@@ -44,7 +43,7 @@ namespace Serilog.Sinks.Http.Private
 
 			sink = new RollingFileSink(
 				options.BufferBaseFilename + "-{Date}.json",
-				new CompactJsonFormatter(),
+				new HttpJsonFormatter(),
 				options.BufferFileSizeLimitBytes,
 				null,
 				Encoding.UTF8);

@@ -8,6 +8,7 @@
 				@event.Timestamp,
 				@event.Level,
 				@event.MessageTemplate,
+				@event.Properties,
 				@event.Exception);
 		}
 
@@ -18,6 +19,7 @@
 				Timestamp = @event.Timestamp,
 				Level = @event.Level,
 				MessageTemplate = @event.MessageTemplate,
+				Properties = @event.Properties,
 				Exception = @event.Exception
 			};
 		}

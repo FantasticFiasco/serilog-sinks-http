@@ -1,7 +1,8 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
+using Serilog.Sinks.Http;
 
-namespace Serilog.Sinks.Http.IntegrationTests
+namespace Serilog
 {
 	public class TestServerHttpClient : IHttpClient
 	{
