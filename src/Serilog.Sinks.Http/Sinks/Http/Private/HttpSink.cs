@@ -30,28 +30,23 @@ namespace Serilog.Sinks.Http.Private
     {
 	    private static readonly string ContentType = "application/json";
 
-		private readonly string requestUri;
-		private readonly long? eventBodyLimitBytes;
+		private readonly Options options;
 		private readonly ITextFormatter formatter;
 
 		private IHttpClient client;
 
 		public HttpSink(
 			IHttpClient client,
-			string requestUri,
-			int batchPostingLimit,
-			TimeSpan period,
-			long? eventBodyLimitBytes)
-			: base(batchPostingLimit, period)
+			Options options)
+			: base(options.BatchPostingLimit, options.Period)
 		{
 			if (client == null)
 				throw new ArgumentNullException(nameof(client));
-			if (requestUri == null)
-				throw new ArgumentNullException(nameof(requestUri));
+			if (options == null)
+				throw new ArgumentNullException(nameof(options));
 
 			this.client = client;
-			this.requestUri = requestUri;
-			this.eventBodyLimitBytes = eventBodyLimitBytes;
+			this.options = options;
 
 			formatter = new CompactJsonFormatter();
 		}
@@ -62,11 +57,11 @@ namespace Serilog.Sinks.Http.Private
 			var content = new StringContent(payload, Encoding.UTF8, ContentType);
 
 			var result = await client
-				.PostAsync(requestUri, content)
+				.PostAsync(options.RequestUri, content)
 				.ConfigureAwait(false);
 
 			if (!result.IsSuccessStatusCode)
-				throw new LoggingFailedException($"Received failed result {result.StatusCode} when posting events to {requestUri}");
+				throw new LoggingFailedException($"Received failed result {result.StatusCode} when posting events to {options.RequestUri}");
 		}
 
 		/// <summary>
@@ -123,12 +118,12 @@ namespace Serilog.Sinks.Http.Private
 
 		private bool CheckEventBodySize(string json)
 		{
-			if (eventBodyLimitBytes.HasValue &&
-				Encoding.UTF8.GetByteCount(json) > eventBodyLimitBytes.Value)
+			if (options.EventBodyLimitBytes.HasValue &&
+				Encoding.UTF8.GetByteCount(json) > options.EventBodyLimitBytes.Value)
 			{
 				SelfLog.WriteLine(
 					"Event JSON representation exceeds the byte size limit of {0} set for this sink and will be dropped; data: {1}",
-					eventBodyLimitBytes,
+					options.EventBodyLimitBytes,
 					json);
 
 				return false;
