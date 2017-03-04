@@ -5,20 +5,20 @@
 A [Serilog](http://serilog.net/) sink that sends HTTP POST requests over the network.
 
 **Package** - [Serilog.Sinks.Http](https://www.nuget.org/packages/serilog.sinks.http)
-| **Platforms** - .NET 4.5, .NETStandard 1.5
+| **Platforms** - .NET 4.5, .NETStandard 1.3
 
 ### Getting started
 
-In the example shown, the sink will send a HTTP POST request to URI `www.mylogs.com`.
+In the following example, the sink will send a HTTP POST request to `www.mylogs.com`.
 
 ```csharp
 Serilog.ILogger log = new LoggerConfiguration()
   .MinimumLevel.Verbose()
-  .WriteTo.Http("www.mylogs.com")
+  .WriteTo.Http("www.mylogs.com", new Options())
   .CreateLogger();
 ```
 
-The sink is batching multiple events into a single request, and the following hypothetical payload is sent as JSON.
+The sink is batching multiple log events into a single request, and the following hypothetical payload is sent as JSON.
 
 ```json
 {
@@ -52,6 +52,10 @@ The sink is batching multiple events into a single request, and the following hy
   ]
 }
 ```
+
+### Durability
+
+A sink can be created as durable by calling `Http(string, DurableOptions)` instead of `Http(string, Options)`. A durable sink will persist log events on disk before sending them over the network, thus protecting against data loss after a system or process restart.
 
 ### Typical use case
 
