@@ -16,10 +16,10 @@ namespace Serilog.Sinks.Http.IntegrationTests.Server.Controllers
 
 		// GET /api/events
 		[HttpGet]
-	    public IEnumerable<EventDto> Get()
-	    {
-		    return eventService.Get()
+		public IEnumerable<EventDto> Get()
+		{
+			return eventService.Get()
 				.Select(PayloadConvert.ToDto);
-	    }
+		}
 	}
 }
