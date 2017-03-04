@@ -12,23 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Net.Http;
-using System.Threading.Tasks;
-
 namespace Serilog.Sinks.Http
 {
 	/// <summary>
-	/// Interface responsible for posting HTTP requests.
+	/// Class describing the options for a durable HTTP sink.
 	/// </summary>
-	public interface IHttpClient : IDisposable
+	public class DurableOptions : Options
 	{
 		/// <summary>
-		/// Sends a POST request to the specified Uri as an asynchronous operation.
+		/// Gets or sets the path for a set of files that will be used to buffer events until they
+		/// can be successfully transmitted across the network. Individual files will be created
+		/// using the pattern <see cref="BufferBaseFilename"/>-{Date}.json. Default value is
+		/// 'Buffer'.
 		/// </summary>
-		/// <param name="requestUri">The Uri the request is sent to.</param>
-		/// <param name="content">The HTTP request content sent to the server.</param>
-		/// <returns>The task object representing the asynchronous operation.</returns>
-		Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content);
+		public string BufferBaseFilename { get; set; } = "Buffer";
+
+		/// <summary>
+		/// Gets or sets the maximum size, in bytes, to which the buffer log file for a specific date
+		/// will be allowed to grow. By default no limit will be applied.
+		/// </summary>
+		public long? BufferFileSizeLimitBytes { get; set; }
 	}
 }

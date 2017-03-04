@@ -13,61 +13,87 @@
 // limitations under the License.
 
 using System;
+using System.Net.Http;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.Http;
+using Serilog.Sinks.Http.Private;
 
 namespace Serilog
 {
-    /// <summary>
-    /// Adds the WriteTo.Http() extension method to <see cref="LoggerConfiguration"/>.
-    /// </summary>
-    public static class LoggerSinkConfigurationExtensions
-    {
-        /// <summary>
-        /// Adds a sink that sends log events using HTTP POST over the network.
-        /// </summary>
-        /// <param name="sinkConfiguration">The logger configuration.</param>
-        /// <param name="requestUri">The URI the request is sent to.</param>
-        /// <param name="batchPostingLimit">
-        /// The maximum number of events to post in a single batch. The default is
-        /// <see cref="HttpSink.DefaultBatchPostingLimit"/>.
-        /// </param>
-        /// <param name="period">
-        /// The time to wait between checking for event batches. The default is
-        /// <see cref="HttpSink.DefaultPeriod"/>.
-        /// </param>
-        /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="restrictedToMinimumLevel">
-        /// The minimum level for events passed through the sink. The default is
-        /// <see cref="LevelAlias.Minimum"/>.
-        /// </param>
-        /// <param name="httpClient">
-        /// A custom <see cref="IHttpClient"/> implementation.
-        /// </param>
-        ///  <returns>Logger configuration, allowing configuration to continue.</returns>
-        public static LoggerConfiguration Http(
-            this LoggerSinkConfiguration sinkConfiguration,
-            string requestUri,
-            int? batchPostingLimit = null,
-            TimeSpan? period = null,
-            IFormatProvider formatProvider = null,
-            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IHttpClient httpClient = null)
-        {
-            if (sinkConfiguration == null)
-                throw new ArgumentNullException(nameof(sinkConfiguration));
+	/// <summary>
+	/// Adds the WriteTo.Http() and WriteTo.DurableHttp() extension method to
+	/// <see cref="LoggerConfiguration"/>.
+	/// </summary>
+	public static class LoggerSinkConfigurationExtensions
+	{
+		/// <summary>
+		/// Adds a non durable sink that sends log events using HTTP POST over the network. A
+		/// non-durable sink will loose data after a system or process restart.
+		/// </summary>
+		/// <param name="sinkConfiguration">The logger configuration.</param>
+		/// <param name="requestUri">The URI the request is sent to.</param>
+		/// <param name="options">The sink options.</param>
+		/// <param name="restrictedToMinimumLevel">
+		/// The minimum level for events passed through the sink. Default value is
+		/// <see cref="LevelAlias.Minimum"/>.
+		/// </param>
+		/// <param name="httpClient">
+		/// A custom <see cref="IHttpClient"/> implementation. Default value is
+		/// <see cref="HttpClient"/>.
+		/// </param>
+		/// <returns>Logger configuration, allowing configuration to continue.</returns>
+		public static LoggerConfiguration Http(
+			this LoggerSinkConfiguration sinkConfiguration,
+			string requestUri,
+			Options options,
+			LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+			IHttpClient httpClient = null)
+		{
+			if (sinkConfiguration == null)
+				throw new ArgumentNullException(nameof(sinkConfiguration));
 
-            var client = httpClient ?? new HttpClientWrapper();
+			var sink = new HttpSink(
+				httpClient ?? new HttpClientWrapper(),
+				requestUri,
+				options);
 
-            var sink = new HttpSink(
-                client,
-                requestUri,
-                batchPostingLimit ?? HttpSink.DefaultBatchPostingLimit,
-                period ?? HttpSink.DefaultPeriod,
-                formatProvider);
+			return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
+		}
 
-            return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
-        }
-    }
+		/// <summary>
+		/// Adds a durable sink that sends log events using HTTP POST over the network. A durable
+		/// sink will persist log events on disk before sending them over the network, thus
+		///  protecting against data loss after a system or process restart.
+		/// </summary>
+		/// <param name="sinkConfiguration">The logger configuration.</param>
+		/// <param name="requestUri">The URI the request is sent to.</param>
+		/// <param name="options">The sink options.</param>
+		/// <param name="restrictedToMinimumLevel">
+		/// The minimum level for events passed through the sink. Default value is
+		/// <see cref="LevelAlias.Minimum"/>.
+		/// </param>
+		/// <param name="httpClient">
+		/// A custom <see cref="IHttpClient"/> implementation. Default value is
+		/// <see cref="HttpClient"/>.
+		/// </param>
+		/// <returns>Logger configuration, allowing configuration to continue.</returns>
+		public static LoggerConfiguration DurableHttp(
+			this LoggerSinkConfiguration sinkConfiguration,
+			string requestUri,
+			DurableOptions options,
+			LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+			IHttpClient httpClient = null)
+		{
+			if (sinkConfiguration == null)
+				throw new ArgumentNullException(nameof(sinkConfiguration));
+
+			var sink = new DurableHttpSink(
+				httpClient ?? new HttpClientWrapper(),
+				requestUri,
+				options);
+
+			return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
+		}
+	}
 }

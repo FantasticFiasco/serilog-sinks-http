@@ -12,23 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Serilog.Sinks.Http
+namespace Serilog.Sinks.Http.Private
 {
-	/// <summary>
-	/// Interface responsible for posting HTTP requests.
-	/// </summary>
-	public interface IHttpClient : IDisposable
+	internal class HttpClientWrapper : IHttpClient
 	{
-		/// <summary>
-		/// Sends a POST request to the specified Uri as an asynchronous operation.
-		/// </summary>
-		/// <param name="requestUri">The Uri the request is sent to.</param>
-		/// <param name="content">The HTTP request content sent to the server.</param>
-		/// <returns>The task object representing the asynchronous operation.</returns>
-		Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content);
+		private readonly HttpClient client;
+
+		public HttpClientWrapper()
+		{
+			client = new HttpClient();
+		}
+
+		public Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content)
+		{
+			return client.PostAsync(requestUri, content);
+		}
+
+		public void Dispose()
+		{
+			client.Dispose();
+		}
 	}
 }

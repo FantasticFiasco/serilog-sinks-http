@@ -1,63 +1,59 @@
 ﻿using System;
-using System.Linq;
-using System.Threading;
+using System.Collections.Generic;
 using Serilog.Events;
-using Serilog.Parsing;
+using Xunit.Sdk;
 
-namespace Serilog.Sinks.Http.Tests.Support
+namespace Serilog.Support
 {
-    internal static class Some
-    {
-        private static int counter;
+	public static class Some
+	{
+		public static LogEvent LogEvent(
+			string messageTemplate,
+			params object[] propertyValues)
+		{
+			return LogEvent(null, messageTemplate, propertyValues);
+		}
 
-        internal static int Int()
-        {
-            return Interlocked.Increment(ref counter);
-        }
+		public static LogEvent LogEvent(
+			Exception exception,
+			string messageTemplate,
+			params object[] propertyValues)
+		{
+			return LogEvent(LogEventLevel.Information, exception, messageTemplate, propertyValues);
+		}
 
-        internal static string String(string tag = null)
-        {
-            return (tag ?? "") + "__" + Int();
-        }
+		public static LogEvent LogEvent(
+			LogEventLevel level,
+			Exception exception,
+			string messageTemplate,
+			params object[] propertyValues)
+		{
+			var log = new LoggerConfiguration().CreateLogger();
 
-        internal static TimeSpan TimeSpan()
-        {
-            return System.TimeSpan.FromMinutes(Int());
-        }
+			MessageTemplate template;
+			IEnumerable<LogEventProperty> properties;
 
-        internal static DateTime Instant()
-        {
-            return new DateTime(2012, 10, 28) + TimeSpan();
-        }
+			if (!log.BindMessageTemplate(messageTemplate, propertyValues, out template, out properties))
+			{
+				throw new XunitException("Template could not be bound.");
+			}
 
-        internal static DateTimeOffset OffsetInstant()
-        {
-            return new DateTimeOffset(Instant());
-        }
+			return new LogEvent(DateTimeOffset.Now, level, exception, template, properties);
+		}
 
-        internal static LogEvent LogEvent(DateTimeOffset? timestamp = null, LogEventLevel level = LogEventLevel.Information)
-        {
-            return new LogEvent(
-                timestamp ?? OffsetInstant(),
-                level,
-                null,
-                MessageTemplate(),
-                Enumerable.Empty<LogEventProperty>());
-        }
+		public static LogEvent DebugEvent()
+		{
+			return LogEvent(LogEventLevel.Debug, null, "Debug event");
+		}
 
-        internal static LogEvent InformationEvent(DateTimeOffset? timestamp = null)
-        {
-            return LogEvent(timestamp);
-        }
+		public static LogEvent InformationEvent()
+		{
+			return LogEvent(LogEventLevel.Information, null, "Information event");
+		}
 
-        internal static LogEvent DebugEvent(DateTimeOffset? timestamp = null)
-        {
-            return LogEvent(timestamp, LogEventLevel.Debug);
-        }
-
-        internal static MessageTemplate MessageTemplate()
-        {
-            return new MessageTemplateParser().Parse(String());
-        }
-    }
+		public static LogEvent ErrorEvent()
+		{
+			return LogEvent(LogEventLevel.Error, null, "Error event");
+		}
+	}
 }
