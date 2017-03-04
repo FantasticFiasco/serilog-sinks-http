@@ -12,7 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ### Changed
 
-- [BREAKING CHANGE] The syntax for creating a non-durable sink has been changed from `Http(string)` to `Http(string, Options)` to accommodate for the syntax to create a durable sink. A non-durable sink will loose data after a system or process restart.  
+- [BREAKING CHANGE] The syntax for creating a non-durable sink has been changed from `Http(string)` to `Http(string, Options)` to accommodate for the syntax to create a durable sink. A non-durable sink will loose data after a system or process restart.
 
 ## 2.0.0 2016-11-23
 

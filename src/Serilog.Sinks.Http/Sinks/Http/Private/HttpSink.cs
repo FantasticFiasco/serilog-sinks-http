@@ -25,11 +25,11 @@ using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.Http.Private
 {
-    internal class HttpSink : PeriodicBatchingSink
-    {
-	    private static readonly string ContentType = "application/json";
+	internal class HttpSink : PeriodicBatchingSink
+	{
+		private static readonly string ContentType = "application/json";
 
-	    private readonly string requestUri;
+		private readonly string requestUri;
 		private readonly Options options;
 		private readonly ITextFormatter formatter;
 

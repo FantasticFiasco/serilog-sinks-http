@@ -28,7 +28,8 @@ namespace Serilog
 	public static class LoggerSinkConfigurationExtensions
 	{
 		/// <summary>
-		/// Adds a sink that sends volatile log events using HTTP POST over the network.
+		/// Adds a non durable sink that sends log events using HTTP POST over the network. A
+		/// non-durable sink will loose data after a system or process restart.
 		/// </summary>
 		/// <param name="sinkConfiguration">The logger configuration.</param>
 		/// <param name="requestUri">The URI the request is sent to.</param>
@@ -61,7 +62,9 @@ namespace Serilog
 		}
 
 		/// <summary>
-		/// Adds a sink that sends durable log events using HTTP POST over the network.
+		/// Adds a durable sink that sends log events using HTTP POST over the network. A durable
+		/// sink will persist log events on disk before sending them over the network, thus
+		///  protecting against data loss after a system or process restart.
 		/// </summary>
 		/// <param name="sinkConfiguration">The logger configuration.</param>
 		/// <param name="requestUri">The URI the request is sent to.</param>

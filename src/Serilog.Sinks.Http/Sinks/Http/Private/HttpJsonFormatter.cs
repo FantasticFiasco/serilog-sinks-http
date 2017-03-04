@@ -24,7 +24,7 @@ using Serilog.Parsing;
 
 namespace Serilog.Sinks.Http.Private
 {
-    internal class HttpJsonFormatter : ITextFormatter
+	internal class HttpJsonFormatter : ITextFormatter
 	{
 		private static readonly JsonValueFormatter ValueFormatter = new JsonValueFormatter();
 
