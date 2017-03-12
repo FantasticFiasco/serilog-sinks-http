@@ -1,4 +1,6 @@
-﻿namespace Serilog.Sinks.Http.IntegrationTests.Server.Controllers
+﻿using Serilog.Sinks.Http.IntegrationTests.Server.Controllers.Dtos;
+
+namespace Serilog.Sinks.Http.IntegrationTests.Server.Controllers
 {
 	public static class PayloadConvert
 	{
@@ -9,6 +11,7 @@
 				@event.Level,
 				@event.MessageTemplate,
 				@event.Properties,
+				@event.RenderedMessage,
 				@event.Exception);
 		}
 
@@ -20,6 +23,7 @@
 				Level = @event.Level,
 				MessageTemplate = @event.MessageTemplate,
 				Properties = @event.Properties,
+				RenderedMessage = @event.RenderedMessage,
 				Exception = @event.Exception
 			};
 		}

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Serilog
 {
-    public abstract class SinkFixture : TestServerFixture
+	public abstract class SinkFixture : TestServerFixture
 	{
 		protected SinkFixture()
 		{
@@ -69,6 +69,7 @@ namespace Serilog
 			Assert.Equal(expected.Level.ToString(), @event.Level);
 			Assert.Equal(expected.MessageTemplate.Text, @event.MessageTemplate);
 			Assert.Equal(expected.Properties["Name"].ToString().Trim('"'), @event.Properties["Name"]);
+			Assert.Equal("Hello, \"Alice\"!", @event.RenderedMessage);
 			Assert.Null(@event.Exception);
 		}
 
@@ -87,6 +88,7 @@ namespace Serilog
 			Assert.Equal(expected.Timestamp, @event.Timestamp);
 			Assert.Equal(expected.Level.ToString(), @event.Level);
 			Assert.Equal(expected.MessageTemplate.Text, @event.MessageTemplate);
+			Assert.Equal("Some error message", @event.RenderedMessage);
 			Assert.Equal(expected.Exception.ToString(), @event.Exception);
 		}
 

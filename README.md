@@ -25,7 +25,7 @@ The sink is batching multiple log events into a single request, and the followin
   "events": [
     {
       "Timestamp": "2016-11-03T00:09:11.4899425+01:00",
-      "Level": "Debug",
+      "Level": "Information",
       "MessageTemplate": "Logging {@Heartbeat} from {Computer}",
       "RenderedMessage": "Logging { UserName: \"Mike\", UserDomainName: \"Home\" } from \"Workstation\"",
       "Properties": {
@@ -38,7 +38,7 @@ The sink is batching multiple log events into a single request, and the followin
     },
     {
       "Timestamp": "2016-11-03T00:09:12.4905685+01:00",
-      "Level": "Debug",
+      "Level": "Information",
       "MessageTemplate": "Logging {@Heartbeat} from {Computer}",
       "RenderedMessage": "Logging { UserName: \"Mike\", UserDomainName: \"Home\" } from \"Workstation\"",
       "Properties": {
@@ -70,6 +70,96 @@ The log events can be sent directly to Elasticsearch using [Serilog.Sinks.Elasti
 #### Send log events to Logstash
 
 If you would like to send the log events to Logstash for further processing instead of sending them directly to Elasticsearch, this sink in combination with the [Logstash HTTP input plugin](https://www.elastic.co/blog/introducing-logstash-input-http-plugin) is the perfect match for you. It is a much better solution than having to install [Filebeat](https://www.elastic.co/products/beats/filebeat) on all your instances, mainly because it involves fewer moving parts.
+
+### Formatting types
+
+#### FormattingType.NormalRendered
+
+The log event is normally formatted and the message template is rendered into a message. This is the most verbose formatting type and its network load is higher than the other options.
+
+Example:
+```json
+{
+  "Timestamp": "2016-11-03T00:09:11.4899425+01:00",
+  "Level": "Information",
+  "MessageTemplate": "Logging {@Heartbeat} from {Computer}",
+  "RenderedMessage": "Logging { UserName: \"Mike\", UserDomainName: \"Home\" } from \"Workstation\"",
+  "Properties": {
+    "Heartbeat": {
+      "UserName": "Mike",
+      "UserDomainName": "Home"
+    },
+    "Computer": "Workstation"
+  }
+}
+```
+
+#### FormattingType.Normal
+
+ The log event is normally formatted and its data normalized. The lack of a rendered message means improved network load compared to `FormattingType.NormalRendered`. Often this formatting type is complemented with a log server that is capable of rendering the messages of the incoming log events.
+
+Example:
+```json
+{
+  "Timestamp": "2016-11-03T00:09:11.4899425+01:00",
+  "Level": "Information",
+  "MessageTemplate": "Logging {@Heartbeat} from {Computer}",
+  "Properties": {
+    "Heartbeat": {
+      "UserName": "Mike",
+      "UserDomainName": "Home"
+    },
+    "Computer": "Workstation"
+  }
+}
+```
+
+#### FormattingType.CompactRendered
+
+The log event is formatted with minimizing size as a priority but still render the message template into a message. This formatting type greatly reduce the network load and should be used in situations where bandwidth is of importance.
+
+The compact formatter adheres to the following rules:
+
+- Built-in field names are short and prefixed with an `@`
+- The `Properties` property is flattened
+- The Information level is omitted since it is considered to be the default
+
+Example:
+```json
+{
+  "@t": "2016-11-03T00:09:11.4899425+01:00",
+  "@mt": "Logging {@Heartbeat} from {Computer}",
+  "@m":"Logging { UserName: \"Mike\", UserDomainName: \"Home\" } from \"Workstation\"",
+  "Heartbeat": {
+    "UserName": "Mike",
+    "UserDomainName": "Home"
+  },
+  "Computer": "Workstation"
+}
+```
+
+#### FormattingType.Compact
+
+The log event is formatted with minimizing size as a priority and its data is normalized. The lack of a rendered message means even smaller network load compared to `FormattingType.CompactRendered` and should be used in situations where bandwidth is of importance. Often this formatting type is complemented with a log server that is capable of rendering the messages of the incoming log events.
+
+The compact formatter adheres to the following rules:
+
+- Built-in field names are short and prefixed with an `@`
+- The `Properties` property is flattened
+- The Information level is omitted since it is considered to be the default
+
+Example:
+```json
+{
+  "@t": "2016-11-03T00:09:11.4899425+01:00",
+  "@mt": "Logging {@Heartbeat} from {Computer}",
+  "Heartbeat": {
+    "UserName": "Mike",
+    "UserDomainName": "Home"
+  },
+  "Computer": "Workstation"
+}
+```
 
 ### Install via NuGet
 

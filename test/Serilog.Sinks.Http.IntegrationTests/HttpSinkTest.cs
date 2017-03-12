@@ -3,7 +3,7 @@ using Serilog.Sinks.Http;
 
 namespace Serilog
 {
-    public class HttpSinkTest : SinkFixture
+	public class HttpSinkTest : SinkFixture
 	{
 		public HttpSinkTest()
 		{

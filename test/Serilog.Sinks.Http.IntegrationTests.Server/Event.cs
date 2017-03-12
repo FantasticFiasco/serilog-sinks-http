@@ -10,12 +10,14 @@ namespace Serilog.Sinks.Http.IntegrationTests.Server
 			string level,
 			string messageTemplate,
 			Dictionary<string, string> properties,
+			string renderedMessage,
 			string exception)
 		{
 			Timestamp = timestamp;
 			Level = level;
 			MessageTemplate = messageTemplate;
 			Properties = properties;
+			RenderedMessage = renderedMessage;
 			Exception = exception;
 		}
 
@@ -24,6 +26,8 @@ namespace Serilog.Sinks.Http.IntegrationTests.Server
 		public string Level { get; }
 
 		public string MessageTemplate { get; }
+
+		public string RenderedMessage { get; set; }
 
 		public Dictionary<string, string> Properties { get; }
 
