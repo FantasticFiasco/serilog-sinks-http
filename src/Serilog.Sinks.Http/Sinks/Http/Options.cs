@@ -39,5 +39,11 @@ namespace Serilog.Sinks.Http
 		/// Default value is 265 KB.
 		/// </summary>
 		public long? EventBodyLimitBytes { get; set; } = 256 * 1024;
+
+		/// <summary>
+		/// Gets or sets the formatting type. Default value is
+		/// <see cref="Http.FormattingType.NormalRendered"/>.
+		/// </summary>
+		public FormattingType FormattingType { get; set; } = FormattingType.NormalRendered;
 	}
 }

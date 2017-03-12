@@ -21,9 +21,10 @@ using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
+using Serilog.Sinks.Http.Private.Formatters;
 using Serilog.Sinks.PeriodicBatching;
 
-namespace Serilog.Sinks.Http.Private
+namespace Serilog.Sinks.Http.Private.Sinks
 {
 	internal class HttpSink : PeriodicBatchingSink
 	{
@@ -52,7 +53,7 @@ namespace Serilog.Sinks.Http.Private
 			this.requestUri = requestUri;
 			this.options = options;
 
-			formatter = new HttpJsonFormatter();
+			formatter = Converter.ToFormatter(options.FormattingType);
 		}
 
 		protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)

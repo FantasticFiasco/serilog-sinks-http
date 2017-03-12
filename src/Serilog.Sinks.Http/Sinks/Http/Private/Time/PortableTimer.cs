@@ -16,7 +16,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Serilog.Sinks.Http.Private
+namespace Serilog.Sinks.Http.Private.Time
 {
 	internal class PortableTimer : IDisposable
 	{

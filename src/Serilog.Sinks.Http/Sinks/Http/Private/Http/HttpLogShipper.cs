@@ -17,14 +17,15 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
-using Serilog.Debugging;
-using IOFile = System.IO.File;
 using System.Threading.Tasks;
+using Serilog.Debugging;
+using Serilog.Sinks.Http.Private.Time;
+using IOFile = System.IO.File;
 #if HRESULTS
 using System.Runtime.InteropServices;
 #endif
 
-namespace Serilog.Sinks.Http.Private
+namespace Serilog.Sinks.Http.Private.Http
 {
 	internal class HttpLogShipper : IDisposable
 	{

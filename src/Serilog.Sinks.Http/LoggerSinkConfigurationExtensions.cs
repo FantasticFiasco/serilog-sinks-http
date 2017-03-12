@@ -17,7 +17,8 @@ using System.Net.Http;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.Http;
-using Serilog.Sinks.Http.Private;
+using Serilog.Sinks.Http.Private.Http;
+using Serilog.Sinks.Http.Private.Sinks;
 
 namespace Serilog
 {

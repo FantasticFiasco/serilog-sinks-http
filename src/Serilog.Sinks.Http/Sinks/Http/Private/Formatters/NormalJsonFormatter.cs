@@ -22,11 +22,19 @@ using Serilog.Formatting;
 using Serilog.Formatting.Json;
 using Serilog.Parsing;
 
-namespace Serilog.Sinks.Http.Private
+namespace Serilog.Sinks.Http.Private.Formatters
 {
-	internal class HttpJsonFormatter : ITextFormatter
+	internal class NormalJsonFormatter : ITextFormatter
 	{
 		private static readonly JsonValueFormatter ValueFormatter = new JsonValueFormatter();
+
+
+		private readonly bool isRenderingMessage;
+
+		public NormalJsonFormatter(bool isRenderingMessage)
+		{
+			this.isRenderingMessage = isRenderingMessage;
+		}
 
 		public void Format(LogEvent logEvent, TextWriter output)
 		{
@@ -44,7 +52,7 @@ namespace Serilog.Sinks.Http.Private
 			}
 		}
 
-		private static void FormatContent(LogEvent logEvent, TextWriter output)
+		private void FormatContent(LogEvent logEvent, TextWriter output)
 		{
 			if (logEvent == null)
 				throw new ArgumentNullException(nameof(logEvent));
@@ -60,6 +68,14 @@ namespace Serilog.Sinks.Http.Private
 			output.Write("\",\"MessageTemplate\":");
 			JsonValueFormatter.WriteQuotedJsonString(logEvent.MessageTemplate.Text, output);
 
+			if (isRenderingMessage)
+			{
+				output.Write(",\"RenderedMessage\":");
+
+				var message = logEvent.MessageTemplate.Render(logEvent.Properties);
+				JsonValueFormatter.WriteQuotedJsonString(message, output);
+			}
+
 			if (logEvent.Exception != null)
 			{
 				output.Write(",\"Exception\":");
@@ -71,13 +87,15 @@ namespace Serilog.Sinks.Http.Private
 				WriteProperties(logEvent.Properties, output);
 			}
 
+			// Better not to allocate an array in the 99.9% of cases where this is false
 			var tokensWithFormat = logEvent.MessageTemplate.Tokens
 				.OfType<PropertyToken>()
-				.Where(pt => pt.Format != null)
-				.ToArray();
+				.Where(pt => pt.Format != null);
 
+			// ReSharper disable once PossibleMultipleEnumeration
 			if (tokensWithFormat.Any())
 			{
+				// ReSharper disable once PossibleMultipleEnumeration
 				WriteRenderings(tokensWithFormat.GroupBy(pt => pt.PropertyName), logEvent.Properties, output);
 			}
 

@@ -14,7 +14,7 @@
 
 using System;
 
-namespace Serilog.Sinks.Http.Private
+namespace Serilog.Sinks.Http.Private.Time
 {
 	internal class ExponentialBackoffConnectionSchedule
 	{

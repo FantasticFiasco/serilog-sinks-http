@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using Serilog.Sinks.Http.IntegrationTests.Server.Controllers.Dtos;
 
 namespace Serilog.Sinks.Http.IntegrationTests.Server.Controllers
 {
