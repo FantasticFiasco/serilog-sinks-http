@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+## 3.1.0 2017-03-12
+
 ### Added
 
 - Support for the formatting types: `FormattingType.NormalRendered`, `FormattingType.Normal`, `FormattingType.CompactRendered` and `FormattingType.Compact`. The formatting type can be configured via `Options` and `DurableOptions`.
