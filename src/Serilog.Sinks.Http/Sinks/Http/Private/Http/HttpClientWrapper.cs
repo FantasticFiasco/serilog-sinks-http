@@ -21,9 +21,16 @@ namespace Serilog.Sinks.Http.Private.Http
 	{
 		private readonly HttpClient client;
 
-		public HttpClientWrapper()
+		public HttpClientWrapper(string user, string password)
 		{
 			client = new HttpClient();
+
+			if (user != "" && password != "")
+			{
+				var credentials = System.Text.Encoding.ASCII.GetBytes(user + ":" + password);
+				client.DefaultRequestHeaders.Authorization =
+					new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", System.Convert.ToBase64String(credentials));
+			}
 		}
 
 		public Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content)
