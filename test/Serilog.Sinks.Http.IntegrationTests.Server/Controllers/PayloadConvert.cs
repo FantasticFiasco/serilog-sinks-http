@@ -1,4 +1,4 @@
-﻿using Serilog.Sinks.Http.IntegrationTests.Server.Controllers.Dtos;
+﻿using Serilog.Sinks.Http.Shared.Dto;
 
 namespace Serilog.Sinks.Http.IntegrationTests.Server.Controllers
 {

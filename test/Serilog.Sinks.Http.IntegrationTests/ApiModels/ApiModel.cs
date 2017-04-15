@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using Polly;
 using Serilog.Sinks.Http.IntegrationTests.Server;
 using Serilog.Sinks.Http.IntegrationTests.Server.Controllers;
-using Serilog.Sinks.Http.IntegrationTests.Server.Controllers.Dtos;
+using Serilog.Sinks.Http.Shared.Dto;
 using Xunit;
 using Xunit.Sdk;
 

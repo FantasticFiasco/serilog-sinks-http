@@ -2,14 +2,13 @@
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp1.1</TargetFrameworks>
-    <AssemblyName>Serilog.Sinks.Http.Tests</AssemblyName>
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <TreatSpecificWarningsAsErrors />
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Serilog.Sinks.Http/Serilog.Sinks.Http.csproj" />
-    <ProjectReference Include="../Serilog.Sinks.Http.IntegrationTests.Server/Serilog.Sinks.Http.IntegrationTests.Server.csproj" />
+    <ProjectReference Include="..\..\src\Serilog.Sinks.Http\Serilog.Sinks.Http.csproj" />
+    <ProjectReference Include="..\Serilog.Sinks.Http.Shared\Serilog.Sinks.Http.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
