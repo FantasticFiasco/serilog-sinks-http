@@ -3,10 +3,9 @@
   <PropertyGroup Label="Configuration">
     <OutputType>Library</OutputType>
   </PropertyGroup>
-
+  
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
-    <ApplicationIcon />
     <OutputTypeEx>library</OutputTypeEx>
     <StartupObject />
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
