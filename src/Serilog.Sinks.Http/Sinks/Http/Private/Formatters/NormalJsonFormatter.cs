@@ -24,19 +24,35 @@ using Serilog.Parsing;
 
 namespace Serilog.Sinks.Http.Private.Formatters
 {
-	internal class NormalJsonFormatter : ITextFormatter
+    /// <summary>
+    /// JSON formatter serializing objects into a normal format.
+    /// </summary>
+    /// <seealso cref="ITextFormatter" />
+    /// <seealso cref="CompactJsonFormatter" />
+	public class NormalJsonFormatter : ITextFormatter
 	{
 		private static readonly JsonValueFormatter ValueFormatter = new JsonValueFormatter();
 
 
 		private readonly bool isRenderingMessage;
 
-		public NormalJsonFormatter(bool isRenderingMessage)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NormalJsonFormatter"/> class.
+        /// </summary>
+        /// <param name="isRenderingMessage">
+        /// Whether message should be rendered during serialization.
+        /// </param>
+        public NormalJsonFormatter(bool isRenderingMessage)
 		{
 			this.isRenderingMessage = isRenderingMessage;
 		}
 
-		public void Format(LogEvent logEvent, TextWriter output)
+        /// <summary>
+        /// Format the log event into the output.
+        /// </summary>
+        /// <param name="logEvent">The event to format.</param>
+        /// <param name="output">The output.</param>
+        public void Format(LogEvent logEvent, TextWriter output)
 		{
 			try
 			{
