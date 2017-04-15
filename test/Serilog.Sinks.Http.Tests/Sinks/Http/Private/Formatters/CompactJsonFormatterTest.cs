@@ -3,8 +3,8 @@ using System.IO;
 using Newtonsoft.Json;
 using Serilog.Events;
 using Serilog.Formatting;
-using Serilog.Sinks.Http.IntegrationTests.Server.Controllers.Dtos;
-using Serilog.Support;
+using Serilog.Sinks.Http.Shared.Dto;
+using Serilog.Sinks.Http.Shared.Support;
 using Xunit;
 
 namespace Serilog.Sinks.Http.Private.Formatters

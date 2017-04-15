@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace Serilog.Sinks.Http.IntegrationTests.Server.Controllers.Dtos
+namespace Serilog.Sinks.Http.Shared.Dto
 {
 	public class CompactEventDto
 	{

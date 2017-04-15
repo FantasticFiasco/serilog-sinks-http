@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Serilog.Events;
 using Xunit.Sdk;
 
-namespace Serilog.Support
+namespace Serilog.Sinks.Http.Shared.Support
 {
 	public static class Some
 	{
