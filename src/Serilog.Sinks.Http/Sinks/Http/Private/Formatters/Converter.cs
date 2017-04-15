@@ -17,9 +17,16 @@ using Serilog.Formatting;
 
 namespace Serilog.Sinks.Http.Private.Formatters
 {
-	internal static class Converter
+    /// <summary>
+    /// Class converting formatting type into a formatter.
+    /// </summary>
+    public static class Converter
 	{
-		public static ITextFormatter ToFormatter(FormattingType formattingType)
+        /// <summary>
+        /// Converts a formatting type into a formatter.
+        /// </summary>
+        /// <param name="formattingType">The formatting type.</param>
+        public static ITextFormatter ToFormatter(FormattingType formattingType)
 		{
 			switch (formattingType)
 			{
