@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>3.1.0</Version>
+    <Version>3.1.1</Version>
     <AssemblyName>Serilog.Sinks.Http</AssemblyName>
     <Description>Serilog event sink that sends HTTP POST requests over the network.</Description>
     <TargetFrameworks>net45;netstandard1.3</TargetFrameworks>
