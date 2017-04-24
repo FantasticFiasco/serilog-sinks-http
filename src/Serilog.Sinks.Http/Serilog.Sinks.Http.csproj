@@ -17,7 +17,7 @@
     <PackageId>Serilog.Sinks.Http</PackageId>
     <PackageTags>serilog;http</PackageTags>
     <PackageIconUrl>http://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
-    <PackageProjectUrl>http://serilog.net</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/FantasticFiasco/serilog-sinks-http</PackageProjectUrl>
     <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
     <!-- Don't reference the full NETStandard.Library -->
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
