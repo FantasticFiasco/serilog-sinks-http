@@ -45,5 +45,15 @@ namespace Serilog.Sinks.Http
 		/// <see cref="Http.FormattingType.NormalRendered"/>.
 		/// </summary>
 		public FormattingType FormattingType { get; set; } = FormattingType.NormalRendered;
+
+		/// <summary>
+		/// Gets or sets the basic authentication user. Default value is empty string
+		/// </summary>
+		public String User { get; set; } = string.Empty;
+
+		/// <summary>
+		/// Gets or sets the basic authentication password. Default value is empty string
+		/// </summary>
+		public String Password { get; set; } = string.Empty;
 	}
 }

@@ -55,7 +55,7 @@ namespace Serilog
 				throw new ArgumentNullException(nameof(sinkConfiguration));
 
 			var sink = new HttpSink(
-				httpClient ?? new HttpClientWrapper(),
+				httpClient ?? new HttpClientWrapper(options.User, options.Password),
 				requestUri,
 				options);
 
@@ -90,7 +90,7 @@ namespace Serilog
 				throw new ArgumentNullException(nameof(sinkConfiguration));
 
 			var sink = new DurableHttpSink(
-				httpClient ?? new HttpClientWrapper(),
+				httpClient ?? new HttpClientWrapper(options.User, options.Password),
 				requestUri,
 				options);
 
