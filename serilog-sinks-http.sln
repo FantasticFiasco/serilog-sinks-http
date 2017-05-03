@@ -24,7 +24,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{9C45525E-C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Http", "src\Serilog.Sinks.Http\Serilog.Sinks.Http.csproj", "{5E451D5E-FA01-47F0-9D6F-45C8D98D9D19}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Http.IntegrationTests", "test\Serilog.Sinks.Http.IntegrationTests\Serilog.Sinks.Http.IntegrationTests.csproj", "{C61C3037-87DB-4756-BAE5-282944FC931C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.HttpTests", "test\Serilog.Sinks.HttpTests\Serilog.Sinks.HttpTests.csproj", "{C61C3037-87DB-4756-BAE5-282944FC931C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Http.IntegrationTests.Server", "test\Serilog.Sinks.Http.IntegrationTests.Server\Serilog.Sinks.Http.IntegrationTests.Server.csproj", "{FFA0883A-D5AD-4C6D-94C6-1D77F4D8D02B}"
 EndProject
