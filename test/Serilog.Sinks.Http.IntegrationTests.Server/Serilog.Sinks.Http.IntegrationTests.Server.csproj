@@ -11,10 +11,6 @@
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <TreatSpecificWarningsAsErrors />
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Serilog.Sinks.Http.Shared\Serilog.Sinks.Http.Shared.csproj" />
-  </ItemGroup>
     
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore" Version="1.1.1" />

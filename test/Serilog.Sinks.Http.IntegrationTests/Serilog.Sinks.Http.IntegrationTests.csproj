@@ -19,7 +19,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Serilog.Sinks.Http\Serilog.Sinks.Http.csproj" />
     <ProjectReference Include="..\Serilog.Sinks.Http.IntegrationTests.Server\Serilog.Sinks.Http.IntegrationTests.Server.csproj" />
-    <ProjectReference Include="..\Serilog.Sinks.Http.Shared\Serilog.Sinks.Http.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

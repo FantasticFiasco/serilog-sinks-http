@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Serilog.Sinks.Http.Shared.Dto;
+using Serilog.Sinks.Http.IntegrationTests.Server.Controllers.Dto;
 
 namespace Serilog.Sinks.Http.IntegrationTests.Server.Controllers
 {

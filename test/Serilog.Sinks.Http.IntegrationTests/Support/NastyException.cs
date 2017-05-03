@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Serilog.Sinks.Http.Shared.Support
+namespace Serilog.Support
 {
 	public class NastyException : Exception
 	{

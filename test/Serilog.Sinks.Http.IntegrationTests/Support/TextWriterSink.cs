@@ -3,7 +3,7 @@ using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
 
-namespace Serilog.Sinks.Http.Shared.Support
+namespace Serilog.Support
 {
 	public class TextWriterSink : ILogEventSink
 	{

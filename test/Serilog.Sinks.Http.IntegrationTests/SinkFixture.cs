@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Serilog.Core;
 using Serilog.Events;
-using Serilog.Sinks.Http.Shared.Support;
+using Serilog.Support;
 using Xunit;
 
 namespace Serilog
