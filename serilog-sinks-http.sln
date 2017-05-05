@@ -26,7 +26,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Http", "src\S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.HttpTests", "test\Serilog.Sinks.HttpTests\Serilog.Sinks.HttpTests.csproj", "{C61C3037-87DB-4756-BAE5-282944FC931C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Http.IntegrationTests.Server", "test\Serilog.Sinks.Http.IntegrationTests.Server\Serilog.Sinks.Http.IntegrationTests.Server.csproj", "{FFA0883A-D5AD-4C6D-94C6-1D77F4D8D02B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Http.LogServer", "test\Serilog.Sinks.Http.LogServer\Serilog.Sinks.Http.LogServer.csproj", "{FFA0883A-D5AD-4C6D-94C6-1D77F4D8D02B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

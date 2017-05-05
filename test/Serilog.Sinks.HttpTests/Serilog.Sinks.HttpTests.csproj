@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Serilog.Sinks.Http\Serilog.Sinks.Http.csproj" />
-    <ProjectReference Include="..\Serilog.Sinks.Http.IntegrationTests.Server\Serilog.Sinks.Http.IntegrationTests.Server.csproj" />
+    <ProjectReference Include="..\Serilog.Sinks.Http.LogServer\Serilog.Sinks.Http.LogServer.csproj" />
   </ItemGroup>
 
   <ItemGroup>
