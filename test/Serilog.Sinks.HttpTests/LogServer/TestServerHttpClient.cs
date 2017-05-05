@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Serilog.Sinks.Http;
 
-namespace Serilog
+namespace Serilog.LogServer
 {
 	public class TestServerHttpClient : IHttpClient
 	{

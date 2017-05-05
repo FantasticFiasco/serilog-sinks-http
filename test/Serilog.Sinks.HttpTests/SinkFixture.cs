@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Serilog.Core;
 using Serilog.Events;
+using Serilog.LogServer;
 using Serilog.Support;
 using Xunit;
 
@@ -17,7 +18,7 @@ namespace Serilog
 
 		protected Logger Logger { get; set; }
 
-		protected TestServerHttpClient HttpClient { get; private set; }
+		protected TestServerHttpClient HttpClient { get; }
 
 		[Theory]
 		[InlineData(LogEventLevel.Verbose)]
@@ -96,11 +97,11 @@ namespace Serilog
 		public async Task DropNastyException()
 		{
 			// Arrange
-			var nasty = Some.LogEvent(LogEventLevel.Error, new NastyException(), "Some error message");
+			var nastyException = Some.LogEvent(LogEventLevel.Error, new NastyException(), "Some error message");
 			var expected = Some.LogEvent("Some message");
 
 			// Act
-			Logger.Write(nasty);
+			Logger.Write(nastyException);
 			Logger.Write(expected);
 
 			// Assert

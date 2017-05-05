@@ -1,11 +1,9 @@
 ﻿using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using Serilog.ApiModels;
 using Serilog.Sinks.Http.IntegrationTests.Server;
 
-
-namespace Serilog
+namespace Serilog.LogServer
 {
 	public abstract class TestServerFixture : IDisposable
 	{

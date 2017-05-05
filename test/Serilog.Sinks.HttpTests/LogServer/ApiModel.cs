@@ -12,17 +12,17 @@ using Serilog.Sinks.Http.IntegrationTests.Server.Controllers.Dto;
 using Xunit;
 using Xunit.Sdk;
 
-namespace Serilog.ApiModels
+namespace Serilog.LogServer
 {
 	public class ApiModel
 	{
 		private readonly HttpClient client;
-		private readonly Policy waitPolicy;
+		private readonly Policy retryPolicy;
 
 		public ApiModel(HttpClient client)
 		{
 			this.client = client;
-			waitPolicy = Policy
+			retryPolicy = Policy
 				.Handle<XunitException>()
 				.WaitAndRetryAsync(10, retryCount => TimeSpan.FromSeconds(1));
 		}
@@ -43,7 +43,7 @@ namespace Serilog.ApiModels
 			Assert.True(response.IsSuccessStatusCode);
 		}
 
-		public async Task<IEnumerable<Event>> GetAsync()
+		public async Task<Event[]> GetAsync()
 		{
 			var response = await client.GetAsync("/api/events");
 
@@ -52,16 +52,18 @@ namespace Serilog.ApiModels
 			var content = await response.Content.ReadAsStringAsync();
 			var events = JsonConvert.DeserializeObject<IEnumerable<EventDto>>(content);
 
-			return events.Select(PayloadConvert.FromDto);
+			return events
+                .Select(PayloadConvert.FromDto)
+                .ToArray();
 		}
 
-		public Task<IEnumerable<Event>> WaitAndGetAsync(int expectedEventCount)
+		public Task<Event[]> WaitAndGetAsync(int expectedEventCount)
 		{
-			return waitPolicy.ExecuteAsync(
+			return retryPolicy.ExecuteAsync(
 				async () =>
 				{
 					var actual = await GetAsync();
-					int actualCount = actual.Count();
+					int actualCount = actual.Length;
 
 					if (actualCount > expectedEventCount)
 					{
