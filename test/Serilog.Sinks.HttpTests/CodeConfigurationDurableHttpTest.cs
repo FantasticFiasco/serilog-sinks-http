@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Serilog.Sinks.Http;
 using IOFile = System.IO.File;
 
 namespace Serilog
@@ -16,12 +15,9 @@ namespace Serilog
 				.MinimumLevel.Verbose()
 				.WriteTo
 				.DurableHttp(
-					"api/batches",
-					new DurableOptions
-					{
-						BatchPostingLimit = 100,
-						Period = TimeSpan.FromMilliseconds(1)
-					},
+					requestUri: "api/batches",
+                    batchPostingLimit: 100,
+                    period: TimeSpan.FromMilliseconds(1),
 					httpClient: HttpClient)
 				.CreateLogger();
 		}

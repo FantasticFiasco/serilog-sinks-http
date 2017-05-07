@@ -54,17 +54,13 @@ namespace Serilog.Sinks.Http.Private.Http
 			TimeSpan period,
 			long? eventBodyLimitBytes)
 		{
-			if (client == null)
-				throw new ArgumentNullException(nameof(client));
-			if (requestUri == null)
-				throw new ArgumentNullException(nameof(requestUri));
 			if (bufferBaseFilename == null)
 				throw new ArgumentNullException(nameof(bufferBaseFilename));
 			if (batchPostingLimit <= 0)
 				throw new ArgumentException("batchPostingLimit must be 1 or greater", nameof(batchPostingLimit));
 
-			this.client = client;
-			this.requestUri = requestUri;
+			this.client = client ?? throw new ArgumentNullException(nameof(client));
+			this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
 			this.batchPostingLimit = batchPostingLimit;
 			this.eventBodyLimitBytes = eventBodyLimitBytes;
 

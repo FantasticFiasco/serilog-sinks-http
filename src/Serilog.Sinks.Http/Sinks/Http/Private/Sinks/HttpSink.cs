@@ -31,29 +31,25 @@ namespace Serilog.Sinks.Http.Private.Sinks
 		private static readonly string ContentType = "application/json";
 
 		private readonly string requestUri;
-		private readonly Options options;
-		private readonly ITextFormatter formatter;
+	    private readonly long? eventBodyLimitBytes;
+        private readonly ITextFormatter formatter;
 
 		private IHttpClient client;
 
 		public HttpSink(
-			IHttpClient client,
-			string requestUri,
-			Options options)
-			: base(options.BatchPostingLimit, options.Period)
+		    string requestUri,
+		    int batchPostingLimit,
+		    TimeSpan period,
+		    long? eventBodyLimitBytes,
+		    FormattingType formattingType,
+            IHttpClient client)
+			: base(batchPostingLimit, period)
 		{
-			if (client == null)
-				throw new ArgumentNullException(nameof(client));
-			if (requestUri == null)
-				throw new ArgumentNullException(nameof(requestUri));
-			if (options == null)
-				throw new ArgumentNullException(nameof(options));
+			this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
+		    this.eventBodyLimitBytes = eventBodyLimitBytes;
+            this.client = client ?? throw new ArgumentNullException(nameof(client));
 
-			this.client = client;
-			this.requestUri = requestUri;
-			this.options = options;
-
-			formatter = Converter.ToFormatter(options.FormattingType);
+            formatter = Converter.ToFormatter(formattingType);
 		}
 
 		protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
@@ -120,12 +116,12 @@ namespace Serilog.Sinks.Http.Private.Sinks
 
 		private bool CheckEventBodySize(string json)
 		{
-			if (options.EventBodyLimitBytes.HasValue &&
-				Encoding.UTF8.GetByteCount(json) > options.EventBodyLimitBytes.Value)
+			if (eventBodyLimitBytes.HasValue &&
+				Encoding.UTF8.GetByteCount(json) > eventBodyLimitBytes.Value)
 			{
 				SelfLog.WriteLine(
 					"Event JSON representation exceeds the byte size limit of {0} set for this sink and will be dropped; data: {1}",
-					options.EventBodyLimitBytes,
+					eventBodyLimitBytes,
 					json);
 
 				return false;

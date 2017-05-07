@@ -1,5 +1,4 @@
 ﻿using System;
-using Serilog.Sinks.Http;
 
 namespace Serilog
 {
@@ -11,12 +10,9 @@ namespace Serilog
 				.MinimumLevel.Verbose()
 				.WriteTo
 				.Http(
-					"api/batches",
-					new Options
-					{
-						BatchPostingLimit = 100,
-						Period = TimeSpan.FromMilliseconds(1)
-					},
+					requestUri: "api/batches",
+                    batchPostingLimit: 100,
+                    period: TimeSpan.FromMilliseconds(1),
 					httpClient: HttpClient)
 				.CreateLogger();
 		}
