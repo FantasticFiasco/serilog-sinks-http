@@ -6,9 +6,9 @@ using IOFile = System.IO.File;
 
 namespace Serilog
 {
-	public class DurableHttpSinkTest : SinkFixture
+	public class CodeConfigurationDurableHttpTest : SinkFixture
 	{
-		public DurableHttpSinkTest()
+		public CodeConfigurationDurableHttpTest()
 		{
 			ClearBufferFiles();
 

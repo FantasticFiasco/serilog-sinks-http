@@ -3,9 +3,9 @@ using Serilog.Sinks.Http;
 
 namespace Serilog
 {
-	public class HttpSinkTest : SinkFixture
+	public class CodeConfigurationHttpTest : SinkFixture
 	{
-		public HttpSinkTest()
+		public CodeConfigurationHttpTest()
 		{
 			Logger = new LoggerConfiguration()
 				.MinimumLevel.Verbose()
