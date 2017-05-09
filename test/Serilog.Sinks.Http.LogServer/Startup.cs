@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 
-namespace Serilog.Sinks.Http.IntegrationTests.Server
+namespace Serilog.Sinks.Http.LogServer
 {
 	public class Startup
 	{

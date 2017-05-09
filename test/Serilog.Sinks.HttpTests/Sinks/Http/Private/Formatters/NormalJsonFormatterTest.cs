@@ -4,7 +4,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Serilog.Events;
 using Serilog.Formatting;
-using Serilog.Sinks.Http.IntegrationTests.Server.Controllers.Dto;
+using Serilog.Sinks.Http.LogServer.Controllers.Dto;
 using Serilog.Support;
 using Xunit;
 

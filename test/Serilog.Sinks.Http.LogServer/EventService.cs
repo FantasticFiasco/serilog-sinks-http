@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 
-namespace Serilog.Sinks.Http.IntegrationTests.Server
+namespace Serilog.Sinks.Http.LogServer
 {
 	public class EventService : IEventService
 	{

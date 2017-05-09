@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Serilog.Sinks.Http.IntegrationTests.Server.Controllers.Dto
+namespace Serilog.Sinks.Http.LogServer.Controllers.Dto
 {
 	public class EventBatchRequestDto
 	{

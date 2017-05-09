@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Polly;
-using Serilog.Sinks.Http.IntegrationTests.Server;
-using Serilog.Sinks.Http.IntegrationTests.Server.Controllers;
-using Serilog.Sinks.Http.IntegrationTests.Server.Controllers.Dto;
+using Serilog.Sinks.Http.LogServer;
+using Serilog.Sinks.Http.LogServer.Controllers;
+using Serilog.Sinks.Http.LogServer.Controllers.Dto;
 using Xunit;
 using Xunit.Sdk;
 

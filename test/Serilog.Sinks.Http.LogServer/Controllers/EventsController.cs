@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Serilog.Sinks.Http.IntegrationTests.Server.Controllers.Dto;
+using Serilog.Sinks.Http.LogServer.Controllers.Dto;
 
-namespace Serilog.Sinks.Http.IntegrationTests.Server.Controllers
+namespace Serilog.Sinks.Http.LogServer.Controllers
 {
 	[Route("api/[controller]")]
 	public class EventsController : Controller

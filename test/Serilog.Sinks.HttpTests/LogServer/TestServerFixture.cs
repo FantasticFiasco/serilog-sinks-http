@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using Serilog.Sinks.Http.IntegrationTests.Server;
+using Serilog.Sinks.Http.LogServer;
 
 namespace Serilog.LogServer
 {
