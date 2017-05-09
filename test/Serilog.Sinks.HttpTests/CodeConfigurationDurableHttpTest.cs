@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Serilog.LogServer;
 using IOFile = System.IO.File;
 
 namespace Serilog
@@ -18,8 +19,11 @@ namespace Serilog
 					requestUri: "api/batches",
                     batchPostingLimit: 100,
                     period: TimeSpan.FromMilliseconds(1),
-					httpClient: HttpClient)
+					httpClient: new TestServerHttpClient())
 				.CreateLogger();
+
+		    HttpClient = TestServerHttpClient.Instance;
+		    HttpClient.Client = Server.CreateClient();
 		}
 
 		private static void ClearBufferFiles()

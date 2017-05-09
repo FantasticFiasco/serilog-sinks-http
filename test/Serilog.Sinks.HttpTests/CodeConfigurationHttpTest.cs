@@ -1,4 +1,5 @@
 ﻿using System;
+using Serilog.LogServer;
 
 namespace Serilog
 {
@@ -13,8 +14,11 @@ namespace Serilog
 					requestUri: "api/batches",
                     batchPostingLimit: 100,
                     period: TimeSpan.FromMilliseconds(1),
-					httpClient: HttpClient)
+					httpClient: new TestServerHttpClient())
 				.CreateLogger();
-		}
+
+            HttpClient = TestServerHttpClient.Instance;
+		    HttpClient.Client = Server.CreateClient();
+        }
 	}
 }

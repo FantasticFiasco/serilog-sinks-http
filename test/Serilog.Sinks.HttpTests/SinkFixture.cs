@@ -11,16 +11,11 @@ namespace Serilog
 {
 	public abstract class SinkFixture : TestServerFixture
 	{
-		protected SinkFixture()
-		{
-			HttpClient = new TestServerHttpClient(Server.CreateClient());
-		}
-
 		protected Logger Logger { get; set; }
 
-		protected TestServerHttpClient HttpClient { get; }
+	    protected TestServerHttpClient HttpClient { get; set; }
 
-		[Theory]
+        [Theory]
 		[InlineData(LogEventLevel.Verbose)]
 		[InlineData(LogEventLevel.Debug)]
 		[InlineData(LogEventLevel.Information)]

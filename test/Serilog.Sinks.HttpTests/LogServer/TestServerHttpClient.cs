@@ -7,17 +7,19 @@ namespace Serilog.LogServer
 {
 	public class TestServerHttpClient : IHttpClient
 	{
-		private readonly HttpClient client;
 		private readonly object syncRoot;
 
 		private bool simulateNetworkFailure;
 
-		public TestServerHttpClient(HttpClient client)
-		{
-			this.client = client;
+	    public TestServerHttpClient()
+	    {
+	        syncRoot = new object();
+            Instance = this;
+	    }
 
-			syncRoot = new object();
-		}
+        public static TestServerHttpClient Instance { get; private set; }
+
+		public HttpClient Client { get; set; }
 
 		public int NumberOfPosts { get; private set; }
 
@@ -35,7 +37,7 @@ namespace Serilog.LogServer
 					return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
 				}
 
-				return client.PostAsync(requestUri, content);
+				return Client.PostAsync(requestUri, content);
 			}
 		}
 
@@ -49,7 +51,8 @@ namespace Serilog.LogServer
 
 		public void Dispose()
 		{
-			client.Dispose();
-		}
+            Client?.Dispose();
+            Client = null;
+        }
 	}
 }
