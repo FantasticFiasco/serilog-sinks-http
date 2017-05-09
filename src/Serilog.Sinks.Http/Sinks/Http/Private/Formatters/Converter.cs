@@ -21,30 +21,30 @@ namespace Serilog.Sinks.Http.Private.Formatters
     /// Class converting formatting type into a formatter.
     /// </summary>
     public static class Converter
-	{
+    {
         /// <summary>
         /// Converts a formatting type into a formatter.
         /// </summary>
         /// <param name="formattingType">The formatting type.</param>
         public static ITextFormatter ToFormatter(FormattingType formattingType)
-		{
-			switch (formattingType)
-			{
-					case FormattingType.NormalRendered:
-						return new NormalJsonFormatter(true);
+        {
+            switch (formattingType)
+            {
+                case FormattingType.NormalRendered:
+                    return new NormalJsonFormatter(true);
 
-					case FormattingType.Normal:
-						return new NormalJsonFormatter(false);
+                case FormattingType.Normal:
+                    return new NormalJsonFormatter(false);
 
-					case FormattingType.CompactRendered:
-						return new CompactJsonFormatter(true);
+                case FormattingType.CompactRendered:
+                    return new CompactJsonFormatter(true);
 
-					case FormattingType.Compact:
-						return new CompactJsonFormatter(false);
+                case FormattingType.Compact:
+                    return new CompactJsonFormatter(false);
 
-					default:
-						throw new ArgumentException($"Formatting type {formattingType} is not supported");
-			}
-		}
-	}
+                default:
+                    throw new ArgumentException($"Formatting type {formattingType} is not supported");
+            }
+        }
+    }
 }

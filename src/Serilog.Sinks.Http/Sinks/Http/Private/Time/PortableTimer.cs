@@ -18,96 +18,96 @@ using System.Threading.Tasks;
 
 namespace Serilog.Sinks.Http.Private.Time
 {
-	internal class PortableTimer : IDisposable
-	{
-		private readonly object stateLock = new object();
-		private readonly Func<Task> onTick;
-		private readonly Timer timer;
+    internal class PortableTimer : IDisposable
+    {
+        private readonly object stateLock = new object();
+        private readonly Func<Task> onTick;
+        private readonly Timer timer;
 
-		private bool running;
-		private bool disposed;
+        private bool running;
+        private bool disposed;
 
-		public PortableTimer(Func<Task> onTick)
-		{
-			if (onTick == null)
-				throw new ArgumentNullException(nameof(onTick));
+        public PortableTimer(Func<Task> onTick)
+        {
+            if (onTick == null)
+                throw new ArgumentNullException(nameof(onTick));
 
-			this.onTick = onTick;
+            this.onTick = onTick;
 
-			timer = new Timer(_ => OnTick(), null, Timeout.Infinite, Timeout.Infinite);
-		}
+            timer = new Timer(_ => OnTick(), null, Timeout.Infinite, Timeout.Infinite);
+        }
 
-		public void Start(TimeSpan interval)
-		{
-			if (interval < TimeSpan.Zero)
-				throw new ArgumentOutOfRangeException(nameof(interval));
+        public void Start(TimeSpan interval)
+        {
+            if (interval < TimeSpan.Zero)
+                throw new ArgumentOutOfRangeException(nameof(interval));
 
-			lock (stateLock)
-			{
-				if (disposed)
-					throw new ObjectDisposedException(nameof(PortableTimer));
-				
-				timer.Change(interval, Timeout.InfiniteTimeSpan);
-			}
-		}
+            lock (stateLock)
+            {
+                if (disposed)
+                    throw new ObjectDisposedException(nameof(PortableTimer));
 
-		public void Dispose()
-		{
-			lock (stateLock)
-			{
-				if (disposed)
-				{
-					return;
-				}
+                timer.Change(interval, Timeout.InfiniteTimeSpan);
+            }
+        }
 
-				while (running)
-				{
-					Monitor.Wait(stateLock);
-				}
+        public void Dispose()
+        {
+            lock (stateLock)
+            {
+                if (disposed)
+                {
+                    return;
+                }
 
-				timer.Dispose();
+                while (running)
+                {
+                    Monitor.Wait(stateLock);
+                }
 
-				disposed = true;
-			}
-		}
+                timer.Dispose();
 
-		private async void OnTick()
-		{
-			try
-			{
-				lock (stateLock)
-				{
-					if (disposed)
-					{
-						return;
-					}
+                disposed = true;
+            }
+        }
 
-					// There's a little bit of raciness here, but it's needed to support the
-					// current API, which allows the tick handler to reenter and set the next interval.
+        private async void OnTick()
+        {
+            try
+            {
+                lock (stateLock)
+                {
+                    if (disposed)
+                    {
+                        return;
+                    }
 
-					if (running)
-					{
-						Monitor.Wait(stateLock);
+                    // There's a little bit of raciness here, but it's needed to support the
+                    // current API, which allows the tick handler to reenter and set the next interval.
 
-						if (disposed)
-						{
-							return;
-						}
-					}
+                    if (running)
+                    {
+                        Monitor.Wait(stateLock);
 
-					running = true;
-				}
+                        if (disposed)
+                        {
+                            return;
+                        }
+                    }
 
-				await onTick();
-			}
-			finally
-			{
-				lock (stateLock)
-				{
-					running = false;
-					Monitor.PulseAll(stateLock);
-				}
-			}
-		}
-	}
+                    running = true;
+                }
+
+                await onTick();
+            }
+            finally
+            {
+                lock (stateLock)
+                {
+                    running = false;
+                    Monitor.PulseAll(stateLock);
+                }
+            }
+        }
+    }
 }

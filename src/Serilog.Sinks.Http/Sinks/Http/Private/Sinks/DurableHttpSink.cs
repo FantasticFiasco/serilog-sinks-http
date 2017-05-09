@@ -22,44 +22,49 @@ using Serilog.Sinks.RollingFile;
 
 namespace Serilog.Sinks.Http.Private.Sinks
 {
-	internal class DurableHttpSink : ILogEventSink, IDisposable
-	{
-		private readonly HttpLogShipper shipper;
-		private readonly RollingFileSink sink;
+    internal class DurableHttpSink : ILogEventSink, IDisposable
+    {
+        private readonly HttpLogShipper shipper;
+        private readonly RollingFileSink sink;
 
-		public DurableHttpSink(
-			IHttpClient client,
-			string requestUri,
-			DurableOptions options)
-		{
-			if (options.BufferFileSizeLimitBytes.HasValue && options.BufferFileSizeLimitBytes < 0)
-				throw new ArgumentOutOfRangeException(nameof(options.BufferFileSizeLimitBytes), "Negative value provided; file size limit must be non-negative.");
+        public DurableHttpSink(
+            string requestUri,
+            string bufferBaseFilename,
+            long? bufferFileSizeLimitBytes,
+            int batchPostingLimit,
+            TimeSpan period,
+            long? eventBodyLimitBytes,
+            FormattingType formattingType,
+            IHttpClient client)
+        {
+            if (bufferFileSizeLimitBytes.HasValue && bufferFileSizeLimitBytes < 0)
+                throw new ArgumentOutOfRangeException(nameof(bufferFileSizeLimitBytes), "Negative value provided; file size limit must be non-negative.");
 
-			shipper = new HttpLogShipper(
-				client,
-				requestUri,
-				options.BufferBaseFilename,
-				options.BatchPostingLimit,
-				options.Period,
-				options.EventBodyLimitBytes);
+            shipper = new HttpLogShipper(
+                client,
+                requestUri,
+                bufferBaseFilename,
+                batchPostingLimit,
+                period,
+                eventBodyLimitBytes);
 
-			sink = new RollingFileSink(
-				options.BufferBaseFilename + "-{Date}.json",
-				Converter.ToFormatter(options.FormattingType),
-				options.BufferFileSizeLimitBytes,
-				null,
-				Encoding.UTF8);
-		}
+            sink = new RollingFileSink(
+                bufferBaseFilename + "-{Date}.json",
+                Converter.ToFormatter(formattingType),
+                bufferFileSizeLimitBytes,
+                null,
+                Encoding.UTF8);
+        }
 
-		public void Emit(LogEvent logEvent)
-		{
-			sink.Emit(logEvent);
-		}
+        public void Emit(LogEvent logEvent)
+        {
+            sink.Emit(logEvent);
+        }
 
-		public void Dispose()
-		{
-			sink.Dispose();
-			shipper.Dispose();
-		}
-	}
+        public void Dispose()
+        {
+            sink.Dispose();
+            shipper.Dispose();
+        }
+    }
 }
