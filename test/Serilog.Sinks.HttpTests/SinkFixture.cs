@@ -136,7 +136,10 @@ namespace Serilog
 			base.Dispose();
 
 			Logger?.Dispose();
-		    TestServerHttpClient.Instance?.Dispose();
+		    Logger = null;
+
+            TestServerHttpClient.Instance?.Dispose();
+		    TestServerHttpClient.Instance = null;
 		}
 
 	    private Event[] ExpectReceivedEvents(int expectedEventCount)

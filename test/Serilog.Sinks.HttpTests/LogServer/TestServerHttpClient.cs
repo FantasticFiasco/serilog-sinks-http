@@ -14,7 +14,7 @@ namespace Serilog.LogServer
 	        Instance = this;
 	    }
         
-        public static TestServerHttpClient Instance { get; private set; }
+        public static TestServerHttpClient Instance { get; set; }
 
 		public HttpClient Client { get; set; }
 
@@ -30,6 +30,7 @@ namespace Serilog.LogServer
 		public void Dispose()
 		{
             Client?.Dispose();
-        }
+		    Client = null;
+		}
 	}
 }
