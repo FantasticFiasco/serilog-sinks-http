@@ -29,10 +29,10 @@ namespace Serilog.Sinks.Http.Private.Formatters
     /// <seealso cref="ITextFormatter" />
     /// <seealso cref="NormalJsonFormatter" />
     public class CompactJsonFormatter : ITextFormatter
-    {
-        private static readonly JsonValueFormatter ValueFormatter = new JsonValueFormatter();
+	{
+		private static readonly JsonValueFormatter ValueFormatter = new JsonValueFormatter();
 
-        private readonly bool isRenderingMessage;
+		private readonly bool isRenderingMessage;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompactJsonFormatter"/> class.
@@ -41,9 +41,9 @@ namespace Serilog.Sinks.Http.Private.Formatters
         /// Whether message should be rendered during serialization.
         /// </param>
         public CompactJsonFormatter(bool isRenderingMessage)
-        {
-            this.isRenderingMessage = isRenderingMessage;
-        }
+		{
+			this.isRenderingMessage = isRenderingMessage;
+		}
 
         /// <summary>
         /// Format the log event into the output.
@@ -51,100 +51,100 @@ namespace Serilog.Sinks.Http.Private.Formatters
         /// <param name="logEvent">The event to format.</param>
         /// <param name="output">The output.</param>
         public void Format(LogEvent logEvent, TextWriter output)
-        {
-            try
-            {
-                var buffer = new StringWriter();
-                FormatContent(logEvent, buffer);
+		{
+			try
+			{
+				var buffer = new StringWriter();
+				FormatContent(logEvent, buffer);
 
-                // If formatting was successful, write to output
-                output.WriteLine(buffer.ToString());
-            }
-            catch (Exception e)
-            {
-                LogNonFormattableEvent(logEvent, e);
-            }
-        }
+				// If formatting was successful, write to output
+				output.WriteLine(buffer.ToString());
+			}
+			catch (Exception e)
+			{
+				LogNonFormattableEvent(logEvent, e);
+			}
+		}
 
-        private void FormatContent(LogEvent logEvent, TextWriter output)
-        {
-            if (logEvent == null)
-                throw new ArgumentNullException(nameof(logEvent));
-            if (output == null)
-                throw new ArgumentNullException(nameof(output));
+		private void FormatContent(LogEvent logEvent, TextWriter output)
+		{
+			if (logEvent == null)
+				throw new ArgumentNullException(nameof(logEvent));
+			if (output == null)
+				throw new ArgumentNullException(nameof(output));
 
-            output.Write("{\"@t\":\"");
-            output.Write(logEvent.Timestamp.UtcDateTime.ToString("o"));
+			output.Write("{\"@t\":\"");
+			output.Write(logEvent.Timestamp.UtcDateTime.ToString("o"));
 
-            output.Write("\",\"@mt\":");
-            JsonValueFormatter.WriteQuotedJsonString(logEvent.MessageTemplate.Text, output);
+			output.Write("\",\"@mt\":");
+			JsonValueFormatter.WriteQuotedJsonString(logEvent.MessageTemplate.Text, output);
 
-            if (isRenderingMessage)
-            {
-                output.Write(",\"@m\":");
-                var message = logEvent.MessageTemplate.Render(logEvent.Properties);
-                JsonValueFormatter.WriteQuotedJsonString(message, output);
-            }
+			if (isRenderingMessage)
+			{
+				output.Write(",\"@m\":");
+				var message = logEvent.MessageTemplate.Render(logEvent.Properties);
+				JsonValueFormatter.WriteQuotedJsonString(message, output);
+			}
 
-            var tokensWithFormat = logEvent.MessageTemplate.Tokens
-                .OfType<PropertyToken>()
-                .Where(pt => pt.Format != null);
+			var tokensWithFormat = logEvent.MessageTemplate.Tokens
+				.OfType<PropertyToken>()
+				.Where(pt => pt.Format != null);
 
-            // Better not to allocate an array in the 99.9% of cases where this is false
-            // ReSharper disable once PossibleMultipleEnumeration
-            if (tokensWithFormat.Any())
-            {
-                output.Write(",\"@r\":[");
-                var delim = "";
-                foreach (var r in tokensWithFormat)
-                {
-                    output.Write(delim);
-                    delim = ",";
-                    var space = new StringWriter();
-                    r.Render(logEvent.Properties, space);
-                    JsonValueFormatter.WriteQuotedJsonString(space.ToString(), output);
-                }
-                output.Write(']');
-            }
+			// Better not to allocate an array in the 99.9% of cases where this is false
+			// ReSharper disable once PossibleMultipleEnumeration
+			if (tokensWithFormat.Any())
+			{
+				output.Write(",\"@r\":[");
+				var delim = "";
+				foreach (var r in tokensWithFormat)
+				{
+					output.Write(delim);
+					delim = ",";
+					var space = new StringWriter();
+					r.Render(logEvent.Properties, space);
+					JsonValueFormatter.WriteQuotedJsonString(space.ToString(), output);
+				}
+				output.Write(']');
+			}
 
-            if (logEvent.Level != LogEventLevel.Information)
-            {
-                output.Write(",\"@l\":\"");
-                output.Write(logEvent.Level);
-                output.Write('\"');
-            }
+			if (logEvent.Level != LogEventLevel.Information)
+			{
+				output.Write(",\"@l\":\"");
+				output.Write(logEvent.Level);
+				output.Write('\"');
+			}
 
-            if (logEvent.Exception != null)
-            {
-                output.Write(",\"@x\":");
-                JsonValueFormatter.WriteQuotedJsonString(logEvent.Exception.ToString(), output);
-            }
+			if (logEvent.Exception != null)
+			{
+				output.Write(",\"@x\":");
+				JsonValueFormatter.WriteQuotedJsonString(logEvent.Exception.ToString(), output);
+			}
 
-            foreach (var property in logEvent.Properties)
-            {
-                var name = property.Key;
-                if (name.Length > 0 && name[0] == '@')
-                {
-                    // Escape first '@' by doubling
-                    name = '@' + name;
-                }
+			foreach (var property in logEvent.Properties)
+			{
+				var name = property.Key;
+				if (name.Length > 0 && name[0] == '@')
+				{
+					// Escape first '@' by doubling
+					name = '@' + name;
+				}
 
-                output.Write(',');
-                JsonValueFormatter.WriteQuotedJsonString(name, output);
-                output.Write(':');
-                ValueFormatter.Format(property.Value, output);
-            }
+				output.Write(',');
+				JsonValueFormatter.WriteQuotedJsonString(name, output);
+				output.Write(':');
+				ValueFormatter.Format(property.Value, output);
+			}
 
-            output.Write('}');
-        }
+			output.Write('}');
+		}
 
-        private static void LogNonFormattableEvent(LogEvent logEvent, Exception e)
-        {
-            SelfLog.WriteLine(
-                "Event at {0} with message template {1} could not be formatted into JSON and will be dropped: {2}",
-                logEvent.Timestamp.ToString("o"),
-                logEvent.MessageTemplate.Text,
-                e);
-        }
-    }
+		private static void LogNonFormattableEvent(LogEvent logEvent, Exception e)
+		{
+			SelfLog.WriteLine(
+				"Event at {0} with message template {1} could not be formatted into JSON and will be dropped: {2}",
+				logEvent.Timestamp.ToString("o"),
+				logEvent.MessageTemplate.Text,
+				e);
+		}
+	}
 }

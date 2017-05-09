@@ -18,96 +18,96 @@ using System.Threading.Tasks;
 
 namespace Serilog.Sinks.Http.Private.Time
 {
-    internal class PortableTimer : IDisposable
-    {
-        private readonly object stateLock = new object();
-        private readonly Func<Task> onTick;
-        private readonly Timer timer;
+	internal class PortableTimer : IDisposable
+	{
+		private readonly object stateLock = new object();
+		private readonly Func<Task> onTick;
+		private readonly Timer timer;
 
-        private bool running;
-        private bool disposed;
+		private bool running;
+		private bool disposed;
 
-        public PortableTimer(Func<Task> onTick)
-        {
-            if (onTick == null)
-                throw new ArgumentNullException(nameof(onTick));
+		public PortableTimer(Func<Task> onTick)
+		{
+			if (onTick == null)
+				throw new ArgumentNullException(nameof(onTick));
 
-            this.onTick = onTick;
+			this.onTick = onTick;
 
-            timer = new Timer(_ => OnTick(), null, Timeout.Infinite, Timeout.Infinite);
-        }
+			timer = new Timer(_ => OnTick(), null, Timeout.Infinite, Timeout.Infinite);
+		}
 
-        public void Start(TimeSpan interval)
-        {
-            if (interval < TimeSpan.Zero)
-                throw new ArgumentOutOfRangeException(nameof(interval));
+		public void Start(TimeSpan interval)
+		{
+			if (interval < TimeSpan.Zero)
+				throw new ArgumentOutOfRangeException(nameof(interval));
 
-            lock (stateLock)
-            {
-                if (disposed)
-                    throw new ObjectDisposedException(nameof(PortableTimer));
+			lock (stateLock)
+			{
+				if (disposed)
+					throw new ObjectDisposedException(nameof(PortableTimer));
+				
+				timer.Change(interval, Timeout.InfiniteTimeSpan);
+			}
+		}
 
-                timer.Change(interval, Timeout.InfiniteTimeSpan);
-            }
-        }
+		public void Dispose()
+		{
+			lock (stateLock)
+			{
+				if (disposed)
+				{
+					return;
+				}
 
-        public void Dispose()
-        {
-            lock (stateLock)
-            {
-                if (disposed)
-                {
-                    return;
-                }
+				while (running)
+				{
+					Monitor.Wait(stateLock);
+				}
 
-                while (running)
-                {
-                    Monitor.Wait(stateLock);
-                }
+				timer.Dispose();
 
-                timer.Dispose();
+				disposed = true;
+			}
+		}
 
-                disposed = true;
-            }
-        }
+		private async void OnTick()
+		{
+			try
+			{
+				lock (stateLock)
+				{
+					if (disposed)
+					{
+						return;
+					}
 
-        private async void OnTick()
-        {
-            try
-            {
-                lock (stateLock)
-                {
-                    if (disposed)
-                    {
-                        return;
-                    }
+					// There's a little bit of raciness here, but it's needed to support the
+					// current API, which allows the tick handler to reenter and set the next interval.
 
-                    // There's a little bit of raciness here, but it's needed to support the
-                    // current API, which allows the tick handler to reenter and set the next interval.
+					if (running)
+					{
+						Monitor.Wait(stateLock);
 
-                    if (running)
-                    {
-                        Monitor.Wait(stateLock);
+						if (disposed)
+						{
+							return;
+						}
+					}
 
-                        if (disposed)
-                        {
-                            return;
-                        }
-                    }
+					running = true;
+				}
 
-                    running = true;
-                }
-
-                await onTick();
-            }
-            finally
-            {
-                lock (stateLock)
-                {
-                    running = false;
-                    Monitor.PulseAll(stateLock);
-                }
-            }
-        }
-    }
+				await onTick();
+			}
+			finally
+			{
+				lock (stateLock)
+				{
+					running = false;
+					Monitor.PulseAll(stateLock);
+				}
+			}
+		}
+	}
 }

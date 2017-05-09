@@ -26,108 +26,112 @@ using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.Http.Private.Sinks
 {
-    internal class HttpSink : PeriodicBatchingSink
-    {
-        private static readonly string ContentType = "application/json";
+	internal class HttpSink : PeriodicBatchingSink
+	{
+		private static readonly string ContentType = "application/json";
 
-        private readonly string requestUri;
-        private readonly long? eventBodyLimitBytes;
-        private readonly ITextFormatter formatter;
+		private readonly string requestUri;
+		private readonly Options options;
+		private readonly ITextFormatter formatter;
 
-        private IHttpClient client;
+		private IHttpClient client;
 
-        public HttpSink(
-            string requestUri,
-            int batchPostingLimit,
-            TimeSpan period,
-            long? eventBodyLimitBytes,
-            FormattingType formattingType,
-            IHttpClient client)
-            : base(batchPostingLimit, period)
-        {
-            this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
-            this.eventBodyLimitBytes = eventBodyLimitBytes;
-            this.client = client ?? throw new ArgumentNullException(nameof(client));
+		public HttpSink(
+			IHttpClient client,
+			string requestUri,
+			Options options)
+			: base(options.BatchPostingLimit, options.Period)
+		{
+			if (client == null)
+				throw new ArgumentNullException(nameof(client));
+			if (requestUri == null)
+				throw new ArgumentNullException(nameof(requestUri));
+			if (options == null)
+				throw new ArgumentNullException(nameof(options));
 
-            formatter = Converter.ToFormatter(formattingType);
-        }
+			this.client = client;
+			this.requestUri = requestUri;
+			this.options = options;
 
-        protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
-        {
-            var payload = FormatPayload(events);
-            var content = new StringContent(payload, Encoding.UTF8, ContentType);
+			formatter = Converter.ToFormatter(options.FormattingType);
+		}
 
-            var result = await client
-                .PostAsync(requestUri, content)
-                .ConfigureAwait(false);
+		protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
+		{
+			var payload = FormatPayload(events);
+			var content = new StringContent(payload, Encoding.UTF8, ContentType);
 
-            if (!result.IsSuccessStatusCode)
-                throw new LoggingFailedException($"Received failed result {result.StatusCode} when posting events to {requestUri}");
-        }
+			var result = await client
+				.PostAsync(requestUri, content)
+				.ConfigureAwait(false);
 
-        /// <summary>
-        /// Free resources held by the sink.
-        /// </summary>
-        /// <param name="disposing">
-        /// If true, called because the object is being disposed; if false, the object is being
-        /// disposed from the finalizer.
-        /// </param>
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
+			if (!result.IsSuccessStatusCode)
+				throw new LoggingFailedException($"Received failed result {result.StatusCode} when posting events to {requestUri}");
+		}
 
-            if (disposing)
-            {
-                client?.Dispose();
-                client = null;
-            }
-        }
+		/// <summary>
+		/// Free resources held by the sink.
+		/// </summary>
+		/// <param name="disposing">
+		/// If true, called because the object is being disposed; if false, the object is being
+		/// disposed from the finalizer.
+		/// </param>
+		protected override void Dispose(bool disposing)
+		{
+			base.Dispose(disposing);
 
-        private string FormatPayload(IEnumerable<LogEvent> events)
-        {
-            var payload = new StringWriter();
-            payload.Write("{\"events\":[");
+			if (disposing)
+			{
+				client?.Dispose();
+				client = null;
+			}
+		}
 
-            var delimStart = string.Empty;
+		private string FormatPayload(IEnumerable<LogEvent> events)
+		{
+			var payload = new StringWriter();
+			payload.Write("{\"events\":[");
 
-            foreach (var logEvent in events)
-            {
-                var buffer = new StringWriter();
-                formatter.Format(logEvent, buffer);
+			var delimStart = string.Empty;
 
-                if (string.IsNullOrEmpty(buffer.ToString()))
-                {
-                    continue;
-                }
+			foreach (var logEvent in events)
+			{
+				var buffer = new StringWriter();
+				formatter.Format(logEvent, buffer);
 
-                var json = buffer.ToString();
-                if (CheckEventBodySize(json))
-                {
-                    payload.Write(delimStart);
-                    payload.Write(json);
-                    delimStart = ",";
-                }
-            }
+				if (string.IsNullOrEmpty(buffer.ToString()))
+				{
+					continue;
+				}
 
-            payload.Write("]}");
+				var json = buffer.ToString();
+				if (CheckEventBodySize(json))
+				{
+					payload.Write(delimStart);
+					payload.Write(json);
+					delimStart = ",";
+				}
+			}
 
-            return payload.ToString();
-        }
+			payload.Write("]}");
 
-        private bool CheckEventBodySize(string json)
-        {
-            if (eventBodyLimitBytes.HasValue &&
-                Encoding.UTF8.GetByteCount(json) > eventBodyLimitBytes.Value)
-            {
-                SelfLog.WriteLine(
-                    "Event JSON representation exceeds the byte size limit of {0} set for this sink and will be dropped; data: {1}",
-                    eventBodyLimitBytes,
-                    json);
+			return payload.ToString();
+		}
 
-                return false;
-            }
+		private bool CheckEventBodySize(string json)
+		{
+			if (options.EventBodyLimitBytes.HasValue &&
+				Encoding.UTF8.GetByteCount(json) > options.EventBodyLimitBytes.Value)
+			{
+				SelfLog.WriteLine(
+					"Event JSON representation exceeds the byte size limit of {0} set for this sink and will be dropped; data: {1}",
+					options.EventBodyLimitBytes,
+					json);
 
-            return true;
-        }
-    }
+				return false;
+			}
+
+			return true;
+		}
+	}
 }
