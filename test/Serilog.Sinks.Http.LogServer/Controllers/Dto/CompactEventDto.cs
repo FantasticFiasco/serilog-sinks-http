@@ -3,24 +3,24 @@ using Newtonsoft.Json;
 
 namespace Serilog.Sinks.Http.LogServer.Controllers.Dto
 {
-	public class CompactEventDto
-	{
-		[JsonProperty("@t")]
-		public DateTime Timestamp { get; set; }
+    public class CompactEventDto
+    {
+        [JsonProperty("@t")]
+        public DateTime Timestamp { get; set; }
 
-		[JsonProperty("@l")]
-		public string Level { get; set; }
+        [JsonProperty("@l")]
+        public string Level { get; set; }
 
-		[JsonProperty("@mt")]
-		public string MessageTemplate { get; set; }
+        [JsonProperty("@mt")]
+        public string MessageTemplate { get; set; }
 
-		[JsonProperty("@m")]
-		public string RenderedMessage { get; set; }
+        [JsonProperty("@m")]
+        public string RenderedMessage { get; set; }
 
-		[JsonProperty("@x")]
-		public string Exception { get; set; }
+        [JsonProperty("@x")]
+        public string Exception { get; set; }
 
-		[JsonProperty("@r")]
-		public string[] Renderings { get; set; }
-	}
+        [JsonProperty("@r")]
+        public string[] Renderings { get; set; }
+    }
 }

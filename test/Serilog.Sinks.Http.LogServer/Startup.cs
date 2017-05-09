@@ -6,35 +6,35 @@ using Microsoft.Extensions.Logging;
 
 namespace Serilog.Sinks.Http.LogServer
 {
-	public class Startup
-	{
-		private readonly IConfigurationRoot configuration;
+    public class Startup
+    {
+        private readonly IConfigurationRoot configuration;
 
-		public Startup(IHostingEnvironment env)
-		{
-			var builder = new ConfigurationBuilder()
-				.SetBasePath(env.ContentRootPath)
-				.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
-			
-			configuration = builder.Build();
-		}
-		
-		// This method gets called by the runtime. Use this method to add services to the container
-		public void ConfigureServices(IServiceCollection services)
-		{
-		    services.AddSingleton<EventService>();
-		    services.AddSingleton<NetworkService>();
+        public Startup(IHostingEnvironment env)
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
-			// Add framework services
-			services.AddMvc();
-		}
+            configuration = builder.Build();
+        }
 
-		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
-		{
-			loggerFactory.AddDebug();
+        // This method gets called by the runtime. Use this method to add services to the container
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddSingleton<EventService>();
+            services.AddSingleton<NetworkService>();
 
-			app.UseMvc();
-		}
-	}
+            // Add framework services
+            services.AddMvc();
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        {
+            loggerFactory.AddDebug();
+
+            app.UseMvc();
+        }
+    }
 }
