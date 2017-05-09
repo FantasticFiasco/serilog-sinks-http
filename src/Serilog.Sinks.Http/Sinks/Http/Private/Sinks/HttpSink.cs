@@ -26,108 +26,108 @@ using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.Http.Private.Sinks
 {
-	internal class HttpSink : PeriodicBatchingSink
-	{
-		private static readonly string ContentType = "application/json";
+    internal class HttpSink : PeriodicBatchingSink
+    {
+        private static readonly string ContentType = "application/json";
 
-		private readonly string requestUri;
-	    private readonly long? eventBodyLimitBytes;
+        private readonly string requestUri;
+        private readonly long? eventBodyLimitBytes;
         private readonly ITextFormatter formatter;
 
-		private IHttpClient client;
+        private IHttpClient client;
 
-		public HttpSink(
-		    string requestUri,
-		    int batchPostingLimit,
-		    TimeSpan period,
-		    long? eventBodyLimitBytes,
-		    FormattingType formattingType,
+        public HttpSink(
+            string requestUri,
+            int batchPostingLimit,
+            TimeSpan period,
+            long? eventBodyLimitBytes,
+            FormattingType formattingType,
             IHttpClient client)
-			: base(batchPostingLimit, period)
-		{
-			this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
-		    this.eventBodyLimitBytes = eventBodyLimitBytes;
+            : base(batchPostingLimit, period)
+        {
+            this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
+            this.eventBodyLimitBytes = eventBodyLimitBytes;
             this.client = client ?? throw new ArgumentNullException(nameof(client));
 
             formatter = Converter.ToFormatter(formattingType);
-		}
+        }
 
-		protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
-		{
-			var payload = FormatPayload(events);
-			var content = new StringContent(payload, Encoding.UTF8, ContentType);
+        protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
+        {
+            var payload = FormatPayload(events);
+            var content = new StringContent(payload, Encoding.UTF8, ContentType);
 
-			var result = await client
-				.PostAsync(requestUri, content)
-				.ConfigureAwait(false);
+            var result = await client
+                .PostAsync(requestUri, content)
+                .ConfigureAwait(false);
 
-			if (!result.IsSuccessStatusCode)
-				throw new LoggingFailedException($"Received failed result {result.StatusCode} when posting events to {requestUri}");
-		}
+            if (!result.IsSuccessStatusCode)
+                throw new LoggingFailedException($"Received failed result {result.StatusCode} when posting events to {requestUri}");
+        }
 
-		/// <summary>
-		/// Free resources held by the sink.
-		/// </summary>
-		/// <param name="disposing">
-		/// If true, called because the object is being disposed; if false, the object is being
-		/// disposed from the finalizer.
-		/// </param>
-		protected override void Dispose(bool disposing)
-		{
-			base.Dispose(disposing);
+        /// <summary>
+        /// Free resources held by the sink.
+        /// </summary>
+        /// <param name="disposing">
+        /// If true, called because the object is being disposed; if false, the object is being
+        /// disposed from the finalizer.
+        /// </param>
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
 
-			if (disposing)
-			{
-				client?.Dispose();
-				client = null;
-			}
-		}
+            if (disposing)
+            {
+                client?.Dispose();
+                client = null;
+            }
+        }
 
-		private string FormatPayload(IEnumerable<LogEvent> events)
-		{
-			var payload = new StringWriter();
-			payload.Write("{\"events\":[");
+        private string FormatPayload(IEnumerable<LogEvent> events)
+        {
+            var payload = new StringWriter();
+            payload.Write("{\"events\":[");
 
-			var delimStart = string.Empty;
+            var delimStart = string.Empty;
 
-			foreach (var logEvent in events)
-			{
-				var buffer = new StringWriter();
-				formatter.Format(logEvent, buffer);
+            foreach (var logEvent in events)
+            {
+                var buffer = new StringWriter();
+                formatter.Format(logEvent, buffer);
 
-				if (string.IsNullOrEmpty(buffer.ToString()))
-				{
-					continue;
-				}
+                if (string.IsNullOrEmpty(buffer.ToString()))
+                {
+                    continue;
+                }
 
-				var json = buffer.ToString();
-				if (CheckEventBodySize(json))
-				{
-					payload.Write(delimStart);
-					payload.Write(json);
-					delimStart = ",";
-				}
-			}
+                var json = buffer.ToString();
+                if (CheckEventBodySize(json))
+                {
+                    payload.Write(delimStart);
+                    payload.Write(json);
+                    delimStart = ",";
+                }
+            }
 
-			payload.Write("]}");
+            payload.Write("]}");
 
-			return payload.ToString();
-		}
+            return payload.ToString();
+        }
 
-		private bool CheckEventBodySize(string json)
-		{
-			if (eventBodyLimitBytes.HasValue &&
-				Encoding.UTF8.GetByteCount(json) > eventBodyLimitBytes.Value)
-			{
-				SelfLog.WriteLine(
-					"Event JSON representation exceeds the byte size limit of {0} set for this sink and will be dropped; data: {1}",
-					eventBodyLimitBytes,
-					json);
+        private bool CheckEventBodySize(string json)
+        {
+            if (eventBodyLimitBytes.HasValue &&
+                Encoding.UTF8.GetByteCount(json) > eventBodyLimitBytes.Value)
+            {
+                SelfLog.WriteLine(
+                    "Event JSON representation exceeds the byte size limit of {0} set for this sink and will be dropped; data: {1}",
+                    eventBodyLimitBytes,
+                    json);
 
-				return false;
-			}
+                return false;
+            }
 
-			return true;
-		}
-	}
+            return true;
+        }
+    }
 }
