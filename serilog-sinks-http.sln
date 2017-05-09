@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.3
+VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{DB19D3CD-BF05-45EA-97D8-FC9F64BF0B7B}"
 EndProject
@@ -24,13 +24,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{9C45525E-C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Http", "src\Serilog.Sinks.Http\Serilog.Sinks.Http.csproj", "{5E451D5E-FA01-47F0-9D6F-45C8D98D9D19}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Http.IntegrationTests", "test\Serilog.Sinks.Http.IntegrationTests\Serilog.Sinks.Http.IntegrationTests.csproj", "{C61C3037-87DB-4756-BAE5-282944FC931C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.HttpTests", "test\Serilog.Sinks.HttpTests\Serilog.Sinks.HttpTests.csproj", "{C61C3037-87DB-4756-BAE5-282944FC931C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Http.IntegrationTests.Server", "test\Serilog.Sinks.Http.IntegrationTests.Server\Serilog.Sinks.Http.IntegrationTests.Server.csproj", "{FFA0883A-D5AD-4C6D-94C6-1D77F4D8D02B}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Http.Tests", "test\Serilog.Sinks.Http.Tests\Serilog.Sinks.Http.Tests.csproj", "{CD798FAD-9F89-41E9-83D9-38E1BF71B6A0}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Http.Shared", "test\Serilog.Sinks.Http.Shared\Serilog.Sinks.Http.Shared.csproj", "{789DA098-0304-41B7-BE06-56BBD14B5B02}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Http.LogServer", "test\Serilog.Sinks.Http.LogServer\Serilog.Sinks.Http.LogServer.csproj", "{FFA0883A-D5AD-4C6D-94C6-1D77F4D8D02B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -50,14 +46,6 @@ Global
 		{FFA0883A-D5AD-4C6D-94C6-1D77F4D8D02B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFA0883A-D5AD-4C6D-94C6-1D77F4D8D02B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FFA0883A-D5AD-4C6D-94C6-1D77F4D8D02B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CD798FAD-9F89-41E9-83D9-38E1BF71B6A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD798FAD-9F89-41E9-83D9-38E1BF71B6A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD798FAD-9F89-41E9-83D9-38E1BF71B6A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD798FAD-9F89-41E9-83D9-38E1BF71B6A0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{789DA098-0304-41B7-BE06-56BBD14B5B02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{789DA098-0304-41B7-BE06-56BBD14B5B02}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{789DA098-0304-41B7-BE06-56BBD14B5B02}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{789DA098-0304-41B7-BE06-56BBD14B5B02}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,7 +54,5 @@ Global
 		{5E451D5E-FA01-47F0-9D6F-45C8D98D9D19} = {DB19D3CD-BF05-45EA-97D8-FC9F64BF0B7B}
 		{C61C3037-87DB-4756-BAE5-282944FC931C} = {9C45525E-C6CE-43B4-95A6-11198A27F4BE}
 		{FFA0883A-D5AD-4C6D-94C6-1D77F4D8D02B} = {9C45525E-C6CE-43B4-95A6-11198A27F4BE}
-		{CD798FAD-9F89-41E9-83D9-38E1BF71B6A0} = {9C45525E-C6CE-43B4-95A6-11198A27F4BE}
-		{789DA098-0304-41B7-BE06-56BBD14B5B02} = {9C45525E-C6CE-43B4-95A6-11198A27F4BE}
 	EndGlobalSection
 EndGlobal
