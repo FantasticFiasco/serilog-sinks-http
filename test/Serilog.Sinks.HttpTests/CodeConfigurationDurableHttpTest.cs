@@ -22,9 +22,8 @@ namespace Serilog
 					httpClient: new TestServerHttpClient())
 				.CreateLogger();
 
-		    HttpClient = TestServerHttpClient.Instance;
-		    HttpClient.Client = Server.CreateClient();
-		}
+		    TestServerHttpClient.Instance.Client = Server.CreateClient();
+        }
 
 		private static void ClearBufferFiles()
 		{

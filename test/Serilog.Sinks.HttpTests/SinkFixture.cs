@@ -24,9 +24,7 @@ namespace Serilog
 
         protected Logger Logger { get; set; }
 
-	    protected TestServerHttpClient HttpClient { get; set; }
-
-        [Theory]
+	    [Theory]
 		[InlineData(LogEventLevel.Verbose)]
 		[InlineData(LogEventLevel.Debug)]
 		[InlineData(LogEventLevel.Information)]
@@ -130,7 +128,7 @@ namespace Serilog
 
 			// Assert
 			ExpectReceivedEvents(1);
-			Assert.InRange(HttpClient.NumberOfPosts, 2, int.MaxValue);
+			Assert.InRange(TestServerHttpClient.Instance.NumberOfPosts, 2, int.MaxValue);
 		}
 
 		public override void Dispose()
@@ -138,7 +136,7 @@ namespace Serilog
 			base.Dispose();
 
 			Logger?.Dispose();
-			HttpClient?.Dispose();
+		    TestServerHttpClient.Instance?.Dispose();
 		}
 
 	    private Event[] ExpectReceivedEvents(int expectedEventCount)

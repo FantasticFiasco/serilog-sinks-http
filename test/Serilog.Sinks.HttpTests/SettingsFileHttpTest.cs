@@ -15,8 +15,7 @@ namespace Serilog
                 .ReadFrom.Configuration(configuration)
                 .CreateLogger();
 
-            HttpClient = TestServerHttpClient.Instance;
-            HttpClient.Client = Server.CreateClient();
+            TestServerHttpClient.Instance.Client = Server.CreateClient();
         }
     }
 }
