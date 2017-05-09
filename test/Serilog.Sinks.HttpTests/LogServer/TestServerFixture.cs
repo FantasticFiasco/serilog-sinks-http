@@ -15,9 +15,11 @@ namespace Serilog.LogServer
 
 		protected TestServer Server { get; }
 
-	    protected IEventService EventService => (IEventService)Server.Host.Services.GetService(typeof(IEventService));
+	    protected EventService EventService => (EventService)Server.Host.Services.GetService(typeof(EventService));
 
-	    public virtual void Dispose()
+	    protected NetworkService NetworkService => (NetworkService)Server.Host.Services.GetService(typeof(NetworkService));
+
+        public virtual void Dispose()
 		{
 			Server?.Dispose();
 		}

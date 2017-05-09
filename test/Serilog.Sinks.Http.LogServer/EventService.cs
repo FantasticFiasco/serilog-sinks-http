@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Serilog.Sinks.Http.LogServer
 {
-	public class EventService : IEventService
+	public class EventService
 	{
 		private readonly ConcurrentQueue<Event> cache;
 

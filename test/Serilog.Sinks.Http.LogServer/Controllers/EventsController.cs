@@ -7,19 +7,29 @@ namespace Serilog.Sinks.Http.LogServer.Controllers
 	[Route("api/[controller]")]
 	public class EventsController
 	{
-		private readonly IEventService eventService;
+		private readonly EventService eventService;
+	    private readonly NetworkService networkService;
 
-		public EventsController(IEventService eventService)
+		public EventsController(EventService eventService, NetworkService networkService)
 		{
 			this.eventService = eventService;
+		    this.networkService = networkService;
 		}
 
 		// POST /api/events
 		[HttpPost]
-		public void Post([FromBody] EventBatchRequestDto batch)
+		public IActionResult Post([FromBody] EventBatchRequestDto batch)
 		{
+		    if (networkService.IsSimulatingNetworkFailure)
+		    {
+		        networkService.IsSimulatingNetworkFailure = false;
+		        return new NotFoundResult();
+		    }
+            
 			var events = batch.Events.Select(FromDto);
 			eventService.Add(events);
+
+		    return new OkResult();
 		}
 
 	    private static Event FromDto(EventDto @event)

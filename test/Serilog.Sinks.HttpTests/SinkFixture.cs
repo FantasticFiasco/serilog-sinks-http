@@ -123,14 +123,14 @@ namespace Serilog
 		public void NetworkFailure()
 		{
 			// Arrange
-			HttpClient.SimulateNetworkFailure();
+			NetworkService.IsSimulatingNetworkFailure = true;
 
 			// Act
 			Logger.Write(LogEventLevel.Information, "Some message");
 
 			// Assert
 			ExpectReceivedEvents(1);
-			Assert.Equal(2, HttpClient.NumberOfPosts);
+			Assert.InRange(HttpClient.NumberOfPosts, 2, int.MaxValue);
 		}
 
 		public override void Dispose()

@@ -1,5 +1,5 @@
-﻿using System.Net;
-using System.Net.Http;
+﻿using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Serilog.Sinks.Http;
 
@@ -7,52 +7,29 @@ namespace Serilog.LogServer
 {
 	public class TestServerHttpClient : IHttpClient
 	{
-		private readonly object syncRoot;
-
-		private bool simulateNetworkFailure;
+	    private int numberOfPosts;
 
 	    public TestServerHttpClient()
 	    {
-	        syncRoot = new object();
-            Instance = this;
+	        Instance = this;
 	    }
-
+        
         public static TestServerHttpClient Instance { get; private set; }
 
 		public HttpClient Client { get; set; }
 
-		public int NumberOfPosts { get; private set; }
+	    public int NumberOfPosts => numberOfPosts;
 
-		public Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content)
+	    public Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content)
 		{
-			// Totally abusing the asynchronous nature of tasks, but this is tests, so I'll let it
-			// slip
-			lock (syncRoot)
-			{
-				NumberOfPosts++;
+		    Interlocked.Increment(ref numberOfPosts);
 
-				if (simulateNetworkFailure)
-				{
-					simulateNetworkFailure = false;
-					return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
-				}
-
-				return Client.PostAsync(requestUri, content);
-			}
-		}
-
-		public void SimulateNetworkFailure()
-		{
-			lock (syncRoot)
-			{
-				simulateNetworkFailure = true;
-			}
+            return Client.PostAsync(requestUri, content);
 		}
 
 		public void Dispose()
 		{
             Client?.Dispose();
-            Client = null;
         }
 	}
 }

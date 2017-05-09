@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace Serilog.Sinks.Http.LogServer
@@ -23,7 +22,8 @@ namespace Serilog.Sinks.Http.LogServer
 		// This method gets called by the runtime. Use this method to add services to the container
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.TryAddSingleton<IEventService>(serviceProvider => new EventService());
+		    services.AddSingleton<EventService>();
+		    services.AddSingleton<NetworkService>();
 
 			// Add framework services
 			services.AddMvc();
