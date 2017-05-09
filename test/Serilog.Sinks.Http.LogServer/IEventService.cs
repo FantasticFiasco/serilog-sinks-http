@@ -6,6 +6,6 @@ namespace Serilog.Sinks.Http.LogServer
 	{
 		void Add(IEnumerable<Event> events);
 
-		IEnumerable<Event> Get();
+		Event[] Get();
 	}
 }

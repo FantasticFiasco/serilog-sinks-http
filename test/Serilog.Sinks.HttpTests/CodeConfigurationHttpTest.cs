@@ -11,7 +11,7 @@ namespace Serilog
 				.MinimumLevel.Verbose()
 				.WriteTo
 				.Http(
-					requestUri: "api/batches",
+					requestUri: "api/events",
                     batchPostingLimit: 100,
                     period: TimeSpan.FromMilliseconds(1),
 					httpClient: new TestServerHttpClient())

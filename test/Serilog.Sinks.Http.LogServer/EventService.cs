@@ -20,7 +20,7 @@ namespace Serilog.Sinks.Http.LogServer
 			}
 		}
 
-		public IEnumerable<Event> Get()
+		public Event[] Get()
 		{
 			return cache.ToArray();
 		}

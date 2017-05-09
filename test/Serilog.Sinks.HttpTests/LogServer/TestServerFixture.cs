@@ -11,15 +11,13 @@ namespace Serilog.LogServer
 		{
 			Server = new TestServer(new WebHostBuilder()
 				.UseStartup<Startup>());
-
-			Api = new ApiModel(Server.CreateClient());
 		}
 
 		protected TestServer Server { get; }
 
-		protected ApiModel Api { get; }
+	    protected IEventService EventService => (IEventService)Server.Host.Services.GetService(typeof(IEventService));
 
-		public virtual void Dispose()
+	    public virtual void Dispose()
 		{
 			Server?.Dispose();
 		}

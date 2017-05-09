@@ -1,17 +1,28 @@
 ﻿using System;
 using System.Linq;
-using System.Threading.Tasks;
+using Polly;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.LogServer;
+using Serilog.Sinks.Http.LogServer;
 using Serilog.Support;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Serilog
 {
 	public abstract class SinkFixture : TestServerFixture
 	{
-		protected Logger Logger { get; set; }
+	    private readonly Policy retryPolicy;
+
+	    protected SinkFixture()
+	    {
+	        retryPolicy = Policy
+	            .Handle<XunitException>()
+	            .WaitAndRetry(10, retryCount => TimeSpan.FromSeconds(1));
+        }
+
+        protected Logger Logger { get; set; }
 
 	    protected TestServerHttpClient HttpClient { get; set; }
 
@@ -22,13 +33,13 @@ namespace Serilog
 		[InlineData(LogEventLevel.Warning)]
 		[InlineData(LogEventLevel.Error)]
 		[InlineData(LogEventLevel.Fatal)]
-		public async Task Level(LogEventLevel level)
+		public void Level(LogEventLevel level)
 		{
 			// Act
 			Logger.Write(level, "Some message");
 
 			// Assert
-			await Api.WaitAndGetAsync(1);
+			ExpectReceivedEvents(1);
 		}
 
 		[Theory]
@@ -37,7 +48,7 @@ namespace Serilog
 		[InlineData(100)]       // ~1 batch
 		[InlineData(1000)]      // ~10 batches
 		[InlineData(10000)]     // ~100 batches
-		public async Task Batches(int numberOfEvents)
+		public void Batches(int numberOfEvents)
 		{
 			// Act
 			for (int i = 0; i < numberOfEvents; i++)
@@ -46,11 +57,11 @@ namespace Serilog
 			}
 
 			// Assert
-			await Api.WaitAndGetAsync(numberOfEvents);
+            ExpectReceivedEvents(numberOfEvents);
 		}
 
 		[Fact]
-		public async Task Payload()
+		public void Payload()
 		{
 			// Arrange
 			var expected = Some.LogEvent("Hello, {Name}!", "Alice");
@@ -59,7 +70,7 @@ namespace Serilog
 			Logger.Write(expected);
 
 			// Assert
-			var @event = (await Api.WaitAndGetAsync(1)).Single();
+			var @event = ExpectReceivedEvents(1).Single();
 
 			Assert.Equal(expected.Timestamp, @event.Timestamp);
 			Assert.Equal(expected.Level.ToString(), @event.Level);
@@ -70,7 +81,7 @@ namespace Serilog
 		}
 
 		[Fact]
-		public async Task Exception()
+		public void Exception()
 		{
 			// Arrange
 			var expected = Some.LogEvent(LogEventLevel.Error, new Exception("Some exception"), "Some error message");
@@ -79,7 +90,7 @@ namespace Serilog
 			Logger.Write(expected);
 
 			// Assert
-			var @event = (await Api.WaitAndGetAsync(1)).Single();
+			var @event = ExpectReceivedEvents(1).Single();
 
 			Assert.Equal(expected.Timestamp, @event.Timestamp);
 			Assert.Equal(expected.Level.ToString(), @event.Level);
@@ -89,7 +100,7 @@ namespace Serilog
 		}
 
 		[Fact]
-		public async Task DropNastyException()
+		public void DropNastyException()
 		{
 			// Arrange
 			var nastyException = Some.LogEvent(LogEventLevel.Error, new NastyException(), "Some error message");
@@ -100,7 +111,7 @@ namespace Serilog
 			Logger.Write(expected);
 
 			// Assert
-			var @event = (await Api.WaitAndGetAsync(1)).Single();
+			var @event = ExpectReceivedEvents(1).Single();
 
 			Assert.Equal(expected.Timestamp, @event.Timestamp);
 			Assert.Equal(expected.Level.ToString(), @event.Level);
@@ -109,7 +120,7 @@ namespace Serilog
 		}
 
 		[Fact]
-		public async Task NetworkFailure()
+		public void NetworkFailure()
 		{
 			// Arrange
 			HttpClient.SimulateNetworkFailure();
@@ -118,7 +129,7 @@ namespace Serilog
 			Logger.Write(LogEventLevel.Information, "Some message");
 
 			// Assert
-			await Api.WaitAndGetAsync(1);
+			ExpectReceivedEvents(1);
 			Assert.Equal(2, HttpClient.NumberOfPosts);
 		}
 
@@ -129,5 +140,27 @@ namespace Serilog
 			Logger?.Dispose();
 			HttpClient?.Dispose();
 		}
+
+	    private Event[] ExpectReceivedEvents(int expectedEventCount)
+	    {
+	        return retryPolicy.Execute(
+	            () =>
+	            {
+	                var actual = EventService.Get()
+                        .ToArray();
+	                
+	                if (actual.Length > expectedEventCount)
+	                {
+	                    throw new Exception($"Expected only {expectedEventCount} but got {actual.Length}");
+	                }
+
+	                if (actual.Length != expectedEventCount)
+	                {
+	                    throw new XunitException();
+	                }
+
+	                return actual;
+	            });
+        }
 	}
 }

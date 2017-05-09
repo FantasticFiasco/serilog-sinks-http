@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Serilog.Sinks.Http.LogServer.Controllers.Dto;
 
 namespace Serilog.Sinks.Http.LogServer.Controllers
 {
 	[Route("api/[controller]")]
-	public class EventsController : Controller
+	public class EventsController
 	{
 		private readonly IEventService eventService;
 
@@ -15,12 +14,23 @@ namespace Serilog.Sinks.Http.LogServer.Controllers
 			this.eventService = eventService;
 		}
 
-		// GET /api/events
-		[HttpGet]
-		public IEnumerable<EventDto> Get()
+		// POST /api/events
+		[HttpPost]
+		public void Post([FromBody] EventBatchRequestDto batch)
 		{
-			return eventService.Get()
-				.Select(PayloadConvert.ToDto);
+			var events = batch.Events.Select(FromDto);
+			eventService.Add(events);
 		}
-	}
+
+	    private static Event FromDto(EventDto @event)
+	    {
+	        return new Event(
+	            @event.Timestamp,
+	            @event.Level,
+	            @event.MessageTemplate,
+	            @event.Properties,
+	            @event.RenderedMessage,
+	            @event.Exception);
+	    }
+    }
 }
