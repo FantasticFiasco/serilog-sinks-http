@@ -6,34 +6,34 @@ using IOFile = System.IO.File;
 
 namespace Serilog
 {
-	public class CodeConfigurationDurableHttpTest : SinkFixture
-	{
-		public CodeConfigurationDurableHttpTest()
-		{
-			ClearBufferFiles();
+    public class CodeConfigurationDurableHttpTest : SinkFixture
+    {
+        public CodeConfigurationDurableHttpTest()
+        {
+            ClearBufferFiles();
 
-			Logger = new LoggerConfiguration()
-				.MinimumLevel.Verbose()
-				.WriteTo
-				.DurableHttp(
-					requestUri: "api/events",
+            Logger = new LoggerConfiguration()
+                .MinimumLevel.Verbose()
+                .WriteTo
+                .DurableHttp(
+                    requestUri: "api/events",
                     batchPostingLimit: 100,
                     period: TimeSpan.FromMilliseconds(1),
-					httpClient: new TestServerHttpClient())
-				.CreateLogger();
+                    httpClient: new TestServerHttpClient())
+                .CreateLogger();
 
-		    TestServerHttpClient.Instance.Client = Server.CreateClient();
+            TestServerHttpClient.Instance.Client = Server.CreateClient();
         }
 
-		private static void ClearBufferFiles()
-		{
-			var files = Directory.GetFiles(Directory.GetCurrentDirectory(), "Buffer*")
-				.ToArray();
+        private static void ClearBufferFiles()
+        {
+            var files = Directory.GetFiles(Directory.GetCurrentDirectory(), "Buffer*")
+                .ToArray();
 
-			foreach (var file in files)
-			{
-				IOFile.Delete(file);
-			}
-		}
-	}
+            foreach (var file in files)
+            {
+                IOFile.Delete(file);
+            }
+        }
+    }
 }

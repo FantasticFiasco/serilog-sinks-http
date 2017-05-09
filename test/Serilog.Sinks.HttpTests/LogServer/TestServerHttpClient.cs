@@ -5,32 +5,32 @@ using Serilog.Sinks.Http;
 
 namespace Serilog.LogServer
 {
-	public class TestServerHttpClient : IHttpClient
-	{
-	    private int numberOfPosts;
+    public class TestServerHttpClient : IHttpClient
+    {
+        private int numberOfPosts;
 
-	    public TestServerHttpClient()
-	    {
-	        Instance = this;
-	    }
-        
+        public TestServerHttpClient()
+        {
+            Instance = this;
+        }
+
         public static TestServerHttpClient Instance { get; set; }
 
-		public HttpClient Client { get; set; }
+        public HttpClient Client { get; set; }
 
-	    public int NumberOfPosts => numberOfPosts;
+        public int NumberOfPosts => numberOfPosts;
 
-	    public Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content)
-		{
-		    Interlocked.Increment(ref numberOfPosts);
+        public Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content)
+        {
+            Interlocked.Increment(ref numberOfPosts);
 
             return Client.PostAsync(requestUri, content);
-		}
+        }
 
-		public void Dispose()
-		{
+        public void Dispose()
+        {
             Client?.Dispose();
-		    Client = null;
-		}
-	}
+            Client = null;
+        }
+    }
 }
