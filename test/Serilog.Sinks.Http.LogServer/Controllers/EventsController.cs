@@ -4,43 +4,43 @@ using Serilog.Sinks.Http.LogServer.Controllers.Dto;
 
 namespace Serilog.Sinks.Http.LogServer.Controllers
 {
-	[Route("api/[controller]")]
-	public class EventsController
-	{
-		private readonly EventService eventService;
-	    private readonly NetworkService networkService;
+    [Route("api/[controller]")]
+    public class EventsController
+    {
+        private readonly EventService eventService;
+        private readonly NetworkService networkService;
 
-		public EventsController(EventService eventService, NetworkService networkService)
-		{
-			this.eventService = eventService;
-		    this.networkService = networkService;
-		}
+        public EventsController(EventService eventService, NetworkService networkService)
+        {
+            this.eventService = eventService;
+            this.networkService = networkService;
+        }
 
-		// POST /api/events
-		[HttpPost]
-		public IActionResult Post([FromBody] EventBatchRequestDto batch)
-		{
-		    if (networkService.IsSimulatingNetworkFailure)
-		    {
-		        networkService.IsSimulatingNetworkFailure = false;
-		        return new NotFoundResult();
-		    }
-            
-			var events = batch.Events.Select(FromDto);
-			eventService.Add(events);
+        // POST /api/events
+        [HttpPost]
+        public IActionResult Post([FromBody] EventBatchRequestDto batch)
+        {
+            if (networkService.IsSimulatingNetworkFailure)
+            {
+                networkService.IsSimulatingNetworkFailure = false;
+                return new NotFoundResult();
+            }
 
-		    return new OkResult();
-		}
+            var events = batch.Events.Select(FromDto);
+            eventService.Add(events);
 
-	    private static Event FromDto(EventDto @event)
-	    {
-	        return new Event(
-	            @event.Timestamp,
-	            @event.Level,
-	            @event.MessageTemplate,
-	            @event.Properties,
-	            @event.RenderedMessage,
-	            @event.Exception);
-	    }
+            return new OkResult();
+        }
+
+        private static Event FromDto(EventDto @event)
+        {
+            return new Event(
+                @event.Timestamp,
+                @event.Level,
+                @event.MessageTemplate,
+                @event.Properties,
+                @event.RenderedMessage,
+                @event.Exception);
+        }
     }
 }
