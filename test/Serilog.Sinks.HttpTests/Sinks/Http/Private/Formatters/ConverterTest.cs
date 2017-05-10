@@ -1,4 +1,5 @@
 ﻿using System;
+using Shouldly;
 using Xunit;
 
 namespace Serilog.Sinks.Http.Private.Formatters
@@ -14,7 +15,7 @@ namespace Serilog.Sinks.Http.Private.Formatters
                 var formatter = Converter.ToFormatter(type);
 
                 // Assert
-                Assert.NotNull(formatter);
+                formatter.ShouldNotBeNull();
             }
         }
     }
