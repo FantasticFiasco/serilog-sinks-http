@@ -6,6 +6,7 @@ using Serilog.Events;
 using Serilog.LogServer;
 using Serilog.Sinks.Http.LogServer;
 using Serilog.Support;
+using Shouldly;
 using Xunit;
 using Xunit.Sdk;
 
@@ -70,12 +71,12 @@ namespace Serilog
             // Assert
             var @event = ExpectReceivedEvents(1).Single();
 
-            Assert.Equal(expected.Timestamp, @event.Timestamp);
-            Assert.Equal(expected.Level.ToString(), @event.Level);
-            Assert.Equal(expected.MessageTemplate.Text, @event.MessageTemplate);
-            Assert.Equal(expected.Properties["Name"].ToString().Trim('"'), @event.Properties["Name"]);
-            Assert.Equal("Hello, \"Alice\"!", @event.RenderedMessage);
-            Assert.Null(@event.Exception);
+            @event.Timestamp.ShouldBe(expected.Timestamp.DateTime);
+            @event.Level.ShouldBe(expected.Level.ToString());
+            @event.MessageTemplate.ShouldBe(expected.MessageTemplate.Text);
+            @event.Properties["Name"].ShouldBe(expected.Properties["Name"].ToString().Trim('"'));
+            @event.RenderedMessage.ShouldBe("Hello, \"Alice\"!");
+            @event.Exception.ShouldBeNull();
         }
 
         [Fact]
@@ -90,11 +91,11 @@ namespace Serilog
             // Assert
             var @event = ExpectReceivedEvents(1).Single();
 
-            Assert.Equal(expected.Timestamp, @event.Timestamp);
-            Assert.Equal(expected.Level.ToString(), @event.Level);
-            Assert.Equal(expected.MessageTemplate.Text, @event.MessageTemplate);
-            Assert.Equal("Some error message", @event.RenderedMessage);
-            Assert.Equal(expected.Exception.ToString(), @event.Exception);
+            @event.Timestamp.ShouldBe(expected.Timestamp.DateTime);
+            @event.Level.ShouldBe(expected.Level.ToString());
+            @event.MessageTemplate.ShouldBe(expected.MessageTemplate.Text);
+            @event.RenderedMessage.ShouldBe("Some error message");
+            @event.Exception.ShouldBe(expected.Exception.ToString());
         }
 
         [Fact]
@@ -111,10 +112,10 @@ namespace Serilog
             // Assert
             var @event = ExpectReceivedEvents(1).Single();
 
-            Assert.Equal(expected.Timestamp, @event.Timestamp);
-            Assert.Equal(expected.Level.ToString(), @event.Level);
-            Assert.Equal(expected.MessageTemplate.Text, @event.MessageTemplate);
-            Assert.Null(@event.Exception);
+            @event.Timestamp.ShouldBe(expected.Timestamp.DateTime);
+            @event.Level.ShouldBe(expected.Level.ToString());
+            @event.MessageTemplate.ShouldBe(expected.MessageTemplate.Text);
+            @event.Exception.ShouldBeNull();
         }
 
         [Fact]
@@ -128,7 +129,7 @@ namespace Serilog
 
             // Assert
             ExpectReceivedEvents(1);
-            Assert.InRange(TestServerHttpClient.Instance.NumberOfPosts, 2, int.MaxValue);
+            TestServerHttpClient.Instance.NumberOfPosts.ShouldBeGreaterThan(1);
         }
 
         public override void Dispose()

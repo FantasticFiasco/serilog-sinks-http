@@ -6,6 +6,7 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.Http.LogServer.Controllers.Dto;
 using Serilog.Support;
+using Shouldly;
 using Xunit;
 
 namespace Serilog.Sinks.Http.Private.Formatters
@@ -38,7 +39,7 @@ namespace Serilog.Sinks.Http.Private.Formatters
 
             // Assert
             var @event = GetEvent();
-            Assert.NotNull(@event.Level);
+            @event.Level.ShouldNotBeNull();
         }
 
         [Theory]
@@ -54,13 +55,13 @@ namespace Serilog.Sinks.Http.Private.Formatters
 
             // Assert
             var @event = GetEvent();
-            Assert.NotNull(@event.Timestamp);
-            Assert.Equal("Information", @event.Level);
-            Assert.Equal("No properties", @event.MessageTemplate);
-            Assert.Equal(isRenderingMessage ? "No properties" : null, @event.RenderedMessage);
-            Assert.Null(@event.Exception);
-            Assert.Null(@event.Properties);
-            Assert.Null(@event.Renderings);
+            @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
+            @event.MessageTemplate.ShouldBe("No properties");
+            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "No properties" : null);
+            @event.Exception.ShouldBeNull();
+            @event.Properties.ShouldBeNull();
+            @event.Renderings.ShouldBeNull();
         }
 
         [Theory]
@@ -76,13 +77,13 @@ namespace Serilog.Sinks.Http.Private.Formatters
 
             // Assert
             var @event = GetEvent();
-            Assert.NotNull(@event.Timestamp);
-            Assert.Equal("Information", @event.Level);
-            Assert.Equal("One {Property}", @event.MessageTemplate);
-            Assert.Equal(isRenderingMessage ? "One 42" : null, @event.RenderedMessage);
-            Assert.Null(@event.Exception);
-            Assert.Equal(new Dictionary<string, string> { { "Property", "42" } }, @event.Properties);
-            Assert.Null(@event.Renderings);
+            @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
+            @event.MessageTemplate.ShouldBe("One {Property}");
+            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "One 42" : null);
+            @event.Exception.ShouldBeNull();
+            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Property", "42" } });
+            @event.Renderings.ShouldBeNull();
         }
 
         [Theory]
@@ -98,13 +99,13 @@ namespace Serilog.Sinks.Http.Private.Formatters
 
             // Assert
             var @event = GetEvent();
-            Assert.NotNull(@event.Timestamp);
-            Assert.Equal("Information", @event.Level);
-            Assert.Equal("Property {First} and {Second}", @event.MessageTemplate);
-            Assert.Equal(isRenderingMessage ? "Property \"One\" and \"Two\"" : null, @event.RenderedMessage);
-            Assert.Null(@event.Exception);
-            Assert.Equal(new Dictionary<string, string> { { "First", "One" }, { "Second", "Two" } }, @event.Properties);
-            Assert.Null(@event.Renderings);
+            @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
+            @event.MessageTemplate.ShouldBe("Property {First} and {Second}");
+            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "Property \"One\" and \"Two\"" : null);
+            @event.Exception.ShouldBeNull();
+            @event.Properties.ShouldBe(new Dictionary<string, string> { { "First", "One" }, { "Second", "Two" } });
+            @event.Renderings.ShouldBeNull();
         }
 
         [Theory]
@@ -120,13 +121,13 @@ namespace Serilog.Sinks.Http.Private.Formatters
 
             // Assert
             var @event = GetEvent();
-            Assert.NotNull(@event.Timestamp);
-            Assert.Equal("Information", @event.Level);
-            Assert.Equal("With exception", @event.MessageTemplate);
-            Assert.Equal(isRenderingMessage ? "With exception" : null, @event.RenderedMessage);
-            Assert.NotNull(@event.Exception);
-            Assert.Null(@event.Properties);
-            Assert.Null(@event.Renderings);
+            @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
+            @event.MessageTemplate.ShouldBe("With exception");
+            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "With exception" : null);
+            @event.Exception.ShouldNotBeNull();
+            @event.Properties.ShouldBeNull();
+            @event.Renderings.ShouldBeNull();
         }
 
         [Theory]
@@ -142,13 +143,13 @@ namespace Serilog.Sinks.Http.Private.Formatters
 
             // Assert
             var @event = GetEvent();
-            Assert.NotNull(@event.Timestamp);
-            Assert.Equal("Information", @event.Level);
-            Assert.Equal("With exception and {Property}", @event.MessageTemplate);
-            Assert.Equal(isRenderingMessage ? "With exception and 42" : null, @event.RenderedMessage);
-            Assert.NotNull(@event.Exception);
-            Assert.Equal(new Dictionary<string, string> { { "Property", "42" } }, @event.Properties);
-            Assert.Null(@event.Renderings);
+            @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
+            @event.MessageTemplate.ShouldBe("With exception and {Property}");
+            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "With exception and 42" : null);
+            @event.Exception.ShouldNotBeNull();
+            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Property", "42" } });
+            @event.Renderings.ShouldBeNull();
         }
 
         [Theory]
@@ -164,21 +165,15 @@ namespace Serilog.Sinks.Http.Private.Formatters
 
             // Assert
             var @event = GetEvent();
-            Assert.NotNull(@event.Timestamp);
-            Assert.Equal("Information", @event.Level);
-            Assert.Equal("One {Rendering:x8}", @event.MessageTemplate);
-            Assert.Equal(isRenderingMessage ? "One 0000002a" : null, @event.RenderedMessage);
-            Assert.Null(@event.Exception);
-            Assert.Equal(new Dictionary<string, string> { { "Rendering", "42" } }, @event.Properties);
-            Assert.Equal(
-                new Dictionary<string, RenderingDto[]>
-                {
-                    {
-                        "Rendering",
-                        new[] { new RenderingDto { Format = "x8", Rendering = "0000002a" } }
-                    }
-                },
-                @event.Renderings);
+            @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
+            @event.MessageTemplate.ShouldBe("One {Rendering:x8}");
+            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "One 0000002a" : null);
+            @event.Exception.ShouldBeNull();
+            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Rendering", "42" } });
+            @event.Renderings.ShouldContainKey("Rendering");
+            @event.Renderings["Rendering"].Length.ShouldBe(1);
+            @event.Renderings["Rendering"][0].ShouldBe(new RenderingDto { Format = "x8", Rendering = "0000002a" });
         }
 
         [Theory]
@@ -194,25 +189,18 @@ namespace Serilog.Sinks.Http.Private.Formatters
 
             // Assert
             var @event = GetEvent();
-            Assert.NotNull(@event.Timestamp);
-            Assert.Equal("Information", @event.Level);
-            Assert.Equal("Rendering {First:x8} and {Second:x8}", @event.MessageTemplate);
-            Assert.Equal(isRenderingMessage ? "Rendering 00000001 and 00000002" : null, @event.RenderedMessage);
-            Assert.Null(@event.Exception);
-            Assert.Equal(new Dictionary<string, string> { { "First", "1" }, { "Second", "2" } }, @event.Properties);
-            Assert.Equal(
-                new Dictionary<string, RenderingDto[]>
-                {
-                    {
-                        "First",
-                        new[] { new RenderingDto { Format = "x8", Rendering = "00000001" } }
-                    },
-                    {
-                        "Second",
-                        new[] { new RenderingDto { Format = "x8", Rendering = "00000002" } }
-                    }
-                },
-                @event.Renderings);
+            @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
+            @event.MessageTemplate.ShouldBe("Rendering {First:x8} and {Second:x8}");
+            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "Rendering 00000001 and 00000002" : null);
+            @event.Exception.ShouldBeNull();
+            @event.Properties.ShouldBe(new Dictionary<string, string> { { "First", "1" }, { "Second", "2" } });
+            @event.Renderings.ShouldContainKey("First");
+            @event.Renderings["First"].Length.ShouldBe(1);
+            @event.Renderings["First"][0].ShouldBe(new RenderingDto { Format = "x8", Rendering = "00000001" });
+            @event.Renderings.ShouldContainKey("Second");
+            @event.Renderings["Second"].Length.ShouldBe(1);
+            @event.Renderings["Second"][0].ShouldBe(new RenderingDto { Format = "x8", Rendering = "00000002" });
         }
 
         [Theory]
@@ -227,7 +215,7 @@ namespace Serilog.Sinks.Http.Private.Formatters
             logger.Information(new NastyException(), "With exception");
 
             // Assert
-            Assert.Equal(string.Empty, output.ToString());
+            output.ToString().ShouldBe(string.Empty);
         }
 
         private ILogger CreateLogger(ITextFormatter formatter)
