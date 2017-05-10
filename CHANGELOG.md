@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ### Added
 
-- [BREAKING CHANGE] Support for [Serilog.Settings.Configuration](https://github.com/serilog/serilog-settings-configuration) required changing the extension methods configuring a HTTP sink. `Options` and `DurableOptions` no longer exist, and their properties are now optional parameters on the extension methods instead.
+- [#8](https://github.com/FantasticFiasco/serilog-sinks-http/issues/8) [BREAKING CHANGE] Support for [Serilog.Settings.Configuration](https://github.com/serilog/serilog-settings-configuration) required changing the extension methods configuring a HTTP sink. `Options` and `DurableOptions` no longer exist, and their properties are now optional parameters on the extension methods instead.
 
 ## 3.1.1 2017-04-24
 
@@ -26,7 +26,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ### Added
 
-- A sink is durable when created using `Http(string, DurableOptions)`. A durable sink will persist log events on disk before sending them over the network, thus protecting against data loss after a system or process restart.
+- [#3](https://github.com/FantasticFiasco/serilog-sinks-http/issues/3) Support for configuring a sink to be durable using `Http(string, DurableOptions)`. A durable sink will persist log events on disk before sending them over the network, thus protecting against data loss after a system or process restart.
 
 ### Changed
 
@@ -37,7 +37,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ### Changed
 
-- [BREAKING CHANGE] Custom implementation of `IHttpClient` can be passed to sink when creating it (contribution by [@lhaussknecht](https://github.com/lhaussknecht))
+- [#1](https://github.com/FantasticFiasco/serilog-sinks-http/pull/1) [BREAKING CHANGE] Sinks can be configured to use a custom implementation of `IHttpClient` (contribution by [@lhaussknecht](https://github.com/lhaussknecht))
 
 ## 1.0.0 2016-11-03
 
