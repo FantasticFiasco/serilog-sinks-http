@@ -15,7 +15,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Serilog.Sinks.Http.Private.Http
+namespace Serilog.Sinks.Http.Private.Network
 {
     internal class HttpClientWrapper : IHttpClient
     {

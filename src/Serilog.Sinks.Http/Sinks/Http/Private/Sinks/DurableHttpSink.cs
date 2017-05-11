@@ -17,7 +17,7 @@ using System.Text;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Sinks.Http.Private.Formatters;
-using Serilog.Sinks.Http.Private.Http;
+using Serilog.Sinks.Http.Private.Network;
 using Serilog.Sinks.RollingFile;
 
 namespace Serilog.Sinks.Http.Private.Sinks
