@@ -25,7 +25,10 @@ using Serilog.Parsing;
 namespace Serilog.Sinks.Http.Private.Formatters
 {
     /// <summary>
-    /// JSON formatter serializing objects into a normal format.
+    /// JSON formatter serializing log events into a normal format with its data normalized. The
+    /// lack of a rendered message means improved network load compared to
+    /// <see cref="NormalRenderedTextFormatter"/>. Often this formatter is complemented with a log
+    /// server that is capable of rendering the messages of the incoming log events.
     /// </summary>
     /// <seealso cref="NormalRenderedTextFormatter" />
     /// <seealso cref="CompactTextFormatter" />

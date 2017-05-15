@@ -17,7 +17,9 @@ using Serilog.Formatting;
 namespace Serilog.Sinks.Http.Private.Formatters
 {
     /// <summary>
-    /// JSON formatter serializing objects into a normal format with a rendered message.
+    /// JSON formatter serializing log events into a normal format with the message template
+    /// rendered into a message. This is the most verbose formatter and its network load is higher
+    /// than the other formatters.
     /// </summary>
     /// <seealso cref="NormalTextFormatter" />
     /// <seealso cref="CompactTextFormatter" />
