@@ -21,81 +21,84 @@ using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
 
-namespace Serilog.Sinks.Http.BatchedTextFormatters
+namespace Serilog.Sinks.Http.BatchFormatters
 {
     /// <summary>
     /// Formatter serializing the events payload.
     /// </summary>
-    public class DefaultBatchedTextFormatter : IBatchedTextFormatter
+    public class DefaultBatchFormatter : IBatchFormatter
     {
-        private readonly ITextFormatter textFormatter;
-
         private readonly long? eventBodyLimitBytes;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DefaultBatchedTextFormatter"/> class.
+        /// Initializes a new instance of the <see cref="DefaultBatchFormatter"/> class.
         /// </summary>
         /// <param name="eventBodyLimitBytes">
         /// The maximum size, in bytes, that the JSON representation of an event may take before it
         /// is dropped rather than being sent to the server. Specify null for no limit. Default
         /// value is 265 KB.
         /// </param>
-        /// <param name="textFormatter">
-        /// Formatter used to format individual event.
-        /// </param>
-        public DefaultBatchedTextFormatter(
-            long? eventBodyLimitBytes = 256 * 1024, 
-            ITextFormatter textFormatter = null)
+        public DefaultBatchFormatter(long? eventBodyLimitBytes = 256 * 1024)
         {
-            this.textFormatter = textFormatter;
             this.eventBodyLimitBytes = eventBodyLimitBytes;
         }
 
         /// <summary>
-        /// Format deserialized events to send.
+        /// Format the log events into a payload.
         /// </summary>
         /// <param name="logEvents">
-        /// Deserialized events.
+        /// The events to format.
+        /// </param>
+        /// <param name="formatter">
+        /// The formatter turning the log events into a textual representation.
         /// </param>
         /// <param name="output">
-        /// Payload to send.
+        /// The payload to send over the network.
         /// </param>
-        public void Format(IEnumerable<LogEvent> logEvents, TextWriter output)
+        public void Format(IEnumerable<LogEvent> logEvents, ITextFormatter formatter, TextWriter output)
         {
-            if (textFormatter == null)
-                throw new ArgumentNullException(nameof(textFormatter));
+            if (logEvents == null)
+                throw new ArgumentNullException(nameof(logEvents));
+            if (formatter == null)
+                throw new ArgumentNullException(nameof(formatter));
 
-            Format(logEvents.Select(e =>
-            {
-                StringWriter stringWriter = new StringWriter();
-                textFormatter.Format(e, stringWriter);
-                return stringWriter.ToString();
-            }), output);
+            IEnumerable<string> formattedLogEvents = logEvents.Select(
+                logEvent =>
+                {
+                    var writer = new StringWriter();
+                    formatter.Format(logEvent, writer);
+                    return writer.ToString();
+                });
+
+            Format(formattedLogEvents, output);
         }
 
         /// <summary>
-        /// Format serialized events to send.
+        /// Format the log events into a payload.
         /// </summary>
         /// <param name="logEvents">
-        /// Serialized events.
+        /// The events to format.
         /// </param>
         /// <param name="output">
-        /// Payload to send.
+        /// The payload to send over the network.
         /// </param>
         public void Format(IEnumerable<string> logEvents, TextWriter output)
         {
+            if (logEvents == null)
+                throw new ArgumentNullException(nameof(logEvents));
+            if (output == null)
+                throw new ArgumentNullException(nameof(output));
+
             output.Write("{\"events\":[");
 
             var delimStart = string.Empty;
 
             foreach (var logEvent in logEvents)
             {
-                var json = logEvent;
-
-                if (CheckEventBodySize(json))
+                if (CheckEventBodySize(logEvent))
                 {
                     output.Write(delimStart);
-                    output.Write(json);
+                    output.Write(logEvent);
                     delimStart = ",";
                 }
             }

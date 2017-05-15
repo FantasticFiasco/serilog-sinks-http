@@ -20,8 +20,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Serilog.Debugging;
-using Serilog.Formatting;
-using Serilog.Sinks.Http.BatchedTextFormatters;
 using Serilog.Sinks.Http.Private.Time;
 using IOFile = System.IO.File;
 #if HRESULTS
@@ -43,7 +41,7 @@ namespace Serilog.Sinks.Http.Private.Network
         private readonly ExponentialBackoffConnectionSchedule connectionSchedule;
         private readonly PortableTimer timer;
         private readonly object stateLock = new object();
-        private readonly IBatchedTextFormatter batchedTextFormatter;
+        private readonly IBatchFormatter batchFormatter;
         private IHttpClient client;
         private DateTime nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
         private volatile bool unloading;
@@ -54,23 +52,18 @@ namespace Serilog.Sinks.Http.Private.Network
             string bufferBaseFilename,
             int batchPostingLimit,
             TimeSpan period,
-            long? eventBodyLimitBytes,
-            ITextFormatter textFormatter,
-            IBatchedTextFormatter batchedTextFormatter)
+            IBatchFormatter batchFormatter)
         {
             if (bufferBaseFilename == null)
                 throw new ArgumentNullException(nameof(bufferBaseFilename));
             if (batchPostingLimit <= 0)
                 throw new ArgumentException("batchPostingLimit must be 1 or greater", nameof(batchPostingLimit));
-            if (textFormatter == null)
-                throw new ArgumentNullException(nameof(textFormatter));
-
+            
             this.client = client ?? throw new ArgumentNullException(nameof(client));
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
             this.batchPostingLimit = batchPostingLimit;
+            this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
             
-            this.batchedTextFormatter = batchedTextFormatter ?? new DefaultBatchedTextFormatter(eventBodyLimitBytes, textFormatter);
-
             bookmarkFilename = Path.GetFullPath(bufferBaseFilename + ".bookmark");
             logFolder = Path.GetDirectoryName(bookmarkFilename);
             candidateSearchPath = Path.GetFileName(bufferBaseFilename) + "*.json";
@@ -224,7 +217,7 @@ namespace Serilog.Sinks.Http.Private.Network
 
             var payload = new StringWriter();
 
-            batchedTextFormatter.Format(events, payload);
+            batchFormatter.Format(events, payload);
 
             return payload.ToString();
         }

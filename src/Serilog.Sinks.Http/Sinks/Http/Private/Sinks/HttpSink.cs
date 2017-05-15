@@ -21,7 +21,6 @@ using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
-using Serilog.Sinks.Http.BatchedTextFormatters;
 using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.Http.Private.Sinks
@@ -31,7 +30,8 @@ namespace Serilog.Sinks.Http.Private.Sinks
         private static readonly string ContentType = "application/json";
 
         private readonly string requestUri;
-        private readonly IBatchedTextFormatter batchedTextFormatter;
+        private readonly ITextFormatter textFormatter;
+        private readonly IBatchFormatter batchFormatter;
 
         private IHttpClient client;
 
@@ -39,16 +39,15 @@ namespace Serilog.Sinks.Http.Private.Sinks
             string requestUri,
             int batchPostingLimit,
             TimeSpan period,
-            long? eventBodyLimitBytes,
             ITextFormatter textFormatter,
-            IBatchedTextFormatter batchedTextFormatter,
+            IBatchFormatter batchFormatter,
             IHttpClient client)
             : base(batchPostingLimit, period)
         {
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
+            this.textFormatter = textFormatter ?? throw new ArgumentNullException(nameof(textFormatter));
+            this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
             this.client = client ?? throw new ArgumentNullException(nameof(client));
-
-            this.batchedTextFormatter = batchedTextFormatter ?? new DefaultBatchedTextFormatter(eventBodyLimitBytes, textFormatter);
         }
 
         protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
@@ -86,7 +85,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
         {
             var payload = new StringWriter();
 
-            batchedTextFormatter.Format(events, payload);
+            batchFormatter.Format(events, textFormatter, payload);
 
             return payload.ToString();
         }
