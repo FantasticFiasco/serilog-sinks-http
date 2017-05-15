@@ -18,7 +18,7 @@ Serilog.ILogger log = new LoggerConfiguration()
   .CreateLogger();
 ```
 
-The sink is batching multiple log events into a single request, and the following hypothetical payload is sent as JSON.
+The sink is batching multiple log events into a single request, and the following hypothetical payload is sent over the network as JSON.
 
 ```json
 {

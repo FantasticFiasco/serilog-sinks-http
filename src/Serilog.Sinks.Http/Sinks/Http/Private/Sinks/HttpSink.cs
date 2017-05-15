@@ -21,7 +21,6 @@ using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
-using Serilog.Sinks.Http.Private.Formatters;
 using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.Http.Private.Sinks
@@ -31,8 +30,8 @@ namespace Serilog.Sinks.Http.Private.Sinks
         private static readonly string ContentType = "application/json";
 
         private readonly string requestUri;
-        private readonly long? eventBodyLimitBytes;
-        private readonly ITextFormatter formatter;
+        private readonly ITextFormatter textFormatter;
+        private readonly IBatchFormatter batchFormatter;
 
         private IHttpClient client;
 
@@ -40,16 +39,15 @@ namespace Serilog.Sinks.Http.Private.Sinks
             string requestUri,
             int batchPostingLimit,
             TimeSpan period,
-            long? eventBodyLimitBytes,
-            FormattingType formattingType,
+            ITextFormatter textFormatter,
+            IBatchFormatter batchFormatter,
             IHttpClient client)
             : base(batchPostingLimit, period)
         {
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
-            this.eventBodyLimitBytes = eventBodyLimitBytes;
+            this.textFormatter = textFormatter ?? throw new ArgumentNullException(nameof(textFormatter));
+            this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
             this.client = client ?? throw new ArgumentNullException(nameof(client));
-
-            formatter = Converter.ToFormatter(formattingType);
         }
 
         protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
@@ -86,48 +84,10 @@ namespace Serilog.Sinks.Http.Private.Sinks
         private string FormatPayload(IEnumerable<LogEvent> events)
         {
             var payload = new StringWriter();
-            payload.Write("{\"events\":[");
 
-            var delimStart = string.Empty;
-
-            foreach (var logEvent in events)
-            {
-                var buffer = new StringWriter();
-                formatter.Format(logEvent, buffer);
-
-                if (string.IsNullOrEmpty(buffer.ToString()))
-                {
-                    continue;
-                }
-
-                var json = buffer.ToString();
-                if (CheckEventBodySize(json))
-                {
-                    payload.Write(delimStart);
-                    payload.Write(json);
-                    delimStart = ",";
-                }
-            }
-
-            payload.Write("]}");
+            batchFormatter.Format(events, textFormatter, payload);
 
             return payload.ToString();
-        }
-
-        private bool CheckEventBodySize(string json)
-        {
-            if (eventBodyLimitBytes.HasValue &&
-                Encoding.UTF8.GetByteCount(json) > eventBodyLimitBytes.Value)
-            {
-                SelfLog.WriteLine(
-                    "Event JSON representation exceeds the byte size limit of {0} set for this sink and will be dropped; data: {1}",
-                    eventBodyLimitBytes,
-                    json);
-
-                return false;
-            }
-
-            return true;
         }
     }
 }
