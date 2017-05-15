@@ -153,12 +153,12 @@ namespace Serilog
 
                     if (actual.Length > expectedEventCount)
                     {
-                        throw new Exception($"Expected only {expectedEventCount} but got {actual.Length}");
+                        throw new Exception($"Expected only {expectedEventCount} event(s) but got {actual.Length}");
                     }
 
                     if (actual.Length != expectedEventCount)
                     {
-                        throw new XunitException();
+                        throw new XunitException($"Expected {expectedEventCount} event(s) but got {actual.Length}");
                     }
 
                     return actual;

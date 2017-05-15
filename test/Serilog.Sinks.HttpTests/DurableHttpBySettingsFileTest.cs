@@ -3,12 +3,12 @@ using Serilog.LogServer;
 
 namespace Serilog
 {
-    public class SettingsFileHttpTest : SinkFixture
+    public class DurableHttpBySettingsFileTest : SinkFixture
     {
-        public SettingsFileHttpTest()
+        public DurableHttpBySettingsFileTest()
         {
             var configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings_http.json")
+                .AddJsonFile("appsettings_durable_http.json")
                 .Build();
 
             Logger = new LoggerConfiguration()

@@ -16,7 +16,7 @@ using System;
 using System.Text;
 using Serilog.Core;
 using Serilog.Events;
-using Serilog.Sinks.Http.Private.Formatters;
+using Serilog.Formatting;
 using Serilog.Sinks.Http.Private.Network;
 using Serilog.Sinks.RollingFile;
 
@@ -33,8 +33,8 @@ namespace Serilog.Sinks.Http.Private.Sinks
             long? bufferFileSizeLimitBytes,
             int batchPostingLimit,
             TimeSpan period,
-            long? eventBodyLimitBytes,
-            FormattingType formattingType,
+            ITextFormatter textFormatter,
+            IBatchFormatter batchFormatter,
             IHttpClient client)
         {
             if (bufferFileSizeLimitBytes.HasValue && bufferFileSizeLimitBytes < 0)
@@ -46,11 +46,11 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 bufferBaseFilename,
                 batchPostingLimit,
                 period,
-                eventBodyLimitBytes);
+                batchFormatter);
 
             sink = new RollingFileSink(
                 bufferBaseFilename + "-{Date}.json",
-                Converter.ToFormatter(formattingType),
+                textFormatter,
                 bufferFileSizeLimitBytes,
                 null,
                 Encoding.UTF8);

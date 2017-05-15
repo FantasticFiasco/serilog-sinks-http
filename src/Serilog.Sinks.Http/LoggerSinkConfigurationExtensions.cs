@@ -16,9 +16,12 @@ using System;
 using System.Net.Http;
 using Serilog.Configuration;
 using Serilog.Events;
+using Serilog.Formatting;
 using Serilog.Sinks.Http;
+using Serilog.Sinks.Http.BatchFormatters;
 using Serilog.Sinks.Http.Private.Network;
 using Serilog.Sinks.Http.Private.Sinks;
+using Serilog.Sinks.Http.TextFormatters;
 
 namespace Serilog
 {
@@ -30,7 +33,7 @@ namespace Serilog
     {
         /// <summary>
         /// Adds a non durable sink that sends log events using HTTP POST over the network. A
-        /// non-durable sink will loose data after a system or process restart.
+        /// non-durable sink will lose data after a system or process restart.
         /// </summary>
         /// <param name="sinkConfiguration">The logger configuration.</param>
         /// <param name="requestUri">The URI the request is sent to.</param>
@@ -40,13 +43,13 @@ namespace Serilog
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
         /// </param>
-        /// <param name="eventBodyLimitBytes">
-        /// The maximum size, in bytes, that the JSON representation of an event may take before it
-        /// is dropped rather than being sent to the server. Specify null for no limit. Default
-        /// value is 265 KB.
+        /// <param name="textFormatter">
+        /// The formatter rendering individual log events into text, for example JSON. Default
+        /// value is <see cref="NormalRenderedTextFormatter"/>.
         /// </param>
-        /// <param name="formattingType">
-        /// The formatting type. Default value is <see cref="FormattingType.NormalRendered"/>.
+        /// <param name="batchFormatter">
+        /// The formatter batching multiple log events into a payload that can be sent over the
+        /// network. Default value is <see cref="DefaultBatchFormatter"/>.
         /// </param>
         /// <param name="restrictedToMinimumLevel">
         /// The minimum level for events passed through the sink. Default value is
@@ -62,8 +65,8 @@ namespace Serilog
             string requestUri,
             int batchPostingLimit = 1000,
             TimeSpan? period = null,
-            long? eventBodyLimitBytes = 256 * 1024,
-            FormattingType formattingType = FormattingType.NormalRendered,
+            ITextFormatter textFormatter = null,
+            IBatchFormatter batchFormatter = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             IHttpClient httpClient = null)
         {
@@ -74,8 +77,8 @@ namespace Serilog
                 requestUri,
                 batchPostingLimit,
                 period ?? TimeSpan.FromSeconds(2),
-                eventBodyLimitBytes,
-                formattingType,
+                textFormatter ?? new NormalRenderedTextFormatter(),
+                batchFormatter ?? new DefaultBatchFormatter(),
                 httpClient ?? new HttpClientWrapper());
 
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
@@ -84,13 +87,13 @@ namespace Serilog
         /// <summary>
         /// Adds a durable sink that sends log events using HTTP POST over the network. A durable
         /// sink will persist log events on disk before sending them over the network, thus
-        ///  protecting against data loss after a system or process restart.
+        /// protecting against data loss after a system or process restart.
         /// </summary>
         /// <param name="sinkConfiguration">The logger configuration.</param>
         /// <param name="requestUri">The URI the request is sent to.</param>
         /// <param name="bufferBaseFilename">
         /// The path for a set of files that will be used to buffer events until they can be
-        /// successfully transmitted across the network. Individual files will be created using the
+        /// successfully sent over the network. Individual files will be created using the
         /// pattern <paramref name="bufferBaseFilename"/>-{Date}.json. Default value is 'Buffer'.
         /// </param>
         /// <param name="bufferFileSizeLimitBytes"></param>
@@ -102,13 +105,13 @@ namespace Serilog
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
         /// </param>
-        /// <param name="eventBodyLimitBytes">
-        /// The maximum size, in bytes, that the JSON representation of an event may take before it
-        /// is dropped rather than being sent to the server. Specify null for no limit. Default
-        /// value is 265 KB.
+        /// <param name="textFormatter">
+        /// The formatter rendering individual log events into text, for example JSON. Default
+        /// value is <see cref="NormalRenderedTextFormatter"/>.
         /// </param>
-        /// <param name="formattingType">
-        /// The formatting type. Default value is <see cref="FormattingType.NormalRendered"/>.
+        /// <param name="batchFormatter">
+        /// The formatter batching multiple log events into a payload that can be sent over the
+        /// network. Default value is <see cref="DefaultBatchFormatter"/>.
         /// </param>
         /// <param name="restrictedToMinimumLevel">
         /// The minimum level for events passed through the sink. Default value is
@@ -126,8 +129,8 @@ namespace Serilog
             long? bufferFileSizeLimitBytes = null,
             int batchPostingLimit = 1000,
             TimeSpan? period = null,
-            long? eventBodyLimitBytes = 256 * 1024,
-            FormattingType formattingType = FormattingType.NormalRendered,
+            ITextFormatter textFormatter = null,
+            IBatchFormatter batchFormatter = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             IHttpClient httpClient = null)
         {
@@ -140,8 +143,8 @@ namespace Serilog
                 bufferFileSizeLimitBytes,
                 batchPostingLimit,
                 period ?? TimeSpan.FromSeconds(2),
-                eventBodyLimitBytes,
-                formattingType,
+                textFormatter ?? new NormalRenderedTextFormatter(),
+                batchFormatter ?? new DefaultBatchFormatter(),
                 httpClient ?? new HttpClientWrapper());
 
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);

@@ -1,22 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.Http.LogServer.Controllers.Dto;
+using Serilog.Sinks.Http.TextFormatters;
 using Serilog.Support;
 using Shouldly;
 using Xunit;
 
-namespace Serilog.Sinks.Http.Private.Formatters
+namespace Serilog.Sinks.Http.Private.TextFormatters
 {
-    public class CompactJsonFormatterTest
+    public class NormalTextFormatterTest
     {
         private readonly StringWriter output;
 
         private ILogger logger;
 
-        public CompactJsonFormatterTest()
+        public NormalTextFormatterTest()
         {
             output = new StringWriter();
         }
@@ -31,22 +33,14 @@ namespace Serilog.Sinks.Http.Private.Formatters
         public void LogEventLevels(LogEventLevel level)
         {
             // Arrange
-            logger = CreateLogger(new CompactJsonFormatter(true));
+            logger = CreateLogger(new NormalRenderedTextFormatter());
 
             // Act
             logger.Write(level, "No properties");
 
             // Assert
             var @event = GetEvent();
-
-            if (level == LogEventLevel.Information)
-            {
-                @event.Level.ShouldBeNull();
-            }
-            else
-            {
-                @event.Level.ShouldNotBeNull();
-            }
+            @event.Level.ShouldNotBeNull();
         }
 
         [Theory]
@@ -55,7 +49,9 @@ namespace Serilog.Sinks.Http.Private.Formatters
         public void EmptyEvent(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(new CompactJsonFormatter(isRenderingMessage));
+            logger = CreateLogger(isRenderingMessage ? 
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
 
             // Act
             logger.Information("No properties");
@@ -63,10 +59,11 @@ namespace Serilog.Sinks.Http.Private.Formatters
             // Assert
             var @event = GetEvent();
             @event.Timestamp.ShouldNotBeNull();
-            @event.Level.ShouldBeNull();
+            @event.Level.ShouldBe("Information");
             @event.MessageTemplate.ShouldBe("No properties");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "No properties" : null);
             @event.Exception.ShouldBeNull();
+            @event.Properties.ShouldBeNull();
             @event.Renderings.ShouldBeNull();
         }
 
@@ -76,7 +73,9 @@ namespace Serilog.Sinks.Http.Private.Formatters
         public void MinimalEvent(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(new CompactJsonFormatter(isRenderingMessage));
+            logger = CreateLogger(isRenderingMessage ?
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
 
             // Act
             logger.Information("One {Property}", 42);
@@ -84,10 +83,11 @@ namespace Serilog.Sinks.Http.Private.Formatters
             // Assert
             var @event = GetEvent();
             @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
             @event.MessageTemplate.ShouldBe("One {Property}");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "One 42" : null);
             @event.Exception.ShouldBeNull();
-            GetProperty("Property").ShouldBe("42");
+            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Property", "42" } });
             @event.Renderings.ShouldBeNull();
         }
 
@@ -97,7 +97,9 @@ namespace Serilog.Sinks.Http.Private.Formatters
         public void MultipleProperties(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(new CompactJsonFormatter(isRenderingMessage));
+            logger = CreateLogger(isRenderingMessage ?
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
 
             // Act
             logger.Information("Property {First} and {Second}", "One", "Two");
@@ -105,11 +107,11 @@ namespace Serilog.Sinks.Http.Private.Formatters
             // Assert
             var @event = GetEvent();
             @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
             @event.MessageTemplate.ShouldBe("Property {First} and {Second}");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "Property \"One\" and \"Two\"" : null);
             @event.Exception.ShouldBeNull();
-            GetProperty("First").ShouldBe("One");
-            GetProperty("Second").ShouldBe("Two");
+            @event.Properties.ShouldBe(new Dictionary<string, string> { { "First", "One" }, { "Second", "Two" } });
             @event.Renderings.ShouldBeNull();
         }
 
@@ -119,7 +121,9 @@ namespace Serilog.Sinks.Http.Private.Formatters
         public void Exceptions(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(new CompactJsonFormatter(isRenderingMessage));
+            logger = CreateLogger(isRenderingMessage ?
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
 
             // Act
             logger.Information(new DivideByZeroException(), "With exception");
@@ -127,9 +131,11 @@ namespace Serilog.Sinks.Http.Private.Formatters
             // Assert
             var @event = GetEvent();
             @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
             @event.MessageTemplate.ShouldBe("With exception");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "With exception" : null);
             @event.Exception.ShouldNotBeNull();
+            @event.Properties.ShouldBeNull();
             @event.Renderings.ShouldBeNull();
         }
 
@@ -139,7 +145,9 @@ namespace Serilog.Sinks.Http.Private.Formatters
         public void ExceptionAndProperties(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(new CompactJsonFormatter(isRenderingMessage));
+            logger = CreateLogger(isRenderingMessage ?
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
 
             // Act
             logger.Information(new DivideByZeroException(), "With exception and {Property}", 42);
@@ -147,10 +155,11 @@ namespace Serilog.Sinks.Http.Private.Formatters
             // Assert
             var @event = GetEvent();
             @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
             @event.MessageTemplate.ShouldBe("With exception and {Property}");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "With exception and 42" : null);
             @event.Exception.ShouldNotBeNull();
-            GetProperty("Property").ShouldBe("42");
+            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Property", "42" } });
             @event.Renderings.ShouldBeNull();
         }
 
@@ -160,7 +169,9 @@ namespace Serilog.Sinks.Http.Private.Formatters
         public void Renderings(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(new CompactJsonFormatter(isRenderingMessage));
+            logger = CreateLogger(isRenderingMessage ?
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
 
             // Act
             logger.Information("One {Rendering:x8}", 42);
@@ -168,11 +179,14 @@ namespace Serilog.Sinks.Http.Private.Formatters
             // Assert
             var @event = GetEvent();
             @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
             @event.MessageTemplate.ShouldBe("One {Rendering:x8}");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "One 0000002a" : null);
             @event.Exception.ShouldBeNull();
-            GetProperty("Rendering").ShouldBe("42");
-            @event.Renderings.ShouldBe(new[] { "0000002a" });
+            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Rendering", "42" } });
+            @event.Renderings.ShouldContainKey("Rendering");
+            @event.Renderings["Rendering"].Length.ShouldBe(1);
+            @event.Renderings["Rendering"][0].ShouldBe(new RenderingDto { Format = "x8", Rendering = "0000002a" });
         }
 
         [Theory]
@@ -181,7 +195,9 @@ namespace Serilog.Sinks.Http.Private.Formatters
         public void MultipleRenderings(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(new CompactJsonFormatter(isRenderingMessage));
+            logger = CreateLogger(isRenderingMessage ?
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
 
             // Act
             logger.Information("Rendering {First:x8} and {Second:x8}", 1, 2);
@@ -189,12 +205,17 @@ namespace Serilog.Sinks.Http.Private.Formatters
             // Assert
             var @event = GetEvent();
             @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
             @event.MessageTemplate.ShouldBe("Rendering {First:x8} and {Second:x8}");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "Rendering 00000001 and 00000002" : null);
             @event.Exception.ShouldBeNull();
-            GetProperty("First").ShouldBe("1");
-            GetProperty("Second").ShouldBe("2");
-            @event.Renderings.ShouldBe(new[] { "00000001", "00000002" });
+            @event.Properties.ShouldBe(new Dictionary<string, string> { { "First", "1" }, { "Second", "2" } });
+            @event.Renderings.ShouldContainKey("First");
+            @event.Renderings["First"].Length.ShouldBe(1);
+            @event.Renderings["First"][0].ShouldBe(new RenderingDto { Format = "x8", Rendering = "00000001" });
+            @event.Renderings.ShouldContainKey("Second");
+            @event.Renderings["Second"].Length.ShouldBe(1);
+            @event.Renderings["Second"][0].ShouldBe(new RenderingDto { Format = "x8", Rendering = "00000002" });
         }
 
         [Theory]
@@ -203,7 +224,9 @@ namespace Serilog.Sinks.Http.Private.Formatters
         public void NastyException(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(new NormalJsonFormatter(isRenderingMessage));
+            logger = CreateLogger(isRenderingMessage ?
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
 
             // Act
             logger.Information(new NastyException(), "With exception");
@@ -220,15 +243,9 @@ namespace Serilog.Sinks.Http.Private.Formatters
                 .CreateLogger();
         }
 
-        private CompactEventDto GetEvent()
+        private EventDto GetEvent()
         {
-            return JsonConvert.DeserializeObject<CompactEventDto>(output.ToString());
-        }
-
-        private string GetProperty(string name)
-        {
-            dynamic @event = JsonConvert.DeserializeObject(output.ToString());
-            return @event[name];
+            return JsonConvert.DeserializeObject<EventDto>(output.ToString());
         }
     }
 }

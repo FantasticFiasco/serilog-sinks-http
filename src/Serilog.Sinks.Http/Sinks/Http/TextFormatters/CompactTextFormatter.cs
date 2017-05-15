@@ -21,29 +21,25 @@ using Serilog.Formatting;
 using Serilog.Formatting.Json;
 using Serilog.Parsing;
 
-namespace Serilog.Sinks.Http.Private.Formatters
+namespace Serilog.Sinks.Http.TextFormatters
 {
     /// <summary>
-    /// JSON formatter serializing objects into a compact format.
+    /// JSON formatter serializing log events with minimizing size as a priority and normalizing
+    /// its data. The lack of a rendered message means even smaller network load compared to
+    /// <see cref="CompactRenderedTextFormatter"/> and should be used in situations where bandwidth
+    /// is of importance. Often this formatter is complemented with a log server that is capable of
+    /// rendering the messages of the incoming log events.
     /// </summary>
+    /// <seealso cref="NormalTextFormatter" />
+    /// <seealso cref="NormalRenderedTextFormatter" />
+    /// <seealso cref="CompactRenderedTextFormatter" />
     /// <seealso cref="ITextFormatter" />
-    /// <seealso cref="NormalJsonFormatter" />
-    public class CompactJsonFormatter : ITextFormatter
+    public class CompactTextFormatter : ITextFormatter
     {
-        private static readonly JsonValueFormatter ValueFormatter = new JsonValueFormatter();
-
-        private readonly bool isRenderingMessage;
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="CompactJsonFormatter"/> class.
+        /// Gets or sets a value indicating whether the message is rendered into JSON.
         /// </summary>
-        /// <param name="isRenderingMessage">
-        /// Whether message should be rendered during serialization.
-        /// </param>
-        public CompactJsonFormatter(bool isRenderingMessage)
-        {
-            this.isRenderingMessage = isRenderingMessage;
-        }
+        protected bool IsRenderingMessage { get; set; }
 
         /// <summary>
         /// Format the log event into the output.
@@ -79,7 +75,7 @@ namespace Serilog.Sinks.Http.Private.Formatters
             output.Write("\",\"@mt\":");
             JsonValueFormatter.WriteQuotedJsonString(logEvent.MessageTemplate.Text, output);
 
-            if (isRenderingMessage)
+            if (IsRenderingMessage)
             {
                 output.Write(",\"@m\":");
                 var message = logEvent.MessageTemplate.Render(logEvent.Properties);
@@ -132,7 +128,7 @@ namespace Serilog.Sinks.Http.Private.Formatters
                 output.Write(',');
                 JsonValueFormatter.WriteQuotedJsonString(name, output);
                 output.Write(':');
-                ValueFormatter.Format(property.Value, output);
+                ValueFormatter.Instance.Format(property.Value, output);
             }
 
             output.Write('}');
