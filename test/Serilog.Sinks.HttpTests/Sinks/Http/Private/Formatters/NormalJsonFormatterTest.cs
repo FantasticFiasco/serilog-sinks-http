@@ -32,7 +32,7 @@ namespace Serilog.Sinks.Http.Private.Formatters
         public void LogEventLevels(LogEventLevel level)
         {
             // Arrange
-            logger = CreateLogger(new NormalJsonFormatter(true));
+            logger = CreateLogger(new NormalRenderedTextFormatter());
 
             // Act
             logger.Write(level, "No properties");
@@ -48,7 +48,9 @@ namespace Serilog.Sinks.Http.Private.Formatters
         public void EmptyEvent(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(new NormalJsonFormatter(isRenderingMessage));
+            logger = CreateLogger(isRenderingMessage ? 
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
 
             // Act
             logger.Information("No properties");
@@ -70,7 +72,9 @@ namespace Serilog.Sinks.Http.Private.Formatters
         public void MinimalEvent(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(new NormalJsonFormatter(isRenderingMessage));
+            logger = CreateLogger(isRenderingMessage ?
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
 
             // Act
             logger.Information("One {Property}", 42);
@@ -92,7 +96,9 @@ namespace Serilog.Sinks.Http.Private.Formatters
         public void MultipleProperties(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(new NormalJsonFormatter(isRenderingMessage));
+            logger = CreateLogger(isRenderingMessage ?
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
 
             // Act
             logger.Information("Property {First} and {Second}", "One", "Two");
@@ -114,7 +120,9 @@ namespace Serilog.Sinks.Http.Private.Formatters
         public void Exceptions(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(new NormalJsonFormatter(isRenderingMessage));
+            logger = CreateLogger(isRenderingMessage ?
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
 
             // Act
             logger.Information(new DivideByZeroException(), "With exception");
@@ -136,7 +144,9 @@ namespace Serilog.Sinks.Http.Private.Formatters
         public void ExceptionAndProperties(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(new NormalJsonFormatter(isRenderingMessage));
+            logger = CreateLogger(isRenderingMessage ?
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
 
             // Act
             logger.Information(new DivideByZeroException(), "With exception and {Property}", 42);
@@ -158,7 +168,9 @@ namespace Serilog.Sinks.Http.Private.Formatters
         public void Renderings(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(new NormalJsonFormatter(isRenderingMessage));
+            logger = CreateLogger(isRenderingMessage ?
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
 
             // Act
             logger.Information("One {Rendering:x8}", 42);
@@ -182,7 +194,9 @@ namespace Serilog.Sinks.Http.Private.Formatters
         public void MultipleRenderings(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(new NormalJsonFormatter(isRenderingMessage));
+            logger = CreateLogger(isRenderingMessage ?
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
 
             // Act
             logger.Information("Rendering {First:x8} and {Second:x8}", 1, 2);
@@ -209,7 +223,9 @@ namespace Serilog.Sinks.Http.Private.Formatters
         public void NastyException(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(new NormalJsonFormatter(isRenderingMessage));
+            logger = CreateLogger(isRenderingMessage ?
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
 
             // Act
             logger.Information(new NastyException(), "With exception");

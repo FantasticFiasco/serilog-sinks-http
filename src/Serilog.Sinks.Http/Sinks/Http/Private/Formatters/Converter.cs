@@ -31,16 +31,16 @@ namespace Serilog.Sinks.Http.Private.Formatters
             switch (formattingType)
             {
                 case FormattingType.NormalRendered:
-                    return new NormalJsonFormatter(true);
+                    return new NormalRenderedTextFormatter();
 
                 case FormattingType.Normal:
-                    return new NormalJsonFormatter(false);
+                    return new NormalTextFormatter();
 
                 case FormattingType.CompactRendered:
-                    return new CompactJsonFormatter(true);
+                    return new CompactRenderedTextFormatter();
 
                 case FormattingType.Compact:
-                    return new CompactJsonFormatter(false);
+                    return new CompactTextFormatter();
 
                 default:
                     throw new ArgumentException($"Formatting type {formattingType} is not supported");

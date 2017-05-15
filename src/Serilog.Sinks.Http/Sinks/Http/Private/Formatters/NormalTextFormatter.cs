@@ -27,25 +27,16 @@ namespace Serilog.Sinks.Http.Private.Formatters
     /// <summary>
     /// JSON formatter serializing objects into a normal format.
     /// </summary>
+    /// <seealso cref="NormalRenderedTextFormatter" />
+    /// <seealso cref="CompactTextFormatter" />
+    /// <seealso cref="CompactRenderedTextFormatter" />
     /// <seealso cref="ITextFormatter" />
-    /// <seealso cref="CompactJsonFormatter" />
-    public class NormalJsonFormatter : ITextFormatter
+    public class NormalTextFormatter : ITextFormatter
     {
-        private static readonly JsonValueFormatter ValueFormatter = new JsonValueFormatter();
-
-
-        private readonly bool isRenderingMessage;
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="NormalJsonFormatter"/> class.
+        /// Gets or sets a value indicating whether the message is rendered into JSON.
         /// </summary>
-        /// <param name="isRenderingMessage">
-        /// Whether message should be rendered during serialization.
-        /// </param>
-        public NormalJsonFormatter(bool isRenderingMessage)
-        {
-            this.isRenderingMessage = isRenderingMessage;
-        }
+        protected bool IsRenderingMessage { get; set; }
 
         /// <summary>
         /// Format the log event into the output.
@@ -84,7 +75,7 @@ namespace Serilog.Sinks.Http.Private.Formatters
             output.Write("\",\"MessageTemplate\":");
             JsonValueFormatter.WriteQuotedJsonString(logEvent.MessageTemplate.Text, output);
 
-            if (isRenderingMessage)
+            if (IsRenderingMessage)
             {
                 output.Write(",\"RenderedMessage\":");
 
@@ -133,7 +124,7 @@ namespace Serilog.Sinks.Http.Private.Formatters
 
                 JsonValueFormatter.WriteQuotedJsonString(property.Key, output);
                 output.Write(':');
-                ValueFormatter.Format(property.Value, output);
+                ValueFormatter.Instance.Format(property.Value, output);
             }
 
             output.Write('}');
