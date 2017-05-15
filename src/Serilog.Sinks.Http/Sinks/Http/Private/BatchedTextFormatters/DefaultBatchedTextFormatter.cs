@@ -21,7 +21,7 @@ using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
 
-namespace Serilog.Sinks.Http.Private.Formatters
+namespace Serilog.Sinks.Http.Private.BatchedTextFormatters
 {
     /// <summary>
     /// Formatter serializing the events payload.

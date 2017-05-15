@@ -20,6 +20,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Serilog.Debugging;
+using Serilog.Sinks.Http.Private.BatchedTextFormatters;
 using Serilog.Sinks.Http.Private.Formatters;
 using Serilog.Sinks.Http.Private.Time;
 using IOFile = System.IO.File;

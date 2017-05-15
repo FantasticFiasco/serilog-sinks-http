@@ -20,6 +20,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Events;
+using Serilog.Sinks.Http.Private.BatchedTextFormatters;
 using Serilog.Sinks.Http.Private.Formatters;
 using Serilog.Sinks.PeriodicBatching;
 
