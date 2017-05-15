@@ -21,7 +21,7 @@ using Serilog.Formatting;
 using Serilog.Formatting.Json;
 using Serilog.Parsing;
 
-namespace Serilog.Sinks.Http.Private.Formatters
+namespace Serilog.Sinks.Http.Formatters
 {
     /// <summary>
     /// JSON formatter serializing log events with minimizing size as a priority and normalizing

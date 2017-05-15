@@ -20,8 +20,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Events;
-using Serilog.Sinks.Http.Private.BatchedTextFormatters;
-using Serilog.Sinks.Http.Private.Formatters;
+using Serilog.Formatting;
+using Serilog.Sinks.Http.BatchedTextFormatters;
 using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.Http.Private.Sinks
@@ -40,7 +40,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
             int batchPostingLimit,
             TimeSpan period,
             long? eventBodyLimitBytes,
-            FormattingType formattingType,
+            ITextFormatter textFormatter,
             IBatchedTextFormatter batchedTextFormatter,
             IHttpClient client)
             : base(batchPostingLimit, period)
@@ -48,7 +48,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
             this.client = client ?? throw new ArgumentNullException(nameof(client));
 
-            this.batchedTextFormatter = batchedTextFormatter ?? new DefaultBatchedTextFormatter(eventBodyLimitBytes, Converter.ToFormatter(formattingType));
+            this.batchedTextFormatter = batchedTextFormatter ?? new DefaultBatchedTextFormatter(eventBodyLimitBytes, textFormatter);
         }
 
         protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)

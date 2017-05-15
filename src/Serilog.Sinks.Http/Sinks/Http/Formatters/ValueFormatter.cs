@@ -14,7 +14,7 @@
 
 using Serilog.Formatting.Json;
 
-namespace Serilog.Sinks.Http.Private.Formatters
+namespace Serilog.Sinks.Http.Formatters
 {
     internal static class ValueFormatter
     {

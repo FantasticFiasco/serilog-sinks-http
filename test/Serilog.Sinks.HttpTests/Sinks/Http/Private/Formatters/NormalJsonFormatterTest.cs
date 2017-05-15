@@ -4,6 +4,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Serilog.Events;
 using Serilog.Formatting;
+using Serilog.Sinks.Http.Formatters;
 using Serilog.Sinks.Http.LogServer.Controllers.Dto;
 using Serilog.Support;
 using Shouldly;

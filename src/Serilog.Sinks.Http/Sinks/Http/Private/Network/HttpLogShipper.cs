@@ -20,8 +20,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Serilog.Debugging;
-using Serilog.Sinks.Http.Private.BatchedTextFormatters;
-using Serilog.Sinks.Http.Private.Formatters;
+using Serilog.Formatting;
+using Serilog.Sinks.Http.BatchedTextFormatters;
 using Serilog.Sinks.Http.Private.Time;
 using IOFile = System.IO.File;
 #if HRESULTS
@@ -55,20 +55,21 @@ namespace Serilog.Sinks.Http.Private.Network
             int batchPostingLimit,
             TimeSpan period,
             long? eventBodyLimitBytes,
-            FormattingType formattingType,
+            ITextFormatter textFormatter,
             IBatchedTextFormatter batchedTextFormatter)
         {
             if (bufferBaseFilename == null)
                 throw new ArgumentNullException(nameof(bufferBaseFilename));
             if (batchPostingLimit <= 0)
                 throw new ArgumentException("batchPostingLimit must be 1 or greater", nameof(batchPostingLimit));
+            if (textFormatter == null)
+                throw new ArgumentNullException(nameof(textFormatter));
 
             this.client = client ?? throw new ArgumentNullException(nameof(client));
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
             this.batchPostingLimit = batchPostingLimit;
-            this.batchedTextFormatter = batchedTextFormatter;
-
-            this.batchedTextFormatter = new DefaultBatchedTextFormatter(eventBodyLimitBytes, Converter.ToFormatter(formattingType));
+            
+            this.batchedTextFormatter = batchedTextFormatter ?? new DefaultBatchedTextFormatter(eventBodyLimitBytes, textFormatter);
 
             bookmarkFilename = Path.GetFullPath(bufferBaseFilename + ".bookmark");
             logFolder = Path.GetDirectoryName(bookmarkFilename);

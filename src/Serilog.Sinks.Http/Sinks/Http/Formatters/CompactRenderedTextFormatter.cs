@@ -14,23 +14,23 @@
 
 using Serilog.Formatting;
 
-namespace Serilog.Sinks.Http.Private.Formatters
+namespace Serilog.Sinks.Http.Formatters
 {
     /// <summary>
-    /// JSON formatter serializing log events into a normal format with the message template
-    /// rendered into a message. This is the most verbose formatter and its network load is higher
-    /// than the other formatters.
+    /// JSON formatter serializing log events with minimizing size as a priority but still render
+    /// the message template into a message. This formatter greatly reduce the network load and
+    /// should be used in situations where bandwidth is of importance.
     /// </summary>
     /// <seealso cref="NormalTextFormatter" />
+    /// <seealso cref="NormalRenderedTextFormatter" />
     /// <seealso cref="CompactTextFormatter" />
-    /// <seealso cref="CompactRenderedTextFormatter" />
     /// <seealso cref="ITextFormatter" />
-    public class NormalRenderedTextFormatter : NormalTextFormatter
+    public class CompactRenderedTextFormatter : CompactTextFormatter
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NormalRenderedTextFormatter"/> class.
+        /// Initializes a new instance of the <see cref="CompactRenderedTextFormatter"/> class.
         /// </summary>
-        public NormalRenderedTextFormatter()
+        public CompactRenderedTextFormatter()
         {
             IsRenderingMessage = true;
         }
