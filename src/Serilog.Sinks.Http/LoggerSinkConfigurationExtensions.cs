@@ -48,6 +48,9 @@ namespace Serilog
         /// <param name="formattingType">
         /// The formatting type. Default value is <see cref="FormattingType.NormalRendered"/>.
         /// </param>
+        /// <param name="batchedTextFormatter">
+        /// The formatter used to format the payload to send.
+        /// </param>
         /// <param name="restrictedToMinimumLevel">
         /// The minimum level for events passed through the sink. Default value is
         /// <see cref="LevelAlias.Minimum"/>.
@@ -64,6 +67,7 @@ namespace Serilog
             TimeSpan? period = null,
             long? eventBodyLimitBytes = 256 * 1024,
             FormattingType formattingType = FormattingType.NormalRendered,
+            IBatchedTextFormatter batchedTextFormatter = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             IHttpClient httpClient = null)
         {
@@ -76,6 +80,7 @@ namespace Serilog
                 period ?? TimeSpan.FromSeconds(2),
                 eventBodyLimitBytes,
                 formattingType,
+                batchedTextFormatter,
                 httpClient ?? new HttpClientWrapper());
 
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
@@ -110,6 +115,9 @@ namespace Serilog
         /// <param name="formattingType">
         /// The formatting type. Default value is <see cref="FormattingType.NormalRendered"/>.
         /// </param>
+        /// <param name="batchedTextFormatter">
+        /// The formatter used to format the payload to send.
+        /// </param>
         /// <param name="restrictedToMinimumLevel">
         /// The minimum level for events passed through the sink. Default value is
         /// <see cref="LevelAlias.Minimum"/>.
@@ -128,6 +136,7 @@ namespace Serilog
             TimeSpan? period = null,
             long? eventBodyLimitBytes = 256 * 1024,
             FormattingType formattingType = FormattingType.NormalRendered,
+            IBatchedTextFormatter batchedTextFormatter = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             IHttpClient httpClient = null)
         {
@@ -142,6 +151,7 @@ namespace Serilog
                 period ?? TimeSpan.FromSeconds(2),
                 eventBodyLimitBytes,
                 formattingType,
+                batchedTextFormatter,
                 httpClient ?? new HttpClientWrapper());
 
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);

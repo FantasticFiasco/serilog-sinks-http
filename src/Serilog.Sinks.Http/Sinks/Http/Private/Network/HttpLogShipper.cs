@@ -13,17 +13,18 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Serilog.Debugging;
+using Serilog.Sinks.Http.Private.Formatters;
 using Serilog.Sinks.Http.Private.Time;
 using IOFile = System.IO.File;
 #if HRESULTS
-
+using System.Runtime.InteropServices;
 #endif
 
 namespace Serilog.Sinks.Http.Private.Network
@@ -35,14 +36,13 @@ namespace Serilog.Sinks.Http.Private.Network
 
         private readonly string requestUri;
         private readonly int batchPostingLimit;
-        private readonly long? eventBodyLimitBytes;
         private readonly string bookmarkFilename;
         private readonly string logFolder;
         private readonly string candidateSearchPath;
         private readonly ExponentialBackoffConnectionSchedule connectionSchedule;
         private readonly PortableTimer timer;
         private readonly object stateLock = new object();
-
+        private readonly IBatchedTextFormatter batchedTextFormatter;
         private IHttpClient client;
         private DateTime nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
         private volatile bool unloading;
@@ -53,7 +53,9 @@ namespace Serilog.Sinks.Http.Private.Network
             string bufferBaseFilename,
             int batchPostingLimit,
             TimeSpan period,
-            long? eventBodyLimitBytes)
+            long? eventBodyLimitBytes,
+            FormattingType formattingType,
+            IBatchedTextFormatter batchedTextFormatter)
         {
             if (bufferBaseFilename == null)
                 throw new ArgumentNullException(nameof(bufferBaseFilename));
@@ -63,7 +65,9 @@ namespace Serilog.Sinks.Http.Private.Network
             this.client = client ?? throw new ArgumentNullException(nameof(client));
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
             this.batchPostingLimit = batchPostingLimit;
-            this.eventBodyLimitBytes = eventBodyLimitBytes;
+            this.batchedTextFormatter = batchedTextFormatter;
+
+            this.batchedTextFormatter = new DefaultBatchedTextFormatter(eventBodyLimitBytes, Converter.ToFormatter(formattingType));
 
             bookmarkFilename = Path.GetFullPath(bufferBaseFilename + ".bookmark");
             logFolder = Path.GetDirectoryName(bookmarkFilename);
@@ -198,9 +202,7 @@ namespace Serilog.Sinks.Http.Private.Network
 
         private string ReadPayload(string currentFile, ref long nextLineBeginsAtOffset, ref int count)
         {
-            var payload = new StringWriter();
-            payload.Write("{\"events\":[");
-            var delimStart = "";
+            var events = new List<string>();
 
             using (var current = IOFile.Open(currentFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
@@ -214,23 +216,14 @@ namespace Serilog.Sinks.Http.Private.Network
                     // oversized event is dropped
                     count++;
 
-                    if (eventBodyLimitBytes.HasValue && Encoding.UTF8.GetByteCount(nextLine) > eventBodyLimitBytes.Value)
-                    {
-                        SelfLog.WriteLine(
-                            "Event JSON representation exceeds the byte size limit of {0} and will be dropped; data: {1}",
-                            eventBodyLimitBytes,
-                            nextLine);
-                    }
-                    else
-                    {
-                        payload.Write(delimStart);
-                        payload.Write(nextLine);
-                        delimStart = ",";
-                    }
+                    events.Add(nextLine);
                 }
-
-                payload.Write("]}");
             }
+
+            var payload = new StringWriter();
+
+            batchedTextFormatter.Format(events, payload);
+
             return payload.ToString();
         }
 
@@ -244,14 +237,14 @@ namespace Serilog.Sinks.Http.Private.Network
                 }
             }
 #if HRESULTS
-			catch (IOException ex)
-			{
-				var errorCode = Marshal.GetHRForException(ex) & ((1 << 16) - 1);
-				if (errorCode != 32 && errorCode != 33)
-				{
-					SelfLog.WriteLine("Unexpected I/O exception while testing locked status of {0}: {1}", file, ex);
-				}
-			}
+            catch (IOException ex)
+            {
+                var errorCode = Marshal.GetHRForException(ex) & ((1 << 16) - 1);
+                if (errorCode != 32 && errorCode != 33)
+                {
+                    SelfLog.WriteLine("Unexpected I/O exception while testing locked status of {0}: {1}", file, ex);
+                }
+            }
 #else
             catch (IOException)
             {
