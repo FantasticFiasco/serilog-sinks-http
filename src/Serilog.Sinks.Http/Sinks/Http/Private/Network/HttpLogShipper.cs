@@ -77,7 +77,7 @@ namespace Serilog.Sinks.Http.Private.Network
             var prefix = match.Groups["prefix"];
             var postfix = match.Groups["postfix"];
 
-            bookmarkFilename = Path.GetFullPath(prefix + ".bookmark");
+            bookmarkFilename = Path.GetFullPath(prefix.Value.TrimEnd(new char[] { '-' }) + ".bookmark");
             logFolder = Path.GetDirectoryName(bookmarkFilename);
             candidateSearchPath = Path.GetFileName(prefix.Value) + "*" + postfix.Value;
             connectionSchedule = new ExponentialBackoffConnectionSchedule(period);
