@@ -35,7 +35,28 @@ namespace Serilog.Sinks.Http.Private.Sinks
             TimeSpan period,
             ITextFormatter textFormatter,
             IBatchFormatter batchFormatter,
-            IHttpClient client)
+            IHttpClient client) : this(
+                requestUri,
+                bufferBaseFilename,
+                bufferFileSizeLimitBytes,
+                batchPostingLimit,
+                period,
+                textFormatter,
+                batchFormatter,
+                client,
+                31)
+        { }
+
+        public DurableHttpSink(
+            string requestUri,
+            string pathFormat,
+            long? bufferFileSizeLimitBytes,
+            int batchPostingLimit,
+            TimeSpan period,
+            ITextFormatter textFormatter,
+            IBatchFormatter batchFormatter,
+            IHttpClient client,
+            int retainedFileCountLimit)
         {
             if (bufferFileSizeLimitBytes.HasValue && bufferFileSizeLimitBytes < 0)
                 throw new ArgumentOutOfRangeException(nameof(bufferFileSizeLimitBytes), "Negative value provided; file size limit must be non-negative.");
@@ -43,16 +64,16 @@ namespace Serilog.Sinks.Http.Private.Sinks
             shipper = new HttpLogShipper(
                 client,
                 requestUri,
-                bufferBaseFilename,
+                pathFormat,
                 batchPostingLimit,
                 period,
                 batchFormatter);
 
             sink = new RollingFileSink(
-                bufferBaseFilename + "-{Date}.json",
+                pathFormat,
                 textFormatter,
                 bufferFileSizeLimitBytes,
-                null,
+                retainedFileCountLimit,
                 Encoding.UTF8);
         }
 
