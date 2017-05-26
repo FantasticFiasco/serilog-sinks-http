@@ -22,6 +22,7 @@ using Serilog.Sinks.Http.BatchFormatters;
 using Serilog.Sinks.Http.Private.Network;
 using Serilog.Sinks.Http.Private.Sinks;
 using Serilog.Sinks.Http.TextFormatters;
+using System.Linq;
 
 namespace Serilog
 {
@@ -95,6 +96,8 @@ namespace Serilog
         /// The path for a set of files that will be used to buffer events until they can be
         /// successfully sent over the network. Individual files will be created using the
         /// pattern <paramref name="bufferBaseFilename"/>-{Date}.json. Default value is 'Buffer'.
+        /// To use file rotation that is on an 30 or 60 minute interval pass "Buffer-{Hour}.json" or
+        /// "Buffer-{HalfHour}.json"
         /// </param>
         /// <param name="bufferFileSizeLimitBytes"></param>
         /// The maximum size, in bytes, to which the buffer log file for a specific date will be
@@ -121,6 +124,10 @@ namespace Serilog
         /// A custom <see cref="IHttpClient"/> implementation. Default value is
         /// <see cref="HttpClient"/>.
         /// </param>
+        /// <param name="retainedFileCountLimit">
+        /// The maximum number of files that the system should keep. Under normal operation only 2 files will be kept, however if logstash is offline
+        /// the number of files specifieid by retainedFileCountLimit will be kept on the file system. Default value is 31.
+        /// </param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         public static LoggerConfiguration DurableHttp(
             this LoggerSinkConfiguration sinkConfiguration,
@@ -132,10 +139,17 @@ namespace Serilog
             ITextFormatter textFormatter = null,
             IBatchFormatter batchFormatter = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IHttpClient httpClient = null)
+            IHttpClient httpClient = null,
+            int retainedFileCountLimit = 31)
         {
             if (sinkConfiguration == null)
                 throw new ArgumentNullException(nameof(sinkConfiguration));
+
+            var dateFormat = new string[] { "{date}", "{hour}", "{halfhour}" };
+            if (!(from d in HttpSettings.DateFormats where bufferBaseFilename.ToLower().Contains(d) select d).Any())
+            {
+                bufferBaseFilename = bufferBaseFilename + "-{Date}.json";
+            }
 
             var sink = new DurableHttpSink(
                 requestUri,
@@ -145,7 +159,8 @@ namespace Serilog
                 period ?? TimeSpan.FromSeconds(2),
                 textFormatter ?? new NormalRenderedTextFormatter(),
                 batchFormatter ?? new DefaultBatchFormatter(),
-                httpClient ?? new HttpClientWrapper());
+                httpClient ?? new HttpClientWrapper(),
+                retainedFileCountLimit);
 
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
         }

@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Sinks.Http.Private.Time;
 using IOFile = System.IO.File;
+using System.Text.RegularExpressions;
 #if HRESULTS
 using System.Runtime.InteropServices;
 #endif
@@ -49,24 +50,36 @@ namespace Serilog.Sinks.Http.Private.Network
         public HttpLogShipper(
             IHttpClient client,
             string requestUri,
-            string bufferBaseFilename,
+            string pathFormat,
             int batchPostingLimit,
             TimeSpan period,
             IBatchFormatter batchFormatter)
         {
-            if (bufferBaseFilename == null)
-                throw new ArgumentNullException(nameof(bufferBaseFilename));
+            if (pathFormat == null)
+                throw new ArgumentNullException(nameof(pathFormat));
             if (batchPostingLimit <= 0)
                 throw new ArgumentException("batchPostingLimit must be 1 or greater", nameof(batchPostingLimit));
-            
+
+            var regex = new Regex(String.Format("(?<prefix>.+)(?:{0})(?<postfix>.*)",
+                String.Join("|", HttpSettings.DateFormats)), RegexOptions.IgnoreCase);
+
+            var match = regex.Match(pathFormat);
+            if (!match.Success)
+            {
+                throw new ArgumentException("pathFormat should include a date in the format {0}", String.Join(" or ", HttpSettings.DateFormats));
+            }
+
             this.client = client ?? throw new ArgumentNullException(nameof(client));
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
             this.batchPostingLimit = batchPostingLimit;
             this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
-            
-            bookmarkFilename = Path.GetFullPath(bufferBaseFilename + ".bookmark");
+
+            var prefix = match.Groups["prefix"];
+            var postfix = match.Groups["postfix"];
+
+            bookmarkFilename = Path.GetFullPath(prefix + ".bookmark");
             logFolder = Path.GetDirectoryName(bookmarkFilename);
-            candidateSearchPath = Path.GetFileName(bufferBaseFilename) + "*.json";
+            candidateSearchPath = Path.GetFileName(prefix.Value) + "*" + postfix.Value;
             connectionSchedule = new ExponentialBackoffConnectionSchedule(period);
             timer = new PortableTimer(OnTick);
 
