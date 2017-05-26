@@ -91,14 +91,22 @@ namespace Serilog
         /// </summary>
         /// <param name="sinkConfiguration">The logger configuration.</param>
         /// <param name="requestUri">The URI the request is sent to.</param>
-        /// <param name="bufferBaseFilename">
-        /// The path for a set of files that will be used to buffer events until they can be
-        /// successfully sent over the network. Individual files will be created using the
-        /// pattern <paramref name="bufferBaseFilename"/>-{Date}.json. Default value is 'Buffer'.
+        /// <param name="bufferPathFormat">
+        /// The path format for a set of files that will be used to buffer events until they can be
+        /// successfully sent over the network. Default value is "Buffer-{Date}.json". To use file
+        /// rotation that is on an 30 or 60 minute interval pass "Buffer-{Hour}.json" or
+        /// "Buffer-{HalfHour}.json".
         /// </param>
-        /// <param name="bufferFileSizeLimitBytes"></param>
+        /// <param name="bufferFileSizeLimitBytes">
         /// The maximum size, in bytes, to which the buffer log file for a specific date will be
         /// allowed to grow. By default no limit will be applied.
+        /// </param>
+        /// <param name="retainedBufferFileCountLimit">
+        /// The maximum number of buffer files that will be retained, including the current buffer
+        /// file. Under normal operation only 2 files will be kept, however if the log server is
+        /// unreachable, the number of files specifieid by <paramref name="retainedBufferFileCountLimit"/>
+        /// will be kept on the file system. For unlimited retention, pass null. Default value is 31.
+        /// </param>
         /// <param name="batchPostingLimit">
         /// The maximum number of events to post in a single batch. Default value is 1000.
         /// </param>
@@ -125,8 +133,9 @@ namespace Serilog
         public static LoggerConfiguration DurableHttp(
             this LoggerSinkConfiguration sinkConfiguration,
             string requestUri,
-            string bufferBaseFilename = "Buffer",
+            string bufferPathFormat = "Buffer-{Date}.json",
             long? bufferFileSizeLimitBytes = null,
+            int? retainedBufferFileCountLimit = 31,
             int batchPostingLimit = 1000,
             TimeSpan? period = null,
             ITextFormatter textFormatter = null,
@@ -139,8 +148,9 @@ namespace Serilog
 
             var sink = new DurableHttpSink(
                 requestUri,
-                bufferBaseFilename,
+                bufferPathFormat,
                 bufferFileSizeLimitBytes,
+                retainedBufferFileCountLimit,
                 batchPostingLimit,
                 period ?? TimeSpan.FromSeconds(2),
                 textFormatter ?? new NormalRenderedTextFormatter(),
