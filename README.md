@@ -163,7 +163,7 @@ Example:
 
 ### Install via NuGet
 
-If you want to include the HTTP POST sink in your project, you can [install it directly from NuGet](https://www.nuget.org/packages/Serilog.Sinks.Http/).
+If you want to include the HTTP sink in your project, you can [install it directly from NuGet](https://www.nuget.org/packages/Serilog.Sinks.Http/).
 
 To install the sink, run the following command in the Package Manager Console:
 
