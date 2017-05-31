@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 - [#8](https://github.com/FantasticFiasco/serilog-sinks-http/issues/8) [BREAKING CHANGE] Support for [Serilog.Settings.Configuration](https://github.com/serilog/serilog-settings-configuration) required changing the extension methods configuring a HTTP sink. `Options` and `DurableOptions` no longer exist, and their properties are now optional parameters on the extension methods instead.
 - [#11](https://github.com/FantasticFiasco/serilog-sinks-http/issues/11) Support for HTTP body configuration using `IBatchFormatter` and `ITextFormatter`. This enables full control of how messages are serialized before being sent over the network. (contribution by [@kvpt](https://github.com/kvpt))
+- [#19](https://github.com/FantasticFiasco/serilog-sinks-http/issues/19) Support for specifying the maximum number of retained buffer files and their rotation period on the durable HTTP sink. (contribution by [@rob-somerville](https://github.com/rob-somerville))
 
 ### Changed
 

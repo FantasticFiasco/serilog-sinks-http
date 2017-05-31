@@ -33,6 +33,8 @@ namespace Serilog.Sinks.Http.Private.Network
     {
         private static readonly TimeSpan RequiredLevelCheckInterval = TimeSpan.FromMinutes(2);
         private static readonly string ContentType = "application/json";
+        private static Regex BufferPathFormatRegex = new Regex(
+            $"(?<prefix>.+)(?:{string.Join("|", Enum.GetNames(typeof(DateFormats)).Select(x => $"{{{x}}}"))})(?<postfix>.+)");
 
         private readonly string requestUri;
         private readonly int batchPostingLimit;
@@ -50,36 +52,35 @@ namespace Serilog.Sinks.Http.Private.Network
         public HttpLogShipper(
             IHttpClient client,
             string requestUri,
-            string pathFormat,
+            string bufferPathFormat,
             int batchPostingLimit,
             TimeSpan period,
             IBatchFormatter batchFormatter)
         {
-            if (pathFormat == null)
-                throw new ArgumentNullException(nameof(pathFormat));
+            if (bufferPathFormat == null)
+                throw new ArgumentNullException(nameof(bufferPathFormat));
+            if (bufferPathFormat != bufferPathFormat.Trim())
+                throw new ArgumentException("bufferPathFormat must not contain any leading or trailing whitespaces", nameof(bufferPathFormat));
             if (batchPostingLimit <= 0)
                 throw new ArgumentException("batchPostingLimit must be 1 or greater", nameof(batchPostingLimit));
-
-            var regex = new Regex(String.Format("(?<prefix>.+)(?:{0})(?<postfix>.*)",
-                String.Join("|", HttpSettings.DateFormats)), RegexOptions.IgnoreCase);
-
-            var match = regex.Match(pathFormat);
-            if (!match.Success)
-            {
-                throw new ArgumentException("pathFormat should include a date in the format {0}", String.Join(" or ", HttpSettings.DateFormats));
-            }
 
             this.client = client ?? throw new ArgumentNullException(nameof(client));
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
             this.batchPostingLimit = batchPostingLimit;
             this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
 
-            var prefix = match.Groups["prefix"];
-            var postfix = match.Groups["postfix"];
+            var bufferPathFormatMatch = BufferPathFormatRegex.Match(bufferPathFormat);
+            if (!bufferPathFormatMatch.Success)
+            {
+                throw new ArgumentException($"bufferPathFormat must include one of the date formats [{string.Join(", ", Enum.GetNames(typeof(DateFormats)))}]");
+            }
+
+            var prefix = bufferPathFormatMatch.Groups["prefix"];
+            var postfix = bufferPathFormatMatch.Groups["postfix"];
 
             bookmarkFilename = Path.GetFullPath(prefix.Value.TrimEnd(new char[] { '-' }) + ".bookmark");
             logFolder = Path.GetDirectoryName(bookmarkFilename);
-            candidateSearchPath = Path.GetFileName(prefix.Value) + "*" + postfix.Value;
+            candidateSearchPath = $"{Path.GetFileName(prefix.Value)}*{postfix.Value}";
             connectionSchedule = new ExponentialBackoffConnectionSchedule(period);
             timer = new PortableTimer(OnTick);
 
