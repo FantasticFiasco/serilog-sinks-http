@@ -25,7 +25,12 @@ using Serilog.Sinks.PeriodicBatching;
 
 namespace Serilog.Sinks.Http.Private.Sinks
 {
-    internal class HttpSink : PeriodicBatchingSink
+    /// <summary>
+    /// A non durable sink that sends log events using HTTP POST over the network. A non-durable
+    /// sink will lose data after a system or process restart.
+    /// </summary>
+    /// <seealso cref="PeriodicBatchingSink" />
+    public class HttpSink : PeriodicBatchingSink
     {
         private static readonly string ContentType = "application/json";
 
@@ -35,6 +40,9 @@ namespace Serilog.Sinks.Http.Private.Sinks
 
         private IHttpClient client;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpSink"/> class.
+        /// </summary>
         public HttpSink(
             string requestUri,
             int batchPostingLimit,
@@ -50,6 +58,9 @@ namespace Serilog.Sinks.Http.Private.Sinks
             this.client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
+        /// <summary>
+        /// Emit a batch of log events, running asynchronously.
+        /// </summary>
         protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
         {
             var payload = FormatPayload(events);

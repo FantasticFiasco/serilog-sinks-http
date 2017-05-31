@@ -22,41 +22,31 @@ using Serilog.Sinks.RollingFile;
 
 namespace Serilog.Sinks.Http.Private.Sinks
 {
-    internal class DurableHttpSink : ILogEventSink, IDisposable
+    /// <summary>
+    /// A durable sink that sends log events using HTTP POST over the network. A durable sink will
+    /// persist log events on disk before sending them over the network, thus protecting against
+    /// data loss after a system or process restart.
+    /// </summary>
+    /// <seealso cref="ILogEventSink" />
+    /// <seealso cref="IDisposable" />
+    public class DurableHttpSink : ILogEventSink, IDisposable
     {
         private readonly HttpLogShipper shipper;
         private readonly RollingFileSink sink;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DurableHttpSink"/> class.
+        /// </summary>
         public DurableHttpSink(
             string requestUri,
-            string bufferBaseFilename,
+            string bufferPathFormat,
             long? bufferFileSizeLimitBytes,
+            int? retainedBufferFileCountLimit,
             int batchPostingLimit,
             TimeSpan period,
             ITextFormatter textFormatter,
             IBatchFormatter batchFormatter,
-            IHttpClient client) : this(
-                requestUri,
-                bufferBaseFilename,
-                bufferFileSizeLimitBytes,
-                batchPostingLimit,
-                period,
-                textFormatter,
-                batchFormatter,
-                client,
-                31)
-        { }
-
-        public DurableHttpSink(
-            string requestUri,
-            string pathFormat,
-            long? bufferFileSizeLimitBytes,
-            int batchPostingLimit,
-            TimeSpan period,
-            ITextFormatter textFormatter,
-            IBatchFormatter batchFormatter,
-            IHttpClient client,
-            int retainedFileCountLimit)
+            IHttpClient client)
         {
             if (bufferFileSizeLimitBytes.HasValue && bufferFileSizeLimitBytes < 0)
                 throw new ArgumentOutOfRangeException(nameof(bufferFileSizeLimitBytes), "Negative value provided; file size limit must be non-negative.");
@@ -64,24 +54,31 @@ namespace Serilog.Sinks.Http.Private.Sinks
             shipper = new HttpLogShipper(
                 client,
                 requestUri,
-                pathFormat,
+                bufferPathFormat,
                 batchPostingLimit,
                 period,
                 batchFormatter);
 
             sink = new RollingFileSink(
-                pathFormat,
+                bufferPathFormat,
                 textFormatter,
                 bufferFileSizeLimitBytes,
-                retainedFileCountLimit,
+                retainedBufferFileCountLimit,
                 Encoding.UTF8);
         }
 
+        /// <summary>
+        /// Emit the provided log event to the sink.
+        /// </summary>
         public void Emit(LogEvent logEvent)
         {
             sink.Emit(logEvent);
         }
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting
+        /// unmanaged resources.
+        /// </summary>
         public void Dispose()
         {
             sink.Dispose();
