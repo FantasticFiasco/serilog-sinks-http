@@ -26,7 +26,7 @@ using Serilog.Sinks.PeriodicBatching;
 namespace Serilog.Sinks.Http.Private.Sinks
 {
     /// <summary>
-    /// A non durable sink that sends log events using HTTP POST over the network. A non-durable
+    /// A non-durable sink that sends log events using HTTP POST over the network. A non-durable
     /// sink will lose data after a system or process restart.
     /// </summary>
     /// <seealso cref="PeriodicBatchingSink" />

@@ -32,7 +32,7 @@ namespace Serilog
     public static class LoggerSinkConfigurationExtensions
     {
         /// <summary>
-        /// Adds a non durable sink that sends log events using HTTP POST over the network. A
+        /// Adds a non-durable sink that sends log events using HTTP POST over the network. A
         /// non-durable sink will lose data after a system or process restart.
         /// </summary>
         /// <param name="sinkConfiguration">The logger configuration.</param>
@@ -104,7 +104,7 @@ namespace Serilog
         /// <param name="retainedBufferFileCountLimit">
         /// The maximum number of buffer files that will be retained, including the current buffer
         /// file. Under normal operation only 2 files will be kept, however if the log server is
-        /// unreachable, the number of files specifieid by <paramref name="retainedBufferFileCountLimit"/>
+        /// unreachable, the number of files specified by <paramref name="retainedBufferFileCountLimit"/>
         /// will be kept on the file system. For unlimited retention, pass null. Default value is 31.
         /// </param>
         /// <param name="batchPostingLimit">
