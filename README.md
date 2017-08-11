@@ -168,7 +168,7 @@ public interface ITextFormatter
 }
 ```
 
-#### Formatter 1 - `NormalRenderedTextFormatter`
+#### Event formatter 1 (default) - `NormalRenderedTextFormatter`
 
 The log event is normally formatted and the message template is rendered into a message. This is the most verbose formatting type and its network load is higher than the other options.
 
@@ -188,7 +188,7 @@ The log event is normally formatted and the message template is rendered into a 
 }
 ```
 
-#### Formatter 2 - `NormalTextFormatter`
+#### Event formatter 2 - `NormalTextFormatter`
 
 The log event is normally formatted and its data normalized. The lack of a rendered message means improved network load compared to `NormalRenderedTextFormatter`. Often this formatting type is complemented with a log server that is capable of rendering the messages of the incoming log events.
 
@@ -207,7 +207,7 @@ The log event is normally formatted and its data normalized. The lack of a rende
 }
 ```
 
-#### Formatter 3 - `CompactRenderedTextFormatter`
+#### Event formatter 3 - `CompactRenderedTextFormatter`
 
 The log event is formatted with minimizing size as a priority but still render the message template into a message. This formatting type reduces the network load and should be used in situations where bandwidth is of importance.
 
@@ -230,7 +230,7 @@ The compact formatter adheres to the following rules:
 }
 ```
 
-#### Formatter 4 - `CompactTextFormatter`
+#### Event formatter 4 - `CompactTextFormatter`
 
 The log event is formatted with minimizing size as a priority and its data is normalized. The lack of a rendered message means even smaller network load compared to `CompactRenderedTextFormatter` and should be used in situations where bandwidth is of importance. Often this formatting type is complemented with a log server that is capable of rendering the messages of the incoming log events.
 
