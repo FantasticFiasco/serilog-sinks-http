@@ -15,9 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using Serilog.Events;
-using Serilog.Formatting;
 
 namespace Serilog.Sinks.Http.BatchFormatters
 {
@@ -26,8 +23,8 @@ namespace Serilog.Sinks.Http.BatchFormatters
     /// <para/>
     /// Example:
     /// [
-    ///   { "Message": "Event n" },
-    ///   { "Message": "Event n+1" }
+    ///   { event n },
+    ///   { event n+1 }
     /// ]
     /// </summary>
     public class ArrayBatchFormatter : BatchFormatter

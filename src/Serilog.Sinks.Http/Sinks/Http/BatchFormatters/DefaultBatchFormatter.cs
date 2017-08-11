@@ -24,8 +24,8 @@ namespace Serilog.Sinks.Http.BatchFormatters
     /// Example:
     /// {
     ///   "events": [
-    ///     { "Message": "Event n" },
-    ///     { "Message": "Event n+1" }
+    ///     { event n },
+    ///     { event n+1 }
     ///   ]
     /// }
     /// </summary>
