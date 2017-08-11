@@ -15,31 +15,32 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using Serilog.Events;
+using Serilog.Formatting;
 
 namespace Serilog.Sinks.Http.BatchFormatters
 {
     /// <summary>
-    /// Formatter serializing batches of log events into a JSON object under a property called 'events'.
+    /// Formatter serializing batches of log events into a JSON array.
     /// <para/>
     /// Example:
-    /// {
-    ///   "events": [
-    ///     { "Message": "Event n" },
-    ///     { "Message": "Event n+1" }
-    ///   ]
-    /// }
+    /// [
+    ///   { "Message": "Event n" },
+    ///   { "Message": "Event n+1" }
+    /// ]
     /// </summary>
-    public class DefaultBatchFormatter : BatchFormatter
+    public class ArrayBatchFormatter : BatchFormatter
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DefaultBatchFormatter"/> class.
+        /// Initializes a new instance of the <see cref="ArrayBatchFormatter"/> class.
         /// </summary>
         /// <param name="eventBodyLimitBytes">
         /// The maximum size, in bytes, that the JSON representation of an event may take before it
         /// is dropped rather than being sent to the server. Specify null for no limit. Default
         /// value is 256 KB.
         /// </param>
-        public DefaultBatchFormatter(long? eventBodyLimitBytes = 256 * 1024)
+        public ArrayBatchFormatter(long? eventBodyLimitBytes = 256 * 1024)
             : base(eventBodyLimitBytes)
         {
         }
@@ -60,7 +61,7 @@ namespace Serilog.Sinks.Http.BatchFormatters
             if (output == null)
                 throw new ArgumentNullException(nameof(output));
 
-            output.Write("{\"events\":[");
+            output.Write("[");
 
             var delimStart = string.Empty;
 
@@ -79,7 +80,7 @@ namespace Serilog.Sinks.Http.BatchFormatters
                 }
             }
 
-            output.Write("]}");
+            output.Write("]");
         }
     }
 }
