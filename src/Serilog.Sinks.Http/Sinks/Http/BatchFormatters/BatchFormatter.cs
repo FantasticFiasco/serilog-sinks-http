@@ -84,7 +84,7 @@ namespace Serilog.Sinks.Http.BatchFormatters
 		public abstract void Format(IEnumerable<string> logEvents, TextWriter output);
 
         /// <summary>
-        /// Checks the size of the event body.
+        /// Checks the size of the log event body.
         /// </summary>
         /// <returns>true if body size is within acceptable range; otherwise false.</returns>
         protected bool CheckEventBodySize(string json)
