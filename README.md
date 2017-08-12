@@ -254,7 +254,7 @@ The compact formatter adheres to the following rules:
 
 ### Batch formatters
 
-The sink comes pre-loaded with two batch JSON based formatters where `DefaultBatchFormatter` is the default. You can decide to configure your sink to use any of these two, or write your own by implementing `IBatchFormatter`.
+The sink comes pre-loaded with two JSON based batch formatters where `DefaultBatchFormatter` is the default. You can decide to configure your sink to use any of these two, or write your own by implementing `IBatchFormatter`.
 
 ```csharp
 /// <summary>
