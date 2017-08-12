@@ -147,7 +147,7 @@ The batch formatter has the responsibility of batching a sequence of log events 
 
 ### Event formatters
 
-The sink comes pre-loaded with four event formatters where `NormalRenderedTextFormatter` is the default. You can decide to configure your sink to use any of these four, or write your own by implementing `ITextFormatter`.
+The sink comes pre-loaded with four JSON based event formatters where `NormalRenderedTextFormatter` is the default. You can decide to configure your sink to use any of these four, or write your own by implementing `ITextFormatter`.
 
 ```csharp
 /// <summary>
@@ -254,19 +254,7 @@ The compact formatter adheres to the following rules:
 
 ### Batch formatters
 
-The sink comes pre-loaded with a batch formatter called `DefaultBatchFormatter`. It creates a JSON object with a property called `events` that holds the log events sent over the network.
-
-Example:
-```json
-{
-  "events": [
-    { "Message": "Event n" },
-    { "Message": "Event n+1" }
-  ]
-}
-```
-
-You can decide to use this batch formatter, or write your own by implementing `IBatchFormatter`.
+The sink comes pre-loaded with two batch JSON based formatters where `DefaultBatchFormatter` is the default. You can decide to configure your sink to use any of these two, or write your own by implementing `IBatchFormatter`.
 
 ```csharp
 /// <summary>
@@ -299,6 +287,30 @@ public interface IBatchFormatter
   /// </param>
   void Format(IEnumerable<string> logEvents, TextWriter output);
 }
+```
+
+#### Batch formatter 1 (default) - `DefaultBatchFormatter`
+
+A sequence of log events are stored in a JSON object under a property called `events`. This formatter is inspired by the [Seq sink](https://github.com/serilog/serilog-sinks-seq).
+
+```json
+{
+  "events": [
+    { event n },
+    { event n+1 }
+  ]
+}
+```
+
+#### Batch formatter 2 - `ArrayBatchFormatter`
+
+A sequence of log events are stored as a JSON array. This formatter is compatible with the Logstash HTTP input plugin configured to use the JSON codec. 
+
+```json
+[
+  { event n },
+  { event n+1 }
+]
 ```
 
 ## Install via NuGet
