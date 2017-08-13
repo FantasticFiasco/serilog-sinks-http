@@ -10,6 +10,10 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 - [#22](https://github.com/FantasticFiasco/serilog-sinks-http/issues/22) Batch formatter `ArrayBatchFormatter` which is compatible with the Logstash HTTP input plugin configured to use the JSON codec
 
+### Fixed
+
+- Prevent posting HTTP messages without any log events
+
 ## [4.0.0] - 2017-06-17
 
 ### Added

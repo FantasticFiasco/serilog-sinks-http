@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Serilog.Sinks.Http.BatchFormatters
 {
@@ -59,6 +60,12 @@ namespace Serilog.Sinks.Http.BatchFormatters
                 throw new ArgumentNullException(nameof(logEvents));
             if (output == null)
                 throw new ArgumentNullException(nameof(output));
+
+            // Abort if sequence of log events is empty
+            if (!logEvents.Any())
+            {
+                return;
+            }
 
             output.Write("{\"events\":[");
 
