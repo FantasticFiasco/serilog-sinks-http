@@ -5,12 +5,11 @@ using Newtonsoft.Json;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.Http.LogServer.Controllers.Dto;
-using Serilog.Sinks.Http.TextFormatters;
 using Serilog.Support;
 using Shouldly;
 using Xunit;
 
-namespace Serilog.Sinks.Http.Private.TextFormatters
+namespace Serilog.Sinks.Http.TextFormatters
 {
     public class NormalTextFormatterTest
     {
