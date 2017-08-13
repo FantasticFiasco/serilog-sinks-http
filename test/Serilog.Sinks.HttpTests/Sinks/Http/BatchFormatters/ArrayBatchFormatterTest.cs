@@ -1,9 +1,5 @@
 ﻿using Newtonsoft.Json;
-using Serilog.Events;
-using Serilog.Formatting;
 using Serilog.Sinks.Http.LogServer.Controllers.Dto;
-using Serilog.Sinks.Http.TextFormatters;
-using Serilog.Support;
 using Shouldly;
 using System.IO;
 using System.Linq;
@@ -11,19 +7,8 @@ using Xunit;
 
 namespace Serilog.Sinks.Http.BatchFormatters
 {
-    public class ArrayBatchFormatterTest
+    public class ArrayBatchFormatterTest : BatchFormatterFixture
     {
-        private readonly LogEvent[] logEvents;
-        private readonly ITextFormatter textFormatter;
-        private readonly StringWriter output;
-
-        public ArrayBatchFormatterTest()
-        {
-            logEvents = new LogEvent[] { Some.DebugEvent(), Some.DebugEvent() };
-            textFormatter = new NormalTextFormatter();
-            output = new StringWriter();
-        }
-
         [Fact]
         public void FormatLogEvents()
         {
