@@ -20,7 +20,7 @@ $suffix = @{ $true = ""; $false = "$branch-$revision"}[$branch -eq "master" -and
 
 Write-Host "build: Version suffix is '$suffix'"
 
-foreach ($src in ls src/*) {
+foreach ($src in Get-ChildItem src/*) {
     Push-Location $src
 
     Write-Host "build: Packaging project in $src"
@@ -31,7 +31,7 @@ foreach ($src in ls src/*) {
     Pop-Location
 }
 
-foreach ($test in ls test/*Tests) {
+foreach ($test in Get-ChildItem test/*Tests) {
     Push-Location $test
 
     Write-Host "build: Testing project in $test"
