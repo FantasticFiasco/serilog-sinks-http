@@ -8,6 +8,8 @@ if (Test-Path .\artifacts) {
     Remove-Item .\artifacts -Force -Recurse
 }
 
+& dotnet --version
+
 Write-Host "build: Install NuGet packages"
 & dotnet restore --no-cache
 
