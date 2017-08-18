@@ -18,7 +18,7 @@ if ($branch -like "*/*") { $branch = $branch.Substring($branch.LastIndexOf("/") 
 $revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUILD_NUMBER, 10); $false = "local" }[$env:APPVEYOR_BUILD_NUMBER -ne $NULL];
 $suffix = @{ $true = ""; $false = "$branch-$revision"}[$branch -eq "master" -and $revision -ne "local"]
 
-Write-Host "build: Version suffix is $suffix"
+Write-Host "build: Version suffix is '$suffix'"
 
 foreach ($src in ls src/*) {
     Push-Location $src
