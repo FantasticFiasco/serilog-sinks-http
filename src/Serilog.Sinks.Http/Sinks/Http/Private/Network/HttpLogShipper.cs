@@ -33,7 +33,7 @@ namespace Serilog.Sinks.Http.Private.Network
     {
         private static readonly TimeSpan RequiredLevelCheckInterval = TimeSpan.FromMinutes(2);
         private static readonly string ContentType = "application/json";
-        private static Regex BufferPathFormatRegex = new Regex(
+        private static readonly Regex BufferPathFormatRegex = new Regex(
             $"(?<prefix>.+)(?:{string.Join("|", Enum.GetNames(typeof(DateFormats)).Select(x => $"{{{x}}}"))})(?<postfix>.+)");
 
         private readonly string requestUri;
