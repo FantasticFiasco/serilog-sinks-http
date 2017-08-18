@@ -10,8 +10,7 @@ if (Test-Path .\artifacts) {
     Remove-Item .\artifacts -Force -Recurse
 }
 
-$dotnetVersion = & dotnet --version
-Write-Host "dotnet v$dotnetVersion"
+Write-Host "dotnet v${& dotnet --version}"
 
 Write-Host "build: Install NuGet packages"
 & dotnet restore --no-cache
