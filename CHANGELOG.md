@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+## [4.2.0] - 2017-08-20
+
 ### Added
 
 - Support for .NET Core 2.0
