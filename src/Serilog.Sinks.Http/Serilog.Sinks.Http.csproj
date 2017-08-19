@@ -3,8 +3,8 @@
   <PropertyGroup>
     <VersionPrefix>4.1.0</VersionPrefix>
     <AssemblyName>Serilog.Sinks.Http</AssemblyName>
-    <Description>Serilog event sink that sends HTTP POST requests over the network.</Description>
-    <TargetFrameworks>net45;netstandard1.3</TargetFrameworks>
+    <Description>A Serilog sink sending log events over HTTP.</Description>
+    <TargetFrameworks>net45;netstandard1.3;netstandard2.0</TargetFrameworks>
     <RootNamespace>Serilog</RootNamespace>
     <Authors>Mattias Kindborg</Authors>
     <Company />
@@ -23,8 +23,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Serilog" Version="2.4.0" />
-    <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.0.1" />
+    <PackageReference Include="Serilog" Version="2.5.0" />
+    <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.1.1" />
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
   </ItemGroup>
 
