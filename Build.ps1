@@ -2,6 +2,7 @@ $logo = (Invoke-WebRequest "https://raw.githubusercontent.com/FantasticFiasco/lo
 Write-Host "$logo" -ForegroundColor Green
 
 Write-Host "build: Build started"
+Write-Host "build: dotnet v$(dotnet --version)"
 
 Push-Location $PSScriptRoot
 
@@ -9,8 +10,6 @@ if (Test-Path .\artifacts) {
     Write-Host "build: Cleaning .\artifacts"
     Remove-Item .\artifacts -Force -Recurse
 }
-
-Write-Host "build: dotnet v$(dotnet --version)"
 
 Write-Host "build: Install NuGet packages"
 & dotnet restore --no-cache
