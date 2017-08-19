@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="2.0.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-preview-20170628-02" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
     <PackageReference Include="Polly" Version="5.3.1" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="2.4.0" />
     <PackageReference Include="Shouldly" Version="2.8.3" />
