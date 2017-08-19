@@ -2,7 +2,7 @@ $logo = (Invoke-WebRequest "https://raw.githubusercontent.com/FantasticFiasco/lo
 Write-Host "$logo" -ForegroundColor Green
 
 Write-Host "build: Build started"
-Write-Host "build: dotnet v$(dotnet --version)"
+Write-Host "build: dotnet cli v$(dotnet --version)"
 
 Push-Location $PSScriptRoot
 
