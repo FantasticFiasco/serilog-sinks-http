@@ -4,7 +4,7 @@ Write-Host "$logo" -ForegroundColor Green
 Write-Host "build: Build started"
 Write-Host "build: dotnet cli v$(dotnet --version)"
 
-Push-Location $PSScriptRoot
+Push-Location $PSScriptRoot\..
 
 if (Test-Path .\artifacts) {
     Write-Host "build: Cleaning .\artifacts"

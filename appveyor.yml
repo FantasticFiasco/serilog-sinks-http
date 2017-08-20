@@ -24,7 +24,7 @@ configuration: Release
 
 # to run your custom scripts instead of automatic MSBuild
 build_script:
-- ps: ./Build.ps1
+- ps: ./build/build.ps1
 
 #---------------------------------#
 #       tests configuration       #

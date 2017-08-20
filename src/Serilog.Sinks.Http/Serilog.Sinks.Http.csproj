@@ -13,7 +13,7 @@
     <TreatSpecificWarningsAsErrors />
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
-    <AssemblyOriginatorKeyFile>../../Serilog.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>../../serilog.snk</AssemblyOriginatorKeyFile>
     <PackageId>Serilog.Sinks.Http</PackageId>
     <PackageTags>serilog;http</PackageTags>
     <PackageIconUrl>http://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
