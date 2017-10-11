@@ -160,7 +160,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 httpClient.Object);
 
             // Act
-            await Task.Delay(TimeSpan.FromSeconds(180));
+            await Task.Delay(TimeSpan.FromMinutes(3));
 
             // Assert
             httpClient.Verify(
