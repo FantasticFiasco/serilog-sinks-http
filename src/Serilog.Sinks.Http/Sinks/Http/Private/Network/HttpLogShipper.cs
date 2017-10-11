@@ -145,6 +145,9 @@ namespace Serilog.Sinks.Http.Private.Network
                                 nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
                             }
 
+                            if (string.IsNullOrEmpty(payload))
+                                continue;;
+
                             var content = new StringContent(payload, Encoding.UTF8, ContentType);
 
                             var result = await client.PostAsync(requestUri, content).ConfigureAwait(false);
