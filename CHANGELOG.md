@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+### Fixed
+
+- [#32](https://github.com/FantasticFiasco/serilog-sinks-http/issues/32) Prevent durable HTTP sink from posting HTTP messages without any log events
+
 ## [4.2.0] - 2017-08-20
 
 ### Added
