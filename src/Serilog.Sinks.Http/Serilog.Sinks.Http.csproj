@@ -4,7 +4,7 @@
     <VersionPrefix>4.2.1</VersionPrefix>
     <AssemblyName>Serilog.Sinks.Http</AssemblyName>
     <Description>A Serilog sink sending log events over HTTP.</Description>
-    <TargetFrameworks>net45;netstandard1.3;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net45;netstandard1.3</TargetFrameworks>
     <RootNamespace>Serilog</RootNamespace>
     <Authors>Mattias Kindborg</Authors>
     <Company />

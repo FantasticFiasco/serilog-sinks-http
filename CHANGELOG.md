@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+### Removed
+
+- Support for .NET Standard 2.0 since the sink also has support for .NET Standard 1.3
+
 ## [4.2.1] - 2017-10-11
 
 ### Fixed
