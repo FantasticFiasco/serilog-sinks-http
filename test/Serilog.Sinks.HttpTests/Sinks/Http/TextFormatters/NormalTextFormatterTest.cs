@@ -29,7 +29,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         [InlineData(LogEventLevel.Warning)]
         [InlineData(LogEventLevel.Error)]
         [InlineData(LogEventLevel.Fatal)]
-        public void LogEventLevels(LogEventLevel level)
+        public void Level(LogEventLevel level)
         {
             // Arrange
             logger = CreateLogger(new NormalRenderedTextFormatter());
@@ -45,7 +45,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void EmptyEvent(bool isRenderingMessage)
+        public void Message(bool isRenderingMessage)
         {
             // Arrange
             logger = CreateLogger(isRenderingMessage ? 
@@ -69,7 +69,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void MinimalEvent(bool isRenderingMessage)
+        public void PropertyInMessageTemplate(bool isRenderingMessage)
         {
             // Arrange
             logger = CreateLogger(isRenderingMessage ?
@@ -93,7 +93,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void MultipleProperties(bool isRenderingMessage)
+        public void PropertiesInMessageTemplate(bool isRenderingMessage)
         {
             // Arrange
             logger = CreateLogger(isRenderingMessage ?
@@ -117,7 +117,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void Exceptions(bool isRenderingMessage)
+        public void EnrichedProperties(bool isRenderingMessage)
         {
             // Arrange
             logger = CreateLogger(isRenderingMessage ?
@@ -125,47 +125,25 @@ namespace Serilog.Sinks.Http.TextFormatters
                 new NormalTextFormatter());
 
             // Act
-            logger.Information(new DivideByZeroException(), "With exception");
+            logger
+                .ForContext("First", "One")
+                .ForContext("Second", "Two")
+                .Information("No properties");
 
             // Assert
             var @event = GetEvent();
             @event.Timestamp.ShouldNotBeNull();
-            @event.Level.ShouldBe("Information");
-            @event.MessageTemplate.ShouldBe("With exception");
-            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "With exception" : null);
-            @event.Exception.ShouldNotBeNull();
-            @event.Properties.ShouldBeNull();
+            @event.MessageTemplate.ShouldBe("No properties");
+            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "No properties" : null);
+            @event.Exception.ShouldBeNull();
+            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Second", "Two" }, { "First", "One" } });
             @event.Renderings.ShouldBeNull();
         }
 
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void ExceptionAndProperties(bool isRenderingMessage)
-        {
-            // Arrange
-            logger = CreateLogger(isRenderingMessage ?
-                new NormalRenderedTextFormatter() :
-                new NormalTextFormatter());
-
-            // Act
-            logger.Information(new DivideByZeroException(), "With exception and {Property}", 42);
-
-            // Assert
-            var @event = GetEvent();
-            @event.Timestamp.ShouldNotBeNull();
-            @event.Level.ShouldBe("Information");
-            @event.MessageTemplate.ShouldBe("With exception and {Property}");
-            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "With exception and 42" : null);
-            @event.Exception.ShouldNotBeNull();
-            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Property", "42" } });
-            @event.Renderings.ShouldBeNull();
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void Renderings(bool isRenderingMessage)
+        public void Rendering(bool isRenderingMessage)
         {
             // Arrange
             logger = CreateLogger(isRenderingMessage ?
@@ -191,7 +169,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void MultipleRenderings(bool isRenderingMessage)
+        public void Renderings(bool isRenderingMessage)
         {
             // Arrange
             logger = CreateLogger(isRenderingMessage ?
@@ -215,6 +193,54 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event.Renderings.ShouldContainKey("Second");
             @event.Renderings["Second"].Length.ShouldBe(1);
             @event.Renderings["Second"][0].ShouldBe(new RenderingDto { Format = "x8", Rendering = "00000002" });
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Exception(bool isRenderingMessage)
+        {
+            // Arrange
+            logger = CreateLogger(isRenderingMessage ?
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
+
+            // Act
+            logger.Information(new DivideByZeroException(), "With exception");
+
+            // Assert
+            var @event = GetEvent();
+            @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
+            @event.MessageTemplate.ShouldBe("With exception");
+            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "With exception" : null);
+            @event.Exception.ShouldNotBeNull();
+            @event.Properties.ShouldBeNull();
+            @event.Renderings.ShouldBeNull();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ExceptionAndProperty(bool isRenderingMessage)
+        {
+            // Arrange
+            logger = CreateLogger(isRenderingMessage ?
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
+
+            // Act
+            logger.Information(new DivideByZeroException(), "With exception and {Property}", 42);
+
+            // Assert
+            var @event = GetEvent();
+            @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
+            @event.MessageTemplate.ShouldBe("With exception and {Property}");
+            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "With exception and 42" : null);
+            @event.Exception.ShouldNotBeNull();
+            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Property", "42" } });
+            @event.Renderings.ShouldBeNull();
         }
 
         [Theory]

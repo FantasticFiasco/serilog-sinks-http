@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using Serilog.Events;
@@ -10,13 +11,13 @@ using Xunit;
 
 namespace Serilog.Sinks.Http.TextFormatters
 {
-    public class CompactTextFormatterTest
+    public class NamespacedTextFormatterTest
     {
         private readonly StringWriter output;
 
         private ILogger logger;
 
-        public CompactTextFormatterTest()
+        public NamespacedTextFormatterTest()
         {
             output = new StringWriter();
         }
@@ -31,22 +32,14 @@ namespace Serilog.Sinks.Http.TextFormatters
         public void Level(LogEventLevel level)
         {
             // Arrange
-            logger = CreateLogger(new CompactRenderedTextFormatter());
+            logger = CreateLogger(new TestFormatter("component", "subComponent", true));
 
             // Act
             logger.Write(level, "No properties");
 
             // Assert
             var @event = GetEvent();
-
-            if (level == LogEventLevel.Information)
-            {
-                @event.Level.ShouldBeNull();
-            }
-            else
-            {
-                @event.Level.ShouldNotBeNull();
-            }
+            @event.Level.ShouldNotBeNull();
         }
 
         [Theory]
@@ -55,9 +48,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         public void Message(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(isRenderingMessage ?
-                new CompactRenderedTextFormatter() :
-                new CompactTextFormatter());
+            logger = CreateLogger(new TestFormatter("component", "subComponent", isRenderingMessage));
 
             // Act
             logger.Information("No properties");
@@ -65,10 +56,11 @@ namespace Serilog.Sinks.Http.TextFormatters
             // Assert
             var @event = GetEvent();
             @event.Timestamp.ShouldNotBeNull();
-            @event.Level.ShouldBeNull();
+            @event.Level.ShouldBe("Information");
             @event.MessageTemplate.ShouldBe("No properties");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "No properties" : null);
             @event.Exception.ShouldBeNull();
+            @event.Properties.ShouldBeNull();
             @event.Renderings.ShouldBeNull();
         }
 
@@ -78,9 +70,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         public void PropertyInMessageTemplate(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(isRenderingMessage ?
-                new CompactRenderedTextFormatter() :
-                new CompactTextFormatter());
+            logger = CreateLogger(new TestFormatter("component", "subComponent", isRenderingMessage));
 
             // Act
             logger.Information("One {Property}", 42);
@@ -88,10 +78,11 @@ namespace Serilog.Sinks.Http.TextFormatters
             // Assert
             var @event = GetEvent();
             @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
             @event.MessageTemplate.ShouldBe("One {Property}");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "One 42" : null);
             @event.Exception.ShouldBeNull();
-            GetProperty("Property").ShouldBe("42");
+            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Property", "42" } });
             @event.Renderings.ShouldBeNull();
         }
 
@@ -101,9 +92,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         public void PropertiesInMessageTemplate(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(isRenderingMessage ?
-                new CompactRenderedTextFormatter() :
-                new CompactTextFormatter());
+            logger = CreateLogger(new TestFormatter("component", "subComponent", isRenderingMessage));
 
             // Act
             logger.Information("Property {First} and {Second}", "One", "Two");
@@ -111,11 +100,11 @@ namespace Serilog.Sinks.Http.TextFormatters
             // Assert
             var @event = GetEvent();
             @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
             @event.MessageTemplate.ShouldBe("Property {First} and {Second}");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "Property \"One\" and \"Two\"" : null);
             @event.Exception.ShouldBeNull();
-            GetProperty("First").ShouldBe("One");
-            GetProperty("Second").ShouldBe("Two");
+            @event.Properties.ShouldBe(new Dictionary<string, string> { { "First", "One" }, { "Second", "Two" } });
             @event.Renderings.ShouldBeNull();
         }
 
@@ -125,9 +114,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         public void EnrichedProperties(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(isRenderingMessage ?
-                new CompactRenderedTextFormatter() :
-                new CompactTextFormatter());
+            logger = CreateLogger(new TestFormatter("component", "subComponent", isRenderingMessage));
 
             // Act
             logger
@@ -141,8 +128,7 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event.MessageTemplate.ShouldBe("No properties");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "No properties" : null);
             @event.Exception.ShouldBeNull();
-            GetProperty("First").ShouldBe("One");
-            GetProperty("Second").ShouldBe("Two");
+            @event.Properties.ShouldBe(new Dictionary<string, string> { { "First", "One" }, { "Second", "Two" } });
             @event.Renderings.ShouldBeNull();
         }
 
@@ -152,9 +138,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         public void Rendering(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(isRenderingMessage ?
-                new CompactRenderedTextFormatter() :
-                new CompactTextFormatter());
+            logger = CreateLogger(new TestFormatter("component", "subComponent", isRenderingMessage));
 
             // Act
             logger.Information("One {Rendering:x8}", 42);
@@ -162,11 +146,14 @@ namespace Serilog.Sinks.Http.TextFormatters
             // Assert
             var @event = GetEvent();
             @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
             @event.MessageTemplate.ShouldBe("One {Rendering:x8}");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "One 0000002a" : null);
             @event.Exception.ShouldBeNull();
-            GetProperty("Rendering").ShouldBe("42");
-            @event.Renderings.ShouldBe(new[] { "0000002a" });
+            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Rendering", "42" } });
+            @event.Renderings.ShouldContainKey("Rendering");
+            @event.Renderings["Rendering"].Length.ShouldBe(1);
+            @event.Renderings["Rendering"][0].ShouldBe(new RenderingDto { Format = "x8", Rendering = "0000002a" });
         }
 
         [Theory]
@@ -175,9 +162,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         public void Renderings(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(isRenderingMessage ?
-                new CompactRenderedTextFormatter() :
-                new CompactTextFormatter());
+            logger = CreateLogger(new TestFormatter("component", "subComponent", isRenderingMessage));
 
             // Act
             logger.Information("Rendering {First:x8} and {Second:x8}", 1, 2);
@@ -185,12 +170,17 @@ namespace Serilog.Sinks.Http.TextFormatters
             // Assert
             var @event = GetEvent();
             @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
             @event.MessageTemplate.ShouldBe("Rendering {First:x8} and {Second:x8}");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "Rendering 00000001 and 00000002" : null);
             @event.Exception.ShouldBeNull();
-            GetProperty("First").ShouldBe("1");
-            GetProperty("Second").ShouldBe("2");
-            @event.Renderings.ShouldBe(new[] { "00000001", "00000002" });
+            @event.Properties.ShouldBe(new Dictionary<string, string> { { "First", "1" }, { "Second", "2" } });
+            @event.Renderings.ShouldContainKey("First");
+            @event.Renderings["First"].Length.ShouldBe(1);
+            @event.Renderings["First"][0].ShouldBe(new RenderingDto { Format = "x8", Rendering = "00000001" });
+            @event.Renderings.ShouldContainKey("Second");
+            @event.Renderings["Second"].Length.ShouldBe(1);
+            @event.Renderings["Second"][0].ShouldBe(new RenderingDto { Format = "x8", Rendering = "00000002" });
         }
 
         [Theory]
@@ -199,9 +189,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         public void Exception(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(isRenderingMessage ?
-                new CompactRenderedTextFormatter() :
-                new CompactTextFormatter());
+            logger = CreateLogger(new TestFormatter("component", "subComponent", isRenderingMessage));
 
             // Act
             logger.Information(new DivideByZeroException(), "With exception");
@@ -209,9 +197,11 @@ namespace Serilog.Sinks.Http.TextFormatters
             // Assert
             var @event = GetEvent();
             @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
             @event.MessageTemplate.ShouldBe("With exception");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "With exception" : null);
             @event.Exception.ShouldNotBeNull();
+            @event.Properties.ShouldBeNull();
             @event.Renderings.ShouldBeNull();
         }
 
@@ -221,9 +211,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         public void ExceptionAndProperty(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(isRenderingMessage ?
-                new CompactRenderedTextFormatter() :
-                new CompactTextFormatter());
+            logger = CreateLogger(new TestFormatter("component", "subComponent", isRenderingMessage));
 
             // Act
             logger.Information(new DivideByZeroException(), "With exception and {Property}", 42);
@@ -231,10 +219,11 @@ namespace Serilog.Sinks.Http.TextFormatters
             // Assert
             var @event = GetEvent();
             @event.Timestamp.ShouldNotBeNull();
+            @event.Level.ShouldBe("Information");
             @event.MessageTemplate.ShouldBe("With exception and {Property}");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "With exception and 42" : null);
             @event.Exception.ShouldNotBeNull();
-            GetProperty("Property").ShouldBe("42");
+            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Property", "42" } });
             @event.Renderings.ShouldBeNull();
         }
 
@@ -244,9 +233,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         public void NastyException(bool isRenderingMessage)
         {
             // Arrange
-            logger = CreateLogger(isRenderingMessage ?
-                new CompactRenderedTextFormatter() :
-                new CompactTextFormatter());
+            logger = CreateLogger(new TestFormatter("component", "subComponent", isRenderingMessage));
 
             // Act
             logger.Information(new NastyException(), "With exception");
@@ -263,15 +250,25 @@ namespace Serilog.Sinks.Http.TextFormatters
                 .CreateLogger();
         }
 
-        private CompactEventDto GetEvent()
+        private EventDto GetEvent()
         {
-            return JsonConvert.DeserializeObject<CompactEventDto>(output.ToString());
+            return JsonConvert.DeserializeObject<EventDto>(output.ToString());
         }
 
-        private string GetProperty(string name)
+        private class TestFormatter : NamespacedTextFormatter
         {
-            dynamic @event = JsonConvert.DeserializeObject(output.ToString());
-            return @event[name];
+            public TestFormatter(string component, string subComponent, bool isRenderingMessage)
+            {
+                Component = component;
+                SubComponent = subComponent;
+                IsRenderingMessage = isRenderingMessage;
+            }
+
+            protected override string Component { get; }
+
+            protected override string SubComponent { get; }
+
+            protected override bool IsRenderingMessage { get; }
         }
     }
 }
