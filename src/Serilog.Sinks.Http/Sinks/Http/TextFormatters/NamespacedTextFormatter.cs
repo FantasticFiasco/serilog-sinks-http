@@ -39,8 +39,9 @@ namespace Serilog.Sinks.Http.TextFormatters
 
         /// <summary>
         /// Gets the sub-component name, which will be serialized into a sub-property of
-        /// <see cref="Component"/> in the JSON document. If value is null or an empty string it
-        /// will be omitted from the serialized JSON document.
+        /// <see cref="Component"/> in the JSON document. If value is null it will be omitted from
+        /// the serialized JSON document, and the message properties will be serialized into
+        /// sub-properties of <see cref="Component"/>.
         /// </summary>
         protected abstract string SubComponent { get; }
 
