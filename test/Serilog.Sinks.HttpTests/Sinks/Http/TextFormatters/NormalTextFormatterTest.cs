@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using Serilog.Events;
@@ -86,7 +85,8 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event.MessageTemplate.ShouldBe("One {Property}");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "One 42" : null);
             @event.Exception.ShouldBeNull();
-            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Property", "42" } });
+            @event.Properties.Count.ShouldBe(1);
+            @event.Properties.ShouldContainKeyAndValue("Property", "42");
             @event.Renderings.ShouldBeNull();
         }
 
@@ -110,7 +110,9 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event.MessageTemplate.ShouldBe("Property {First} and {Second}");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "Property \"One\" and \"Two\"" : null);
             @event.Exception.ShouldBeNull();
-            @event.Properties.ShouldBe(new Dictionary<string, string> { { "First", "One" }, { "Second", "Two" } });
+            @event.Properties.Count.ShouldBe(2);
+            @event.Properties.ShouldContainKeyAndValue("First", "One");
+            @event.Properties.ShouldContainKeyAndValue("Second", "Two");
             @event.Renderings.ShouldBeNull();
         }
 
@@ -136,7 +138,9 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event.MessageTemplate.ShouldBe("No properties");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "No properties" : null);
             @event.Exception.ShouldBeNull();
-            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Second", "Two" }, { "First", "One" } });
+            @event.Properties.Count.ShouldBe(2);;
+            @event.Properties.ShouldContainKeyAndValue("First", "One");
+            @event.Properties.ShouldContainKeyAndValue("Second", "Two");
             @event.Renderings.ShouldBeNull();
         }
 
@@ -160,7 +164,8 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event.MessageTemplate.ShouldBe("One {Rendering:x8}");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "One 0000002a" : null);
             @event.Exception.ShouldBeNull();
-            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Rendering", "42" } });
+            @event.Properties.Count.ShouldBe(1);
+            @event.Properties.ShouldContainKeyAndValue("Rendering", "42");
             @event.Renderings.ShouldContainKey("Rendering");
             @event.Renderings["Rendering"].Length.ShouldBe(1);
             @event.Renderings["Rendering"][0].ShouldBe(new RenderingDto { Format = "x8", Rendering = "0000002a" });
@@ -186,7 +191,9 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event.MessageTemplate.ShouldBe("Rendering {First:x8} and {Second:x8}");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "Rendering 00000001 and 00000002" : null);
             @event.Exception.ShouldBeNull();
-            @event.Properties.ShouldBe(new Dictionary<string, string> { { "First", "1" }, { "Second", "2" } });
+            @event.Properties.Count.ShouldBe(2);;
+            @event.Properties.ShouldContainKeyAndValue("First", "1");
+            @event.Properties.ShouldContainKeyAndValue("Second", "2");
             @event.Renderings.ShouldContainKey("First");
             @event.Renderings["First"].Length.ShouldBe(1);
             @event.Renderings["First"][0].ShouldBe(new RenderingDto { Format = "x8", Rendering = "00000001" });
@@ -239,7 +246,8 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event.MessageTemplate.ShouldBe("With exception and {Property}");
             @event.RenderedMessage.ShouldBe(isRenderingMessage ? "With exception and 42" : null);
             @event.Exception.ShouldNotBeNull();
-            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Property", "42" } });
+            @event.Properties.Count.ShouldBe(1);
+            @event.Properties.ShouldContainKeyAndValue("Property", "42");
             @event.Renderings.ShouldBeNull();
         }
 
