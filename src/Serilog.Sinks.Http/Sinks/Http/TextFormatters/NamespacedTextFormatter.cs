@@ -19,10 +19,10 @@ using Serilog.Formatting;
 namespace Serilog.Sinks.Http.TextFormatters
 {
     /// <summary>
-    /// JSON formatter serializing log events into a format where the message properties are placed into
-    /// their own namespace. It is designed for the micro-service architecture to reduce the risk of
-    /// different services sending log events with identical property names but different types,
-    /// which the Elastic Stack doesn't support.
+    /// JSON formatter serializing log events into a format where the message properties are placed
+    /// into their own namespace. It is designed for a micro-service architecture where one wish to
+    /// reduce the risk of having multiple services sending log events with identical property
+    /// names but different value types, something that is unsupported by the Elastic Stack.
     /// </summary>
     /// <seealso cref="NormalTextFormatter" />
     /// <seealso cref="NormalRenderedTextFormatter" />
