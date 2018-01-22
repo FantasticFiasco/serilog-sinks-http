@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
-using Newtonsoft.Json;
+using System.Linq;
+using Newtonsoft.Json.Linq;
 using Serilog.Events;
 using Serilog.Formatting;
-using Serilog.Sinks.Http.LogServer.Controllers.Dto;
 using Serilog.Support;
 using Shouldly;
 using Xunit;
@@ -41,11 +41,11 @@ namespace Serilog.Sinks.Http.TextFormatters
 
             if (level == LogEventLevel.Information)
             {
-                @event.Level.ShouldBeNull();
+                @event["@l"].ShouldBeNull();
             }
             else
             {
-                @event.Level.ShouldNotBeNull();
+                @event["@l"].ShouldNotBeNull();
             }
         }
 
@@ -64,12 +64,12 @@ namespace Serilog.Sinks.Http.TextFormatters
 
             // Assert
             var @event = GetEvent();
-            @event.Timestamp.ShouldNotBeNull();
-            @event.Level.ShouldBeNull();
-            @event.MessageTemplate.ShouldBe("No properties");
-            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "No properties" : null);
-            @event.Exception.ShouldBeNull();
-            @event.Renderings.ShouldBeNull();
+            @event["@t"].ShouldNotBeNull();
+            @event["@l"].ShouldBeNull();
+            @event["@mt"].ShouldBe("No properties");
+            @event["@m"].ShouldBe(isRenderingMessage ? "No properties" : null);
+            @event["@x"].ShouldBeNull();
+            @event["@r"].ShouldBeNull();
         }
 
         [Theory]
@@ -87,12 +87,12 @@ namespace Serilog.Sinks.Http.TextFormatters
 
             // Assert
             var @event = GetEvent();
-            @event.Timestamp.ShouldNotBeNull();
-            @event.MessageTemplate.ShouldBe("One {Property}");
-            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "One 42" : null);
-            @event.Exception.ShouldBeNull();
-            GetProperty("Property").ShouldBe("42");
-            @event.Renderings.ShouldBeNull();
+            @event["@t"].ShouldNotBeNull();
+            @event["@mt"].ShouldBe("One {Property}");
+            @event["@m"].ShouldBe(isRenderingMessage ? "One 42" : null);
+            @event["@x"].ShouldBeNull();
+            @event["Property"].ShouldBe(42);
+            @event["@r"].ShouldBeNull();
         }
 
         [Theory]
@@ -110,13 +110,13 @@ namespace Serilog.Sinks.Http.TextFormatters
 
             // Assert
             var @event = GetEvent();
-            @event.Timestamp.ShouldNotBeNull();
-            @event.MessageTemplate.ShouldBe("Property {First} and {Second}");
-            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "Property \"One\" and \"Two\"" : null);
-            @event.Exception.ShouldBeNull();
-            GetProperty("First").ShouldBe("One");
-            GetProperty("Second").ShouldBe("Two");
-            @event.Renderings.ShouldBeNull();
+            @event["@t"].ShouldNotBeNull();
+            @event["@mt"].ShouldBe("Property {First} and {Second}");
+            @event["@m"].ShouldBe(isRenderingMessage ? "Property \"One\" and \"Two\"" : null);
+            @event["@x"].ShouldBeNull();
+            @event["First"].ShouldBe("One");
+            @event["Second"].ShouldBe("Two");
+            @event["@r"].ShouldBeNull();
         }
 
         [Theory]
@@ -137,13 +137,13 @@ namespace Serilog.Sinks.Http.TextFormatters
 
             // Assert
             var @event = GetEvent();
-            @event.Timestamp.ShouldNotBeNull();
-            @event.MessageTemplate.ShouldBe("No properties");
-            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "No properties" : null);
-            @event.Exception.ShouldBeNull();
-            GetProperty("First").ShouldBe("One");
-            GetProperty("Second").ShouldBe("Two");
-            @event.Renderings.ShouldBeNull();
+            @event["@t"].ShouldNotBeNull();
+            @event["@mt"].ShouldBe("No properties");
+            @event["@m"].ShouldBe(isRenderingMessage ? "No properties" : null);
+            @event["@x"].ShouldBeNull();
+            @event["First"].ShouldBe("One");
+            @event["Second"].ShouldBe("Two");
+            @event["@r"].ShouldBeNull();
         }
 
         [Theory]
@@ -161,12 +161,12 @@ namespace Serilog.Sinks.Http.TextFormatters
 
             // Assert
             var @event = GetEvent();
-            @event.Timestamp.ShouldNotBeNull();
-            @event.MessageTemplate.ShouldBe("One {Rendering:x8}");
-            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "One 0000002a" : null);
-            @event.Exception.ShouldBeNull();
-            GetProperty("Rendering").ShouldBe("42");
-            @event.Renderings.ShouldBe(new[] { "0000002a" });
+            @event["@t"].ShouldNotBeNull();
+            @event["@mt"].ShouldBe("One {Rendering:x8}");
+            @event["@m"].ShouldBe(isRenderingMessage ? "One 0000002a" : null);
+            @event["@x"].ShouldBeNull();
+            @event["Rendering"].ShouldBe(42);
+            @event["@r"].Select(token => token.Value<string>()).ShouldBe(new[] { "0000002a" });
         }
 
         [Theory]
@@ -184,13 +184,13 @@ namespace Serilog.Sinks.Http.TextFormatters
 
             // Assert
             var @event = GetEvent();
-            @event.Timestamp.ShouldNotBeNull();
-            @event.MessageTemplate.ShouldBe("Rendering {First:x8} and {Second:x8}");
-            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "Rendering 00000001 and 00000002" : null);
-            @event.Exception.ShouldBeNull();
-            GetProperty("First").ShouldBe("1");
-            GetProperty("Second").ShouldBe("2");
-            @event.Renderings.ShouldBe(new[] { "00000001", "00000002" });
+            @event["@t"].ShouldNotBeNull();
+            @event["@mt"].ShouldBe("Rendering {First:x8} and {Second:x8}");
+            @event["@m"].ShouldBe(isRenderingMessage ? "Rendering 00000001 and 00000002" : null);
+            @event["@x"].ShouldBeNull();
+            @event["First"].ShouldBe(1);
+            @event["Second"].ShouldBe(2);
+            @event["@r"].Children().Select(token => token.Value<string>()).ShouldBe(new[] { "00000001", "00000002" });
         }
 
         [Theory]
@@ -208,11 +208,11 @@ namespace Serilog.Sinks.Http.TextFormatters
 
             // Assert
             var @event = GetEvent();
-            @event.Timestamp.ShouldNotBeNull();
-            @event.MessageTemplate.ShouldBe("With exception");
-            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "With exception" : null);
-            @event.Exception.ShouldNotBeNull();
-            @event.Renderings.ShouldBeNull();
+            @event["@t"].ShouldNotBeNull();
+            @event["@mt"].ShouldBe("With exception");
+            @event["@m"].ShouldBe(isRenderingMessage ? "With exception" : null);
+            @event["@x"].ShouldNotBeNull();
+            @event["@r"].ShouldBeNull();
         }
 
         [Theory]
@@ -230,12 +230,12 @@ namespace Serilog.Sinks.Http.TextFormatters
 
             // Assert
             var @event = GetEvent();
-            @event.Timestamp.ShouldNotBeNull();
-            @event.MessageTemplate.ShouldBe("With exception and {Property}");
-            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "With exception and 42" : null);
-            @event.Exception.ShouldNotBeNull();
-            GetProperty("Property").ShouldBe("42");
-            @event.Renderings.ShouldBeNull();
+            @event["@t"].ShouldNotBeNull();
+            @event["@mt"].ShouldBe("With exception and {Property}");
+            @event["@m"].ShouldBe(isRenderingMessage ? "With exception and 42" : null);
+            @event["@x"].ShouldNotBeNull();
+            @event["Property"].ShouldBe(42);
+            @event["@r"].ShouldBeNull();
         }
 
         [Theory]
@@ -263,15 +263,9 @@ namespace Serilog.Sinks.Http.TextFormatters
                 .CreateLogger();
         }
 
-        private CompactEventDto GetEvent()
+        private JObject GetEvent()
         {
-            return JsonConvert.DeserializeObject<CompactEventDto>(output.ToString());
-        }
-
-        private string GetProperty(string name)
-        {
-            dynamic @event = JsonConvert.DeserializeObject(output.ToString());
-            return @event[name];
+            return JObject.Parse(output.ToString());
         }
     }
 }
