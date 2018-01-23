@@ -67,7 +67,7 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event["@t"].ShouldNotBeNull();
             @event["@l"].ShouldBeNull();
             @event["@mt"].ShouldBe("No properties");
-            @event["@m"].ShouldBe(isRenderingMessage ? "No properties" : null);
+            ((string)@event["@m"]).ShouldBe(isRenderingMessage ? "No properties" : null);
             @event["@x"].ShouldBeNull();
             @event["@r"].ShouldBeNull();
         }
@@ -89,7 +89,7 @@ namespace Serilog.Sinks.Http.TextFormatters
             var @event = GetEvent();
             @event["@t"].ShouldNotBeNull();
             @event["@mt"].ShouldBe("One {Property}");
-            @event["@m"].ShouldBe(isRenderingMessage ? "One 42" : null);
+            ((string)@event["@m"]).ShouldBe(isRenderingMessage ? "One 42" : null);
             @event["@x"].ShouldBeNull();
             @event["Property"].ShouldBe(42);
             @event["@r"].ShouldBeNull();
@@ -112,7 +112,7 @@ namespace Serilog.Sinks.Http.TextFormatters
             var @event = GetEvent();
             @event["@t"].ShouldNotBeNull();
             @event["@mt"].ShouldBe("Property {First} and {Second}");
-            @event["@m"].ShouldBe(isRenderingMessage ? "Property \"One\" and \"Two\"" : null);
+            ((string)@event["@m"]).ShouldBe(isRenderingMessage ? "Property \"One\" and \"Two\"" : null);
             @event["@x"].ShouldBeNull();
             @event["First"].ShouldBe("One");
             @event["Second"].ShouldBe("Two");
@@ -139,7 +139,7 @@ namespace Serilog.Sinks.Http.TextFormatters
             var @event = GetEvent();
             @event["@t"].ShouldNotBeNull();
             @event["@mt"].ShouldBe("No properties");
-            @event["@m"].ShouldBe(isRenderingMessage ? "No properties" : null);
+            ((string)@event["@m"]).ShouldBe(isRenderingMessage ? "No properties" : null);
             @event["@x"].ShouldBeNull();
             @event["First"].ShouldBe("One");
             @event["Second"].ShouldBe("Two");
@@ -163,7 +163,7 @@ namespace Serilog.Sinks.Http.TextFormatters
             var @event = GetEvent();
             @event["@t"].ShouldNotBeNull();
             @event["@mt"].ShouldBe("One {Rendering:x8}");
-            @event["@m"].ShouldBe(isRenderingMessage ? "One 0000002a" : null);
+            ((string)@event["@m"]).ShouldBe(isRenderingMessage ? "One 0000002a" : null);
             @event["@x"].ShouldBeNull();
             @event["Rendering"].ShouldBe(42);
             @event["@r"].Select(token => token.Value<string>()).ShouldBe(new[] { "0000002a" });
@@ -186,7 +186,7 @@ namespace Serilog.Sinks.Http.TextFormatters
             var @event = GetEvent();
             @event["@t"].ShouldNotBeNull();
             @event["@mt"].ShouldBe("Rendering {First:x8} and {Second:x8}");
-            @event["@m"].ShouldBe(isRenderingMessage ? "Rendering 00000001 and 00000002" : null);
+            ((string)@event["@m"]).ShouldBe(isRenderingMessage ? "Rendering 00000001 and 00000002" : null);
             @event["@x"].ShouldBeNull();
             @event["First"].ShouldBe(1);
             @event["Second"].ShouldBe(2);
@@ -210,7 +210,7 @@ namespace Serilog.Sinks.Http.TextFormatters
             var @event = GetEvent();
             @event["@t"].ShouldNotBeNull();
             @event["@mt"].ShouldBe("With exception");
-            @event["@m"].ShouldBe(isRenderingMessage ? "With exception" : null);
+            ((string)@event["@m"]).ShouldBe(isRenderingMessage ? "With exception" : null);
             @event["@x"].ShouldNotBeNull();
             @event["@r"].ShouldBeNull();
         }
@@ -232,7 +232,7 @@ namespace Serilog.Sinks.Http.TextFormatters
             var @event = GetEvent();
             @event["@t"].ShouldNotBeNull();
             @event["@mt"].ShouldBe("With exception and {Property}");
-            @event["@m"].ShouldBe(isRenderingMessage ? "With exception and 42" : null);
+            ((string)@event["@m"]).ShouldBe(isRenderingMessage ? "With exception and 42" : null);
             @event["@x"].ShouldNotBeNull();
             @event["Property"].ShouldBe(42);
             @event["@r"].ShouldBeNull();

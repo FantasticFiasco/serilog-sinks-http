@@ -146,7 +146,7 @@ namespace Serilog.Sinks.Http.Private.Network
                             }
 
                             if (string.IsNullOrEmpty(payload))
-                                continue;;
+                                continue;
 
                             var content = new StringContent(payload, Encoding.UTF8, ContentType);
 
