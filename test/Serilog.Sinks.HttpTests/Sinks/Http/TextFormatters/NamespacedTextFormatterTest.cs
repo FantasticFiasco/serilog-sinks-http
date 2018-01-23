@@ -60,7 +60,6 @@ namespace Serilog.Sinks.Http.TextFormatters
             ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "No properties" : null);
             @event["Exception"].ShouldBeNull();
             @event["Properties"].ShouldBeNull();
-            @event["Foo"].ShouldBeNull();
         }
 
         [Theory]
@@ -81,9 +80,9 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event["MessageTemplate"].ShouldBe("One {Property}");
             ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "One 42" : null);
             @event["Exception"].ShouldBeNull();
-            @event["Properties"].ShouldBeNull();
-            @event["Foo"].Children().Count().ShouldBe(1);
-            @event["Foo"]["Property"].ShouldBe(42);
+            @event["Properties"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"]["Property"].ShouldBe(42);
         }
 
         [Theory]
@@ -104,9 +103,10 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event["MessageTemplate"].ShouldBe("One {Property}");
             ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "One 42" : null);
             @event["Exception"].ShouldBeNull();
-            @event["Properties"].ShouldBeNull();
-            @event["Foo"]["Bar"].Children().Count().ShouldBe(1);
-            @event["Foo"]["Bar"]["Property"].ShouldBe(42);
+            @event["Properties"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"]["Bar"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"]["Bar"]["Property"].ShouldBe(42);
         }
 
         [Theory]
@@ -127,10 +127,10 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event["MessageTemplate"].ShouldBe("Property {First} and {Second}");
             ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "Property \"One\" and \"Two\"" : null);
             @event["Exception"].ShouldBeNull();
-            @event["Properties"].ShouldBeNull();
-            @event["Foo"].Children().Count().ShouldBe(2);
-            @event["Foo"]["First"].ShouldBe("One");
-            @event["Foo"]["Second"].ShouldBe("Two");
+            @event["Properties"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"].Children().Count().ShouldBe(2);
+            @event["Properties"]["Foo"]["First"].ShouldBe("One");
+            @event["Properties"]["Foo"]["Second"].ShouldBe("Two");
         }
 
         [Theory]
@@ -151,10 +151,11 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event["MessageTemplate"].ShouldBe("Property {First} and {Second}");
             ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "Property \"One\" and \"Two\"" : null);
             @event["Exception"].ShouldBeNull();
-            @event["Properties"].ShouldBeNull();
-            @event["Foo"]["Bar"].Children().Count().ShouldBe(2);
-            @event["Foo"]["Bar"]["First"].ShouldBe("One");
-            @event["Foo"]["Bar"]["Second"].ShouldBe("Two");
+            @event["Properties"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"]["Bar"].Children().Count().ShouldBe(2);
+            @event["Properties"]["Foo"]["Bar"]["First"].ShouldBe("One");
+            @event["Properties"]["Foo"]["Bar"]["Second"].ShouldBe("Two");
         }
 
         [Theory]
@@ -200,12 +201,12 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event["MessageTemplate"].ShouldBe("One {Rendering:x8}");
             ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "One 0000002a" : null);
             @event["Exception"].ShouldBeNull();
-            @event["Properties"].ShouldBeNull();
-            @event["Foo"].Children().Count().ShouldBe(2);
-            @event["Foo"]["Rendering"].ShouldBe(42);
-            @event["Foo"]["Renderings"]["Rendering"].Children().Count().ShouldBe(1);
-            @event["Foo"]["Renderings"]["Rendering"][0]["Format"].ShouldBe("x8");
-            @event["Foo"]["Renderings"]["Rendering"][0]["Rendering"].ShouldBe("0000002a");
+            @event["Properties"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"].Children().Count().ShouldBe(2);
+            @event["Properties"]["Foo"]["Rendering"].ShouldBe(42);
+            @event["Properties"]["Foo"]["Renderings"]["Rendering"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"]["Renderings"]["Rendering"][0]["Format"].ShouldBe("x8");
+            @event["Properties"]["Foo"]["Renderings"]["Rendering"][0]["Rendering"].ShouldBe("0000002a");
         }
 
         [Theory]
@@ -226,12 +227,13 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event["MessageTemplate"].ShouldBe("One {Rendering:x8}");
             ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "One 0000002a" : null);
             @event["Exception"].ShouldBeNull();
-            @event["Properties"].ShouldBeNull();
-            @event["Foo"]["Bar"].Children().Count().ShouldBe(2);
-            @event["Foo"]["Bar"]["Rendering"].ShouldBe(42);
-            @event["Foo"]["Bar"]["Renderings"]["Rendering"].Children().Count().ShouldBe(1);
-            @event["Foo"]["Bar"]["Renderings"]["Rendering"][0]["Format"].ShouldBe("x8");
-            @event["Foo"]["Bar"]["Renderings"]["Rendering"][0]["Rendering"].ShouldBe("0000002a");
+            @event["Properties"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"]["Bar"].Children().Count().ShouldBe(2);
+            @event["Properties"]["Foo"]["Bar"]["Rendering"].ShouldBe(42);
+            @event["Properties"]["Foo"]["Bar"]["Renderings"]["Rendering"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"]["Bar"]["Renderings"]["Rendering"][0]["Format"].ShouldBe("x8");
+            @event["Properties"]["Foo"]["Bar"]["Renderings"]["Rendering"][0]["Rendering"].ShouldBe("0000002a");
         }
 
         [Theory]
@@ -252,16 +254,16 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event["MessageTemplate"].ShouldBe("Rendering {First:x8} and {Second:x8}");
             ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "Rendering 00000001 and 00000002" : null);
             @event["Exception"].ShouldBeNull();
-            @event["Properties"].ShouldBeNull();
-            @event["Foo"].Children().Count().ShouldBe(3);
-            @event["Foo"]["First"].ShouldBe(1);
-            @event["Foo"]["Second"].ShouldBe(2);
-            @event["Foo"]["Renderings"]["First"].Children().Count().ShouldBe(1);
-            @event["Foo"]["Renderings"]["First"][0]["Format"].ShouldBe("x8");
-            @event["Foo"]["Renderings"]["First"][0]["Rendering"].ShouldBe("00000001");
-            @event["Foo"]["Renderings"]["Second"].Children().Count().ShouldBe(1);
-            @event["Foo"]["Renderings"]["Second"][0]["Format"].ShouldBe("x8");
-            @event["Foo"]["Renderings"]["Second"][0]["Rendering"].ShouldBe("00000002");
+            @event["Properties"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"].Children().Count().ShouldBe(3);
+            @event["Properties"]["Foo"]["First"].ShouldBe(1);
+            @event["Properties"]["Foo"]["Second"].ShouldBe(2);
+            @event["Properties"]["Foo"]["Renderings"]["First"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"]["Renderings"]["First"][0]["Format"].ShouldBe("x8");
+            @event["Properties"]["Foo"]["Renderings"]["First"][0]["Rendering"].ShouldBe("00000001");
+            @event["Properties"]["Foo"]["Renderings"]["Second"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"]["Renderings"]["Second"][0]["Format"].ShouldBe("x8");
+            @event["Properties"]["Foo"]["Renderings"]["Second"][0]["Rendering"].ShouldBe("00000002");
         }
 
         [Theory]
@@ -282,16 +284,17 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event["MessageTemplate"].ShouldBe("Rendering {First:x8} and {Second:x8}");
             ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "Rendering 00000001 and 00000002" : null);
             @event["Exception"].ShouldBeNull();
-            @event["Properties"].ShouldBeNull();
-            @event["Foo"]["Bar"].Children().Count().ShouldBe(3);
-            @event["Foo"]["Bar"]["First"].ShouldBe(1);
-            @event["Foo"]["Bar"]["Second"].ShouldBe(2);
-            @event["Foo"]["Bar"]["Renderings"]["First"].Children().Count().ShouldBe(1);
-            @event["Foo"]["Bar"]["Renderings"]["First"][0]["Format"].ShouldBe("x8");
-            @event["Foo"]["Bar"]["Renderings"]["First"][0]["Rendering"].ShouldBe("00000001");
-            @event["Foo"]["Bar"]["Renderings"]["Second"].Children().Count().ShouldBe(1);
-            @event["Foo"]["Bar"]["Renderings"]["Second"][0]["Format"].ShouldBe("x8");
-            @event["Foo"]["Bar"]["Renderings"]["Second"][0]["Rendering"].ShouldBe("00000002");
+            @event["Properties"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"]["Bar"].Children().Count().ShouldBe(3);
+            @event["Properties"]["Foo"]["Bar"]["First"].ShouldBe(1);
+            @event["Properties"]["Foo"]["Bar"]["Second"].ShouldBe(2);
+            @event["Properties"]["Foo"]["Bar"]["Renderings"]["First"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"]["Bar"]["Renderings"]["First"][0]["Format"].ShouldBe("x8");
+            @event["Properties"]["Foo"]["Bar"]["Renderings"]["First"][0]["Rendering"].ShouldBe("00000001");
+            @event["Properties"]["Foo"]["Bar"]["Renderings"]["Second"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"]["Bar"]["Renderings"]["Second"][0]["Format"].ShouldBe("x8");
+            @event["Properties"]["Foo"]["Bar"]["Renderings"]["Second"][0]["Rendering"].ShouldBe("00000002");
         }
 
         [Theory]
@@ -313,7 +316,6 @@ namespace Serilog.Sinks.Http.TextFormatters
             ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "With exception" : null);
             @event["Exception"].ShouldNotBeNull();
             @event["Properties"].ShouldBeNull();
-            @event["Foo"].ShouldBeNull();
         }
 
         [Theory]
@@ -334,8 +336,9 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event["MessageTemplate"].ShouldBe("With exception and {Property}");
             ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "With exception and 42" : null);
             @event["Exception"].ShouldNotBeNull();
-            @event["Foo"].Children().Count().ShouldBe(1);
-            @event["Foo"]["Property"].ShouldBe(42);
+            @event["Properties"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"]["Property"].ShouldBe(42);
         }
 
         [Theory]
@@ -356,8 +359,10 @@ namespace Serilog.Sinks.Http.TextFormatters
             @event["MessageTemplate"].ShouldBe("With exception and {Property}");
             ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "With exception and 42" : null);
             @event["Exception"].ShouldNotBeNull();
-            @event["Foo"]["Bar"].Children().Count().ShouldBe(1);
-            @event["Foo"]["Bar"]["Property"].ShouldBe(42);
+            @event["Properties"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"]["Bar"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"]["Bar"]["Property"].ShouldBe(42);
         }
 
         [Theory]
@@ -391,17 +396,10 @@ namespace Serilog.Sinks.Http.TextFormatters
         private class Formatter : NamespacedTextFormatter
         {
             public Formatter(string component, string subComponent, bool isRenderingMessage)
+                : base(component, subComponent)
             {
-                Component = component;
-                SubComponent = subComponent;
                 IsRenderingMessage = isRenderingMessage;
             }
-
-            protected override string Component { get; }
-
-            protected override string SubComponent { get; }
-
-            protected override bool IsRenderingMessage { get; }
         }
     }
 }
