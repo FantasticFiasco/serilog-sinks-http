@@ -56,10 +56,8 @@ namespace Serilog.Sinks.Http.BatchFormatters
 		/// </param>
 		public void Format(IEnumerable<LogEvent> logEvents, ITextFormatter formatter, TextWriter output)
 		{
-			if (logEvents == null)
-				throw new ArgumentNullException(nameof(logEvents));
-			if (formatter == null)
-				throw new ArgumentNullException(nameof(formatter));
+			if (logEvents == null) throw new ArgumentNullException(nameof(logEvents));
+			if (formatter == null) throw new ArgumentNullException(nameof(formatter));
 
 			IEnumerable<string> formattedLogEvents = logEvents.Select(
 				logEvent =>

@@ -8,9 +8,7 @@
 
         public override bool Equals(object obj)
         {
-            var other = obj as RenderingDto;
-
-            if (other == null)
+            if (!(obj is RenderingDto other))
                 return false;
 
             return

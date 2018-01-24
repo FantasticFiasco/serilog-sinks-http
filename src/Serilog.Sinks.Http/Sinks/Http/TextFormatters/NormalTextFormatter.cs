@@ -65,10 +65,8 @@ namespace Serilog.Sinks.Http.TextFormatters
 
         private void FormatContent(LogEvent logEvent, TextWriter output)
         {
-            if (logEvent == null)
-                throw new ArgumentNullException(nameof(logEvent));
-            if (output == null)
-                throw new ArgumentNullException(nameof(output));
+            if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
+            if (output == null) throw new ArgumentNullException(nameof(output));
 
             output.Write("{\"Timestamp\":\"");
             output.Write(logEvent.Timestamp.ToString("o"));

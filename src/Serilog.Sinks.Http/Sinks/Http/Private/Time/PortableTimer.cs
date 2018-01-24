@@ -29,23 +29,21 @@ namespace Serilog.Sinks.Http.Private.Time
 
         public PortableTimer(Func<Task> onTick)
         {
-            if (onTick == null)
-                throw new ArgumentNullException(nameof(onTick));
-
-            this.onTick = onTick;
+            this.onTick = onTick ?? throw new ArgumentNullException(nameof(onTick));
 
             timer = new Timer(_ => OnTick(), null, Timeout.Infinite, Timeout.Infinite);
         }
 
         public void Start(TimeSpan interval)
         {
-            if (interval < TimeSpan.Zero)
-                throw new ArgumentOutOfRangeException(nameof(interval));
+            if (interval < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(interval));
 
             lock (stateLock)
             {
                 if (disposed)
+                {
                     throw new ObjectDisposedException(nameof(PortableTimer));
+                }
 
                 timer.Change(interval, Timeout.InfiniteTimeSpan);
             }

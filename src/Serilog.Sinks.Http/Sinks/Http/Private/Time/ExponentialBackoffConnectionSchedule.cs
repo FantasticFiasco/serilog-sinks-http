@@ -27,8 +27,7 @@ namespace Serilog.Sinks.Http.Private.Time
 
         public ExponentialBackoffConnectionSchedule(TimeSpan period)
         {
-            if (period < TimeSpan.Zero)
-                throw new ArgumentOutOfRangeException(nameof(period), "The connection retry period must be a positive timespan");
+            if (period < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(period), "The connection retry period must be a positive timespan");
 
             this.period = period;
         }

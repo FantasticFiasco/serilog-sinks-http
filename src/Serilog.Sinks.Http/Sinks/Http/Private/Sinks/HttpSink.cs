@@ -71,7 +71,9 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 .ConfigureAwait(false);
 
             if (!result.IsSuccessStatusCode)
+            {
                 throw new LoggingFailedException($"Received failed result {result.StatusCode} when posting events to {requestUri}");
+            }
         }
 
         /// <summary>

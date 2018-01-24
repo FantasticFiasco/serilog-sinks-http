@@ -37,6 +37,9 @@ namespace Serilog.Sinks.Http.TextFormatters
     /// <seealso cref="ITextFormatter" />
     public abstract class NamespacedTextFormatter : ITextFormatter
     {
+        private readonly string component;
+        private readonly string subComponent;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="NamespacedTextFormatter"/> class.
         /// </summary>
@@ -52,6 +55,8 @@ namespace Serilog.Sinks.Http.TextFormatters
         /// </param>
         protected NamespacedTextFormatter(string component, string subComponent = null)
         {
+            this.component = component ?? throw new ArgumentNullException(nameof(component));
+            this.subComponent = subComponent;
         }
 
         /// <summary>
@@ -82,10 +87,8 @@ namespace Serilog.Sinks.Http.TextFormatters
 
         private void FormatContent(LogEvent logEvent, TextWriter output)
         {
-            if (logEvent == null)
-                throw new ArgumentNullException(nameof(logEvent));
-            if (output == null)
-                throw new ArgumentNullException(nameof(output));
+            if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
+            if (output == null) throw new ArgumentNullException(nameof(output));
 
             output.Write("{\"Timestamp\":\"");
             output.Write(logEvent.Timestamp.ToString("o"));
@@ -112,7 +115,26 @@ namespace Serilog.Sinks.Http.TextFormatters
 
             if (logEvent.Properties.Count != 0)
             {
-                WriteProperties(logEvent.Properties, output);
+                WriteProperties(logEvent, output);
+            }
+
+            output.Write('}');
+        }
+
+        private static void WriteProperties(LogEvent logEvent, TextWriter output)
+        {
+            output.Write(",\"Properties\":{");
+
+            var precedingDelimiter = "";
+
+            foreach (var property in logEvent.Properties)
+            {
+                output.Write(precedingDelimiter);
+                precedingDelimiter = ",";
+
+                JsonValueFormatter.WriteQuotedJsonString(property.Key, output);
+                output.Write(':');
+                ValueFormatter.Instance.Format(property.Value, output);
             }
 
             // Better not to allocate an array in the 99.9% of cases where this is false
@@ -125,27 +147,6 @@ namespace Serilog.Sinks.Http.TextFormatters
             {
                 // ReSharper disable once PossibleMultipleEnumeration
                 WriteRenderings(tokensWithFormat.GroupBy(pt => pt.PropertyName), logEvent.Properties, output);
-            }
-
-            output.Write('}');
-        }
-
-        private static void WriteProperties(
-            IReadOnlyDictionary<string, LogEventPropertyValue> properties,
-            TextWriter output)
-        {
-            output.Write(",\"Properties\":{");
-
-            var precedingDelimiter = "";
-
-            foreach (var property in properties)
-            {
-                output.Write(precedingDelimiter);
-                precedingDelimiter = ",";
-
-                JsonValueFormatter.WriteQuotedJsonString(property.Key, output);
-                output.Write(':');
-                ValueFormatter.Instance.Format(property.Value, output);
             }
 
             output.Write('}');

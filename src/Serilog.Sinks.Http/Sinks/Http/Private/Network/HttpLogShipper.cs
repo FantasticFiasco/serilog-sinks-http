@@ -57,12 +57,9 @@ namespace Serilog.Sinks.Http.Private.Network
             TimeSpan period,
             IBatchFormatter batchFormatter)
         {
-            if (bufferPathFormat == null)
-                throw new ArgumentNullException(nameof(bufferPathFormat));
-            if (bufferPathFormat != bufferPathFormat.Trim())
-                throw new ArgumentException("bufferPathFormat must not contain any leading or trailing whitespaces", nameof(bufferPathFormat));
-            if (batchPostingLimit <= 0)
-                throw new ArgumentException("batchPostingLimit must be 1 or greater", nameof(batchPostingLimit));
+            if (bufferPathFormat == null) throw new ArgumentNullException(nameof(bufferPathFormat));
+            if (bufferPathFormat != bufferPathFormat.Trim()) throw new ArgumentException("bufferPathFormat must not contain any leading or trailing whitespaces", nameof(bufferPathFormat));
+            if (batchPostingLimit <= 0) throw new ArgumentException("batchPostingLimit must be 1 or greater", nameof(batchPostingLimit));
 
             this.client = client ?? throw new ArgumentNullException(nameof(client));
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
