@@ -125,42 +125,20 @@ namespace Serilog.Sinks.Http.TextFormatters
         {
             output.Write(",\"Properties\":{");
 
-            output.Write($"\"{component}\":{{");
-
-            if (subComponent != null)
-            {
-                output.Write($"\"{subComponent}\":{{");
-            }
-
-            var precedingDelimiter = "";
-
             var namespacedProperties = logEvent.Properties
                 .Where(p => TemplateContainsPropertyName(logEvent.MessageTemplate, p.Key))
                 .ToArray();
 
-            foreach (var namespacedProperty in namespacedProperties)
+            if (namespacedProperties.Length > 0)
             {
-                output.Write(precedingDelimiter);
-                precedingDelimiter = ",";
+                output.Write($"\"{component}\":{{");
 
-                JsonValueFormatter.WriteQuotedJsonString(namespacedProperty.Key, output);
-                output.Write(':');
-                ValueFormatter.Instance.Format(namespacedProperty.Value, output);
-            }
+                if (subComponent != null)
+                {
+                    output.Write($"\"{subComponent}\":{{");
+                }
 
-            if (subComponent != null)
-            {
-                output.Write("}");
-            }
-
-            output.Write("}");
-
-            var otherProperties = logEvent.Properties.Except(namespacedProperties).ToArray();
-            if (otherProperties.Length > 0)
-            {
-                output.Write(",");
-
-                precedingDelimiter = "";
+                var precedingDelimiter = "";
 
                 foreach (var namespacedProperty in namespacedProperties)
                 {
@@ -171,18 +149,47 @@ namespace Serilog.Sinks.Http.TextFormatters
                     output.Write(':');
                     ValueFormatter.Instance.Format(namespacedProperty.Value, output);
                 }
+
+                // Better not to allocate an array in the 99.9% of cases where this is false
+                var tokensWithFormat = logEvent.MessageTemplate.Tokens
+                    .OfType<PropertyToken>()
+                    .Where(pt => pt.Format != null);
+
+                // ReSharper disable once PossibleMultipleEnumeration
+                if (tokensWithFormat.Any())
+                {
+                    // ReSharper disable once PossibleMultipleEnumeration
+                    WriteRenderings(tokensWithFormat.GroupBy(pt => pt.PropertyName), logEvent.Properties, output);
+                }
+
+                if (subComponent != null)
+                {
+                    output.Write("}");
+                }
+
+                output.Write("}");
             }
 
-            // Better not to allocate an array in the 99.9% of cases where this is false
-            var tokensWithFormat = logEvent.MessageTemplate.Tokens
-                .OfType<PropertyToken>()
-                .Where(pt => pt.Format != null);
 
-            // ReSharper disable once PossibleMultipleEnumeration
-            if (tokensWithFormat.Any())
+            var otherProperties = logEvent.Properties.Except(namespacedProperties).ToArray();
+            if (otherProperties.Length > 0)
             {
-                // ReSharper disable once PossibleMultipleEnumeration
-                WriteRenderings(tokensWithFormat.GroupBy(pt => pt.PropertyName), logEvent.Properties, output);
+                if (namespacedProperties.Length > 0)
+                {
+                    output.Write(",");
+                }
+
+                var precedingDelimiter = "";
+
+                foreach (var otherProperty in otherProperties)
+                {
+                    output.Write(precedingDelimiter);
+                    precedingDelimiter = ",";
+
+                    JsonValueFormatter.WriteQuotedJsonString(otherProperty.Key, output);
+                    output.Write(':');
+                    ValueFormatter.Instance.Format(otherProperty.Value, output);
+                }
             }
 
             output.Write('}');
