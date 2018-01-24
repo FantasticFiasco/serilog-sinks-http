@@ -121,20 +121,56 @@ namespace Serilog.Sinks.Http.TextFormatters
             output.Write('}');
         }
 
-        private static void WriteProperties(LogEvent logEvent, TextWriter output)
+        private void WriteProperties(LogEvent logEvent, TextWriter output)
         {
             output.Write(",\"Properties\":{");
 
+            output.Write($"\"{component}\":{{");
+
+            if (subComponent != null)
+            {
+                output.Write($"\"{subComponent}\":{{");
+            }
+
             var precedingDelimiter = "";
 
-            foreach (var property in logEvent.Properties)
+            var namespacedProperties = logEvent.Properties
+                .Where(p => TemplateContainsPropertyName(logEvent.MessageTemplate, p.Key))
+                .ToArray();
+
+            foreach (var namespacedProperty in namespacedProperties)
             {
                 output.Write(precedingDelimiter);
                 precedingDelimiter = ",";
 
-                JsonValueFormatter.WriteQuotedJsonString(property.Key, output);
+                JsonValueFormatter.WriteQuotedJsonString(namespacedProperty.Key, output);
                 output.Write(':');
-                ValueFormatter.Instance.Format(property.Value, output);
+                ValueFormatter.Instance.Format(namespacedProperty.Value, output);
+            }
+
+            if (subComponent != null)
+            {
+                output.Write("}");
+            }
+
+            output.Write("}");
+
+            var otherProperties = logEvent.Properties.Except(namespacedProperties).ToArray();
+            if (otherProperties.Length > 0)
+            {
+                output.Write(",");
+
+                precedingDelimiter = "";
+
+                foreach (var namespacedProperty in namespacedProperties)
+                {
+                    output.Write(precedingDelimiter);
+                    precedingDelimiter = ",";
+
+                    JsonValueFormatter.WriteQuotedJsonString(namespacedProperty.Key, output);
+                    output.Write(':');
+                    ValueFormatter.Instance.Format(namespacedProperty.Value, output);
+                }
             }
 
             // Better not to allocate an array in the 99.9% of cases where this is false
@@ -150,6 +186,20 @@ namespace Serilog.Sinks.Http.TextFormatters
             }
 
             output.Write('}');
+        }
+
+        static bool TemplateContainsPropertyName(MessageTemplate template, string propertyName)
+        {
+            foreach (var token in template.Tokens)
+            {
+                if (token is PropertyToken namedProperty &&
+                    namedProperty.PropertyName == propertyName)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static void WriteRenderings(
