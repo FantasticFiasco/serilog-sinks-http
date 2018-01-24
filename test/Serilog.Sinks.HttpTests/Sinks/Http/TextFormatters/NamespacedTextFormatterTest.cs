@@ -186,6 +186,22 @@ namespace Serilog.Sinks.Http.TextFormatters
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
+        public void PropertyInMessageTemplateAndEnrichedPropertyUsingComponentNamespace(bool isRenderingMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void PropertyInMessageTemplateAndEnrichedPropertyUsingSubComponentNamespace(bool isRenderingMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
         public void RenderingUsingComponentNamespace(bool isRenderingMessage)
         {
             // Arrange
