@@ -168,8 +168,8 @@ namespace Serilog.Sinks.Http.TextFormatters
 
             // Act
             logger
-                .ForContext("First", "One")
-                .ForContext("Second", "Two")
+                .ForContext("FirstContext", "One")
+                .ForContext("SecondContext", "Two")
                 .Information("No properties");
 
             // Assert
@@ -179,8 +179,8 @@ namespace Serilog.Sinks.Http.TextFormatters
             ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "No properties" : null);
             @event["Exception"].ShouldBeNull();
             @event["Properties"].Children().Count().ShouldBe(2);
-            @event["Properties"]["First"].ShouldBe("One");
-            @event["Properties"]["Second"].ShouldBe("Two");
+            @event["Properties"]["FirstContext"].ShouldBe("One");
+            @event["Properties"]["SecondContext"].ShouldBe("Two");
         }
 
         [Theory]
@@ -188,7 +188,25 @@ namespace Serilog.Sinks.Http.TextFormatters
         [InlineData(false)]
         public void PropertyInMessageTemplateAndEnrichedPropertyUsingComponentNamespace(bool isRenderingMessage)
         {
-            throw new NotImplementedException();
+
+            // Arrange
+            logger = CreateLogger(new Formatter("Foo", null, isRenderingMessage));
+
+            // Act
+            logger
+                .ForContext("FirstContext", "One")
+                .Information("One {Property}", 42);
+
+            // Assert
+            var @event = GetEvent();
+            @event["Timestamp"].ShouldNotBeNull();
+            @event["MessageTemplate"].ShouldBe("One {Property}");
+            ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "One 42" : null);
+            @event["Exception"].ShouldBeNull();
+            @event["Properties"].Children().Count().ShouldBe(2);
+            @event["Properties"]["FirstContext"].ShouldBe("One");
+            @event["Properties"]["Foo"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"]["Property"].ShouldBe(42);
         }
 
         [Theory]
@@ -196,7 +214,25 @@ namespace Serilog.Sinks.Http.TextFormatters
         [InlineData(false)]
         public void PropertyInMessageTemplateAndEnrichedPropertyUsingSubComponentNamespace(bool isRenderingMessage)
         {
-            throw new NotImplementedException();
+            // Arrange
+            logger = CreateLogger(new Formatter("Foo", "Bar", isRenderingMessage));
+
+            // Act
+            logger
+                .ForContext("FirstContext", "One")
+                .Information("One {Property}", 42);
+
+            // Assert
+            var @event = GetEvent();
+            @event["Timestamp"].ShouldNotBeNull();
+            @event["MessageTemplate"].ShouldBe("One {Property}");
+            ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "One 42" : null);
+            @event["Exception"].ShouldBeNull();
+            @event["Properties"].Children().Count().ShouldBe(2);
+            @event["Properties"]["FirstContext"].ShouldBe("One");
+            @event["Properties"]["Foo"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"]["Bar"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Foo"]["Bar"]["Property"].ShouldBe(42);
         }
 
         [Theory]
