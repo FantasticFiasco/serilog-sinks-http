@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+### Added
+
+- Event formatter called `NamespacedTextFormatter` suited for a micro-service architecture where log events are sent to the Elastic Stack. The event formatter reduces the risk of two services logging properties with identical names but with different types, which the Elastic Stack doesn't support.
+
 ### Removed
 
 - Support for .NET Standard 2.0 since the sink also has support for .NET Standard 1.3

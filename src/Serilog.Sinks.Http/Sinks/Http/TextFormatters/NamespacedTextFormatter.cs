@@ -44,14 +44,14 @@ namespace Serilog.Sinks.Http.TextFormatters
         /// Initializes a new instance of the <see cref="NamespacedTextFormatter"/> class.
         /// </summary>
         /// <param name="component">
-        /// The component name, which will be serialized into a sub-property of 'Properties' in the
+        /// The component name, which will be serialized into a sub-property of "Properties" in the
         /// JSON document.
         /// </param>
         /// <param name="subComponent">
         /// The sub-component name, which will be serialized into a sub-property of
-        /// <paramref name="component"/> in the JSON document. If value is null it will be omitted from
-        /// the serialized JSON document, and the message properties will be serialized into
-        /// sub-properties of <paramref name="component"/>. Default value is null.
+        /// <paramref name="component"/> in the JSON document. If value is null it will be omitted
+        /// from the serialized JSON document, and the message properties will be serialized as
+        /// properties of <paramref name="component"/>. Default value is null.
         /// </param>
         protected NamespacedTextFormatter(string component, string subComponent = null)
         {
@@ -60,9 +60,10 @@ namespace Serilog.Sinks.Http.TextFormatters
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the message is rendered into JSON.
+        /// Gets or sets a value indicating whether the message is rendered into JSON. Default
+        /// value is true.
         /// </summary>
-        protected bool IsRenderingMessage { get; set; }
+        protected bool IsRenderingMessage { get; set; } = true;
 
         /// <summary>
         /// Format the log event into the output.
@@ -125,35 +126,20 @@ namespace Serilog.Sinks.Http.TextFormatters
         {
             output.Write(",\"Properties\":{");
 
-            var namespacedProperties = logEvent.Properties
-                .Where(p => TemplateContainsPropertyName(logEvent.MessageTemplate, p.Key))
+            var messageTemplateProperties = logEvent.Properties
+                .Where(property => TemplateContainsPropertyName(logEvent.MessageTemplate, property.Key))
                 .ToArray();
 
-            if (namespacedProperties.Length > 0)
+            if (messageTemplateProperties.Length > 0)
             {
-                output.Write($"\"{component}\":{{");
+                WriteOpenNamespace(output);
 
-                if (subComponent != null)
-                {
-                    output.Write($"\"{subComponent}\":{{");
-                }
-
-                var precedingDelimiter = "";
-
-                foreach (var namespacedProperty in namespacedProperties)
-                {
-                    output.Write(precedingDelimiter);
-                    precedingDelimiter = ",";
-
-                    JsonValueFormatter.WriteQuotedJsonString(namespacedProperty.Key, output);
-                    output.Write(':');
-                    ValueFormatter.Instance.Format(namespacedProperty.Value, output);
-                }
+                WriteProperties(messageTemplateProperties, output);
 
                 // Better not to allocate an array in the 99.9% of cases where this is false
                 var tokensWithFormat = logEvent.MessageTemplate.Tokens
                     .OfType<PropertyToken>()
-                    .Where(pt => pt.Format != null);
+                    .Where(propertyToken => propertyToken.Format != null);
 
                 // ReSharper disable once PossibleMultipleEnumeration
                 if (tokensWithFormat.Any())
@@ -162,40 +148,54 @@ namespace Serilog.Sinks.Http.TextFormatters
                     WriteRenderings(tokensWithFormat.GroupBy(pt => pt.PropertyName), logEvent.Properties, output);
                 }
 
-                if (subComponent != null)
-                {
-                    output.Write("}");
-                }
-
-                output.Write("}");
+                WriteCloseNamespace(output);
             }
+            
+            var enrichedProperties = logEvent.Properties
+                .Except(messageTemplateProperties)
+                .ToArray();
 
-
-            var otherProperties = logEvent.Properties.Except(namespacedProperties).ToArray();
-            if (otherProperties.Length > 0)
+            if (enrichedProperties.Length > 0)
             {
-                if (namespacedProperties.Length > 0)
+                if (messageTemplateProperties.Length > 0)
                 {
                     output.Write(",");
                 }
 
-                var precedingDelimiter = "";
-
-                foreach (var otherProperty in otherProperties)
-                {
-                    output.Write(precedingDelimiter);
-                    precedingDelimiter = ",";
-
-                    JsonValueFormatter.WriteQuotedJsonString(otherProperty.Key, output);
-                    output.Write(':');
-                    ValueFormatter.Instance.Format(otherProperty.Value, output);
-                }
+                WriteProperties(enrichedProperties, output);
             }
 
             output.Write('}');
         }
 
-        static bool TemplateContainsPropertyName(MessageTemplate template, string propertyName)
+        private void WriteOpenNamespace(TextWriter output)
+        {
+            output.Write(subComponent != null ?
+                $"\"{component}\":{{\"{subComponent}\":{{" :
+                $"\"{component}\":{{");
+        }
+
+        private void WriteCloseNamespace(TextWriter output)
+        {
+            output.Write(subComponent != null ? "}}" : "}");
+        }
+
+        private static void WriteProperties(IEnumerable<KeyValuePair<string, LogEventPropertyValue>> properties, TextWriter output)
+        {
+            var precedingDelimiter = "";
+
+            foreach (var property in properties)
+            {
+                output.Write(precedingDelimiter);
+                precedingDelimiter = ",";
+
+                JsonValueFormatter.WriteQuotedJsonString(property.Key, output);
+                output.Write(':');
+                ValueFormatter.Instance.Format(property.Value, output);
+            }
+        }
+
+        private static bool TemplateContainsPropertyName(MessageTemplate template, string propertyName)
         {
             foreach (var token in template.Tokens)
             {
