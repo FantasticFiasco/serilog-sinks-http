@@ -6,6 +6,7 @@ Write-Host "build: dotnet cli v$(dotnet --version)"
 
 Push-Location $PSScriptRoot\..
 
+# Clean artifacts
 if (Test-Path .\artifacts) {
     Write-Host "build: Cleaning .\artifacts"
     Remove-Item .\artifacts -Force -Recurse
@@ -18,6 +19,7 @@ $suffix = @{ $true = ""; $false = "$branch-$revision"}[$branch -eq "master" -and
 
 Write-Host "build: Version suffix is '$suffix'"
 
+# Build and pack
 foreach ($src in Get-ChildItem src/*) {
     Push-Location $src
 
@@ -37,6 +39,7 @@ foreach ($src in Get-ChildItem src/*) {
     Pop-Location
 }
 
+# Test
 foreach ($test in Get-ChildItem test/*Tests) {
     Push-Location $test
 
@@ -47,5 +50,8 @@ foreach ($test in Get-ChildItem test/*Tests) {
 
     Pop-Location
 }
+
+# Push
+ls
 
 Pop-Location
