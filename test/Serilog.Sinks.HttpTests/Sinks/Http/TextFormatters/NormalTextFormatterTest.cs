@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
+using System.Linq;
+using Newtonsoft.Json.Linq;
 using Serilog.Events;
 using Serilog.Formatting;
-using Serilog.Sinks.Http.LogServer.Controllers.Dto;
 using Serilog.Support;
 using Shouldly;
 using Xunit;
@@ -29,7 +28,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         [InlineData(LogEventLevel.Warning)]
         [InlineData(LogEventLevel.Error)]
         [InlineData(LogEventLevel.Fatal)]
-        public void LogEventLevels(LogEventLevel level)
+        public void Level(LogEventLevel level)
         {
             // Arrange
             logger = CreateLogger(new NormalRenderedTextFormatter());
@@ -39,13 +38,13 @@ namespace Serilog.Sinks.Http.TextFormatters
 
             // Assert
             var @event = GetEvent();
-            @event.Level.ShouldNotBeNull();
+            @event["Level"].ShouldNotBeNull();
         }
 
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void EmptyEvent(bool isRenderingMessage)
+        public void Message(bool isRenderingMessage)
         {
             // Arrange
             logger = CreateLogger(isRenderingMessage ? 
@@ -57,19 +56,19 @@ namespace Serilog.Sinks.Http.TextFormatters
 
             // Assert
             var @event = GetEvent();
-            @event.Timestamp.ShouldNotBeNull();
-            @event.Level.ShouldBe("Information");
-            @event.MessageTemplate.ShouldBe("No properties");
-            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "No properties" : null);
-            @event.Exception.ShouldBeNull();
-            @event.Properties.ShouldBeNull();
-            @event.Renderings.ShouldBeNull();
+            @event["Timestamp"].ShouldNotBeNull();
+            @event["Level"].ShouldBe("Information");
+            @event["MessageTemplate"].ShouldBe("No properties");
+            ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "No properties" : null);
+            @event["Exception"].ShouldBeNull();
+            @event["Properties"].ShouldBeNull();
+            @event["Renderings"].ShouldBeNull();
         }
 
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void MinimalEvent(bool isRenderingMessage)
+        public void PropertyInMessageTemplate(bool isRenderingMessage)
         {
             // Arrange
             logger = CreateLogger(isRenderingMessage ?
@@ -81,19 +80,20 @@ namespace Serilog.Sinks.Http.TextFormatters
 
             // Assert
             var @event = GetEvent();
-            @event.Timestamp.ShouldNotBeNull();
-            @event.Level.ShouldBe("Information");
-            @event.MessageTemplate.ShouldBe("One {Property}");
-            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "One 42" : null);
-            @event.Exception.ShouldBeNull();
-            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Property", "42" } });
-            @event.Renderings.ShouldBeNull();
+            @event["Timestamp"].ShouldNotBeNull();
+            @event["Level"].ShouldBe("Information");
+            @event["MessageTemplate"].ShouldBe("One {Property}");
+            ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "One 42" : null);
+            @event["Exception"].ShouldBeNull();
+            @event["Properties"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Property"].ShouldBe(42);
+            @event["Renderings"].ShouldBeNull();
         }
 
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void MultipleProperties(bool isRenderingMessage)
+        public void PropertiesInMessageTemplate(bool isRenderingMessage)
         {
             // Arrange
             logger = CreateLogger(isRenderingMessage ?
@@ -105,19 +105,21 @@ namespace Serilog.Sinks.Http.TextFormatters
 
             // Assert
             var @event = GetEvent();
-            @event.Timestamp.ShouldNotBeNull();
-            @event.Level.ShouldBe("Information");
-            @event.MessageTemplate.ShouldBe("Property {First} and {Second}");
-            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "Property \"One\" and \"Two\"" : null);
-            @event.Exception.ShouldBeNull();
-            @event.Properties.ShouldBe(new Dictionary<string, string> { { "First", "One" }, { "Second", "Two" } });
-            @event.Renderings.ShouldBeNull();
+            @event["Timestamp"].ShouldNotBeNull();
+            @event["Level"].ShouldBe("Information");
+            @event["MessageTemplate"].ShouldBe("Property {First} and {Second}");
+            ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "Property \"One\" and \"Two\"" : null);
+            @event["Exception"].ShouldBeNull();
+            @event["Properties"].Children().Count().ShouldBe(2);
+            @event["Properties"]["First"].ShouldBe("One");
+            @event["Properties"]["Second"].ShouldBe("Two");
+            @event["Renderings"].ShouldBeNull();
         }
 
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void Exceptions(bool isRenderingMessage)
+        public void EnrichedProperties(bool isRenderingMessage)
         {
             // Arrange
             logger = CreateLogger(isRenderingMessage ?
@@ -125,23 +127,27 @@ namespace Serilog.Sinks.Http.TextFormatters
                 new NormalTextFormatter());
 
             // Act
-            logger.Information(new DivideByZeroException(), "With exception");
+            logger
+                .ForContext("First", "One")
+                .ForContext("Second", "Two")
+                .Information("No properties");
 
             // Assert
             var @event = GetEvent();
-            @event.Timestamp.ShouldNotBeNull();
-            @event.Level.ShouldBe("Information");
-            @event.MessageTemplate.ShouldBe("With exception");
-            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "With exception" : null);
-            @event.Exception.ShouldNotBeNull();
-            @event.Properties.ShouldBeNull();
-            @event.Renderings.ShouldBeNull();
+            @event["Timestamp"].ShouldNotBeNull();
+            @event["MessageTemplate"].ShouldBe("No properties");
+            ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "No properties" : null);
+            @event["Exception"].ShouldBeNull();
+            @event["Properties"].Children().Count().ShouldBe(2);
+            @event["Properties"]["First"].ShouldBe("One");
+            @event["Properties"]["Second"].ShouldBe("Two");
+            @event["Renderings"].ShouldBeNull();
         }
 
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void ExceptionAndProperties(bool isRenderingMessage)
+        public void Rendering(bool isRenderingMessage)
         {
             // Arrange
             logger = CreateLogger(isRenderingMessage ?
@@ -149,17 +155,20 @@ namespace Serilog.Sinks.Http.TextFormatters
                 new NormalTextFormatter());
 
             // Act
-            logger.Information(new DivideByZeroException(), "With exception and {Property}", 42);
+            logger.Information("One {Rendering:x8}", 42);
 
             // Assert
             var @event = GetEvent();
-            @event.Timestamp.ShouldNotBeNull();
-            @event.Level.ShouldBe("Information");
-            @event.MessageTemplate.ShouldBe("With exception and {Property}");
-            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "With exception and 42" : null);
-            @event.Exception.ShouldNotBeNull();
-            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Property", "42" } });
-            @event.Renderings.ShouldBeNull();
+            @event["Timestamp"].ShouldNotBeNull();
+            @event["Level"].ShouldBe("Information");
+            @event["MessageTemplate"].ShouldBe("One {Rendering:x8}");
+            ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "One 0000002a" : null);
+            @event["Exception"].ShouldBeNull();
+            @event["Properties"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Rendering"].ShouldBe(42);
+            @event["Renderings"]["Rendering"].Children().Count().ShouldBe(1);
+            @event["Renderings"]["Rendering"][0]["Format"].ShouldBe("x8");
+            @event["Renderings"]["Rendering"][0]["Rendering"].ShouldBe("0000002a");
         }
 
         [Theory]
@@ -173,25 +182,30 @@ namespace Serilog.Sinks.Http.TextFormatters
                 new NormalTextFormatter());
 
             // Act
-            logger.Information("One {Rendering:x8}", 42);
+            logger.Information("Rendering {First:x8} and {Second:x8}", 1, 2);
 
             // Assert
             var @event = GetEvent();
-            @event.Timestamp.ShouldNotBeNull();
-            @event.Level.ShouldBe("Information");
-            @event.MessageTemplate.ShouldBe("One {Rendering:x8}");
-            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "One 0000002a" : null);
-            @event.Exception.ShouldBeNull();
-            @event.Properties.ShouldBe(new Dictionary<string, string> { { "Rendering", "42" } });
-            @event.Renderings.ShouldContainKey("Rendering");
-            @event.Renderings["Rendering"].Length.ShouldBe(1);
-            @event.Renderings["Rendering"][0].ShouldBe(new RenderingDto { Format = "x8", Rendering = "0000002a" });
+            @event["Timestamp"].ShouldNotBeNull();
+            @event["Level"].ShouldBe("Information");
+            @event["MessageTemplate"].ShouldBe("Rendering {First:x8} and {Second:x8}");
+            ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "Rendering 00000001 and 00000002" : null);
+            @event["Exception"].ShouldBeNull();
+            @event["Properties"].Children().Count().ShouldBe(2);
+            @event["Properties"]["First"].ShouldBe(1);
+            @event["Properties"]["Second"].ShouldBe(2);
+            @event["Renderings"]["First"].Children().Count().ShouldBe(1);
+            @event["Renderings"]["First"][0]["Format"].ShouldBe("x8");
+            @event["Renderings"]["First"][0]["Rendering"].ShouldBe("00000001");
+            @event["Renderings"]["Second"].Children().Count().ShouldBe(1);
+            @event["Renderings"]["Second"][0]["Format"].ShouldBe("x8");
+            @event["Renderings"]["Second"][0]["Rendering"].ShouldBe("00000002");
         }
 
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void MultipleRenderings(bool isRenderingMessage)
+        public void Exception(bool isRenderingMessage)
         {
             // Arrange
             logger = CreateLogger(isRenderingMessage ?
@@ -199,22 +213,42 @@ namespace Serilog.Sinks.Http.TextFormatters
                 new NormalTextFormatter());
 
             // Act
-            logger.Information("Rendering {First:x8} and {Second:x8}", 1, 2);
+            logger.Information(new DivideByZeroException(), "With exception");
 
             // Assert
             var @event = GetEvent();
-            @event.Timestamp.ShouldNotBeNull();
-            @event.Level.ShouldBe("Information");
-            @event.MessageTemplate.ShouldBe("Rendering {First:x8} and {Second:x8}");
-            @event.RenderedMessage.ShouldBe(isRenderingMessage ? "Rendering 00000001 and 00000002" : null);
-            @event.Exception.ShouldBeNull();
-            @event.Properties.ShouldBe(new Dictionary<string, string> { { "First", "1" }, { "Second", "2" } });
-            @event.Renderings.ShouldContainKey("First");
-            @event.Renderings["First"].Length.ShouldBe(1);
-            @event.Renderings["First"][0].ShouldBe(new RenderingDto { Format = "x8", Rendering = "00000001" });
-            @event.Renderings.ShouldContainKey("Second");
-            @event.Renderings["Second"].Length.ShouldBe(1);
-            @event.Renderings["Second"][0].ShouldBe(new RenderingDto { Format = "x8", Rendering = "00000002" });
+            @event["Timestamp"].ShouldNotBeNull();
+            @event["Level"].ShouldBe("Information");
+            @event["MessageTemplate"].ShouldBe("With exception");
+            ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "With exception" : null);
+            @event["Exception"].ShouldNotBeNull();
+            @event["Properties"].ShouldBeNull();
+            @event["Renderings"].ShouldBeNull();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ExceptionAndProperty(bool isRenderingMessage)
+        {
+            // Arrange
+            logger = CreateLogger(isRenderingMessage ?
+                new NormalRenderedTextFormatter() :
+                new NormalTextFormatter());
+
+            // Act
+            logger.Information(new DivideByZeroException(), "With exception and {Property}", 42);
+
+            // Assert
+            var @event = GetEvent();
+            @event["Timestamp"].ShouldNotBeNull();
+            @event["Level"].ShouldBe("Information");
+            @event["MessageTemplate"].ShouldBe("With exception and {Property}");
+            ((string)@event["RenderedMessage"]).ShouldBe(isRenderingMessage ? "With exception and 42" : null);
+            @event["Exception"].ShouldNotBeNull();
+            @event["Properties"].Children().Count().ShouldBe(1);
+            @event["Properties"]["Property"].ShouldBe(42);
+            @event["Renderings"].ShouldBeNull();
         }
 
         [Theory]
@@ -242,9 +276,9 @@ namespace Serilog.Sinks.Http.TextFormatters
                 .CreateLogger();
         }
 
-        private EventDto GetEvent()
+        private JObject GetEvent()
         {
-            return JsonConvert.DeserializeObject<EventDto>(output.ToString());
+            return JObject.Parse(output.ToString());
         }
     }
 }

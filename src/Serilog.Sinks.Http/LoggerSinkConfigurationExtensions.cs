@@ -70,8 +70,7 @@ namespace Serilog
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             IHttpClient httpClient = null)
         {
-            if (sinkConfiguration == null)
-                throw new ArgumentNullException(nameof(sinkConfiguration));
+            if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
             var sink = new HttpSink(
                 requestUri,
@@ -143,8 +142,7 @@ namespace Serilog
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             IHttpClient httpClient = null)
         {
-            if (sinkConfiguration == null)
-                throw new ArgumentNullException(nameof(sinkConfiguration));
+            if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
             var sink = new DurableHttpSink(
                 requestUri,

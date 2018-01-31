@@ -20,7 +20,7 @@ using System.Linq;
 namespace Serilog.Sinks.Http.BatchFormatters
 {
     /// <summary>
-    /// Formatter serializing batches of log events into a JSON object under a property called 'events'.
+    /// Formatter serializing batches of log events into a JSON object under a property called "events".
     /// <para/>
     /// Example:
     /// {
@@ -56,10 +56,8 @@ namespace Serilog.Sinks.Http.BatchFormatters
         /// </param>
         public override void Format(IEnumerable<string> logEvents, TextWriter output)
         {
-            if (logEvents == null)
-                throw new ArgumentNullException(nameof(logEvents));
-            if (output == null)
-                throw new ArgumentNullException(nameof(output));
+            if (logEvents == null) throw new ArgumentNullException(nameof(logEvents));
+            if (output == null) throw new ArgumentNullException(nameof(output));
 
             // Abort if sequence of log events is empty
             if (!logEvents.Any())

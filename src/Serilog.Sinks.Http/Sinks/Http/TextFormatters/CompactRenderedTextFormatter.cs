@@ -24,6 +24,7 @@ namespace Serilog.Sinks.Http.TextFormatters
     /// <seealso cref="NormalTextFormatter" />
     /// <seealso cref="NormalRenderedTextFormatter" />
     /// <seealso cref="CompactTextFormatter" />
+    /// <seealso cref="NamespacedTextFormatter" />
     /// <seealso cref="ITextFormatter" />
     public class CompactRenderedTextFormatter : CompactTextFormatter
     {

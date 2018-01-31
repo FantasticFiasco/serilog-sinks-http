@@ -33,6 +33,7 @@ namespace Serilog.Sinks.Http.TextFormatters
     /// <seealso cref="NormalTextFormatter" />
     /// <seealso cref="NormalRenderedTextFormatter" />
     /// <seealso cref="CompactRenderedTextFormatter" />
+    /// <seealso cref="NamespacedTextFormatter" />
     /// <seealso cref="ITextFormatter" />
     public class CompactTextFormatter : ITextFormatter
     {
@@ -64,10 +65,8 @@ namespace Serilog.Sinks.Http.TextFormatters
 
         private void FormatContent(LogEvent logEvent, TextWriter output)
         {
-            if (logEvent == null)
-                throw new ArgumentNullException(nameof(logEvent));
-            if (output == null)
-                throw new ArgumentNullException(nameof(output));
+            if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
+            if (output == null) throw new ArgumentNullException(nameof(output));
 
             output.Write("{\"@t\":\"");
             output.Write(logEvent.Timestamp.UtcDateTime.ToString("o"));

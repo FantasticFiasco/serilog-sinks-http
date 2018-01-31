@@ -25,22 +25,45 @@ using Serilog.Parsing;
 namespace Serilog.Sinks.Http.TextFormatters
 {
     /// <summary>
-    /// JSON formatter serializing log events into a normal format with its data normalized. The
-    /// lack of a rendered message means improved network load compared to
-    /// <see cref="NormalRenderedTextFormatter"/>. Often this formatter is complemented with a log
-    /// server that is capable of rendering the messages of the incoming log events.
+    /// JSON formatter serializing log events into a format where the message properties are placed
+    /// into their own namespace. It is designed for a micro-service architecture where one wish to
+    /// reduce the risk of having multiple services sending log events with identical property
+    /// names but different value types, something that is unsupported by the Elastic Stack.
     /// </summary>
+    /// <seealso cref="NormalTextFormatter" />
     /// <seealso cref="NormalRenderedTextFormatter" />
     /// <seealso cref="CompactTextFormatter" />
     /// <seealso cref="CompactRenderedTextFormatter" />
-    /// <seealso cref="NamespacedTextFormatter" />
     /// <seealso cref="ITextFormatter" />
-    public class NormalTextFormatter : ITextFormatter
+    public abstract class NamespacedTextFormatter : ITextFormatter
     {
+        private readonly string component;
+        private readonly string subComponent;
+
         /// <summary>
-        /// Gets or sets a value indicating whether the message is rendered into JSON.
+        /// Initializes a new instance of the <see cref="NamespacedTextFormatter"/> class.
         /// </summary>
-        protected bool IsRenderingMessage { get; set; }
+        /// <param name="component">
+        /// The component name, which will be serialized into a sub-property of "Properties" in the
+        /// JSON document.
+        /// </param>
+        /// <param name="subComponent">
+        /// The sub-component name, which will be serialized into a sub-property of
+        /// <paramref name="component"/> in the JSON document. If value is null it will be omitted
+        /// from the serialized JSON document, and the message properties will be serialized as
+        /// properties of <paramref name="component"/>. Default value is null.
+        /// </param>
+        protected NamespacedTextFormatter(string component, string subComponent = null)
+        {
+            this.component = component ?? throw new ArgumentNullException(nameof(component));
+            this.subComponent = subComponent;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the message is rendered into JSON. Default
+        /// value is true.
+        /// </summary>
+        protected bool IsRenderingMessage { get; set; } = true;
 
         /// <summary>
         /// Format the log event into the output.
@@ -93,30 +116,72 @@ namespace Serilog.Sinks.Http.TextFormatters
 
             if (logEvent.Properties.Count != 0)
             {
-                WriteProperties(logEvent.Properties, output);
-            }
-
-            // Better not to allocate an array in the 99.9% of cases where this is false
-            var tokensWithFormat = logEvent.MessageTemplate.Tokens
-                .OfType<PropertyToken>()
-                .Where(pt => pt.Format != null);
-
-            // ReSharper disable once PossibleMultipleEnumeration
-            if (tokensWithFormat.Any())
-            {
-                // ReSharper disable once PossibleMultipleEnumeration
-                WriteRenderings(tokensWithFormat.GroupBy(pt => pt.PropertyName), logEvent.Properties, output);
+                WriteProperties(logEvent, output);
             }
 
             output.Write('}');
         }
 
-        private static void WriteProperties(
-            IReadOnlyDictionary<string, LogEventPropertyValue> properties,
-            TextWriter output)
+        private void WriteProperties(LogEvent logEvent, TextWriter output)
         {
             output.Write(",\"Properties\":{");
 
+            var messageTemplateProperties = logEvent.Properties
+                .Where(property => TemplateContainsPropertyName(logEvent.MessageTemplate, property.Key))
+                .ToArray();
+
+            if (messageTemplateProperties.Length > 0)
+            {
+                WriteOpenNamespace(output);
+
+                WriteProperties(messageTemplateProperties, output);
+
+                // Better not to allocate an array in the 99.9% of cases where this is false
+                var tokensWithFormat = logEvent.MessageTemplate.Tokens
+                    .OfType<PropertyToken>()
+                    .Where(propertyToken => propertyToken.Format != null);
+
+                // ReSharper disable once PossibleMultipleEnumeration
+                if (tokensWithFormat.Any())
+                {
+                    // ReSharper disable once PossibleMultipleEnumeration
+                    WriteRenderings(tokensWithFormat.GroupBy(pt => pt.PropertyName), logEvent.Properties, output);
+                }
+
+                WriteCloseNamespace(output);
+            }
+            
+            var enrichedProperties = logEvent.Properties
+                .Except(messageTemplateProperties)
+                .ToArray();
+
+            if (enrichedProperties.Length > 0)
+            {
+                if (messageTemplateProperties.Length > 0)
+                {
+                    output.Write(",");
+                }
+
+                WriteProperties(enrichedProperties, output);
+            }
+
+            output.Write('}');
+        }
+
+        private void WriteOpenNamespace(TextWriter output)
+        {
+            output.Write(subComponent != null ?
+                $"\"{component}\":{{\"{subComponent}\":{{" :
+                $"\"{component}\":{{");
+        }
+
+        private void WriteCloseNamespace(TextWriter output)
+        {
+            output.Write(subComponent != null ? "}}" : "}");
+        }
+
+        private static void WriteProperties(IEnumerable<KeyValuePair<string, LogEventPropertyValue>> properties, TextWriter output)
+        {
             var precedingDelimiter = "";
 
             foreach (var property in properties)
@@ -128,8 +193,20 @@ namespace Serilog.Sinks.Http.TextFormatters
                 output.Write(':');
                 ValueFormatter.Instance.Format(property.Value, output);
             }
+        }
 
-            output.Write('}');
+        private static bool TemplateContainsPropertyName(MessageTemplate template, string propertyName)
+        {
+            foreach (var token in template.Tokens)
+            {
+                if (token is PropertyToken namedProperty &&
+                    namedProperty.PropertyName == propertyName)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static void WriteRenderings(
