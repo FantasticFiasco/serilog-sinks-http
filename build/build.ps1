@@ -47,17 +47,17 @@ foreach ($src in Get-ChildItem src/*)
 }
 
 # Test
-foreach ($test in Get-ChildItem test/*Tests)
-{
-    Push-Location $test
+# foreach ($test in Get-ChildItem test/*Tests)
+# {
+#     Push-Location $test
 
-    Write-Host "build: Testing project in $test"
+#     Write-Host "build: Testing project in $test"
 
-    & dotnet test -c Release
-    if ($LASTEXITCODE -ne 0) { exit 2 }
+#     & dotnet test -c Release
+#     if ($LASTEXITCODE -ne 0) { exit 2 }
 
-    Pop-Location
-}
+#     Pop-Location
+# }
 
 # Push
 Write-Host "APPVEYOR_REPO_TAG: $env:APPVEYOR_REPO_TAG"
