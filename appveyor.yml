@@ -5,9 +5,6 @@
 # version format
 version: '{build}'
 
-# do not build on tags (GitHub and BitBucket)
-skip_tags: true
-
 #---------------------------------#
 #    environment configuration    #
 #---------------------------------#
