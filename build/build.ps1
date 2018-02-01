@@ -60,8 +60,8 @@ foreach ($src in Get-ChildItem src/*)
 # }
 
 # Push
-if ($env:APPVEYOR_REPO_TAG -eq "true")
-{
+# if ($env:APPVEYOR_REPO_TAG -eq "true")
+# {
     Write-Host "Push package on tag $env:APPVEYOR_REPO_TAG_NAME"
 
     Push-Location artifacts
@@ -72,6 +72,6 @@ if ($env:APPVEYOR_REPO_TAG -eq "true")
     }
 
     Pop-Location
-}
+# }
 
 Pop-Location
