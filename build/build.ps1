@@ -60,13 +60,18 @@ foreach ($src in Get-ChildItem src/*)
 # }
 
 # Push
-Write-Host "APPVEYOR_REPO_TAG: $env:APPVEYOR_REPO_TAG"
-Write-Host "APPVEYOR_REPO_TAG: $env:APPVEYOR_REPO_TAG_NAME"
-
 if ($env:APPVEYOR_REPO_TAG -eq "true")
 {
-    Write-Host "APPVEYOR_REPO_TAG: $env:APPVEYOR_REPO_TAG_NAME"
-    # dotnet nuget push <package> --source https://www.nuget.org/api/v2/package --api-key <NuGet API key>
+    Write-Host "Push package on tag $env:APPVEYOR_REPO_TAG_NAME"
+
+    Push-Location artifacts
+
+    foreach ($package in Get-ChildItem *.nupkg -Exclude *.symbols.nupkg)
+    {
+        & dotnet nuget push $package --source https://www.nuget.org/api/v2/package --api-key kalle
+    }
+
+    Pop-Location
 }
 
 Pop-Location
