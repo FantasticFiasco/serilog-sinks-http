@@ -68,7 +68,7 @@ if ($env:APPVEYOR_REPO_TAG -eq "true")
 
     foreach ($package in Get-ChildItem *.nupkg -Exclude *.symbols.nupkg)
     {
-        & dotnet nuget push $package --source https://www.nuget.org/api/v2/package --api-key $NUGET_API_KEY
+        & dotnet nuget push $package --source "https://www.nuget.org/api/v2/package" --api-key "$env:NUGET_API_KEY"
     }
 
     Pop-Location
