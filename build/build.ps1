@@ -21,11 +21,11 @@ $suffix = @{ $true = ""; $false = "$branch-$revision"}[$branch -eq "master" -and
 Write-Host "build: Version suffix is '$suffix'"
 
 # Build and pack
-foreach ($src in Get-ChildItem src/*)
+foreach ($source in Get-ChildItem .\src\*)
 {
-    Push-Location $src
+    Push-Location $source
 
-    Write-Host "build: Packaging project in $src"
+    Write-Host "build: Packaging project in $source"
 
     if ($suffix -eq "")
     {
@@ -47,31 +47,31 @@ foreach ($src in Get-ChildItem src/*)
 }
 
 # Test
-# foreach ($test in Get-ChildItem test/*Tests)
-# {
-#     Push-Location $test
+foreach ($test in Get-ChildItem test/*Tests)
+{
+    Push-Location $test
 
-#     Write-Host "build: Testing project in $test"
+    Write-Host "build: Testing project in $test"
 
-#     & dotnet test -c Release
-#     if ($LASTEXITCODE -ne 0) { exit 2 }
+    & dotnet test -c Release
+    if ($LASTEXITCODE -ne 0) { exit 2 }
 
-#     Pop-Location
-# }
+    Pop-Location
+}
 
 # Push
-# if ($env:APPVEYOR_REPO_TAG -eq "true")
-# {
-    Write-Host "Push package on tag $env:APPVEYOR_REPO_TAG_NAME"
+if ($env:APPVEYOR_REPO_TAG -eq "true")
+{
+    Write-Host "build: push package to www.nuget.org"
 
-    Push-Location artifacts
+    Push-Location .\artifacts
 
     foreach ($package in Get-ChildItem *.nupkg -Exclude *.symbols.nupkg)
     {
-        & dotnet nuget push $package --source https://www.nuget.org/api/v2/package --api-key kalle
+        & dotnet nuget push $package --source https://www.nuget.org/api/v2/package --api-key $NUGET_API_KEY
     }
 
     Pop-Location
-# }
+}
 
 Pop-Location
