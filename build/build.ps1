@@ -52,6 +52,8 @@ foreach ($test in Get-ChildItem test/*Tests) {
 }
 
 # Push
-ls
+Write-Host "APPVEYOR_REPO_TAG: $env:APPVEYOR_REPO_TAG"
+Write-Host "APPVEYOR_REPO_TAG: $env:APPVEYOR_REPO_TAG_NAME"
+
 
 Pop-Location
