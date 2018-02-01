@@ -6,7 +6,9 @@ Write-Host "build: dotnet cli v$(dotnet --version)"
 
 Push-Location $PSScriptRoot\..
 
-if (Test-Path .\artifacts) {
+# Clean artifacts
+if (Test-Path .\artifacts)
+{
     Write-Host "build: Cleaning .\artifacts"
     Remove-Item .\artifacts -Force -Recurse
 }
@@ -18,32 +20,56 @@ $suffix = @{ $true = ""; $false = "$branch-$revision"}[$branch -eq "master" -and
 
 Write-Host "build: Version suffix is '$suffix'"
 
-foreach ($src in Get-ChildItem src/*) {
-    Push-Location $src
+# Build and pack
+foreach ($source in Get-ChildItem .\src\*)
+{
+    Push-Location $source
 
-    Write-Host "build: Packaging project in $src"
+    Write-Host "build: Packaging project in $source"
 
     if ($suffix -eq "")
     {
         & dotnet build -c Release
         & dotnet pack -c Release --include-symbols -o ..\..\artifacts --no-build
     }
-    else {
+    else
+    {
         & dotnet build -c Release --version-suffix=$suffix
         & dotnet pack -c Release --include-symbols -o ..\..\artifacts --version-suffix=$suffix --no-build
     }
-    if ($LASTEXITCODE -ne 0) { exit 1 }    
+    
+    if ($LASTEXITCODE -ne 0)
+    {
+        exit 1
+    }    
 
     Pop-Location
 }
 
-foreach ($test in Get-ChildItem test/*Tests) {
+# Test
+foreach ($test in Get-ChildItem test/*Tests)
+{
     Push-Location $test
 
     Write-Host "build: Testing project in $test"
 
     & dotnet test -c Release
     if ($LASTEXITCODE -ne 0) { exit 2 }
+
+    Pop-Location
+}
+
+# Push
+if ($env:APPVEYOR_REPO_TAG -eq "true")
+{
+    Write-Host "build: push package to www.nuget.org"
+
+    Push-Location .\artifacts
+
+    foreach ($package in Get-ChildItem *.nupkg -Exclude *.symbols.nupkg)
+    {
+        & dotnet nuget push $package --source https://www.nuget.org/api/v2/package --api-key $NUGET_API_KEY
+    }
 
     Pop-Location
 }
