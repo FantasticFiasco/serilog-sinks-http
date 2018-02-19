@@ -8,74 +8,74 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## [4.3.0] - 2018-02-01
 
-### Added
+### :zap: Added
 
 - Event formatter called `NamespacedTextFormatter` suited for a micro-service architecture where log events are sent to the Elastic Stack. The event formatter reduces the risk of two services logging properties with identical names but with different types, which the Elastic Stack doesn't support.
 
-### Removed
+### :skull: Removed
 
 - Support for .NET Standard 2.0 since the sink also has support for .NET Standard 1.3
 
 ## [4.2.1] - 2017-10-11
 
-### Fixed
+### :syringe: Fixed
 
 - [#32](https://github.com/FantasticFiasco/serilog-sinks-http/issues/32) Prevent durable HTTP sink from posting HTTP messages without any log events
 
 ## [4.2.0] - 2017-08-20
 
-### Added
+### :zap: Added
 
 - Support for .NET Core 2.0
 
 ## [4.1.0] - 2017-08-13
 
-### Added
+### :zap: Added
 
 - [#22](https://github.com/FantasticFiasco/serilog-sinks-http/issues/22) Batch formatter `ArrayBatchFormatter` which is compatible with the Logstash HTTP input plugin configured to use the JSON codec
 
-### Fixed
+### :syringe: Fixed
 
 - Prevent posting HTTP messages without any log events
 
 ## [4.0.0] - 2017-06-17
 
-### Added
+### :zap: Added
 
 - [#8](https://github.com/FantasticFiasco/serilog-sinks-http/issues/8) [BREAKING CHANGE] Support for [Serilog.Settings.Configuration](https://github.com/serilog/serilog-settings-configuration) required changing the extension methods configuring a HTTP sink. `Options` and `DurableOptions` no longer exist, and their properties are now optional parameters on the extension methods instead.
 - [#11](https://github.com/FantasticFiasco/serilog-sinks-http/issues/11) Support for HTTP body configuration using `IBatchFormatter` and `ITextFormatter`. This enables full control of how messages are serialized before being sent over the network. (contribution by [@kvpt](https://github.com/kvpt))
 - [#19](https://github.com/FantasticFiasco/serilog-sinks-http/issues/19) Support for specifying the maximum number of retained buffer files and their rotation period on the durable HTTP sink. (contribution by [@rob-somerville](https://github.com/rob-somerville))
 
-### Changed
+### :dizzy: Changed
 
 - [#11](https://github.com/FantasticFiasco/serilog-sinks-http/issues/11) Enum `FormattingType` has been replaces with public access to the formatters `NormalRenderedTextFormatter`, `NormalTextFormatter`, `CompactRenderedTextFormatter` and `CompactTextFormatter`. Removing the enum opens up the possibility to specify your own text formatter.  (contribution by [@kvpt](https://github.com/kvpt))
 
 ## [3.1.1] - 2017-04-24
 
-### Fixed
+### :syringe: Fixed
 
 - Package project URL
 
 ## [3.1.0] - 2017-03-12
 
-### Added
+### :zap: Added
 
 - Support for the formatting types: `FormattingType.NormalRendered`, `FormattingType.Normal`, `FormattingType.CompactRendered` and `FormattingType.Compact`. The formatting type can be configured via `Options` and `DurableOptions`.
 
 ## [3.0.0] - 2017-03-04
 
-### Added
+### :zap: Added
 
 - [#3](https://github.com/FantasticFiasco/serilog-sinks-http/issues/3) Support for configuring a sink to be durable using `Http(string, DurableOptions)`. A durable sink will persist log events on disk before sending them over the network, thus protecting against data loss after a system or process restart.
 
-### Changed
+### :dizzy: Changed
 
 - [BREAKING CHANGE] The syntax for creating a non-durable sink has been changed from `Http(string)` to `Http(string, Options)` to accommodate for the syntax to create a durable sink. A non-durable sink will lose data after a system or process restart.
 - Improve compatibility by supporting .NET Standard 1.3
 
 ## [2.0.0] - 2016-11-23
 
-### Changed
+### :dizzy: Changed
 
 - [#1](https://github.com/FantasticFiasco/serilog-sinks-http/pull/1) [BREAKING CHANGE] Sinks can be configured to use a custom implementation of `IHttpClient` (contribution by [@lhaussknecht](https://github.com/lhaussknecht))
 
