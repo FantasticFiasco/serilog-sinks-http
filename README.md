@@ -101,7 +101,7 @@ The log events can be sent directly to Elasticsearch using [Serilog.Sinks.Elasti
 
 If you would like to send the log events to Logstash for further processing instead of sending them directly to Elasticsearch, this sink in combination with the [Logstash HTTP input plugin](https://www.elastic.co/blog/introducing-logstash-input-http-plugin) is the perfect match for you. It is a much better solution than having to install [Filebeat](https://www.elastic.co/products/beats/filebeat) on all your instances, mainly because it involves fewer moving parts.
 
-For a complete reference application of Serilog sending log events to Logstash, please see [serilog-sinks-http-elastic-stack](https://github.com/FantasticFiasco/serilog-sinks-http-elastic-stack).
+For a complete reference application of Serilog sending log events to Logstash, please see [serilog-sinks-http-sample-elastic-stack](https://github.com/FantasticFiasco/serilog-sinks-http-sample-elastic-stack).
 
 ## Install via NuGet
 
