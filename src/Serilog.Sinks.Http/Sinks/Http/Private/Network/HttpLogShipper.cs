@@ -18,11 +18,11 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Sinks.Http.Private.Time;
 using IOFile = System.IO.File;
-using System.Text.RegularExpressions;
 #if HRESULTS
 using System.Runtime.InteropServices;
 #endif
@@ -75,7 +75,7 @@ namespace Serilog.Sinks.Http.Private.Network
             var prefix = bufferPathFormatMatch.Groups["prefix"];
             var postfix = bufferPathFormatMatch.Groups["postfix"];
 
-            bookmarkFilename = Path.GetFullPath(prefix.Value.TrimEnd(new char[] { '-' }) + ".bookmark");
+            bookmarkFilename = Path.GetFullPath(prefix.Value.TrimEnd('-') + ".bookmark");
             logFolder = Path.GetDirectoryName(bookmarkFilename);
             candidateSearchPath = $"{Path.GetFileName(prefix.Value)}*{postfix.Value}";
             connectionSchedule = new ExponentialBackoffConnectionSchedule(period);
@@ -117,10 +117,7 @@ namespace Serilog.Sinks.Http.Private.Network
                         FileAccess.ReadWrite,
                         FileShare.Read))
                     {
-                        long nextLineBeginsAtOffset;
-                        string currentFile;
-
-                        TryReadBookmark(bookmark, out nextLineBeginsAtOffset, out currentFile);
+                        TryReadBookmark(bookmark, out var nextLineBeginsAtOffset, out var currentFile);
 
                         var fileSet = GetFileSet();
 
@@ -217,9 +214,8 @@ namespace Serilog.Sinks.Http.Private.Network
             {
                 current.Position = nextLineBeginsAtOffset;
 
-                string nextLine;
                 while (count < batchPostingLimit &&
-                       TryReadLine(current, ref nextLineBeginsAtOffset, out nextLine))
+                       TryReadLine(current, ref nextLineBeginsAtOffset, out var nextLine))
                 {
                     // Count is the indicator that work was done, so advances even in the (rare) case an
                     // oversized event is dropped
