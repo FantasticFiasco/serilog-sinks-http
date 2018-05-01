@@ -14,6 +14,7 @@ __Package__ - [Serilog.Sinks.Http](https://www.nuget.org/packages/serilog.sinks.
 
 - [Super simple to use](#super-simple-to-use)
 - [Typical use case](#typical-use-case)
+- [Sample applications](#sample-applications)
 - [Install via NuGet](#install-via-nuget)
 - [Credit](#credit)
 
@@ -21,12 +22,12 @@ __Package__ - [Serilog.Sinks.Http](https://www.nuget.org/packages/serilog.sinks.
 
 ## Super simple to use
 
-In the following example, the sink will POST log events to `www.mylogs.com` over HTTP.
+In the following example, the sink will POST log events to `http://www.mylogs.com` over HTTP.
 
 ```csharp
 ILogger log = new LoggerConfiguration()
   .MinimumLevel.Verbose()
-  .WriteTo.Http("www.mylogs.com")
+  .WriteTo.Http("http://www.mylogs.com")
   .CreateLogger();
 
 log.Information("Logging {@Heartbeat} from {Computer}", heartbeat, computer);
@@ -42,7 +43,7 @@ Used in conjunction with [Serilog.Settings.Configuration](https://github.com/ser
       {
         "Name": "Http",
         "Args": {
-          "requestUri": "www.mylogs.com"
+          "requestUri": "http://www.mylogs.com"
         } 
       }
     ]
@@ -101,7 +102,13 @@ The log events can be sent directly to Elasticsearch using [Serilog.Sinks.Elasti
 
 If you would like to send the log events to Logstash for further processing instead of sending them directly to Elasticsearch, this sink in combination with the [Logstash HTTP input plugin](https://www.elastic.co/blog/introducing-logstash-input-http-plugin) is the perfect match for you. It is a much better solution than having to install [Filebeat](https://www.elastic.co/products/beats/filebeat) on all your instances, mainly because it involves fewer moving parts.
 
-For a complete reference application of Serilog sending log events to Logstash, please see [serilog-sinks-http-sample-elastic-stack](https://github.com/FantasticFiasco/serilog-sinks-http-sample-elastic-stack).
+## Sample applications
+
+The following sample applications demonstrate the usage of this sink in various circumstances:
+
+- [Serilog and the Elastic Stack](https://github.com/FantasticFiasco/serilog-sinks-http-sample-elastic-stack) - Sample application sending log events to Elastic Stack
+- [Serilog.Sinks.Http - Sample in .NET Core](https://github.com/FantasticFiasco/serilog-sinks-http-sample-dotnet-core) - Sample application producing log events in .NET Core
+- [Serilog.Sinks.Http - Sample in .NET Framework](https://github.com/FantasticFiasco/serilog-sinks-http-sample-dotnet-framework) - Sample application producing log events in .NET Framework
 
 ## Install via NuGet
 
