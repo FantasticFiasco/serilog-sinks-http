@@ -8,7 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{692091BE-C926-48A6-9A65-447E6C773BC1}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
-		Build.ps1 = Build.ps1
+		build\build.ps1 = build\build.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation", "documentation", "{A726A97C-1A7C-4898-BD7E-DC399921DA66}"
