@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Net.Http;
 using System.Threading.Tasks;
-using Moq;
 using Serilog.LogServer;
 using Serilog.Sinks.Http.BatchFormatters;
 using Serilog.Sinks.Http.TextFormatters;
+using Serilog.Support;
 using Shouldly;
 using Xunit;
 
@@ -145,7 +144,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
         public async Task NoNetworkTrafficWithoutLogEvents()
         {
             // Arrange
-            var httpClient = new Mock<IHttpClient>();
+            var httpClient = new InMemoryHttpClient();
 
             // ReSharper disable once UnusedVariable
             var httpSink = new DurableHttpSink(
@@ -157,15 +156,13 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 TimeSpan.FromSeconds(2),
                 new NormalRenderedTextFormatter(),
                 new DefaultBatchFormatter(),
-                httpClient.Object);
+                httpClient);
 
             // Act
             await Task.Delay(TimeSpan.FromMinutes(3));
 
             // Assert
-            httpClient.Verify(
-                mock => mock.PostAsync(It.IsAny<string>(), It.IsAny<HttpContent>()),
-                Times.Never);
+            httpClient.Events.ShouldBeEmpty();
         }
     }
 }

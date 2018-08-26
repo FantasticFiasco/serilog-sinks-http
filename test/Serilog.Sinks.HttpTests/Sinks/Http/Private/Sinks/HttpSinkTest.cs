@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Net.Http;
+using System.Linq;
 using System.Threading.Tasks;
-using Moq;
+using Serilog.Formatting.Display;
 using Serilog.Sinks.Http.BatchFormatters;
 using Serilog.Sinks.Http.TextFormatters;
 using Serilog.Support;
+using Shouldly;
 using Xunit;
 
 namespace Serilog.Sinks.Http.Private.Sinks
@@ -15,7 +16,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
         public async Task NoNetworkTrafficWithoutLogEvents()
         {
             // Arrange
-            var httpClient = new Mock<IHttpClient>();
+            var httpClient = new InMemoryHttpClient();
 
             // ReSharper disable once UnusedVariable
             var httpSink = new HttpSink(
@@ -24,44 +25,41 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 TimeSpan.FromSeconds(2),
                 new NormalRenderedTextFormatter(),
                 new DefaultBatchFormatter(),
-                httpClient.Object);
+                httpClient);
 
             // Act
             await Task.Delay(TimeSpan.FromMinutes(3));
-            
+
             // Assert
-            httpClient.Verify(
-                mock => mock.PostAsync(It.IsAny<string>(), It.IsAny<HttpContent>()),
-                Times.Never);
+            httpClient.Events.ShouldBeEmpty();
         }
 
         [Fact]
         public async Task RespectQueueLimit()
         {
             // Arrange
-            var httpClient = new Mock<IHttpClient>();
+            var httpClient = new InMemoryHttpClient();
 
             var httpSink = new HttpSink(
                 "api/events",
                 1,
                 1,  // Queue only holds 1 event
                 TimeSpan.FromSeconds(2),
-                new NormalRenderedTextFormatter(),
+                new MessageTemplateTextFormatter("{Message}", null),
                 new DefaultBatchFormatter(),
-                httpClient.Object);
+                httpClient);
 
             // Act
-            for (int i = 0; i < 10; i++)
-            {
-                httpSink.Emit(Some.InformationEvent());
-            }
+            Enumerable
+                .Range(1, 10)
+                .ToList()
+                .ForEach(number => httpSink.Emit(Some.LogEvent("Event {number}", number)));
 
             await Task.Delay(TimeSpan.FromSeconds(4));
 
             // Assert
-            httpClient.Verify(
-                mock => mock.PostAsync(It.IsAny<string>(), It.IsAny<HttpContent>()),
-                Times.Exactly(2)); // Two since the first and the last event will be sent, all other will be dropped from the queue
+            httpClient.Events.Length.ShouldBe(1);
+            (await httpClient.Events[0].ReadAsStringAsync()).ShouldBe("{\"events\":[Event 1]}");
         }
     }
 }
