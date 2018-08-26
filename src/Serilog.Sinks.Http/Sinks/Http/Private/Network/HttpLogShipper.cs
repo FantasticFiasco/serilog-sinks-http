@@ -31,8 +31,9 @@ namespace Serilog.Sinks.Http.Private.Network
 {
     internal class HttpLogShipper : IDisposable
     {
+        private const string ContentType = "application/json";
+
         private static readonly TimeSpan RequiredLevelCheckInterval = TimeSpan.FromMinutes(2);
-        private static readonly string ContentType = "application/json";
         private static readonly Regex BufferPathFormatRegex = new Regex(
             $"(?<prefix>.+)(?:{string.Join("|", Enum.GetNames(typeof(DateFormats)).Select(x => $"{{{x}}}"))})(?<postfix>.+)");
 

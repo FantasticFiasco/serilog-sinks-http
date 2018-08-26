@@ -32,7 +32,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
     /// <seealso cref="PeriodicBatchingSink" />
     public class HttpSink : PeriodicBatchingSink
     {
-        private static readonly string ContentType = "application/json";
+        private const string ContentType = "application/json";
 
         private readonly string requestUri;
         private readonly ITextFormatter textFormatter;
