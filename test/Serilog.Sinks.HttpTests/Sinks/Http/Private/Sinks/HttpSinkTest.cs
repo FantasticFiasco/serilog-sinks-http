@@ -55,11 +55,16 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 .ToList()
                 .ForEach(number => httpSink.Emit(Some.LogEvent("Event {number}", number)));
 
-            await Task.Delay(TimeSpan.FromSeconds(4));
+            await Task.Delay(TimeSpan.FromSeconds(5));
 
             // Assert
-            httpClient.Events.Length.ShouldBe(1);
+            httpClient.Events.Length.ShouldBe(2);
+
+            // First event will always be sent
             (await httpClient.Events[0].ReadAsStringAsync()).ShouldBe("{\"events\":[Event 1]}");
+
+            // All succeeding events except the last will be dropped due to the queue limit
+            (await httpClient.Events[1].ReadAsStringAsync()).ShouldBe("{\"events\":[Event 10]}");
         }
     }
 }
