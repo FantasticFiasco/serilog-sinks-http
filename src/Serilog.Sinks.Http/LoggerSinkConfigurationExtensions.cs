@@ -41,8 +41,8 @@ namespace Serilog
         /// The maximum number of events to post in a single batch. Default value is 1000.
         /// </param>
         /// <param name="queueLimit">
-        /// The maximum number of events stored in the queue in memory, waiting to be posted.
-        /// Default value is infinitely.
+        /// The maximum number of events stored in the queue in memory, waiting to be posted over
+        /// the network. Default value is infinitely.
         /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
