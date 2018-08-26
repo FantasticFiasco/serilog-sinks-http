@@ -17,23 +17,17 @@ using System.Threading.Tasks;
 
 namespace Serilog.Sinks.Http.Private.Network
 {
-    internal class HttpClientWrapper : IHttpClient
+    internal class DefaultHttpClient : IHttpClient
     {
         private readonly HttpClient client;
 
-        public HttpClientWrapper()
-        {
+        public DefaultHttpClient() =>
             client = new HttpClient();
-        }
 
-        public Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content)
-        {
-            return client.PostAsync(requestUri, content);
-        }
+        public Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content) =>
+            client.PostAsync(requestUri, content);
 
-        public void Dispose()
-        {
+        public void Dispose() =>
             client.Dispose();
-        }
     }
 }
