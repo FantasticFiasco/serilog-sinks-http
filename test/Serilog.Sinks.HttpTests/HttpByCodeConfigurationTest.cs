@@ -13,6 +13,7 @@ namespace Serilog
                 .Http(
                     requestUri: "api/events",
                     batchPostingLimit: 100,
+                    queueLimit: 10000,
                     period: TimeSpan.FromMilliseconds(1),
                     httpClient: new TestServerHttpClient())
                 .CreateLogger();
