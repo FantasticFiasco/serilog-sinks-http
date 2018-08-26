@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+### :zap: Added
+
+- [#51](https://github.com/FantasticFiasco/serilog-sinks-http/issues/51) [BREAKING CHANGE] Support to specify `queueLimit` when creating a non-durable sink, limiting the number of events queued in memory, waiting to be posted over the network.
+
 ## [4.3.0] - 2018-02-01
 
 ### :zap: Added
