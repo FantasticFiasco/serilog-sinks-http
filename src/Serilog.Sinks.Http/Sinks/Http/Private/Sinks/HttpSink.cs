@@ -45,7 +45,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
         /// </summary>
         /// <remarks>
         /// We need two constructors since <see cref="PeriodicBatchingSink"/> is behaving
-        /// differently depending on if we specify a queue limit or not.
+        /// differently depending on whether we specify a queue limit or not.
         /// </remarks>
         public HttpSink(
             string requestUri,
@@ -68,7 +68,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
         /// </summary>
         /// <remarks>
         /// We need two constructors since <see cref="PeriodicBatchingSink"/> is behaving
-        /// differently depending on if we specify a queue limit or not.
+        /// differently depending on whether we specify a queue limit or not.
         /// </remarks>
         public HttpSink(
             string requestUri,
