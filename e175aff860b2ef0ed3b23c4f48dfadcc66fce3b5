@@ -7,3 +7,7 @@ ddafead01182 branches/render-message
 633745a89fcf master
 b9a0a88634c1 master
 ec9f58fa2110 feat/dotnet-core-2-0
+19bf0b637600 feature/namespaced-formatter
+48ac09b8bb5b fix/issue-32
+ab2bcdd85942 master
+1a502b54722b beta1
