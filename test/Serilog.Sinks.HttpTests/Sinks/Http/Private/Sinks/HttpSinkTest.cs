@@ -50,8 +50,12 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 httpClient);
 
             // Act
+            httpSink.Emit(Some.LogEvent("Event {number}", 1));
+
+            await Task.Delay(TimeSpan.FromSeconds(0.5));
+
             Enumerable
-                .Range(1, 10)
+                .Range(2, 10)
                 .ToList()
                 .ForEach(number => httpSink.Emit(Some.LogEvent("Event {number}", number)));
 
@@ -60,10 +64,10 @@ namespace Serilog.Sinks.Http.Private.Sinks
             // Assert
             httpClient.Events.Length.ShouldBe(2);
 
-            // First event will always be sent
+            // The first event will always be sent
             (await httpClient.Events[0].ReadAsStringAsync()).ShouldBe("{\"events\":[Event 1]}");
 
-            // All succeeding events except the last will be dropped due to the queue limit
+            // The second event will also be sent, but the rest will be dropped due to the queue limit
             (await httpClient.Events[1].ReadAsStringAsync()).ShouldBe("{\"events\":[Event 10]}");
         }
     }
