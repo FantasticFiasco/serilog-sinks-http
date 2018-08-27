@@ -1,0 +1,27 @@
+﻿using System;
+using Serilog.Core;
+using Serilog.Sinks.Http.BatchFormatters;
+using Serilog.Support;
+using Serilog.Support.TextFormatters;
+
+namespace Serilog
+{
+    public class HttpSinkGivenCodeConfigurationShould : SinkFixture
+    {
+        public HttpSinkGivenCodeConfigurationShould() =>
+            Logger = new LoggerConfiguration()
+                .MinimumLevel.Verbose()
+                .WriteTo
+                .Http(
+                    requestUri: "some/route",
+                    batchPostingLimit: 100,
+                    queueLimit: 10000,
+                    period: TimeSpan.FromMilliseconds(1),
+                    textFormatter: new RenderedMessageTextFormatter(),
+                    batchFormatter: new ArrayBatchFormatter(),
+                    httpClient: new HttpClientMock())
+                .CreateLogger();
+
+        protected override Logger Logger { get; }
+    }
+}

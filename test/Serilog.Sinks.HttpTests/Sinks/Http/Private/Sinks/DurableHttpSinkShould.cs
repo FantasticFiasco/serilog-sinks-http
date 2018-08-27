@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Serilog.LogServer;
 using Serilog.Sinks.Http.BatchFormatters;
-using Serilog.Sinks.Http.TextFormatters;
 using Serilog.Support;
+using Serilog.Support.TextFormatters;
 using Shouldly;
 using Xunit;
 
 namespace Serilog.Sinks.Http.Private.Sinks
 {
-    public class DurableHttpSinkTest
+    public class DurableHttpSinkShould
     {
         [Theory]
         [InlineData("a{Date}b")]
@@ -21,22 +20,22 @@ namespace Serilog.Sinks.Http.Private.Sinks
         [InlineData("aaa{Date}bbb")]
         [InlineData("aaa{Hour}bbb")]
         [InlineData("aaa{HalfHour}bbb")]
-        public void ValidBufferPathFormat(string bufferPathFormat)
+        public void ReturnSinkGivenValidBufferPathFormat(string bufferPathFormat)
         {
             // Arrange
-            Action provider = () => new DurableHttpSink(
-                "api/events",
+            Action actual = () => new DurableHttpSink(
+                "some/route",
                 bufferPathFormat,
                 null,
                 31,
                 1000,
                 TimeSpan.FromSeconds(2),
-                new NormalRenderedTextFormatter(),
-                new DefaultBatchFormatter(),
-                new TestServerHttpClient());
+                new RenderedMessageTextFormatter(),
+                new ArrayBatchFormatter(), 
+                new HttpClientMock());
 
-            // Assert
-            provider.ShouldNotThrow();
+            // Act & Assert
+            actual.ShouldNotThrow();
         }
 
         [Theory]
@@ -74,22 +73,22 @@ namespace Serilog.Sinks.Http.Private.Sinks
         [InlineData(" a{Date}b ")]
         [InlineData(" a{Hour}b ")]
         [InlineData(" a{HalfHour}b ")]
-        public void InvalidBufferPathFormat(string bufferPathFormat)
+        public void ThrowExceptionGivenInvalidBufferPathFormat(string bufferPathFormat)
         {
             // Arrange
-            Action provider = () => new DurableHttpSink(
-                "api/events",
+            Action actual = () => new DurableHttpSink(
+                "some/route",
                 bufferPathFormat,
                 null,
                 31,
                 1000,
                 TimeSpan.FromSeconds(2),
-                new NormalRenderedTextFormatter(),
-                new DefaultBatchFormatter(),
-                new TestServerHttpClient());
+                new RenderedMessageTextFormatter(),
+                new ArrayBatchFormatter(),
+                new HttpClientMock());
 
-            // Assert
-            provider.ShouldThrow<ArgumentException>();
+            // Act & Assert
+            actual.ShouldThrow<ArgumentException>();
         }
 
         [Theory]
@@ -99,22 +98,22 @@ namespace Serilog.Sinks.Http.Private.Sinks
         [InlineData(10)]
         [InlineData(100)]
         [InlineData(int.MaxValue)]
-        public void ValidBufferFileSizeLimitBytes(int? bufferFileSizeLimitBytes)
+        public void ReturnSinkGivenValidBufferFileSizeLimitBytes(int? bufferFileSizeLimitBytes)
         {
             // Arrange
-            Action provider = () => new DurableHttpSink(
-                "api/events",
+            Action actual = () => new DurableHttpSink(
+                "some/route",
                 "Buffer-{Date}.json",
                 bufferFileSizeLimitBytes,
                 31,
                 1000,
                 TimeSpan.FromSeconds(2),
-                new NormalRenderedTextFormatter(),
-                new DefaultBatchFormatter(),
-                new TestServerHttpClient());
+                new RenderedMessageTextFormatter(),
+                new ArrayBatchFormatter(),
+                new HttpClientMock());
 
-            // Assert
-            provider.ShouldNotThrow();
+            // Act & Assert
+            actual.ShouldNotThrow();
         }
 
         [Theory]
@@ -122,47 +121,48 @@ namespace Serilog.Sinks.Http.Private.Sinks
         [InlineData(-10)]
         [InlineData(-100)]
         [InlineData(int.MinValue)]
-        public void InvalidBufferFileSizeLimitBytes(int? bufferFileSizeLimitBytes)
+        public void ThrowExceptionGivenInvalidBufferFileSizeLimitBytes(int? bufferFileSizeLimitBytes)
         {
             // Arrange
-            Action provider = () => new DurableHttpSink(
-                "api/events",
+            Action actual = () => new DurableHttpSink(
+                "some/route",
                 "Buffer-{Date}.json",
                 bufferFileSizeLimitBytes,
                 31,
                 1000,
                 TimeSpan.FromSeconds(2),
-                new NormalRenderedTextFormatter(),
-                new DefaultBatchFormatter(),
-                new TestServerHttpClient());
+                new RenderedMessageTextFormatter(),
+                new ArrayBatchFormatter(),
+                new HttpClientMock());
 
-            // Assert
-            provider.ShouldThrow<ArgumentOutOfRangeException>();
+            // Act & Assert
+            actual.ShouldThrow<ArgumentOutOfRangeException>();
         }
 
         [Fact]
-        public async Task NoNetworkTrafficWithoutLogEvents()
+        public async Task StayIdleGivenNoLogEvents()
         {
             // Arrange
-            var httpClient = new InMemoryHttpClient();
+            var httpClient = new HttpClientMock();
 
-            // ReSharper disable once UnusedVariable
-            var httpSink = new DurableHttpSink(
-                "api/events",
+            using (new DurableHttpSink(
+                "some/route",
                 "Buffer-{Date}.json",
                 null,
                 null,
-                1000,
-                TimeSpan.FromSeconds(2),
-                new NormalRenderedTextFormatter(),
-                new DefaultBatchFormatter(),
-                httpClient);
+                1,
+                TimeSpan.FromMilliseconds(1),         // 1 ms period
+                new RenderedMessageTextFormatter(),
+                new ArrayBatchFormatter(),
+                httpClient))
+            {
+                // Act
+                await Task.Delay(TimeSpan.FromMilliseconds(10));    // Sleep 10x the period
 
-            // Act
-            await Task.Delay(TimeSpan.FromMinutes(3));
-
-            // Assert
-            httpClient.Events.ShouldBeEmpty();
+                // Assert
+                httpClient.BatchCount.ShouldBe(0);
+                httpClient.LogEvents.ShouldBeEmpty();
+            }
         }
     }
 }

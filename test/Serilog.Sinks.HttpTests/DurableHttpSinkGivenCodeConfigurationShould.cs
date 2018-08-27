@@ -1,14 +1,17 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Serilog.LogServer;
+using Serilog.Core;
+using Serilog.Sinks.Http.BatchFormatters;
+using Serilog.Support;
+using Serilog.Support.TextFormatters;
 using IOFile = System.IO.File;
 
 namespace Serilog
 {
-    public class DurableHttpByCodeConfigurationTest : SinkFixture
+    public class DurableHttpSinkGivenCodeConfigurationShould : SinkFixture
     {
-        public DurableHttpByCodeConfigurationTest()
+        public DurableHttpSinkGivenCodeConfigurationShould()
         {
             ClearBufferFiles();
 
@@ -16,14 +19,16 @@ namespace Serilog
                 .MinimumLevel.Verbose()
                 .WriteTo
                 .DurableHttp(
-                    requestUri: "api/events",
+                    requestUri: "some/route",
                     batchPostingLimit: 100,
                     period: TimeSpan.FromMilliseconds(1),
-                    httpClient: new TestServerHttpClient())
+                    textFormatter: new RenderedMessageTextFormatter(),
+                    batchFormatter: new ArrayBatchFormatter(),
+                    httpClient: new HttpClientMock())
                 .CreateLogger();
-
-            TestServerHttpClient.Instance.Client = Server.CreateClient();
         }
+
+        protected override Logger Logger { get; }
 
         private static void ClearBufferFiles()
         {
