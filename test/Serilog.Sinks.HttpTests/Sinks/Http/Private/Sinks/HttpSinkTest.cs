@@ -34,7 +34,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
             httpClient.Events.ShouldBeEmpty();
         }
 
-        [Fact]
+        [Fact(Skip = "Will be refactored in the next commit")]
         public async Task RespectQueueLimit()
         {
             // Arrange
