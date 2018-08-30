@@ -7,22 +7,18 @@ namespace Serilog.LogServer
 {
     public abstract class TestServerFixture : IDisposable
     {
-        protected TestServerFixture()
-        {
-            Server = new TestServer(
-                new WebHostBuilder()
-                    .UseStartup<Startup>());
-        }
+        protected TestServerFixture() =>
+            Server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
 
         protected TestServer Server { get; }
 
-        protected EventService EventService => (EventService)Server.Host.Services.GetService(typeof(EventService));
+        protected EventService EventService =>
+            (EventService)Server.Host.Services.GetService(typeof(EventService));
 
-        protected NetworkService NetworkService => (NetworkService)Server.Host.Services.GetService(typeof(NetworkService));
+        protected NetworkService NetworkService =>
+            (NetworkService)Server.Host.Services.GetService(typeof(NetworkService));
 
-        public virtual void Dispose()
-        {
+        public virtual void Dispose() =>
             Server?.Dispose();
-        }
     }
 }

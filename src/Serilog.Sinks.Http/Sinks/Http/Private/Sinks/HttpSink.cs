@@ -32,7 +32,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
     /// <seealso cref="PeriodicBatchingSink" />
     public class HttpSink : PeriodicBatchingSink
     {
-        private static readonly string ContentType = "application/json";
+        private const string ContentType = "application/json";
 
         private readonly string requestUri;
         private readonly ITextFormatter textFormatter;
@@ -43,6 +43,33 @@ namespace Serilog.Sinks.Http.Private.Sinks
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpSink"/> class.
         /// </summary>
+        /// <remarks>
+        /// We need two constructors since <see cref="PeriodicBatchingSink"/> is behaving
+        /// differently depending on whether we specify a queue limit or not.
+        /// </remarks>
+        public HttpSink(
+            string requestUri,
+            int batchPostingLimit,
+            int queueLimit,
+            TimeSpan period,
+            ITextFormatter textFormatter,
+            IBatchFormatter batchFormatter,
+            IHttpClient client)
+            : base(batchPostingLimit, period, queueLimit)
+        {
+            this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
+            this.textFormatter = textFormatter ?? throw new ArgumentNullException(nameof(textFormatter));
+            this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
+            this.client = client ?? throw new ArgumentNullException(nameof(client));
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HttpSink"/> class.
+        /// </summary>
+        /// <remarks>
+        /// We need two constructors since <see cref="PeriodicBatchingSink"/> is behaving
+        /// differently depending on whether we specify a queue limit or not.
+        /// </remarks>
         public HttpSink(
             string requestUri,
             int batchPostingLimit,

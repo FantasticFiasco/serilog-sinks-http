@@ -70,10 +70,8 @@ namespace Serilog.Sinks.Http.Private.Sinks
         /// <summary>
         /// Emit the provided log event to the sink.
         /// </summary>
-        public void Emit(LogEvent logEvent)
-        {
+        public void Emit(LogEvent logEvent) =>
             sink.Emit(logEvent);
-        }
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting
@@ -81,8 +79,8 @@ namespace Serilog.Sinks.Http.Private.Sinks
         /// </summary>
         public void Dispose()
         {
-            sink.Dispose();
-            shipper.Dispose();
+            sink?.Dispose();
+            shipper?.Dispose();
         }
     }
 }

@@ -9,16 +9,15 @@ namespace Serilog.LogServer
     {
         private int numberOfPosts;
 
-        public TestServerHttpClient()
-        {
+        public TestServerHttpClient() =>
             Instance = this;
-        }
 
         public static TestServerHttpClient Instance { get; set; }
 
         public HttpClient Client { get; set; }
 
-        public int NumberOfPosts => numberOfPosts;
+        public int NumberOfPosts =>
+            numberOfPosts;
 
         public Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content)
         {

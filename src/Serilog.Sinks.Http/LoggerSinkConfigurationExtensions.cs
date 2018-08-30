@@ -40,6 +40,10 @@ namespace Serilog
         /// <param name="batchPostingLimit">
         /// The maximum number of events to post in a single batch. Default value is 1000.
         /// </param>
+        /// <param name="queueLimit">
+        /// The maximum number of events stored in the queue in memory, waiting to be posted over
+        /// the network. Default value is infinitely.
+        /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
         /// </param>
@@ -64,6 +68,7 @@ namespace Serilog
             this LoggerSinkConfiguration sinkConfiguration,
             string requestUri,
             int batchPostingLimit = 1000,
+            int? queueLimit = null,
             TimeSpan? period = null,
             ITextFormatter textFormatter = null,
             IBatchFormatter batchFormatter = null,
@@ -72,13 +77,15 @@ namespace Serilog
         {
             if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
-            var sink = new HttpSink(
-                requestUri,
-                batchPostingLimit,
-                period ?? TimeSpan.FromSeconds(2),
-                textFormatter ?? new NormalRenderedTextFormatter(),
-                batchFormatter ?? new DefaultBatchFormatter(),
-                httpClient ?? new HttpClientWrapper());
+            // Default values
+            period =  period ?? TimeSpan.FromSeconds(2);
+            textFormatter = textFormatter ?? new NormalRenderedTextFormatter();
+            batchFormatter = batchFormatter ?? new DefaultBatchFormatter();
+            httpClient = httpClient ?? new DefaultHttpClient();
+
+            var sink = queueLimit != null
+                ? new HttpSink(requestUri, batchPostingLimit, queueLimit.Value, period.Value, textFormatter, batchFormatter, httpClient)
+                : new HttpSink(requestUri, batchPostingLimit, period.Value, textFormatter, batchFormatter, httpClient);
 
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
         }
@@ -144,16 +151,22 @@ namespace Serilog
         {
             if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
+            // Default values
+            period = period ?? TimeSpan.FromSeconds(2);
+            textFormatter = textFormatter ?? new NormalRenderedTextFormatter();
+            batchFormatter = batchFormatter ?? new DefaultBatchFormatter();
+            httpClient = httpClient ?? new DefaultHttpClient();
+
             var sink = new DurableHttpSink(
                 requestUri,
                 bufferPathFormat,
                 bufferFileSizeLimitBytes,
                 retainedBufferFileCountLimit,
                 batchPostingLimit,
-                period ?? TimeSpan.FromSeconds(2),
-                textFormatter ?? new NormalRenderedTextFormatter(),
-                batchFormatter ?? new DefaultBatchFormatter(),
-                httpClient ?? new HttpClientWrapper());
+                period.Value,
+                textFormatter,
+                batchFormatter,
+                httpClient);
 
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
         }
