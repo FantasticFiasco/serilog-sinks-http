@@ -64,7 +64,6 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 await Task.Delay(TimeSpan.FromMilliseconds(10));    // Sleep 10x the period
 
                 // Assert
-                httpClient.BatchCount.ShouldBeGreaterThan(1);
                 httpClient.LogEvents.Length.ShouldBeLessThan(logEvents.Length);    // Some log events will have been dropped
             }
         }
