@@ -1,16 +1,16 @@
 ﻿using System;
 
-namespace Serilog.Support
+namespace Serilog.Support.TextFormatters
 {
-    public class RenderedMessageLogEvent : IEquatable<RenderedMessageLogEvent>
+    public class NormalTextLogEvent : IEquatable<NormalTextLogEvent>
     {
         public string RenderedMessage { get; set; }
 
-        public bool Equals(RenderedMessageLogEvent other) =>
+        public bool Equals(NormalTextLogEvent other) =>
             other != null && other.RenderedMessage == RenderedMessage;
 
         public override bool Equals(object obj) =>
-            Equals(obj as RenderedMessageLogEvent);
+            Equals(obj as NormalTextLogEvent);
 
         public override int GetHashCode() =>
             0;

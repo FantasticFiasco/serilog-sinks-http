@@ -23,7 +23,7 @@ namespace Serilog
                     batchPostingLimit: 100,
                     period: TimeSpan.FromMilliseconds(1),
                     textFormatter: new NormalTextFormatter(),
-                    batchFormatter: new ArrayBatchFormatter(),
+                    batchFormatter: new DefaultBatchFormatter(),
                     httpClient: new HttpClientMock())
                 .CreateLogger();
         }

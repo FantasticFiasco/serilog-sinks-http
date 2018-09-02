@@ -8,19 +8,20 @@ using Newtonsoft.Json;
 using Serilog.Sinks.Http;
 using Serilog.Sinks.Http.BatchFormatters;
 using Serilog.Sinks.Http.TextFormatters;
+using Serilog.Support.BatchFormatters;
 using Xunit.Sdk;
 
 namespace Serilog.Support
 {
     public class HttpClientMock : IHttpClient
     {
-        private readonly ConcurrentQueue<Batch> batches;
+        private readonly ConcurrentQueue<DefaultBatch> batches;
 
         private bool simulateNetworkFailure;
 
         public HttpClientMock()
         {
-            batches = new ConcurrentQueue<Batch>();
+            batches = new ConcurrentQueue<DefaultBatch>();
 
             Instance = this;
         }
@@ -31,7 +32,10 @@ namespace Serilog.Support
             batches.Count;
 
         public string[] LogEvents =>
-            batches.SelectMany(batch => batch.LogEvents).ToArray();
+            batches
+                .SelectMany(batch => batch.Events)
+                .Select(logEvent => logEvent.RenderedMessage)
+                .ToArray();
 
         public async Task WaitAsync(int expectedLogEventCount)
         {
@@ -64,24 +68,16 @@ namespace Serilog.Support
                 return new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
             }
 
-            string[] logEvents;
+            DefaultBatch batch;
 
             try
             {
-                logEvents = JsonConvert
-                    .DeserializeObject<RenderedMessageLogEvent[]>(await content.ReadAsStringAsync())
-                    .Select(logEvent => logEvent.RenderedMessage)
-                    .ToArray();
+                batch = JsonConvert.DeserializeObject<DefaultBatch>(await content.ReadAsStringAsync());
             }
             catch (Exception)
             {
-                throw new XunitException($"{nameof(HttpClientMock)} assume log events are formatted using {nameof(NormalTextFormatter)}, and batches are formatted using {nameof(ArrayBatchFormatter)}");
+                throw new XunitException($"{nameof(HttpClientMock)} assume log events are formatted using {nameof(NormalTextFormatter)}, and batches are formatted using {nameof(DefaultBatchFormatter)}");
             }
-
-            var batch = new Batch
-            {
-                LogEvents = logEvents
-            };
 
             batches.Enqueue(batch);
 
@@ -93,11 +89,6 @@ namespace Serilog.Support
             
         public void Dispose()
         {
-        }
-
-        private class Batch
-        {
-            public string[] LogEvents { get; set; }
         }
     }
 }
