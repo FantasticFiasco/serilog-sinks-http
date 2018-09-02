@@ -17,7 +17,7 @@ namespace Serilog
                     batchPostingLimit: 100,
                     queueLimit: 10000,
                     period: TimeSpan.FromMilliseconds(1),
-                    textFormatter: new NormalTextFormatter(),
+                    textFormatter: new NormalRenderedTextFormatter(),
                     batchFormatter: new DefaultBatchFormatter(),
                     httpClient: new HttpClientMock())
                 .CreateLogger();

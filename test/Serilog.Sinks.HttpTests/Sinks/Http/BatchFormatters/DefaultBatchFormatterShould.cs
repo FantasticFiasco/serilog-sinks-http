@@ -6,6 +6,7 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.Http.TextFormatters;
 using Serilog.Support;
+using Serilog.Support.BatchFormatters;
 using Xunit;
 
 namespace Serilog.Sinks.Http.BatchFormatters
@@ -19,7 +20,7 @@ namespace Serilog.Sinks.Http.BatchFormatters
         public DefaultBatchFormatterShould()
         {
             logEvents = new[] { Some.LogEvent("Event {number}", 1), Some.LogEvent("Event {number}", 2) };
-            textFormatter = new NormalTextFormatter();
+            textFormatter = new NormalRenderedTextFormatter();
             output = new StringWriter();
         }
 
@@ -33,8 +34,11 @@ namespace Serilog.Sinks.Http.BatchFormatters
             batchFormatter.Format(logEvents, textFormatter, output);
 
             // Assert
-            var actual = JsonConvert.DeserializeObject<Body>(output.ToString());
-            actual.Events.ShouldBe(new[] { "Event 1", "Event 2" });
+            var actual = JsonConvert.DeserializeObject<DefaultBatch>(output.ToString());
+
+            actual.Events.Length.ShouldBe(2);
+            actual.Events[0].RenderedMessage.ShouldBe("Event 1");
+            actual.Events[1].RenderedMessage.ShouldBe("Event 2");
         }
 
         [Fact]
@@ -54,8 +58,11 @@ namespace Serilog.Sinks.Http.BatchFormatters
             batchFormatter.Format(formattedLogEvents, output);
 
             // Assert
-            var actual = JsonConvert.DeserializeObject<Body>(output.ToString());
-            actual.Events.ShouldBe(new[] { "Event 1", "Event 2" });
+            var actual = JsonConvert.DeserializeObject<DefaultBatch>(output.ToString());
+
+            actual.Events.Length.ShouldBe(2);
+            actual.Events[0].RenderedMessage.ShouldBe("Event 1");
+            actual.Events[1].RenderedMessage.ShouldBe("Event 2");
         }
 
         [Fact]
@@ -68,14 +75,8 @@ namespace Serilog.Sinks.Http.BatchFormatters
             batchFormatter.Format(logEvents, textFormatter, output);
 
             // Assert
-            var actual = JsonConvert.DeserializeObject<Body>(output.ToString());
+            var actual = JsonConvert.DeserializeObject<DefaultBatch>(output.ToString());
             actual.Events.ShouldBeEmpty();
-        }
-
-        private class Body
-        {
-            [JsonProperty("events")]
-            public string[] Events { get; set; }
         }
     }
 }

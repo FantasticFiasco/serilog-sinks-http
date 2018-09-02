@@ -76,7 +76,7 @@ namespace Serilog.Support
             }
             catch (Exception)
             {
-                throw new XunitException($"{nameof(HttpClientMock)} assume log events are formatted using {nameof(NormalTextFormatter)}, and batches are formatted using {nameof(DefaultBatchFormatter)}");
+                throw new XunitException($"{nameof(HttpClientMock)} assume log events are formatted using {nameof(NormalRenderedTextFormatter)}, and batches are formatted using {nameof(DefaultBatchFormatter)}");
             }
 
             batches.Enqueue(batch);

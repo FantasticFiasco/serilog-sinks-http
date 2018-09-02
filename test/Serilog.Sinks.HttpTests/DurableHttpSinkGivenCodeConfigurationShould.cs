@@ -22,7 +22,7 @@ namespace Serilog
                     requestUri: "some/route",
                     batchPostingLimit: 100,
                     period: TimeSpan.FromMilliseconds(1),
-                    textFormatter: new NormalTextFormatter(),
+                    textFormatter: new NormalRenderedTextFormatter(),
                     batchFormatter: new DefaultBatchFormatter(),
                     httpClient: new HttpClientMock())
                 .CreateLogger();
