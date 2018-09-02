@@ -1,11 +1,9 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
 using Serilog.Core;
 using Serilog.Sinks.Http.BatchFormatters;
 using Serilog.Sinks.Http.TextFormatters;
 using Serilog.Support;
-using IOFile = System.IO.File;
+using Serilog.Support.IO;
 
 namespace Serilog
 {
@@ -13,7 +11,7 @@ namespace Serilog
     {
         public DurableHttpSinkGivenCodeConfigurationShould()
         {
-            ClearBufferFiles();
+            Files.DeleteBufferFiles();
 
             Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
@@ -30,15 +28,6 @@ namespace Serilog
 
         protected override Logger Logger { get; }
 
-        private static void ClearBufferFiles()
-        {
-            var files = Directory.GetFiles(Directory.GetCurrentDirectory(), "Buffer*")
-                .ToArray();
-
-            foreach (var file in files)
-            {
-                IOFile.Delete(file);
-            }
-        }
+        
     }
 }

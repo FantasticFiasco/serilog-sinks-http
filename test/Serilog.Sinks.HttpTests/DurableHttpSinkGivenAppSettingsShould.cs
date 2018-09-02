@@ -1,8 +1,6 @@
-﻿using System.IO;
-using System.Linq;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Serilog.Core;
-using IOFile = System.IO.File;
+using Serilog.Support.IO;
 
 namespace Serilog
 {
@@ -10,7 +8,7 @@ namespace Serilog
     {
         public DurableHttpSinkGivenAppSettingsShould()
         {
-            ClearBufferFiles();
+            Files.DeleteBufferFiles();
 
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings_durable_http.json")
@@ -22,16 +20,5 @@ namespace Serilog
         }
 
         protected override Logger Logger { get; }
-
-        private static void ClearBufferFiles()
-        {
-            var files = Directory.GetFiles(Directory.GetCurrentDirectory(), "Buffer*")
-                .ToArray();
-
-            foreach (var file in files)
-            {
-                IOFile.Delete(file);
-            }
-        }
     }
 }
