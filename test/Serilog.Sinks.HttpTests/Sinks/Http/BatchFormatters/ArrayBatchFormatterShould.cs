@@ -6,6 +6,7 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.Http.TextFormatters;
 using Serilog.Support;
+using Serilog.Support.TextFormatters;
 using Xunit;
 
 namespace Serilog.Sinks.Http.BatchFormatters
@@ -19,7 +20,7 @@ namespace Serilog.Sinks.Http.BatchFormatters
         public ArrayBatchFormatterShould()
         {
             logEvents = new[] { Some.LogEvent("Event {number}", 1), Some.LogEvent("Event {number}", 2) };
-            textFormatter = new NormalTextFormatter();
+            textFormatter = new NormalRenderedTextFormatter();
             output = new StringWriter();
         }
 
@@ -33,8 +34,11 @@ namespace Serilog.Sinks.Http.BatchFormatters
             batchFormatter.Format(logEvents, textFormatter, output);
 
             // Assert
-            var actual = JsonConvert.DeserializeObject<string[]>(output.ToString());
-            actual.ShouldBe(new[] { "Event 1", "Event 2" });
+            var actual = JsonConvert.DeserializeObject<NormalTextLogEvent[]>(output.ToString());
+
+            actual.Length.ShouldBe(2);
+            actual[0].RenderedMessage.ShouldBe("Event 1");
+            actual[1].RenderedMessage.ShouldBe("Event 2");
         }
 
         [Fact]
@@ -54,8 +58,11 @@ namespace Serilog.Sinks.Http.BatchFormatters
             batchFormatter.Format(formattedLogEvents, output);
 
             // Assert
-            var actual = JsonConvert.DeserializeObject<string[]>(output.ToString());
-            actual.ShouldBe(new[] { "Event 1", "Event 2" });
+            var actual = JsonConvert.DeserializeObject<NormalTextLogEvent[]>(output.ToString());
+
+            actual.Length.ShouldBe(2);
+            actual[0].RenderedMessage.ShouldBe("Event 1");
+            actual[1].RenderedMessage.ShouldBe("Event 2");
         }
 
         [Fact]
@@ -68,7 +75,7 @@ namespace Serilog.Sinks.Http.BatchFormatters
             batchFormatter.Format(logEvents, textFormatter, output);
 
             // Assert
-            var actual = JsonConvert.DeserializeObject<string[]>(output.ToString());
+            var actual = JsonConvert.DeserializeObject<NormalTextLogEvent[]>(output.ToString());
             actual.ShouldBeEmpty();
         }
     }
