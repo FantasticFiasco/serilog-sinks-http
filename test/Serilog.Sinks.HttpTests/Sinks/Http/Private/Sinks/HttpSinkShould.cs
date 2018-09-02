@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Serilog.Sinks.Http.BatchFormatters;
+using Serilog.Sinks.Http.TextFormatters;
 using Serilog.Support;
-using Serilog.Support.TextFormatters;
 using Shouldly;
 using Xunit;
 
@@ -21,7 +21,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 "some/route",
                 1,
                 TimeSpan.FromMilliseconds(1),         // 1 ms period
-                new RenderedMessageTextFormatter(),
+                new NormalTextFormatter(),
                 new ArrayBatchFormatter(),
                 httpClient))
             {
@@ -51,7 +51,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 1,
                 1,                                   // Queue only holds 1 event
                 TimeSpan.FromMilliseconds(1),        // 1 ms period
-                new RenderedMessageTextFormatter(),
+                new NormalTextFormatter(),
                 new ArrayBatchFormatter(),
                 httpClient))
             {

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Serilog.Sinks.Http.BatchFormatters;
+using Serilog.Sinks.Http.TextFormatters;
 using Serilog.Support;
-using Serilog.Support.TextFormatters;
 using Shouldly;
 using Xunit;
 
@@ -30,8 +30,8 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 31,
                 1000,
                 TimeSpan.FromSeconds(2),
-                new RenderedMessageTextFormatter(),
-                new ArrayBatchFormatter(), 
+                new NormalTextFormatter(),
+                new ArrayBatchFormatter(),
                 new HttpClientMock());
 
             // Act & Assert
@@ -83,7 +83,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 31,
                 1000,
                 TimeSpan.FromSeconds(2),
-                new RenderedMessageTextFormatter(),
+                new NormalTextFormatter(),
                 new ArrayBatchFormatter(),
                 new HttpClientMock());
 
@@ -108,7 +108,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 31,
                 1000,
                 TimeSpan.FromSeconds(2),
-                new RenderedMessageTextFormatter(),
+                new NormalTextFormatter(),
                 new ArrayBatchFormatter(),
                 new HttpClientMock());
 
@@ -131,7 +131,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 31,
                 1000,
                 TimeSpan.FromSeconds(2),
-                new RenderedMessageTextFormatter(),
+                new NormalTextFormatter(),
                 new ArrayBatchFormatter(),
                 new HttpClientMock());
 
@@ -152,7 +152,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 null,
                 1,
                 TimeSpan.FromMilliseconds(1),         // 1 ms period
-                new RenderedMessageTextFormatter(),
+                new NormalTextFormatter(),
                 new ArrayBatchFormatter(),
                 httpClient))
             {

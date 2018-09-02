@@ -1,8 +1,8 @@
 ﻿using System;
 using Serilog.Core;
 using Serilog.Sinks.Http.BatchFormatters;
+using Serilog.Sinks.Http.TextFormatters;
 using Serilog.Support;
-using Serilog.Support.TextFormatters;
 
 namespace Serilog
 {
@@ -17,7 +17,7 @@ namespace Serilog
                     batchPostingLimit: 100,
                     queueLimit: 10000,
                     period: TimeSpan.FromMilliseconds(1),
-                    textFormatter: new RenderedMessageTextFormatter(),
+                    textFormatter: new NormalTextFormatter(),
                     batchFormatter: new ArrayBatchFormatter(),
                     httpClient: new HttpClientMock())
                 .CreateLogger();

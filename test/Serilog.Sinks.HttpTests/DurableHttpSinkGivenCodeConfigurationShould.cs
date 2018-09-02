@@ -3,8 +3,8 @@ using System.IO;
 using System.Linq;
 using Serilog.Core;
 using Serilog.Sinks.Http.BatchFormatters;
+using Serilog.Sinks.Http.TextFormatters;
 using Serilog.Support;
-using Serilog.Support.TextFormatters;
 using IOFile = System.IO.File;
 
 namespace Serilog
@@ -22,7 +22,7 @@ namespace Serilog
                     requestUri: "some/route",
                     batchPostingLimit: 100,
                     period: TimeSpan.FromMilliseconds(1),
-                    textFormatter: new RenderedMessageTextFormatter(),
+                    textFormatter: new NormalTextFormatter(),
                     batchFormatter: new ArrayBatchFormatter(),
                     httpClient: new HttpClientMock())
                 .CreateLogger();

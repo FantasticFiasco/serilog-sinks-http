@@ -6,6 +6,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Serilog.Sinks.Http;
+using Serilog.Sinks.Http.BatchFormatters;
+using Serilog.Sinks.Http.TextFormatters;
 using Xunit.Sdk;
 
 namespace Serilog.Support
@@ -62,9 +64,19 @@ namespace Serilog.Support
                 return new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
             }
 
-            // Assume log events are formatted using RenderedMessageTextFormatter, and batches are
-            // formatted using ArrayBatchFormatter
-            var logEvents = JsonConvert.DeserializeObject<string[]>(await content.ReadAsStringAsync());
+            string[] logEvents;
+
+            try
+            {
+                logEvents = JsonConvert
+                    .DeserializeObject<RenderedMessageLogEvent[]>(await content.ReadAsStringAsync())
+                    .Select(logEvent => logEvent.RenderedMessage)
+                    .ToArray();
+            }
+            catch (Exception)
+            {
+                throw new XunitException($"{nameof(HttpClientMock)} assume log events are formatted using {nameof(NormalTextFormatter)}, and batches are formatted using {nameof(ArrayBatchFormatter)}");
+            }
 
             var batch = new Batch
             {

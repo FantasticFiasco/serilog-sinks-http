@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using Serilog.Events;
 using Serilog.Formatting;
+using Serilog.Sinks.Http.TextFormatters;
 using Serilog.Support;
-using Serilog.Support.TextFormatters;
 using Xunit;
 
 namespace Serilog.Sinks.Http.BatchFormatters
@@ -19,7 +19,7 @@ namespace Serilog.Sinks.Http.BatchFormatters
         public ArrayBatchFormatterShould()
         {
             logEvents = new[] { Some.LogEvent("Event {number}", 1), Some.LogEvent("Event {number}", 2) };
-            textFormatter = new RenderedMessageTextFormatter();
+            textFormatter = new NormalTextFormatter();
             output = new StringWriter();
         }
 
