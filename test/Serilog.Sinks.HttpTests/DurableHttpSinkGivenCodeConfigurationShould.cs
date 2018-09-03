@@ -11,7 +11,7 @@ namespace Serilog
     {
         public DurableHttpSinkGivenCodeConfigurationShould()
         {
-            Files.DeleteBufferFiles();
+            DeleteBufferFiles();
 
             Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()

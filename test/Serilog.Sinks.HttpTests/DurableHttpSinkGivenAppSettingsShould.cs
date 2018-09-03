@@ -8,7 +8,7 @@ namespace Serilog
     {
         public DurableHttpSinkGivenAppSettingsShould()
         {
-            Files.DeleteBufferFiles();
+            DeleteBufferFiles();
 
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings_durable_http.json")
