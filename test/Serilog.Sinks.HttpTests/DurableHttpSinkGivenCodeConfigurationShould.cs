@@ -3,7 +3,6 @@ using Serilog.Core;
 using Serilog.Sinks.Http.BatchFormatters;
 using Serilog.Sinks.Http.TextFormatters;
 using Serilog.Support;
-using Serilog.Support.IO;
 
 namespace Serilog
 {

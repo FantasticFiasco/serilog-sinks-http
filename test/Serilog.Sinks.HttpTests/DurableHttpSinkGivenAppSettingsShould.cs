@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Serilog.Core;
-using Serilog.Support.IO;
 
 namespace Serilog
 {
