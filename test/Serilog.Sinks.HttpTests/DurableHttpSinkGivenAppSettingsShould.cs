@@ -1,21 +1,23 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Serilog.LogServer;
+using Serilog.Core;
 
 namespace Serilog
 {
-    public class HttpBySettingsFileTest : SinkFixture
+    public class DurableHttpSinkGivenAppSettingsShould : SinkFixture
     {
-        public HttpBySettingsFileTest()
+        public DurableHttpSinkGivenAppSettingsShould()
         {
+            DeleteBufferFiles();
+
             var configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings_http.json")
+                .AddJsonFile("appsettings_durable_http.json")
                 .Build();
 
             Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
                 .CreateLogger();
-
-            TestServerHttpClient.Instance.Client = Server.CreateClient();
         }
+
+        protected override Logger Logger { get; }
     }
 }
