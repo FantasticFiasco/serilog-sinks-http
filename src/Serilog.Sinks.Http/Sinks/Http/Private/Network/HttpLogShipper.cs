@@ -22,7 +22,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Sinks.Http.Private.Time;
-using IOFile = System.IO.File;
 #if HRESULTS
 using System.Runtime.InteropServices;
 #endif
@@ -118,7 +117,7 @@ namespace Serilog.Sinks.Http.Private.Network
 
                         var fileSet = GetFileSet();
 
-                        if (currentFile == null || !IOFile.Exists(currentFile))
+                        if (currentFile == null || !System.IO.File.Exists(currentFile))
                         {
                             nextLineBeginsAtOffset = 0;
                             currentFile = fileSet.FirstOrDefault();
@@ -180,7 +179,7 @@ namespace Serilog.Sinks.Http.Private.Network
                                 // Once there's a third file waiting to ship, we do our
                                 // best to move on, though a lock on the current file
                                 // will delay this.
-                                IOFile.Delete(fileSet[0]);
+                                System.IO.File.Delete(fileSet[0]);
                             }
                         }
                     }
@@ -207,7 +206,7 @@ namespace Serilog.Sinks.Http.Private.Network
         {
             var events = new List<string>();
 
-            using (var current = IOFile.Open(currentFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var current = System.IO.File.Open(currentFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 current.Position = nextLineBeginsAtOffset;
 
@@ -233,7 +232,7 @@ namespace Serilog.Sinks.Http.Private.Network
         {
             try
             {
-                using (var fileStream = IOFile.Open(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read))
+                using (var fileStream = System.IO.File.Open(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read))
                 {
                     return fileStream.Length <= maxLength;
                 }
