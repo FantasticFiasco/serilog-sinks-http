@@ -1,40 +1,43 @@
-namespace Serilog.Sinks.Http.Private.Network
-{
-    public class PayloadReaderShould
-    {
-        private long nextLineBeginsAtOffset;
-        private int count;
+//using System.IO;
+//using Xunit;
 
-        [Fact]
-        public void ReadLogEvent()
-        {
-            // Arrange
-            var stream = new MemoryStream("{ \"foo\": 1 }");
+//namespace Serilog.Sinks.Http.Private.Network
+//{
+//    public class PayloadReaderShould
+//    {
+//        private long nextLineBeginsAtOffset;
+//        private int count;
 
-            // Act
-            var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, null, int.MaxValue);
+//        [Fact]
+//        public void ReadLogEvent()
+//        {
+//            // Arrange
+//            var stream = new MemoryStream("{ \"foo\": 1 }");
 
-            // Assert
-            //actual.
-            count.ShouldBe()
-        }
+//            // Act
+//            var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, null, int.MaxValue);
 
-        [Fact]
-        public void ReadLogEvents()
-        {
+//            // Assert
+//            //actual.
+//            count.ShouldBe()
+//        }
+
+//        [Fact]
+//        public void ReadLogEvents()
+//        {
             
-        }
+//        }
 
-        [Fact]
-        public void NotReadEventGivenPartiallyWritten()
-        {
+//        [Fact]
+//        public void NotReadEventGivenPartiallyWritten()
+//        {
             
-        }
+//        }
 
-        [Fact]
-        public void NotReadEventsGivenPartiallyWritten()
-        {
+//        [Fact]
+//        public void NotReadEventsGivenPartiallyWritten()
+//        {
             
-        }
-    }
-}
+//        }
+//    }
+//}

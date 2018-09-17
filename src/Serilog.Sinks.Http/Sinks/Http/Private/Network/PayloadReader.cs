@@ -7,8 +7,8 @@ namespace Serilog.Sinks.Http.Private.Network
 {
     internal static class PayloadReader
     {
-        private const string CR = '\r';
-        private const string LF = '\n';
+        private const char CR = '\r';
+        private const char LF = '\n';
 
         public static string Read(
             string fileName,
@@ -31,11 +31,11 @@ namespace Serilog.Sinks.Http.Private.Network
             int batchPostingLimit)
         {
             var events = new List<string>();
-            
-            current.Position = nextLineBeginsAtOffset;
+
+            stream.Position = nextLineBeginsAtOffset;
 
             while (count < batchPostingLimit &&
-                    TryReadLine(current, ref nextLineBeginsAtOffset, out var nextLine))
+                    TryReadLine(stream, ref nextLineBeginsAtOffset, out var nextLine))
             {
                 // Count is the indicator that work was done, so advances even in the (rare) case an
                 // oversized event is dropped
@@ -78,18 +78,16 @@ namespace Serilog.Sinks.Http.Private.Network
             return true;
         }
 
-        private static string ReadLine(Stream current)
+        private static string ReadLine(Stream stream)
         {
             // Important not to dispose this StreamReader as the stream must remain open
-            var reader = new StreamReader(current, Encoding.UTF8, false, 128);
+            var reader = new StreamReader(stream, Encoding.UTF8, false, 128);
 
             var lineBuilder = new StringBuilder();
 
-            char character;
-
             while (true)
             {
-                character = reader.Read();
+                var character = (char)reader.Read();
 
                 // Is this the end of the stream? In that case abort since all log events are
                 // terminated using a new line, and this would mean that either:
