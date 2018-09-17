@@ -122,13 +122,16 @@ namespace Serilog.Sinks.Http.Private.Network
                         if (currentFile == null)
                             continue;
 
-                        var payload = PayloadReader.Read(
+                        var logEvents = PayloadReader.Read(
                             currentFile,
                             ref nextLineBeginsAtOffset,
                             ref count,
-                            batchFormatter,
                             batchPostingLimit);
 
+                        var payloadWriter = new StringWriter();
+                        batchFormatter.Format(logEvents, payloadWriter);
+                        var payload = payloadWriter.ToString();
+                        
                         if (count > 0 || nextRequiredLevelCheckUtc < DateTime.UtcNow)
                         {
                             lock (stateLock)

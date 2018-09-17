@@ -10,27 +10,25 @@ namespace Serilog.Sinks.Http.Private.Network
         private const char CR = '\r';
         private const char LF = '\n';
 
-        public static string Read(
+        public static string[] Read(
             string fileName,
             ref long nextLineBeginsAtOffset,
             ref int count,
-            IBatchFormatter batchFormatter,
             int batchPostingLimit)
         {
             using (var stream = System.IO.File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
-                return Read(stream, ref nextLineBeginsAtOffset, ref count, batchFormatter, batchPostingLimit);
+                return Read(stream, ref nextLineBeginsAtOffset, ref count, batchPostingLimit);
             }
         }
 
-        public static string Read(
+        public static string[] Read(
             Stream stream,
             ref long nextLineBeginsAtOffset,
             ref int count,
-            IBatchFormatter batchFormatter,
             int batchPostingLimit)
         {
-            var events = new List<string>();
+            var logEvents = new List<string>();
 
             stream.Position = nextLineBeginsAtOffset;
 
@@ -41,14 +39,10 @@ namespace Serilog.Sinks.Http.Private.Network
                 // oversized event is dropped
                 count++;
 
-                events.Add(nextLine);
+                logEvents.Add(nextLine);
             }
 
-            var payload = new StringWriter();
-
-            batchFormatter.Format(events, payload);
-
-            return payload.ToString();
+            return logEvents.ToArray();
         }
 
         private static bool TryReadLine(Stream current, ref long nextStart, out string nextLine)
