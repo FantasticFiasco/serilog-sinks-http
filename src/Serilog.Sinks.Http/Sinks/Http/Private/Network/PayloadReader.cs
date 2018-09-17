@@ -7,28 +7,41 @@ namespace Serilog.Sinks.Http.Private.Network
 {
     internal static class PayloadReader
     {
+        private const string CR = '\r';
+        private const string LF = '\n';
+
         public static string Read(
-            string currentFile,
+            string fileName,
+            ref long nextLineBeginsAtOffset,
+            ref int count,
+            IBatchFormatter batchFormatter,
+            int batchPostingLimit)
+        {
+            using (var stream = System.IO.File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                return Read(stream, ref nextLineBeginsAtOffset, ref count, batchFormatter, batchPostingLimit);
+            }
+        }
+
+        public static string Read(
+            Stream stream,
             ref long nextLineBeginsAtOffset,
             ref int count,
             IBatchFormatter batchFormatter,
             int batchPostingLimit)
         {
             var events = new List<string>();
+            
+            current.Position = nextLineBeginsAtOffset;
 
-            using (var current = System.IO.File.Open(currentFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            while (count < batchPostingLimit &&
+                    TryReadLine(current, ref nextLineBeginsAtOffset, out var nextLine))
             {
-                current.Position = nextLineBeginsAtOffset;
+                // Count is the indicator that work was done, so advances even in the (rare) case an
+                // oversized event is dropped
+                count++;
 
-                while (count < batchPostingLimit &&
-                       TryReadLine(current, ref nextLineBeginsAtOffset, out var nextLine))
-                {
-                    // Count is the indicator that work was done, so advances even in the (rare) case an
-                    // oversized event is dropped
-                    count++;
-
-                    events.Add(nextLine);
-                }
+                events.Add(nextLine);
             }
 
             var payload = new StringWriter();
@@ -67,27 +80,33 @@ namespace Serilog.Sinks.Http.Private.Network
 
         private static string ReadLine(Stream current)
         {
-            // Important not to dispose this StreamReader as the stream must remain open.
+            // Important not to dispose this StreamReader as the stream must remain open
             var reader = new StreamReader(current, Encoding.UTF8, false, 128);
 
-            var stringBuilder = new StringBuilder();
+            var lineBuilder = new StringBuilder();
+
+            char character;
 
             while (true)
             {
-                var x = reader.Read();
+                character = reader.Read();
 
-                if (x == -1)
+                // Is this the end of the stream? In that case abort since all log events are
+                // terminated using a new line, and this would mean that either:
+                //   - There are no new log events
+                //   - The current log event hasn't yet been completely flushed to disk 
+                if (character == -1)
                 {
                     return null;
                 }
 
-                if (x == '\r' || x == '\n')
+                // Are we done, have we read the line?
+                if (character == CR || character == LF)
                 {
-                    return stringBuilder.ToString();
-                    
+                    return lineBuilder.ToString();
                 }
 
-                stringBuilder.Append((char)x);
+                lineBuilder.Append(character);
             }
         }
     }
