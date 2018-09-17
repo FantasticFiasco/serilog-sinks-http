@@ -50,9 +50,7 @@ namespace Serilog.Sinks.Http.Private.Network
 
             current.Position = nextStart;
 
-            // Important not to dispose this StreamReader as the stream must remain open.
-            var reader = new StreamReader(current, Encoding.UTF8, false, 128);
-            nextLine = reader.ReadLine();
+            nextLine = ReadLine(current);
 
             if (nextLine == null)
                 return false;
@@ -65,6 +63,32 @@ namespace Serilog.Sinks.Http.Private.Network
             }
 
             return true;
+        }
+
+        private static string ReadLine(Stream current)
+        {
+            // Important not to dispose this StreamReader as the stream must remain open.
+            var reader = new StreamReader(current, Encoding.UTF8, false, 128);
+
+            var stringBuilder = new StringBuilder();
+
+            while (true)
+            {
+                var x = reader.Read();
+
+                if (x == -1)
+                {
+                    return null;
+                }
+
+                if (x == '\r' || x == '\n')
+                {
+                    return stringBuilder.ToString();
+                    
+                }
+
+                stringBuilder.Append((char)x);
+            }
         }
     }
 }
