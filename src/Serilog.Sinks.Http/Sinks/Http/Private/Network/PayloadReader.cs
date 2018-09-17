@@ -90,15 +90,15 @@ namespace Serilog.Sinks.Http.Private.Network
         {
             // Important not to dispose this StreamReader as the stream must remain open
             var reader = new StreamReader(stream, Encoding.UTF8, false, 128);
-
             var lineBuilder = new StringBuilder();
 
             while (true)
             {
-                var character = (char)reader.Read();
+                var character = reader.Read();
 
-                // Is this the end of the stream? In that case abort since all log events are
-                // terminated using a new line, and this would mean that either:
+                // Is this the end of the stream? In that case abort since all log events should be
+                // terminated using a new line, and a line without a new line this would mean that
+                // either:
                 //   - There are no new log events
                 //   - The current log event hasn't yet been completely flushed to disk 
                 if (character == -1)
@@ -112,7 +112,7 @@ namespace Serilog.Sinks.Http.Private.Network
                     return lineBuilder.ToString();
                 }
 
-                lineBuilder.Append(character);
+                lineBuilder.Append((char)character);
             }
         }
     }
