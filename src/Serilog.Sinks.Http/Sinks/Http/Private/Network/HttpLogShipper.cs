@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 using System;
 using System.IO;
 using System.Linq;
@@ -27,7 +27,7 @@ using System.Runtime.InteropServices;
 
 namespace Serilog.Sinks.Http.Private.Network
 {
-    internal class HttpLogShipper : IDisposable
+    public class HttpLogShipper : IDisposable
     {
         private const string ContentType = "application/json";
 
@@ -261,3 +261,4 @@ namespace Serilog.Sinks.Http.Private.Network
         }
     }
 }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

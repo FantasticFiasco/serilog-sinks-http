@@ -11,12 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 using System;
 
 namespace Serilog.Sinks.Http.Private.Time
 {
-    internal class ExponentialBackoffConnectionSchedule
+    public class ExponentialBackoffConnectionSchedule
     {
         private static readonly TimeSpan MinimumBackoffPeriod = TimeSpan.FromSeconds(5);
         private static readonly TimeSpan MaximumBackoffInterval = TimeSpan.FromMinutes(10);
@@ -71,3 +71,4 @@ namespace Serilog.Sinks.Http.Private.Time
         }
     }
 }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
