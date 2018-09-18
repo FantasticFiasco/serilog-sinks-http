@@ -18,11 +18,8 @@ namespace Serilog.Sinks.Http.Private.Network
         public void ReadLogEvent()
         {
             // Arrange
-            var expected = new[] { Foo };
-
-            var fileContent =
-                " " +   // Adapt to offset 1
-                expected[0] + Environment.NewLine;
+            // The initial space is there to adapt to offset 1
+            var fileContent = $" {Foo}{Environment.NewLine}";
 
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(fileContent));
 
@@ -30,7 +27,7 @@ namespace Serilog.Sinks.Http.Private.Network
             var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
 
             // Assert
-            actual.ShouldBe(expected);
+            actual.ShouldBe(new[] { Foo });
             nextLineBeginsAtOffset.ShouldBe(fileContent.Length);
             count.ShouldBe(1);
         }
@@ -39,11 +36,9 @@ namespace Serilog.Sinks.Http.Private.Network
         public void NotReadLogEventGivenPartiallyWritten()
         {
             // Arrange
-            var expected = new string[0];
-
-            var fileContent =
-                " " +   // Adapt to offset 1
-                Foo;    // Partially written log event since new line is missing
+            // The initial space is there to adapt to offset 1, and the partially written log event
+            // is missing new line
+            var fileContent = $" {Foo}";   
 
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(fileContent));
 
@@ -51,8 +46,8 @@ namespace Serilog.Sinks.Http.Private.Network
             var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
 
             // Assert
-            actual.ShouldBe(expected);
-            nextLineBeginsAtOffset.ShouldBe(1);
+            actual.ShouldBeEmpty();
+            nextLineBeginsAtOffset.ShouldBe(fileContent.IndexOf(Foo, StringComparison.InvariantCulture));
             count.ShouldBe(0);
         }
 
@@ -60,12 +55,10 @@ namespace Serilog.Sinks.Http.Private.Network
         public void ReadLogEvents()
         {
             // Arrange
-            var expected = new[] { Foo, Bar };
-
+            // The initial space is there to adapt to offset 1
             var fileContent =
-                " " +   // Adapt to offset 1
-                expected[0] + Environment.NewLine +
-                expected[1] + Environment.NewLine;
+                $" {Foo}{Environment.NewLine}" +
+                $"{Bar}{Environment.NewLine}";
 
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(fileContent));
 
@@ -73,7 +66,7 @@ namespace Serilog.Sinks.Http.Private.Network
             var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
 
             // Assert
-            actual.ShouldBe(expected);
+            actual.ShouldBe(new[] { Foo, Bar });
             nextLineBeginsAtOffset.ShouldBe(fileContent.Length);
             count.ShouldBe(2);
         }
@@ -82,12 +75,11 @@ namespace Serilog.Sinks.Http.Private.Network
         public void NotReadEventsGivenPartiallyWritten()
         {
             // Arrange
-            var expected = new[] { Foo };
-
+            // The initial space is there to adapt to offset 1, and the partially written log event
+            // is missing new line
             var fileContent =
-                " " +           // Adapt to offset 1
-                expected[0] + Environment.NewLine +
-                Bar;    // Partially written log event since new line is missing
+                $" {Foo}{Environment.NewLine}" +
+                $"{Bar}";
 
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(fileContent));
 
@@ -95,7 +87,7 @@ namespace Serilog.Sinks.Http.Private.Network
             var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
 
             // Assert
-            actual.ShouldBe(expected);
+            actual.ShouldBe(new [] { Foo });
             nextLineBeginsAtOffset.ShouldBe(fileContent.IndexOf(Bar, StringComparison.InvariantCulture));
             count.ShouldBe(1);
         }

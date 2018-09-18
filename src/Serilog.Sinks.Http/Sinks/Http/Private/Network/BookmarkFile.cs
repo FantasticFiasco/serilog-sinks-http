@@ -40,14 +40,14 @@ namespace Serilog.Sinks.Http.Private.Network
 
             if (fileStream.Length != 0)
             {
-                // Important not to dispose this StreamReader as the stream must remain open.
+                // Important not to dispose this StreamReader as the stream must remain open
                 var reader = new StreamReader(fileStream, Encoding.UTF8, false, 128);
-                var current = reader.ReadLine();
+                var bookmark = reader.ReadLine();
 
-                if (current != null)
+                if (bookmark != null)
                 {
                     fileStream.Position = 0;
-                    var parts = current.Split(
+                    var parts = bookmark.Split(
                         new[] { ":::" },
                         StringSplitOptions.RemoveEmptyEntries);
 

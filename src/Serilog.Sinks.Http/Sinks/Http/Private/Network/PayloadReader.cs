@@ -97,7 +97,7 @@ namespace Serilog.Sinks.Http.Private.Network
                 var character = reader.Read();
 
                 // Is this the end of the stream? In that case abort since all log events should be
-                // terminated using a new line, and a line without a new line this would mean that
+                // terminated using a new line, and a line without a new line would mean that
                 // either:
                 //   - There are no new log events
                 //   - The current log event hasn't yet been completely flushed to disk 
