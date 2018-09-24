@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+## [5.0.1] - 2018-09-24
+
 ### :syringe: Fixed
 
 - [#54](https://github.com/FantasticFiasco/serilog-sinks-http/issues/54) Prevent durable HTTP sink from posting partially written log events

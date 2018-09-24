@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <VersionPrefix>5.0.0</VersionPrefix>
+    <VersionPrefix>5.0.1</VersionPrefix>
     <AssemblyName>Serilog.Sinks.Http</AssemblyName>
     <Description>A Serilog sink sending log events over HTTP.</Description>
     <TargetFrameworks>net45;netstandard1.3</TargetFrameworks>
