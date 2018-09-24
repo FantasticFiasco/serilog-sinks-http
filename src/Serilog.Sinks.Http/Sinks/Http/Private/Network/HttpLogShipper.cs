@@ -11,9 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -22,14 +21,13 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Sinks.Http.Private.Time;
-using IOFile = System.IO.File;
 #if HRESULTS
 using System.Runtime.InteropServices;
 #endif
 
 namespace Serilog.Sinks.Http.Private.Network
 {
-    internal class HttpLogShipper : IDisposable
+    public class HttpLogShipper : IDisposable
     {
         private const string ContentType = "application/json";
 
@@ -109,20 +107,13 @@ namespace Serilog.Sinks.Http.Private.Network
                 {
                     count = 0;
 
-                    // Locking the bookmark ensures that though there may be multiple instances of this
-                    // class running, only one will ship logs at a time.
-
-                    using (var bookmark = IOFile.Open(
-                        bookmarkFilename,
-                        FileMode.OpenOrCreate,
-                        FileAccess.ReadWrite,
-                        FileShare.Read))
+                    using (var bookmark = new BookmarkFile(bookmarkFilename))
                     {
-                        TryReadBookmark(bookmark, out var nextLineBeginsAtOffset, out var currentFile);
+                        bookmark.TryReadBookmark(out var nextLineBeginsAtOffset, out var currentFile);
 
                         var fileSet = GetFileSet();
 
-                        if (currentFile == null || !IOFile.Exists(currentFile))
+                        if (currentFile == null || !System.IO.File.Exists(currentFile))
                         {
                             nextLineBeginsAtOffset = 0;
                             currentFile = fileSet.FirstOrDefault();
@@ -131,8 +122,16 @@ namespace Serilog.Sinks.Http.Private.Network
                         if (currentFile == null)
                             continue;
 
-                        var payload = ReadPayload(currentFile, ref nextLineBeginsAtOffset, ref count);
+                        var logEvents = PayloadReader.Read(
+                            currentFile,
+                            ref nextLineBeginsAtOffset,
+                            ref count,
+                            batchPostingLimit);
 
+                        var payloadWriter = new StringWriter();
+                        batchFormatter.Format(logEvents, payloadWriter);
+                        var payload = payloadWriter.ToString();
+                        
                         if (count > 0 || nextRequiredLevelCheckUtc < DateTime.UtcNow)
                         {
                             lock (stateLock)
@@ -150,7 +149,7 @@ namespace Serilog.Sinks.Http.Private.Network
                             {
                                 connectionSchedule.MarkSuccess();
 
-                                WriteBookmark(bookmark, nextLineBeginsAtOffset, currentFile);
+                                bookmark.WriteBookmark(nextLineBeginsAtOffset, currentFile);
                             }
                             else
                             {
@@ -176,7 +175,7 @@ namespace Serilog.Sinks.Http.Private.Network
                                 fileSet.First() == currentFile &&
                                 IsUnlockedAtLength(currentFile, nextLineBeginsAtOffset))
                             {
-                                WriteBookmark(bookmark, 0, fileSet[1]);
+                                bookmark.WriteBookmark(0, fileSet[1]);
                             }
 
                             if (fileSet.Length > 2)
@@ -184,7 +183,7 @@ namespace Serilog.Sinks.Http.Private.Network
                                 // Once there's a third file waiting to ship, we do our
                                 // best to move on, though a lock on the current file
                                 // will delay this.
-                                IOFile.Delete(fileSet[0]);
+                                System.IO.File.Delete(fileSet[0]);
                             }
                         }
                     }
@@ -207,37 +206,11 @@ namespace Serilog.Sinks.Http.Private.Network
             }
         }
 
-        private string ReadPayload(string currentFile, ref long nextLineBeginsAtOffset, ref int count)
-        {
-            var events = new List<string>();
-
-            using (var current = IOFile.Open(currentFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                current.Position = nextLineBeginsAtOffset;
-
-                while (count < batchPostingLimit &&
-                       TryReadLine(current, ref nextLineBeginsAtOffset, out var nextLine))
-                {
-                    // Count is the indicator that work was done, so advances even in the (rare) case an
-                    // oversized event is dropped
-                    count++;
-
-                    events.Add(nextLine);
-                }
-            }
-
-            var payload = new StringWriter();
-
-            batchFormatter.Format(events, payload);
-
-            return payload.ToString();
-        }
-
         private static bool IsUnlockedAtLength(string file, long maxLength)
         {
             try
             {
-                using (var fileStream = IOFile.Open(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read))
+                using (var fileStream = System.IO.File.Open(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read))
                 {
                     return fileStream.Length <= maxLength;
                 }
@@ -265,71 +238,6 @@ namespace Serilog.Sinks.Http.Private.Network
             return false;
         }
 
-        private static void WriteBookmark(FileStream bookmark, long nextLineBeginsAtOffset, string currentFile)
-        {
-            using (var writer = new StreamWriter(bookmark))
-            {
-                writer.WriteLine("{0}:::{1}", nextLineBeginsAtOffset, currentFile);
-            }
-        }
-
-        // It would be ideal to chomp whitespace here, but not required
-        private static bool TryReadLine(Stream current, ref long nextStart, out string nextLine)
-        {
-            var includesBom = nextStart == 0;
-
-            if (current.Length <= nextStart)
-            {
-                nextLine = null;
-                return false;
-            }
-
-            current.Position = nextStart;
-
-            // Important not to dispose this StreamReader as the stream must remain open.
-            var reader = new StreamReader(current, Encoding.UTF8, false, 128);
-            nextLine = reader.ReadLine();
-
-            if (nextLine == null)
-                return false;
-
-            nextStart += Encoding.UTF8.GetByteCount(nextLine) + Encoding.UTF8.GetByteCount(Environment.NewLine);
-            if (includesBom)
-                nextStart += 3;
-
-            return true;
-        }
-
-        private static void TryReadBookmark(Stream bookmark, out long nextLineBeginsAtOffset, out string currentFile)
-        {
-            nextLineBeginsAtOffset = 0;
-            currentFile = null;
-
-            if (bookmark.Length != 0)
-            {
-                // Important not to dispose this StreamReader as the stream must remain open.
-                var reader = new StreamReader(bookmark, Encoding.UTF8, false, 128);
-                var current = reader.ReadLine();
-
-                if (current != null)
-                {
-                    bookmark.Position = 0;
-                    var parts = current.Split(
-                        new[]
-                        {
-                            ":::"
-                        },
-                        StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length == 2)
-                    {
-                        nextLineBeginsAtOffset = long.Parse(parts[0]);
-                        currentFile = parts[1];
-                    }
-                }
-
-            }
-        }
-
         private string[] GetFileSet()
         {
             return Directory.GetFiles(logFolder, candidateSearchPath)
@@ -353,3 +261,4 @@ namespace Serilog.Sinks.Http.Private.Network
         }
     }
 }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

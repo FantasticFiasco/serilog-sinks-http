@@ -88,9 +88,9 @@ namespace Serilog.Sinks.Http.Private.Sinks
         /// <summary>
         /// Emit a batch of log events, running asynchronously.
         /// </summary>
-        protected override async Task EmitBatchAsync(IEnumerable<LogEvent> events)
+        protected override async Task EmitBatchAsync(IEnumerable<LogEvent> logEvents)
         {
-            var payload = FormatPayload(events);
+            var payload = FormatPayload(logEvents);
             var content = new StringContent(payload, Encoding.UTF8, ContentType);
 
             var result = await client
@@ -121,11 +121,11 @@ namespace Serilog.Sinks.Http.Private.Sinks
             }
         }
 
-        private string FormatPayload(IEnumerable<LogEvent> events)
+        private string FormatPayload(IEnumerable<LogEvent> logEvents)
         {
             var payload = new StringWriter();
 
-            batchFormatter.Format(events, textFormatter, payload);
+            batchFormatter.Format(logEvents, textFormatter, payload);
 
             return payload.ToString();
         }
