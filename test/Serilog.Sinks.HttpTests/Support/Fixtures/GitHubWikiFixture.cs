@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Net.Http;
 
 namespace Serilog.Support.Fixtures
@@ -22,9 +23,12 @@ namespace Serilog.Support.Fixtures
         {
             var pattern = $"- `{parameterName}` - ";
 
-            return rows
-                .Single(row => row.StartsWith(pattern))
-                .Substring(pattern.Length);
+            var matchingRow = rows.SingleOrDefault(row => row.StartsWith(pattern));
+            if (matchingRow == null) throw new Exception($"GitHub wiki does not contain a description of parameter \"{parameterName}\"");
+
+            return matchingRow
+                .Substring(pattern.Length)
+                .Replace("`", string.Empty);    // Remove code annotation
         }
     }
 }

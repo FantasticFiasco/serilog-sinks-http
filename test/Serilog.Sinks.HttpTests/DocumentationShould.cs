@@ -19,7 +19,8 @@ namespace Serilog
         }
 
         [Theory]
-        [InlineData("Http", "Durable-HTTP-sink.md")]
+        [InlineData("Http", "HTTP-sink.md")]
+        [InlineData("DurableHttp", "Durable-HTTP-sink.md")]
         public void MatchWikiPage(string extensionName, string wikiPage)
         {
             // Arrange
