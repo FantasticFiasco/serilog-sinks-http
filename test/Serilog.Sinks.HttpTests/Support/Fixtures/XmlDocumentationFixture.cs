@@ -22,7 +22,13 @@ namespace Serilog.Support.Fixtures
                 .Descendants("param")
                 .Single(descendant => descendant.Attribute("name").Value == parameterName);
 
-            return parameter.Value.Trim();
+            var description = parameter
+                .Value
+                .Split("\n")
+                .Select(row => row.Trim())
+                .Where(row => row.Length > 0);
+
+            return string.Join(" ", description);
         }
     }
 }
