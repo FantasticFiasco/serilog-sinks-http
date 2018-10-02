@@ -6,13 +6,13 @@ using Xunit;
 
 namespace Serilog
 {
-    public class DocumentationShould
+    public class WikiDocumentationShould
         : IClassFixture<XmlDocumentationFixture>, IClassFixture<GitHubWikiFixture>
     {
         private readonly XmlDocumentationFixture xmlDocumentationFixture;
         private readonly GitHubWikiFixture gitHubWikiFixture;
         
-        public DocumentationShould(XmlDocumentationFixture xmlDocumentationFixture, GitHubWikiFixture gitHubWikiFixture)
+        public WikiDocumentationShould(XmlDocumentationFixture xmlDocumentationFixture, GitHubWikiFixture gitHubWikiFixture)
         {
             this.xmlDocumentationFixture = xmlDocumentationFixture;
             this.gitHubWikiFixture = gitHubWikiFixture;
