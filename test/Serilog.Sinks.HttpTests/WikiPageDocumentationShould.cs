@@ -6,22 +6,22 @@ using Xunit;
 
 namespace Serilog
 {
-    public class WikiDocumentationShould
+    public class WikiPageDocumentationShould
         : IClassFixture<XmlDocumentationFixture>, IClassFixture<GitHubWikiFixture>
     {
-        private readonly XmlDocumentationFixture xmlDocumentationFixture;
         private readonly GitHubWikiFixture gitHubWikiFixture;
+        private readonly XmlDocumentationFixture xmlDocumentationFixture;
         
-        public WikiDocumentationShould(XmlDocumentationFixture xmlDocumentationFixture, GitHubWikiFixture gitHubWikiFixture)
+        public WikiPageDocumentationShould(GitHubWikiFixture gitHubWikiFixture, XmlDocumentationFixture xmlDocumentationFixture)
         {
-            this.xmlDocumentationFixture = xmlDocumentationFixture;
             this.gitHubWikiFixture = gitHubWikiFixture;
+            this.xmlDocumentationFixture = xmlDocumentationFixture;
         }
 
         [Theory]
-        [InlineData("Http", "HTTP-sink.md")]
-        [InlineData("DurableHttp", "Durable-HTTP-sink.md")]
-        public void MatchWikiPage(string extensionName, string wikiPage)
+        [InlineData("HTTP-sink.md", "Http")]
+        [InlineData("Durable-HTTP-sink.md", "DurableHttp")]
+        public void MatchCode(string wikiPage, string extensionName)
         {
             // Arrange
             gitHubWikiFixture.Load(wikiPage);
@@ -35,8 +35,8 @@ namespace Serilog
             foreach (var parameterName in parameterNames)
             {
                 // Act
-                var codeDescription = xmlDocumentationFixture.GetDescription(extensionName, parameterName);
                 var wikiDescription = gitHubWikiFixture.GetDescription(parameterName);
+                var codeDescription = xmlDocumentationFixture.GetDescription(extensionName, parameterName);
 
                 // Assert
                 wikiDescription.ShouldBe(codeDescription);
