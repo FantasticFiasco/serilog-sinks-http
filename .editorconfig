@@ -57,5 +57,8 @@ indent_size = 2
 [*.json]
 indent_size = 2
 
+[*.props]
+indent_size = 2
+
 [*.{yaml,yml}]
 indent_size = 2
