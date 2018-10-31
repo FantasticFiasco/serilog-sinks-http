@@ -11,9 +11,9 @@
     <AssemblyOriginatorKeyFile>../../serilog.snk</AssemblyOriginatorKeyFile>
     <PackageId>Serilog.Sinks.Http</PackageId>
     <PackageTags>serilog;http</PackageTags>
-    <PackageIconUrl>http://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
+    <PackageIconUrl>https://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/FantasticFiasco/serilog-sinks-http</PackageProjectUrl>
-    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/FantasticFiasco/serilog-sinks-http/master/LICENSE</PackageLicenseUrl>
     <PackageReleaseNotes>For release notes, please see the change log on GitHub.</PackageReleaseNotes>
   </PropertyGroup>
 
