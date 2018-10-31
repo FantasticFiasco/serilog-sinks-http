@@ -15,6 +15,7 @@
     <PackageProjectUrl>https://github.com/FantasticFiasco/serilog-sinks-http</PackageProjectUrl>
     <PackageLicenseUrl>https://raw.githubusercontent.com/FantasticFiasco/serilog-sinks-http/master/LICENSE</PackageLicenseUrl>
     <PackageReleaseNotes>For release notes, please see the change log on GitHub.</PackageReleaseNotes>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
 
   <ItemGroup>
