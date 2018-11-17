@@ -100,8 +100,8 @@ namespace Serilog
         /// <param name="bufferPathFormat">
         /// The path format for a set of files that will be used to buffer events until they can be
         /// successfully sent over the network. Default value is "Buffer-{Date}.json". To use file
-        /// rotation that is on an 30 or 60 minute interval pass "Buffer-{Hour}.json" or
-        /// "Buffer-{HalfHour}.json".
+        /// rotation that is on an 30 or 60 minute interval pass "Buffer-{HalfHour}.json" or
+        /// "Buffer-{Hour}.json".
         /// </param>
         /// <param name="bufferFileSizeLimitBytes">
         /// The maximum size, in bytes, to which the buffer log file for a specific date will be
