@@ -5,6 +5,7 @@
     <Authors>Mattias Kindborg</Authors>
     <Company />
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
 
 </Project>

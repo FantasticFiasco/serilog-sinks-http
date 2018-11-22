@@ -18,7 +18,7 @@ namespace Serilog
             this.xmlDocumentationFixture = xmlDocumentationFixture;
         }
 
-        [Theory]
+        [TheoryOnMasterBranch]
         [InlineData("HTTP-sink.md", "Http")]
         [InlineData("Durable-HTTP-sink.md", "DurableHttp")]
         public void MatchCode(string wikiPage, string extensionName)

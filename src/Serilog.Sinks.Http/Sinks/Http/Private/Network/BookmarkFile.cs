@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
 using System;
 using System.IO;
 using System.Text;
@@ -22,12 +22,12 @@ namespace Serilog.Sinks.Http.Private.Network
     {
         private readonly FileStream fileStream;
 
-        public BookmarkFile(string bookmarkFilename)
+        public BookmarkFile(string bookmarkFileName)
         {
-            if (bookmarkFilename == null) throw new ArgumentNullException(nameof(bookmarkFilename));
+            if (bookmarkFileName == null) throw new ArgumentNullException(nameof(bookmarkFileName));
 
             fileStream = System.IO.File.Open(
-                bookmarkFilename,
+                bookmarkFileName,
                 FileMode.OpenOrCreate,
                 FileAccess.ReadWrite,
                 FileShare.Read);
@@ -68,7 +68,7 @@ namespace Serilog.Sinks.Http.Private.Network
             }
         }
 
-        public void Dispose() => fileStream?.Dispose();
+        public void Dispose() =>
+            fileStream?.Dispose();
     }
 }
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

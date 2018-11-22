@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Serilog.Sinks.Http.Private.Sinks
 {
-    public class DurableHttpSinkShould
+    public class TimeRolledDurableHttpSinkShould
     {
         [Theory]
         [InlineData("a{Date}b")]
@@ -23,7 +23,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
         public void ReturnSinkGivenValidBufferPathFormat(string bufferPathFormat)
         {
             // Arrange
-            Action actual = () => new DurableHttpSink(
+            Func<TimeRolledDurableHttpSink> actual = () => new TimeRolledDurableHttpSink(
                 "some/route",
                 bufferPathFormat,
                 null,
@@ -76,7 +76,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
         public void ThrowExceptionGivenInvalidBufferPathFormat(string bufferPathFormat)
         {
             // Arrange
-            Action actual = () => new DurableHttpSink(
+            Func<TimeRolledDurableHttpSink> actual = () => new TimeRolledDurableHttpSink(
                 "some/route",
                 bufferPathFormat,
                 null,
@@ -101,7 +101,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
         public void ReturnSinkGivenValidBufferFileSizeLimitBytes(int? bufferFileSizeLimitBytes)
         {
             // Arrange
-            Action actual = () => new DurableHttpSink(
+            Func<TimeRolledDurableHttpSink> actual = () => new TimeRolledDurableHttpSink(
                 "some/route",
                 "Buffer-{Date}.json",
                 bufferFileSizeLimitBytes,
@@ -124,7 +124,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
         public void ThrowExceptionGivenInvalidBufferFileSizeLimitBytes(int? bufferFileSizeLimitBytes)
         {
             // Arrange
-            Action actual = () => new DurableHttpSink(
+            Func<TimeRolledDurableHttpSink> actual = () => new TimeRolledDurableHttpSink(
                 "some/route",
                 "Buffer-{Date}.json",
                 bufferFileSizeLimitBytes,
@@ -145,7 +145,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
             // Arrange
             var httpClient = new HttpClientMock();
 
-            using (new DurableHttpSink(
+            using (new TimeRolledDurableHttpSink(
                 "some/route",
                 "Buffer-{Date}.json",
                 null,

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.ComponentModel;
 using System.Net.Http;
 using Serilog.Configuration;
 using Serilog.Events;
@@ -26,8 +27,8 @@ using Serilog.Sinks.Http.TextFormatters;
 namespace Serilog
 {
     /// <summary>
-    /// Adds the WriteTo.Http() and WriteTo.DurableHttp() extension method to
-    /// <see cref="LoggerConfiguration"/>.
+    /// Class containing extension methods to <see cref="LoggerConfiguration"/>, configuring sinks
+    /// sending log events over the network using HTTP.
     /// </summary>
     public static class LoggerSinkConfigurationExtensions
     {
@@ -90,21 +91,55 @@ namespace Serilog
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
         }
 
+        [Obsolete("Use DurableHttpUsingTimeRolledBuffers instead of this sink provider")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public static LoggerConfiguration DurableHttp(
+            this LoggerSinkConfiguration sinkConfiguration,
+            string requestUri,
+            string bufferPathFormat = "Buffer-{Date}.json",
+            long? bufferFileSizeLimitBytes = null,
+            int? retainedBufferFileCountLimit = 31,
+            int batchPostingLimit = 1000,
+            TimeSpan? period = null,
+            ITextFormatter textFormatter = null,
+            IBatchFormatter batchFormatter = null,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            IHttpClient httpClient = null)
+        {
+            return DurableHttpUsingTimeRolledBuffers(
+                sinkConfiguration,
+                requestUri,
+                bufferPathFormat,
+                bufferFileSizeLimitBytes,
+                retainedBufferFileCountLimit,
+                batchPostingLimit,
+                period,
+                textFormatter,
+                batchFormatter,
+                restrictedToMinimumLevel,
+                httpClient);
+        }
+
         /// <summary>
         /// Adds a durable sink that sends log events using HTTP POST over the network. A durable
-        /// sink will persist log events on disk before sending them over the network, thus
-        /// protecting against data loss after a system or process restart.
+        /// sink will persist log events on disk in buffer files before sending them over the
+        /// network, thus protecting against data loss after a system or process restart. The
+        /// buffer files will use a rolling behavior defined by the time interval specified in
+        /// <paramref name="bufferPathFormat"/>, i.e. a new buffer file is created every time a new
+        /// interval is started. The maximum size of a file is defined by
+        /// <paramref name="bufferFileSizeLimitBytes"/>, and when that limit is reached all
+        /// incoming log events will be dropped until a new interval is started.
         /// </summary>
         /// <param name="sinkConfiguration">The logger configuration.</param>
         /// <param name="requestUri">The URI the request is sent to.</param>
         /// <param name="bufferPathFormat">
-        /// The path format for a set of files that will be used to buffer events until they can be
-        /// successfully sent over the network. Default value is "Buffer-{Date}.json". To use file
-        /// rotation that is on an 30 or 60 minute interval pass "Buffer-{HalfHour}.json" or
-        /// "Buffer-{Hour}.json".
+        /// The relative or absolute path format for a set of files that will be used to buffer
+        /// events until they can be successfully sent over the network. Default value is
+        /// "Buffer-{Date}.json". To use file rotation that is on an 30 or 60 minute interval pass
+        /// "Buffer-{HalfHour}.json" or "Buffer-{Hour}.json".
         /// </param>
         /// <param name="bufferFileSizeLimitBytes">
-        /// The maximum size, in bytes, to which the buffer log file for a specific date will be
+        /// The approximate maximum size, in bytes, to which a buffer file for a specific time interval will be
         /// allowed to grow. By default no limit will be applied.
         /// </param>
         /// <param name="retainedBufferFileCountLimit">
@@ -136,7 +171,7 @@ namespace Serilog
         /// <see cref="HttpClient"/>.
         /// </param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
-        public static LoggerConfiguration DurableHttp(
+        public static LoggerConfiguration DurableHttpUsingTimeRolledBuffers(
             this LoggerSinkConfiguration sinkConfiguration,
             string requestUri,
             string bufferPathFormat = "Buffer-{Date}.json",
@@ -157,9 +192,97 @@ namespace Serilog
             batchFormatter = batchFormatter ?? new DefaultBatchFormatter();
             httpClient = httpClient ?? new DefaultHttpClient();
 
-            var sink = new DurableHttpSink(
+            var sink = new TimeRolledDurableHttpSink(
                 requestUri,
                 bufferPathFormat,
+                bufferFileSizeLimitBytes,
+                retainedBufferFileCountLimit,
+                batchPostingLimit,
+                period.Value,
+                textFormatter,
+                batchFormatter,
+                httpClient);
+
+            return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
+        }
+
+        /// <summary>
+        /// Adds a durable sink that sends log events using HTTP POST over the network. A durable
+        /// sink will persist log events on disk in buffer files before sending them over the
+        /// network, thus protecting against data loss after a system or process restart. The
+        /// buffer files will use a rolling behavior defined by the file size specified in
+        /// <paramref name="bufferFileSizeLimitBytes"/>, i.e. a new buffer file is created when
+        /// current has passed its limit. The maximum number of retained files is defined by
+        /// <paramref name="retainedBufferFileCountLimit"/>, and when that limit is reached the
+        /// oldest file is dropped to make room for a new.
+        /// </summary>
+        /// <param name="sinkConfiguration">The logger configuration.</param>
+        /// <param name="requestUri">The URI the request is sent to.</param>
+        /// <param name="bufferBaseFileName">
+        /// The relative or absolute path for a set of files that will be used to buffer events
+        /// until they can be successfully transmitted across the network. Individual files will be
+        /// created using the pattern "<paramref name="bufferBaseFileName"/>*.json", which should
+        /// not clash with any other file names in the same directory. Default value is "Buffer".
+        /// </param>
+        /// <param name="bufferFileSizeLimitBytes">
+        /// The approximate maximum size, in bytes, to which a buffer file will be allowed to grow.
+        /// For unrestricted growth, pass null. The default is 1 GB. To avoid writing partial
+        /// events, the last event within the limit will be written in full even if it exceeds the
+        /// limit.
+        /// </param>
+        /// <param name="retainedBufferFileCountLimit">
+        /// The maximum number of buffer files that will be retained, including the current buffer
+        /// file. Under normal operation only 2 files will be kept, however if the log server is
+        /// unreachable, the number of files specified by <paramref name="retainedBufferFileCountLimit"/>
+        /// will be kept on the file system. For unlimited retention, pass null. Default value is 31.
+        /// </param>
+        /// <param name="batchPostingLimit">
+        /// The maximum number of events to post in a single batch. Default value is 1000.
+        /// </param>
+        /// <param name="period">
+        /// The time to wait between checking for event batches. Default value is 2 seconds.
+        /// </param>
+        /// <param name="textFormatter">
+        /// The formatter rendering individual log events into text, for example JSON. Default
+        /// value is <see cref="NormalRenderedTextFormatter"/>.
+        /// </param>
+        /// <param name="batchFormatter">
+        /// The formatter batching multiple log events into a payload that can be sent over the
+        /// network. Default value is <see cref="DefaultBatchFormatter"/>.
+        /// </param>
+        /// <param name="restrictedToMinimumLevel">
+        /// The minimum level for events passed through the sink. Default value is
+        /// <see cref="LevelAlias.Minimum"/>.
+        /// </param>
+        /// <param name="httpClient">
+        /// A custom <see cref="IHttpClient"/> implementation. Default value is
+        /// <see cref="HttpClient"/>.
+        /// </param>
+        /// <returns>Logger configuration, allowing configuration to continue.</returns>
+        public static LoggerConfiguration DurableHttpUsingFileSizeRolledBuffers(
+            this LoggerSinkConfiguration sinkConfiguration,
+            string requestUri,
+            string bufferBaseFileName = "Buffer",
+            long? bufferFileSizeLimitBytes = 1024 * 1024 * 1024,
+            int? retainedBufferFileCountLimit = 31,
+            int batchPostingLimit = 1000,
+            TimeSpan? period = null,
+            ITextFormatter textFormatter = null,
+            IBatchFormatter batchFormatter = null,
+            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            IHttpClient httpClient = null)
+        {
+            if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
+
+            // Default values
+            period = period ?? TimeSpan.FromSeconds(2);
+            textFormatter = textFormatter ?? new NormalRenderedTextFormatter();
+            batchFormatter = batchFormatter ?? new DefaultBatchFormatter();
+            httpClient = httpClient ?? new DefaultHttpClient();
+
+            var sink = new FileSizeRolledDurableHttpSink(
+                requestUri,
+                bufferBaseFileName,
                 bufferFileSizeLimitBytes,
                 retainedBufferFileCountLimit,
                 batchPostingLimit,
