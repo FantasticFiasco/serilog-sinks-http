@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+## [5.1.0] - 2019-01-07
+
 ### :zap: Added
 
 - Support for .NET Framework 4.6.1 due to recommendations from the [cross-platform targeting guidelines](https://docs.microsoft.com/en-us/dotnet/standard/library-guidance/cross-platform-targeting#multi-targeting)
