@@ -1,7 +1,7 @@
 # Serilog.Sinks.Http - A Serilog sink sending log events over HTTP
 
 [![Build status](https://ci.appveyor.com/api/projects/status/ayvak8yo23k962sg/branch/master?svg=true)](https://ci.appveyor.com/project/FantasticFiasco/serilog-sinks-http)
-[![NuGet Version](http://img.shields.io/nuget/v/Serilog.Sinks.Http.svg?style=flat)](https://www.nuget.org/packages/Serilog.Sinks.Http/) 
+[![NuGet Version](http://img.shields.io/nuget/v/Serilog.Sinks.Http.svg?style=flat)](https://www.nuget.org/packages/Serilog.Sinks.Http/)
 [![NuGet](https://img.shields.io/nuget/dt/Serilog.Sinks.Http.svg)](https://www.nuget.org/packages/Serilog.Sinks.Http/)
 [![Documentation](https://img.shields.io/badge/docs-wiki-yellow.svg)](https://github.com/serilog/serilog/wiki)
 [![Join the chat at https://gitter.im/serilog/serilog](https://img.shields.io/gitter/room/serilog/serilog.svg)](https://gitter.im/serilog/serilog)
@@ -16,6 +16,7 @@ __Package__ - [Serilog.Sinks.Http](https://www.nuget.org/packages/serilog.sinks.
 - [Typical use case](#typical-use-case)
 - [Sample applications](#sample-applications)
 - [Install via NuGet](#install-via-nuget)
+- [Donations](#donations)
 - [Credit](#credit)
 
 ---
@@ -44,7 +45,7 @@ Used in conjunction with [Serilog.Settings.Configuration](https://github.com/ser
         "Name": "Http",
         "Args": {
           "requestUri": "http://www.mylogs.com"
-        } 
+        }
       }
     ]
   }
@@ -119,6 +120,12 @@ To install the sink, run the following command in the Package Manager Console:
 ```
 PM> Install-Package Serilog.Sinks.Http
 ```
+
+## Donations
+
+If this project has helped you to stay productive and save money, you can buy me a cup of coffee :)
+
+[![PayPal Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/FantasticFiasco)
 
 ## Credit
 
