@@ -13,12 +13,11 @@ if (Test-Path .\artifacts)
     Remove-Item .\artifacts -Force -Recurse
 }
 
-$branch = @{ $true = $env:APPVEYOR_REPO_BRANCH; $false = $(git symbolic-ref --short -q HEAD) }[$env:APPVEYOR_REPO_BRANCH -ne $NULL];
-if ($branch -like "*/*") { $branch = $branch.Substring($branch.LastIndexOf("/") + 1) }
-$revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUILD_NUMBER, 10); $false = "local" }[$env:APPVEYOR_BUILD_NUMBER -ne $NULL];
-$suffix = @{ $true = ""; $false = "$branch-$revision"}[$branch -eq "master" -and $revision -ne "local"]
+$tagged_build = if ($env:APPVEYOR_REPO_TAG -eq "true") { $true } else { $false }
+Write-Host "build: Triggered by git tag: $tagged_build"
 
-Write-Host "build: Version suffix is '$suffix'"
+$git_sha = $env:APPVEYOR_REPO_COMMIT.Substring(0, 7)
+Write-Host "build: Git SHA: $git_sha"
 
 # Build and pack
 foreach ($source in Get-ChildItem .\src\*)
@@ -27,21 +26,21 @@ foreach ($source in Get-ChildItem .\src\*)
 
     Write-Host "build: Packaging project in $source"
 
-    if ($suffix -eq "")
+    if ($tagged_build)
     {
         & dotnet build -c Release
         & dotnet pack -c Release --include-symbols -o ..\..\artifacts --no-build
     }
     else
     {
-        & dotnet build -c Release --version-suffix=$suffix
-        & dotnet pack -c Release --include-symbols -o ..\..\artifacts --version-suffix=$suffix --no-build
+        & dotnet build -c Release --version-suffix=$git_sha
+        & dotnet pack -c Release --include-symbols -o ..\..\artifacts --version-suffix=$git_sha --no-build
     }
-    
+
     if ($LASTEXITCODE -ne 0)
     {
         exit 1
-    }    
+    }
 
     Pop-Location
 }
@@ -60,7 +59,7 @@ foreach ($test in Get-ChildItem test/*Tests)
 }
 
 # Push
-if ($env:APPVEYOR_REPO_TAG -eq "true")
+if ($tagged_build)
 {
     Write-Host "build: push package to www.nuget.org"
 
