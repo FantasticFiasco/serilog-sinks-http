@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Xml.Linq;
-using Serilog.Events;
 using Serilog.Sinks.Http;
 using Serilog.Sinks.Http.BatchFormatters;
 using Serilog.Sinks.Http.TextFormatters;
