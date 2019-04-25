@@ -86,7 +86,7 @@ namespace Serilog.Support
                 Content = content
             };
         }
-            
+
         public void Dispose()
         {
         }

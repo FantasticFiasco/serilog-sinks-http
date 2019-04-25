@@ -27,6 +27,6 @@ namespace Serilog
 
         protected override Logger Logger { get; }
 
-        
+
     }
 }

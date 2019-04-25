@@ -38,7 +38,7 @@ namespace Serilog.Sinks.Http.Private.Network
             // Arrange
             // The initial space is there to adapt to offset 1, and the partially written log event
             // is missing new line
-            var fileContent = $" {Foo}";   
+            var fileContent = $" {Foo}";
 
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(fileContent));
 
@@ -70,7 +70,7 @@ namespace Serilog.Sinks.Http.Private.Network
             nextLineBeginsAtOffset.ShouldBe(fileContent.Length);
             count.ShouldBe(2);
         }
-        
+
         [Fact]
         public void NotReadEventsGivenPartiallyWritten()
         {

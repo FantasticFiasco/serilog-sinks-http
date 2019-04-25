@@ -1,11 +1,11 @@
 ﻿// Copyright 2015-2019 Serilog Contributors
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -100,7 +100,7 @@ namespace Serilog.Sinks.Http.Private.Network
                 // terminated using a new line, and a line without a new line would mean that
                 // either:
                 //   - There are no new log events
-                //   - The current log event hasn't yet been completely flushed to disk 
+                //   - The current log event hasn't yet been completely flushed to disk
                 if (character == -1)
                 {
                     return null;

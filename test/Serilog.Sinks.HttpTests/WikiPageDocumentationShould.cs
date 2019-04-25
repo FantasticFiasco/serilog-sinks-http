@@ -11,7 +11,7 @@ namespace Serilog
     {
         private readonly GitHubWikiFixture gitHubWikiFixture;
         private readonly XmlDocumentationFixture xmlDocumentationFixture;
-        
+
         public WikiPageDocumentationShould(GitHubWikiFixture gitHubWikiFixture, XmlDocumentationFixture xmlDocumentationFixture)
         {
             this.gitHubWikiFixture = gitHubWikiFixture;
