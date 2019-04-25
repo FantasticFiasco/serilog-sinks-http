@@ -17,27 +17,29 @@ using System.Text;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
+using Serilog.Sinks.Http.Private.IO;
 using Serilog.Sinks.Http.Private.Network;
 using Serilog.Sinks.RollingFile;
 
 namespace Serilog.Sinks.Http.Private.Sinks
 {
     /// <summary>
-    /// A durable sink that sends log events using HTTP POST over the network. A durable sink will
-    /// persist log events on disk before sending them over the network, thus protecting against
-    /// data loss after a system or process restart.
+    /// A durable sink that sends log events using HTTP POST over the network. A durable
+    /// sink will persist log events on disk in buffer files before sending them over the
+    /// network, thus protecting against data loss after a system or process restart. The
+    /// buffer files will use a rolling behavior based on time interval.
     /// </summary>
     /// <seealso cref="ILogEventSink" />
     /// <seealso cref="IDisposable" />
-    public class DurableHttpSink : ILogEventSink, IDisposable
+    public class TimeRolledDurableHttpSink : ILogEventSink, IDisposable
     {
         private readonly HttpLogShipper shipper;
-        private readonly RollingFileSink sink;
+        private readonly ILogEventSink sink;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DurableHttpSink"/> class.
+        /// Initializes a new instance of the <see cref="TimeRolledDurableHttpSink"/> class.
         /// </summary>
-        public DurableHttpSink(
+        public TimeRolledDurableHttpSink(
             string requestUri,
             string bufferPathFormat,
             long? bufferFileSizeLimitBytes,
@@ -54,7 +56,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
             shipper = new HttpLogShipper(
                 client,
                 requestUri,
-                bufferPathFormat,
+                new TimeRolledBufferFiles(new DirectoryService(), bufferPathFormat),
                 batchPostingLimit,
                 period,
                 batchFormatter);
@@ -67,19 +69,14 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 Encoding.UTF8);
         }
 
-        /// <summary>
-        /// Emit the provided log event to the sink.
-        /// </summary>
+        /// <inheritdoc />
         public void Emit(LogEvent logEvent) =>
             sink.Emit(logEvent);
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting
-        /// unmanaged resources.
-        /// </summary>
+        /// <inheritdoc />
         public void Dispose()
         {
-            sink?.Dispose();
+            (sink as IDisposable)?.Dispose();
             shipper?.Dispose();
         }
     }

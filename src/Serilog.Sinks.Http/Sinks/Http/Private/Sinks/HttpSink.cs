@@ -85,9 +85,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
             this.client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
-        /// <summary>
-        /// Emit a batch of log events, running asynchronously.
-        /// </summary>
+        /// <inheritdoc />
         protected override async Task EmitBatchAsync(IEnumerable<LogEvent> logEvents)
         {
             var payload = FormatPayload(logEvents);
@@ -103,13 +101,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
             }
         }
 
-        /// <summary>
-        /// Free resources held by the sink.
-        /// </summary>
-        /// <param name="disposing">
-        /// If true, called because the object is being disposed; if false, the object is being
-        /// disposed from the finalizer.
-        /// </param>
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);

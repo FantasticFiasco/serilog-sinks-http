@@ -11,13 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
 using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Sinks.Http.Private.Time;
@@ -32,51 +31,34 @@ namespace Serilog.Sinks.Http.Private.Network
         private const string ContentType = "application/json";
 
         private static readonly TimeSpan RequiredLevelCheckInterval = TimeSpan.FromMinutes(2);
-        private static readonly Regex BufferPathFormatRegex = new Regex(
-            $"(?<prefix>.+)(?:{string.Join("|", Enum.GetNames(typeof(DateFormats)).Select(x => $"{{{x}}}"))})(?<postfix>.+)");
-
+        
+        private IHttpClient client;
         private readonly string requestUri;
         private readonly int batchPostingLimit;
-        private readonly string bookmarkFilename;
-        private readonly string logFolder;
-        private readonly string candidateSearchPath;
+        private readonly IBufferFiles bufferFiles;
         private readonly ExponentialBackoffConnectionSchedule connectionSchedule;
         private readonly PortableTimer timer;
         private readonly object stateLock = new object();
         private readonly IBatchFormatter batchFormatter;
-        private IHttpClient client;
         private DateTime nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
         private volatile bool unloading;
 
         public HttpLogShipper(
             IHttpClient client,
             string requestUri,
-            string bufferPathFormat,
+            IBufferFiles bufferFiles,
             int batchPostingLimit,
             TimeSpan period,
             IBatchFormatter batchFormatter)
         {
-            if (bufferPathFormat == null) throw new ArgumentNullException(nameof(bufferPathFormat));
-            if (bufferPathFormat != bufferPathFormat.Trim()) throw new ArgumentException("bufferPathFormat must not contain any leading or trailing whitespaces", nameof(bufferPathFormat));
             if (batchPostingLimit <= 0) throw new ArgumentException("batchPostingLimit must be 1 or greater", nameof(batchPostingLimit));
 
             this.client = client ?? throw new ArgumentNullException(nameof(client));
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
+            this.bufferFiles = bufferFiles ?? throw new ArgumentNullException(nameof(bufferFiles));
             this.batchPostingLimit = batchPostingLimit;
             this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
-
-            var bufferPathFormatMatch = BufferPathFormatRegex.Match(bufferPathFormat);
-            if (!bufferPathFormatMatch.Success)
-            {
-                throw new ArgumentException($"bufferPathFormat must include one of the date formats [{string.Join(", ", Enum.GetNames(typeof(DateFormats)))}]");
-            }
-
-            var prefix = bufferPathFormatMatch.Groups["prefix"];
-            var postfix = bufferPathFormatMatch.Groups["postfix"];
-
-            bookmarkFilename = Path.GetFullPath(prefix.Value.TrimEnd('-') + ".bookmark");
-            logFolder = Path.GetDirectoryName(bookmarkFilename);
-            candidateSearchPath = $"{Path.GetFileName(prefix.Value)}*{postfix.Value}";
+            
             connectionSchedule = new ExponentialBackoffConnectionSchedule(period);
             timer = new PortableTimer(OnTick);
 
@@ -107,11 +89,11 @@ namespace Serilog.Sinks.Http.Private.Network
                 {
                     count = 0;
 
-                    using (var bookmark = new BookmarkFile(bookmarkFilename))
+                    using (var bookmark = new BookmarkFile(bufferFiles.BookmarkFileName))
                     {
                         bookmark.TryReadBookmark(out var nextLineBeginsAtOffset, out var currentFile);
 
-                        var fileSet = GetFileSet();
+                        var fileSet = bufferFiles.Get();
 
                         if (currentFile == null || !System.IO.File.Exists(currentFile))
                         {
@@ -238,13 +220,6 @@ namespace Serilog.Sinks.Http.Private.Network
             return false;
         }
 
-        private string[] GetFileSet()
-        {
-            return Directory.GetFiles(logFolder, candidateSearchPath)
-                .OrderBy(file => file)
-                .ToArray();
-        }
-
         private void CloseAndFlush()
         {
             lock (stateLock)
@@ -261,4 +236,3 @@ namespace Serilog.Sinks.Http.Private.Network
         }
     }
 }
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

@@ -6,6 +6,14 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+### :zap: Added
+
+- Extension method `DurableHttpUsingFileSizeRolledBuffers`, creating a durable sink using buffer files with a file size based rolling behavior
+
+### :zzz: Deprecated
+
+- Extension method `DurableHttp` has been renamed to `DurableHttpUsingTimeRolledBuffers`, providing clarification between the two durable sink types
+
 ## [5.1.0] - 2019-01-07
 
 ### :zap: Added
