@@ -1,18 +1,24 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using Serilog.Sinks.Http;
-using Serilog.Sinks.Http.BatchFormatters;
-using Serilog.Sinks.Http.TextFormatters;
 
 namespace Serilog.Support.Fixtures
 {
     public class XmlDocumentationFixture
     {
         private readonly XDocument document;
+        private readonly Regex seeClassRegex;
+        private readonly Regex seeEnumRegex;
+        private readonly Regex paramRefRegex;
 
         public XmlDocumentationFixture()
         {
             document = XDocument.Load("Serilog.Sinks.Http.xml");
+            seeClassRegex = new Regex(@"<see cref=""T:(?<fullName>[\w.]+)""\s*/>");
+            seeEnumRegex = new Regex(@"<see cref=""F:(?<fullName>[\w.]+)""\s*/>");
+            paramRefRegex = new Regex(@"<paramref name=""(?<parameterName>\w+)""\s*/>");
         }
 
         public string GetDescription(string extensionName, string parameterName)
@@ -29,20 +35,72 @@ namespace Serilog.Support.Fixtures
                 .Split("\n")
                 .Select(row => row.Trim())
                 .Where(row => row.Length > 0)
-                .Select(RemoveLinks);
+                .Select(RemoveSeeClassLinks)
+                .Select(RemoveSeeEnumLinks)
+                .Select(RemoveParamRefLinks);
 
             return string.Join(" ", description);
         }
 
-        private static string RemoveLinks(string description)
+        private string RemoveSeeClassLinks(string description)
         {
-            return description
-                .Replace($"<see cref=\"T:{typeof(NormalRenderedTextFormatter).FullName}\" />", nameof(NormalRenderedTextFormatter))
-                .Replace($"<see cref=\"T:{typeof(DefaultBatchFormatter).FullName}\" />", nameof(DefaultBatchFormatter))
-                .Replace($"<see cref=\"T:{typeof(IHttpClient).FullName}\" />", nameof(IHttpClient))
-                .Replace("<see cref=\"F:Serilog.Events.LevelAlias.Minimum\" />", "LevelAlias.Minimum")
-                .Replace("<see cref=\"T:System.Net.Http.HttpClient\" />", "HttpClient")
-                .Replace("<paramref name=\"retainedBufferFileCountLimit\" />", "retainedBufferFileCountLimit");
+            var matches = seeClassRegex.Matches(description);
+
+            foreach (Match match in matches)
+            {
+                var type = ProbeType(match.Groups["fullName"].Value);
+
+                description = description.Replace(
+                    match.Groups[0].Value,
+                    type.Name);
+            }
+
+            return description;
+        }
+
+        private string RemoveSeeEnumLinks(string description)
+        {
+            var matches = seeEnumRegex.Matches(description);
+
+            foreach (Match match in matches)
+            {
+                var type = ProbeType(match.Groups["fullName"].Value);
+
+                if (type != null)
+                {
+                    description = description.Replace(
+                        match.Groups[0].Value,
+                        type.Name);
+                }
+                else
+                {
+                    // If documentation is specifying an enum value instead of the enum itself, we need
+                    // to strip away the value
+                    var parts = match.Groups["fullName"].Value.Split('.');
+                    var fullName = string.Join('.', parts, 0, parts.Length - 1);
+                    type = ProbeType(fullName);
+
+                    description = description.Replace(
+                        match.Groups[0].Value,
+                        $"{type.Name}.{parts.Last()}");
+                }
+            }
+
+            return description;
+        }
+
+        private string RemoveParamRefLinks(string description)
+        {
+            var matches = paramRefRegex.Matches(description);
+
+            foreach (Match match in matches)
+            {
+                description = description.Replace(
+                    match.Groups[0].Value,
+                    match.Groups["parameterName"].Value);
+            }
+
+            return description;
         }
 
         private static string GetValue(XNode node)
@@ -53,6 +111,18 @@ namespace Serilog.Support.Fixtures
 
                 return reader.ReadInnerXml();
             }
+        }
+
+        private static Type ProbeType(string fullName)
+        {
+            Type ProbeTypeInAssembly(string assemblyName)
+            {
+                return Assembly.Load(assemblyName).GetType(fullName);
+            }
+
+            return ProbeTypeInAssembly("Serilog.Sinks.Http")
+                ?? ProbeTypeInAssembly("Serilog")
+                ?? ProbeTypeInAssembly("netstandard");
         }
     }
 }

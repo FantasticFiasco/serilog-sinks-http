@@ -1,34 +1,34 @@
 ﻿using System;
-using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Serilog.Support.Fixtures
 {
     public class GitHubWikiFixture
     {
-        private string[] rows;
+        private const string WikiUrl = "https://raw.githubusercontent.com/wiki/FantasticFiasco/serilog-sinks-http/{0}";
+        private const string DescriptionRegexFormat = "- `{0}` - (?<description>.*)$";
 
-        public void Load(string wikiPage)
+        private string pageContent;
+        
+        public async Task LoadAsync(string wikiPage)
         {
             using (var client = new HttpClient())
             {
-                rows = client
-                    .GetStringAsync($"https://raw.githubusercontent.com/wiki/FantasticFiasco/serilog-sinks-http/{wikiPage}")
-                    .Result
-                    .Split('\n');
+                pageContent = await client.GetStringAsync(string.Format(WikiUrl, wikiPage));
             }
         }
 
         public string GetDescription(string parameterName)
         {
-            var pattern = $"- `{parameterName}` - ";
+            var descriptionRegex = new Regex(string.Format(DescriptionRegexFormat, parameterName), RegexOptions.Multiline);
 
-            var matchingRow = rows.SingleOrDefault(row => row.StartsWith(pattern));
-            if (matchingRow == null) throw new Exception($"GitHub wiki does not contain a description of parameter \"{parameterName}\"");
+            var match = descriptionRegex.Match(pageContent);
+            if (!match.Success) throw new Exception($"GitHub wiki does not contain a description of parameter \"{parameterName}\"");
 
-            return matchingRow
-                .Substring(pattern.Length)
-                .Replace("`", string.Empty);    // Remove code annotation
+            return match.Groups["description"].Value
+                .Replace("`", string.Empty);    // Remove code indicator
         }
     }
 }

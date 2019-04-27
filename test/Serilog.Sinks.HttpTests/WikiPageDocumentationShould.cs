@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using Serilog.Configuration;
 using Serilog.Support.Fixtures;
 using Shouldly;
@@ -20,11 +21,12 @@ namespace Serilog
 
         [TheoryOnMasterBranch]
         [InlineData("HTTP-sink.md", "Http")]
-        [InlineData("Durable-HTTP-sink.md", "DurableHttp")]
-        public void MatchCode(string wikiPage, string extensionName)
+        [InlineData("Durable-file-size-rolled-HTTP-sink.md", "DurableHttpUsingFileSizeRolledBuffers")]
+        [InlineData("Durable-time-rolled-HTTP-sink.md", "DurableHttpUsingTimeRolledBuffers")]
+        public async Task MatchCode(string wikiPage, string extensionName)
         {
             // Arrange
-            gitHubWikiFixture.Load(wikiPage);
+            await gitHubWikiFixture.LoadAsync(wikiPage);
 
             var parameterNames = typeof(LoggerSinkConfigurationExtensions)
                 .GetMethod(extensionName)
