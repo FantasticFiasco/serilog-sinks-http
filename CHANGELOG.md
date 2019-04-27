@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+## [5.2.0] - 2019-04-27
+
 ### :zap: Added
 
 - Extension method `DurableHttpUsingFileSizeRolledBuffers`, creating a durable sink using buffer files with a file size based rolling behavior
