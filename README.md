@@ -52,7 +52,7 @@ Used in conjunction with [Serilog.Settings.Configuration](https://github.com/ser
 }
 ```
 
-The sink can also be configured to be durable, i.e. log events are persisted on disk before sending them over the network, thus protecting against data loss after a system or process restart. For more information read the [wiki](https://github.com/FantasticFiasco/serilog-sinks-http/wiki).
+The sink can also be configured to be durable, i.e. log events are persisted on disk before being sent over the network, thus protected against data loss after a system or process restart. For more information please read the [wiki](https://github.com/FantasticFiasco/serilog-sinks-http/wiki).
 
 The sink is batching multiple log events into a single request, and the following hypothetical payload is sent over the network as JSON.
 
