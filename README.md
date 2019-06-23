@@ -13,7 +13,7 @@ __Package__ - [Serilog.Sinks.Http](https://www.nuget.org/packages/serilog.sinks.
 ## Table of contents
 
 - [Super simple to use](#super-simple-to-use)
-- [Typical use case](#typical-use-case)
+- [Typical use cases](#typical-use-cases)
 - [Sample applications](#sample-applications)
 - [Install via NuGet](#install-via-nuget)
 - [Donations](#donations)
@@ -89,11 +89,15 @@ The sink is batching multiple log events into a single request, and the followin
 }
 ```
 
-## Typical use case
+## Typical use cases
 
 Producing log events is only half the story. Unless you are consuming them in a matter that benefits you in development or production, there is really no need to produce them in the first place.
 
 Integration with [Elastic Stack](https://www.elastic.co/products) (formerly know as ELK, an acronym for Elasticsearch, Logstash and Kibana) is powerful beyond belief, but there are many alternatives to get the log events into Elasticsearch.
+
+### Send log events from Docker containers
+
+A common solution, given your application is running in Docker containers, is to have *stdout* (standard output) and *stderr* (standard error) passed on to the Elastic Stack. There is a multitude of ways to accomplish this, but one using [Logspout](https://github.com/gliderlabs/logspout) is linked in the [Sample applications](#sample-applications) chapter.
 
 ### Send log events to Elasticsearch
 
@@ -110,6 +114,10 @@ The following sample applications demonstrate the usage of this sink in various 
 - [Serilog and the Elastic Stack](https://github.com/FantasticFiasco/serilog-sinks-http-sample-elastic-stack) - Sample application sending log events to Elastic Stack
 - [Serilog.Sinks.Http - Sample in .NET Core](https://github.com/FantasticFiasco/serilog-sinks-http-sample-dotnet-core) - Sample application producing log events in .NET Core
 - [Serilog.Sinks.Http - Sample in .NET Framework](https://github.com/FantasticFiasco/serilog-sinks-http-sample-dotnet-framework) - Sample application producing log events in .NET Framework
+
+The following sample application demonstrate how Serilog events from a Docker container end up in the Elastic Stack using [Logspout](https://github.com/gliderlabs/logspout), without using `Serilog.Sinks.Http`.
+
+- [Serilog, Logspout and the Elastic Stack](https://github.com/FantasticFiasco/serilog-logspout-elastic-stack) - Sample application sending log events from a Docker container using Logspout to Elastic Stack
 
 ## Install via NuGet
 

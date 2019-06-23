@@ -3,3 +3,4 @@ Serilog
 Http
 Elasticsearch
 Logstash
+Logspout
