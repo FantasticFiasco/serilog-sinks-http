@@ -8,7 +8,7 @@
 [![Help](https://img.shields.io/badge/stackoverflow-serilog-orange.svg)](http://stackoverflow.com/questions/tagged/serilog)
 
 __Package__ - [Serilog.Sinks.Http](https://www.nuget.org/packages/serilog.sinks.http)
-| __Platforms__ - .NET 4.5, .NET Standard 1.3
+| __Platforms__ - .NET 4.5/4.6.1, .NET Standard 1.3/2.0
 
 ## Table of contents
 
