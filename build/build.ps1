@@ -58,19 +58,4 @@ foreach ($test in Get-ChildItem test/*Tests)
     Pop-Location
 }
 
-# Push
-if ($tagged_build)
-{
-    Write-Host "build: push package to www.nuget.org"
-
-    Push-Location .\artifacts
-
-    foreach ($package in Get-ChildItem *.nupkg -Exclude *.symbols.nupkg)
-    {
-        & dotnet nuget push $package --source "https://www.nuget.org/api/v2/package" --api-key "$env:NUGET_API_KEY"
-    }
-
-    Pop-Location
-}
-
 Pop-Location
