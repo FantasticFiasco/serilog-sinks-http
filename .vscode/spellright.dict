@@ -4,3 +4,4 @@ Http
 Elasticsearch
 Logstash
 Logspout
+Fluentd

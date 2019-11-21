@@ -113,6 +113,7 @@ If you would like to send the log events to Logstash for further processing inst
 The following sample applications demonstrate the usage of this sink in various circumstances:
 
 - [Serilog and the Elastic Stack](https://github.com/FantasticFiasco/serilog-sinks-http-sample-elastic-stack) - Sample application sending log events to Elastic Stack
+- [Serilog and Fluentd](https://github.com/FantasticFiasco/serilog-sinks-http-sample-fluentd) - Sample application sending log events to Fluentd
 - [Serilog.Sinks.Http - Sample in .NET Core](https://github.com/FantasticFiasco/serilog-sinks-http-sample-dotnet-core) - Sample application producing log events in .NET Core
 - [Serilog.Sinks.Http - Sample in .NET Framework](https://github.com/FantasticFiasco/serilog-sinks-http-sample-dotnet-framework) - Sample application producing log events in .NET Framework
 
