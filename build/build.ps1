@@ -52,9 +52,10 @@ foreach ($test in Get-ChildItem test/*Tests)
 
     Write-Host "build: Testing project in $test"
 
+    & dotnet test -c Release
+
     & dir $test\bin
 
-    & dotnet test -c Release
     if ($LASTEXITCODE -ne 0) { exit 2 }
 
     Pop-Location
