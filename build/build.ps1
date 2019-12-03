@@ -54,7 +54,7 @@ foreach ($test in Get-ChildItem test/*Tests)
 
     & dotnet test -c Release
 
-    & dir $test\bin
+    & dir $test\bin\Release\netcoreapp2.0\
 
     if ($LASTEXITCODE -ne 0) { exit 2 }
 
