@@ -15,7 +15,7 @@
     <PackageTags>serilog;http</PackageTags>
     <PackageIconUrl>https://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/FantasticFiasco/serilog-sinks-http</PackageProjectUrl>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/FantasticFiasco/serilog-sinks-http/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageReleaseNotes>For release notes, please see the change log on GitHub.</PackageReleaseNotes>
     <!-- Embed symbols in NuGet package -->
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
