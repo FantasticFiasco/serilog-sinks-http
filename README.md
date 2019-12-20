@@ -110,7 +110,7 @@ If you would like to send the log events to Logstash for further processing inst
 
 ## Sample applications
 
-The following sample applications demonstrate the usage of this sink in various circumstances:
+The following sample applications demonstrate the usage of this sink in various contexts:
 
 - [Serilog and the Elastic Stack](https://github.com/FantasticFiasco/serilog-sinks-http-sample-elastic-stack) - Sample application sending log events to Elastic Stack
 - [Serilog and Fluentd](https://github.com/FantasticFiasco/serilog-sinks-http-sample-fluentd) - Sample application sending log events to Fluentd
