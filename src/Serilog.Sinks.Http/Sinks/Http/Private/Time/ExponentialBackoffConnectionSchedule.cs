@@ -18,8 +18,15 @@ namespace Serilog.Sinks.Http.Private.Time
 {
     public class ExponentialBackoffConnectionSchedule
     {
-        private static readonly TimeSpan MinimumBackoffPeriod = TimeSpan.FromSeconds(5);
-        private static readonly TimeSpan MaximumBackoffInterval = TimeSpan.FromMinutes(10);
+        /// <summary>
+        /// The minimum backoff period.
+        /// </summary>
+        public static readonly TimeSpan MinimumBackoffPeriod = TimeSpan.FromSeconds(5);
+
+        /// <summary>
+        /// The maximum, i.e. capped, backoff period.
+        /// </summary>
+        public static readonly TimeSpan MaximumBackoffInterval = TimeSpan.FromMinutes(10);
 
         private readonly TimeSpan period;
 
