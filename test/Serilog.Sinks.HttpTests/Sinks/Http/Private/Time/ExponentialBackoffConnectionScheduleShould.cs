@@ -100,7 +100,7 @@ namespace Serilog.Sinks.Http.Private.Time
             }
 
             // Act
-            for (var i = 0; i < 1000000; i++)
+            for (var i = 0; i < 100000; i++)    // 100 000 failures is the result of almost two years of downtime
             {
                 // Assert
                 if (schedule.NextInterval != ExponentialBackoffConnectionSchedule.MaximumBackoffInterval)

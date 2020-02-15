@@ -53,27 +53,34 @@ namespace Serilog.Sinks.Http.Private.Time
         {
             get
             {
-                // Available, and first failure, just try the batch interval
-                if (failuresSinceSuccessfulConnection <= 1)
-                    return period;
+                try
+                {
+                    // Available, and first failure, just try the batch interval
+                    if (failuresSinceSuccessfulConnection <= 1)
+                        return period;
 
-                // Second failure, start ramping up the interval - first 2x, then 4x, ...
-                var backoffFactor = Math.Pow(2, failuresSinceSuccessfulConnection - 1);
+                    // Second failure, start ramping up the interval - first 2x, then 4x, ...
+                    var backoffFactor = Math.Pow(2, failuresSinceSuccessfulConnection - 1);
 
-                // If the period is ridiculously short, give it a boost so we get some
-                // visible backoff
-                var backoffPeriod = Math.Max(period.Ticks, MinimumBackoffPeriod.Ticks);
+                    // If the period is ridiculously short, give it a boost so we get some
+                    // visible backoff
+                    var backoffPeriod = Math.Max(period.Ticks, MinimumBackoffPeriod.Ticks);
 
-                // The "ideal" interval
-                var backedOff = (long)(backoffPeriod * backoffFactor);
+                    // The "ideal" interval
+                    var backedOff = checked((long)(backoffPeriod * backoffFactor));
 
-                // Capped to the maximum interval
-                var cappedBackoff = Math.Min(MaximumBackoffInterval.Ticks, backedOff);
+                    // Capped to the maximum interval
+                    var cappedBackoff = Math.Min(MaximumBackoffInterval.Ticks, backedOff);
 
-                // Unless that's shorter than the base interval, in which case we'll just apply the period
-                var actual = Math.Max(period.Ticks, cappedBackoff);
+                    // Unless that's shorter than the base interval, in which case we'll just apply the period
+                    var actual = Math.Max(period.Ticks, cappedBackoff);
 
-                return TimeSpan.FromTicks(actual);
+                    return TimeSpan.FromTicks(actual);
+                }
+                catch (OverflowException)
+                {
+                    return MaximumBackoffInterval;
+                }
             }
         }
     }
