@@ -63,40 +63,147 @@ namespace Serilog.Sinks.Http.Private.Time
         [InlineData(10 * 60)]  // 10 min
         public void BehaveExponentially(int periodInSeconds)
         {
-            // // Arrange
-            // var period = TimeSpan.FromSeconds(periodInSeconds);
-            // var schedule = new ExponentialBackoffConnectionSchedule(period);
+            // Arrange
+            var period = TimeSpan.FromSeconds(periodInSeconds);
+            var schedule = new ExponentialBackoffConnectionSchedule(period);
+            IBackoff backoff = new LinearBackoff(period);
 
-            throw new NotImplementedException();
+            while (!(backoff is CappedBackoff))
+            {
+                // Act
+                schedule.MarkFailure();
+
+                // Assert
+                backoff = backoff.GetNext(schedule.NextInterval);
+            }
+        }
+
+        [Theory]
+        [InlineData(1)]        // 1s
+        [InlineData(2)]        // 2s
+        [InlineData(5)]        // 5s
+        [InlineData(10)]       // 10s
+        [InlineData(30)]       // 30s
+        [InlineData(1 * 60)]   // 1 min
+        [InlineData(5 * 60)]   // 5 min
+        [InlineData(10 * 60)]  // 10 min
+        public void RemainCappedDuringFailures(int periodInSeconds)
+        {
+            // Arrange
+            var period = TimeSpan.FromSeconds(periodInSeconds);
+            var schedule = new ExponentialBackoffConnectionSchedule(period);
+
+            // Lets make sure the backoff is capped
+            while (schedule.NextInterval != ExponentialBackoffConnectionSchedule.MaximumBackoffInterval)
+            {
+                schedule.MarkFailure();
+            }
+
+            // Act
+            for (var i = 0; i < 1000000; i++)
+            {
+                // Assert
+                if (schedule.NextInterval != ExponentialBackoffConnectionSchedule.MaximumBackoffInterval)
+                {
+                    throw new Exception($"Backoff schedule transitioned from being capped ({ExponentialBackoffConnectionSchedule.MaximumBackoffInterval}) to no longer being capped ({schedule.NextInterval})");
+                }
+
+                schedule.MarkFailure();
+            }
         }
 
         private interface IBackoff
         {
-            IBackoff GetNext(IBackoff previous);
+            IBackoff GetNext(TimeSpan nextInterval);
         }
 
         /// <summary>
-        /// Backoff might appear as linear in the beginning.
+        /// An exponential backoff implementation might appear as linear in the start.
         /// </summary>
-        private class LinearBackoffState : IBackoff
+        private class LinearBackoff : IBackoff
         {
-            public IBackoff GetNext(IBackoff previous) => throw new NotImplementedException();
+            private readonly TimeSpan currentInterval;
+
+            public LinearBackoff(TimeSpan currentInterval)
+            {
+                this.currentInterval = currentInterval;
+            }
+
+            public IBackoff GetNext(TimeSpan nextInterval)
+            {
+                // From the state of being linear, the implementation can become capped
+                if (nextInterval == ExponentialBackoffConnectionSchedule.MaximumBackoffInterval)
+                {
+                    return new CappedBackoff(nextInterval);
+                }
+
+                // From the state of being linear, the implementation can become exponential
+                if (nextInterval > currentInterval)
+                {
+                    return new ExponentialBackoff(nextInterval);
+                }
+
+                // From the state of being linear, the implementation can remain linear
+                if (nextInterval == currentInterval)
+                {
+                    return this;
+                }
+
+                throw new Exception("The implementation from being linear must remain linear or become exponential");
+            }
         }
 
         /// <summary>
-        /// Backoff is exponential.
+        /// An exponential backoff implementation.
         /// </summary>
-        private class ExponentialBackoffState : IBackoff
+        private class ExponentialBackoff : IBackoff
         {
-            public IBackoff GetNext(IBackoff previous) => throw new NotImplementedException();
+            private readonly TimeSpan currentInterval;
+
+            public ExponentialBackoff(TimeSpan currentInterval)
+            {
+                this.currentInterval = currentInterval;
+            }
+
+            public IBackoff GetNext(TimeSpan nextInterval)
+            {
+                // From the state of being exponential, the implementation can become capped
+                if (nextInterval == ExponentialBackoffConnectionSchedule.MaximumBackoffInterval)
+                {
+                    return new CappedBackoff(nextInterval);
+                }
+
+                // From the state of being exponential, the implementation can remain exponential
+                if (nextInterval > currentInterval)
+                {
+                    return new ExponentialBackoff(nextInterval);
+                }
+
+                throw new Exception("todo 1");
+            }
         }
 
         /// <summary>
-        /// Backoff is capped to a maximum value.
+        /// An exponential backoff implementation might be capped in the end.
         /// </summary>
-        private class CappedBackoffState : IBackoff
+        private class CappedBackoff : IBackoff
         {
-            public IBackoff GetNext(IBackoff previous) => throw new NotImplementedException();
+            private readonly TimeSpan currentInterval;
+
+            public CappedBackoff(TimeSpan currentInterval)
+            {
+                this.currentInterval = currentInterval;
+            }
+
+            public IBackoff GetNext(TimeSpan nextInterval)
+            {
+                if (nextInterval != currentInterval)
+                {
+                    throw new Exception("Once backoff implementation is capped, it should remain capped");
+                }
+
+                return this;
+            }
         }
     }
 }
