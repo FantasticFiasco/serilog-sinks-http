@@ -1,7 +1,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <VersionPrefix>5.2.0</VersionPrefix>
+    <VersionPrefix>5.2.1</VersionPrefix>
     <Authors>Mattias Kindborg</Authors>
     <Company />
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
