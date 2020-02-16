@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+### :syringe: Fixed
+
+- [#97](https://github.com/FantasticFiasco/serilog-sinks-http/issues/97) Make sure the sink respects the exponential backoff, even after numerous unsuccessful attempts to send the log events to a log server (discovered by [@markusbrueckner](https://github.com/markusbrueckner))
+
 ## [5.2.0] - 2019-04-27
 
 ### :zap: Added

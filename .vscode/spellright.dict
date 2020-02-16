@@ -5,3 +5,5 @@ Elasticsearch
 Logstash
 Logspout
 Fluentd
+backoff
+Versioning
