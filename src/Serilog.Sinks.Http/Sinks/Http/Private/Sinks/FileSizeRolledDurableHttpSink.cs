@@ -65,6 +65,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
                     textFormatter,
                     $"{bufferBaseFileName}-.json",
                     fileSizeLimitBytes: bufferFileSizeLimitBytes,
+                    shared: true,
                     rollOnFileSizeLimit: true,
                     retainedFileCountLimit: retainedBufferFileCountLimit,
                     rollingInterval: RollingInterval.Day,

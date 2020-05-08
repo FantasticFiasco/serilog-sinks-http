@@ -66,7 +66,8 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 textFormatter,
                 bufferFileSizeLimitBytes,
                 retainedBufferFileCountLimit,
-                Encoding.UTF8);
+                Encoding.UTF8,
+                shared: true);
         }
 
         /// <inheritdoc />
