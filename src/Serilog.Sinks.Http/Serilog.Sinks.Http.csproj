@@ -13,6 +13,7 @@
     <!-- NuGet package -->
     <PackageId>Serilog.Sinks.Http</PackageId>
     <PackageTags>serilog;http</PackageTags>
+    <PackageIcon>serilog-sink-nuget.png</PackageIcon>
     <PackageIconUrl>https://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/FantasticFiasco/serilog-sinks-http</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
@@ -41,5 +42,9 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'net45' Or '$(TargetFramework)' == 'net461'">
     <DefineConstants>$(DefineConstants);HRESULTS</DefineConstants>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="assets\serilog-sink-nuget.png" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 
 </Project>
