@@ -14,7 +14,6 @@
     <PackageId>Serilog.Sinks.Http</PackageId>
     <PackageTags>serilog;http</PackageTags>
     <PackageIcon>serilog-sink-nuget.png</PackageIcon>
-    <!-- <PackageIconUrl>https://serilog.net/images/serilog-sink-nuget.png</PackageIconUrl> -->
     <PackageProjectUrl>https://github.com/FantasticFiasco/serilog-sinks-http</PackageProjectUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageReleaseNotes>For release notes, please see the change log on GitHub.</PackageReleaseNotes>
