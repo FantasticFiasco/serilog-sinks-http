@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ### :zap: Added
 
-- [#95](https://github.com/FantasticFiasco/serilog-sinks-http/issues/95) [BREAKING CHANGE] Support to specify `bufferFileShared` when creating a durable sink, allowing the buffer file to be shared by multiple processes (discovered by [@esakkiraja-k](https://github.com/esakkiraja-k))
+- [#95](https://github.com/FantasticFiasco/serilog-sinks-http/issues/95) [BREAKING CHANGE] Support to specify `bufferFileShared` when creating a durable sink, thus allowing the buffer file to be shared by multiple processes (discovered by [@esakkiraja-k](https://github.com/esakkiraja-k))
 
 ## [5.2.1] - 2020-02-16
 
