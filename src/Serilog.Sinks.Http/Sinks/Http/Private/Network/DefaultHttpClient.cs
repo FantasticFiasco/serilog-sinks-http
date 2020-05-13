@@ -19,15 +19,15 @@ namespace Serilog.Sinks.Http.Private.Network
 {
     public class DefaultHttpClient : IHttpClient
     {
-        private readonly HttpClient client;
+        private readonly HttpClient httpClient;
 
         public DefaultHttpClient() =>
-            client = new HttpClient();
+            httpClient = new HttpClient();
 
         public Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content) =>
-            client.PostAsync(requestUri, content);
+            httpClient.PostAsync(requestUri, content);
 
         public void Dispose() =>
-            client.Dispose();
+            httpClient.Dispose();
     }
 }

@@ -43,18 +43,19 @@ namespace Serilog.Sinks.Http.Private.Sinks
             string requestUri,
             string bufferPathFormat,
             long? bufferFileSizeLimitBytes,
+            bool bufferFileShared,
             int? retainedBufferFileCountLimit,
             int batchPostingLimit,
             TimeSpan period,
             ITextFormatter textFormatter,
             IBatchFormatter batchFormatter,
-            IHttpClient client)
+            IHttpClient httpClient)
         {
             if (bufferFileSizeLimitBytes.HasValue && bufferFileSizeLimitBytes < 0)
                 throw new ArgumentOutOfRangeException(nameof(bufferFileSizeLimitBytes), "Negative value provided; file size limit must be non-negative.");
 
             shipper = new HttpLogShipper(
-                client,
+                httpClient,
                 requestUri,
                 new TimeRolledBufferFiles(new DirectoryService(), bufferPathFormat),
                 batchPostingLimit,
@@ -67,7 +68,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 bufferFileSizeLimitBytes,
                 retainedBufferFileCountLimit,
                 Encoding.UTF8,
-                shared: true);
+                shared: bufferFileShared);
         }
 
         /// <inheritdoc />
