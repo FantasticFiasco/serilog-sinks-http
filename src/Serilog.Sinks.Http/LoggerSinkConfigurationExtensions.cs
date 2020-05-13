@@ -145,7 +145,7 @@ namespace Serilog
         /// allowed to grow. By default no limit will be applied.
         /// </param>
         /// <param name="bufferFileShared">
-        /// Allow the buffer file to be shared by multiple processes. The default is false.
+        /// Allow the buffer file to be shared by multiple processes. Default value is false.
         /// </param>
         /// <param name="retainedBufferFileCountLimit">
         /// The maximum number of buffer files that will be retained, including the current buffer
@@ -238,7 +238,7 @@ namespace Serilog
         /// limit.
         /// </param>
         /// <param name="bufferFileShared">
-        /// Allow the buffer file to be shared by multiple processes. The default is false.
+        /// Allow the buffer file to be shared by multiple processes. Default value is false.
         /// </param>
         /// <param name="retainedBufferFileCountLimit">
         /// The maximum number of buffer files that will be retained, including the current buffer
