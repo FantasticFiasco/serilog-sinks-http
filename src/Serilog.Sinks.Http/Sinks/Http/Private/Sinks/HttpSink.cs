@@ -38,7 +38,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
         private readonly ITextFormatter textFormatter;
         private readonly IBatchFormatter batchFormatter;
 
-        private IHttpClient client;
+        private IHttpClient httpClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpSink"/> class.
@@ -54,13 +54,13 @@ namespace Serilog.Sinks.Http.Private.Sinks
             TimeSpan period,
             ITextFormatter textFormatter,
             IBatchFormatter batchFormatter,
-            IHttpClient client)
+            IHttpClient httpClient)
             : base(batchPostingLimit, period, queueLimit)
         {
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
             this.textFormatter = textFormatter ?? throw new ArgumentNullException(nameof(textFormatter));
             this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
-            this.client = client ?? throw new ArgumentNullException(nameof(client));
+            this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
         /// <summary>
@@ -76,13 +76,13 @@ namespace Serilog.Sinks.Http.Private.Sinks
             TimeSpan period,
             ITextFormatter textFormatter,
             IBatchFormatter batchFormatter,
-            IHttpClient client)
+            IHttpClient httpClient)
             : base(batchPostingLimit, period)
         {
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
             this.textFormatter = textFormatter ?? throw new ArgumentNullException(nameof(textFormatter));
             this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
-            this.client = client ?? throw new ArgumentNullException(nameof(client));
+            this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
         /// <inheritdoc />
@@ -91,7 +91,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
             var payload = FormatPayload(logEvents);
             var content = new StringContent(payload, Encoding.UTF8, ContentType);
 
-            var result = await client
+            var result = await httpClient
                 .PostAsync(requestUri, content)
                 .ConfigureAwait(false);
 
@@ -108,8 +108,8 @@ namespace Serilog.Sinks.Http.Private.Sinks
 
             if (disposing)
             {
-                client?.Dispose();
-                client = null;
+                httpClient?.Dispose();
+                httpClient = null;
             }
         }
 

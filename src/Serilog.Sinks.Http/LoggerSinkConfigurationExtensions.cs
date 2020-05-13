@@ -98,6 +98,7 @@ namespace Serilog
             string requestUri,
             string bufferPathFormat = "Buffer-{Date}.json",
             long? bufferFileSizeLimitBytes = null,
+            bool bufferFileShared = false,
             int? retainedBufferFileCountLimit = 31,
             int batchPostingLimit = 1000,
             TimeSpan? period = null,
@@ -107,17 +108,18 @@ namespace Serilog
             IHttpClient httpClient = null)
         {
             return DurableHttpUsingTimeRolledBuffers(
-                sinkConfiguration,
-                requestUri,
-                bufferPathFormat,
-                bufferFileSizeLimitBytes,
-                retainedBufferFileCountLimit,
-                batchPostingLimit,
-                period,
-                textFormatter,
-                batchFormatter,
-                restrictedToMinimumLevel,
-                httpClient);
+                sinkConfiguration: sinkConfiguration,
+                requestUri: requestUri,
+                bufferPathFormat: bufferPathFormat,
+                bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
+                bufferFileShared: bufferFileShared,
+                retainedBufferFileCountLimit: retainedBufferFileCountLimit,
+                batchPostingLimit: batchPostingLimit,
+                period: period,
+                textFormatter: textFormatter,
+                batchFormatter: batchFormatter,
+                restrictedToMinimumLevel: restrictedToMinimumLevel,
+                httpClient: httpClient);
         }
 
         /// <summary>
@@ -141,6 +143,9 @@ namespace Serilog
         /// <param name="bufferFileSizeLimitBytes">
         /// The approximate maximum size, in bytes, to which a buffer file for a specific time interval will be
         /// allowed to grow. By default no limit will be applied.
+        /// </param>
+        /// <param name="bufferFileShared">
+        /// Allow the buffer file to be shared by multiple processes. Default value is false.
         /// </param>
         /// <param name="retainedBufferFileCountLimit">
         /// The maximum number of buffer files that will be retained, including the current buffer
@@ -176,6 +181,7 @@ namespace Serilog
             string requestUri,
             string bufferPathFormat = "Buffer-{Date}.json",
             long? bufferFileSizeLimitBytes = null,
+            bool bufferFileShared = false,
             int? retainedBufferFileCountLimit = 31,
             int batchPostingLimit = 1000,
             TimeSpan? period = null,
@@ -193,15 +199,16 @@ namespace Serilog
             httpClient = httpClient ?? new DefaultHttpClient();
 
             var sink = new TimeRolledDurableHttpSink(
-                requestUri,
-                bufferPathFormat,
-                bufferFileSizeLimitBytes,
-                retainedBufferFileCountLimit,
-                batchPostingLimit,
-                period.Value,
-                textFormatter,
-                batchFormatter,
-                httpClient);
+                requestUri: requestUri,
+                bufferPathFormat: bufferPathFormat,
+                bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
+                bufferFileShared: bufferFileShared,
+                retainedBufferFileCountLimit: retainedBufferFileCountLimit,
+                batchPostingLimit: batchPostingLimit,
+                period: period.Value,
+                textFormatter: textFormatter,
+                batchFormatter: batchFormatter,
+                httpClient: httpClient);
 
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
         }
@@ -229,6 +236,9 @@ namespace Serilog
         /// For unrestricted growth, pass null. The default is 1 GB. To avoid writing partial
         /// events, the last event within the limit will be written in full even if it exceeds the
         /// limit.
+        /// </param>
+        /// <param name="bufferFileShared">
+        /// Allow the buffer file to be shared by multiple processes. Default value is false.
         /// </param>
         /// <param name="retainedBufferFileCountLimit">
         /// The maximum number of buffer files that will be retained, including the current buffer
@@ -264,6 +274,7 @@ namespace Serilog
             string requestUri,
             string bufferBaseFileName = "Buffer",
             long? bufferFileSizeLimitBytes = 1024 * 1024 * 1024,
+            bool bufferFileShared = false,
             int? retainedBufferFileCountLimit = 31,
             int batchPostingLimit = 1000,
             TimeSpan? period = null,
@@ -281,15 +292,16 @@ namespace Serilog
             httpClient = httpClient ?? new DefaultHttpClient();
 
             var sink = new FileSizeRolledDurableHttpSink(
-                requestUri,
-                bufferBaseFileName,
-                bufferFileSizeLimitBytes,
-                retainedBufferFileCountLimit,
-                batchPostingLimit,
-                period.Value,
-                textFormatter,
-                batchFormatter,
-                httpClient);
+                requestUri: requestUri,
+                bufferBaseFileName: bufferBaseFileName,
+                bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
+                bufferFileShared: bufferFileShared,
+                retainedBufferFileCountLimit: retainedBufferFileCountLimit,
+                batchPostingLimit: batchPostingLimit,
+                period: period.Value,
+                textFormatter: textFormatter,
+                batchFormatter: batchFormatter,
+                httpClient: httpClient);
 
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
         }

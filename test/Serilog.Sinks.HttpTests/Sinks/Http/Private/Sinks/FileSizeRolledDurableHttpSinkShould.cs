@@ -24,6 +24,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 "some/route",
                 "Buffer",
                 bufferFileSizeLimitBytes,
+                false,
                 31,
                 1000,
                 TimeSpan.FromSeconds(2),
@@ -47,6 +48,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 "some/route",
                 "Buffer",
                 bufferFileSizeLimitBytes,
+                false,
                 31,
                 1000,
                 TimeSpan.FromSeconds(2),
@@ -68,6 +70,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 "some/route",
                 "Buffer",
                 null,
+                false,
                 null,
                 1,
                 TimeSpan.FromMilliseconds(1),         // 1 ms period

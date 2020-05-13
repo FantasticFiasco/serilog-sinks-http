@@ -14,9 +14,9 @@ namespace Serilog.Support.Fixtures
         
         public async Task LoadAsync(string wikiPage)
         {
-            using (var client = new HttpClient())
+            using (var httpClient = new HttpClient())
             {
-                pageContent = await client.GetStringAsync(string.Format(WikiUrl, wikiPage));
+                pageContent = await httpClient.GetStringAsync(string.Format(WikiUrl, wikiPage));
             }
         }
 

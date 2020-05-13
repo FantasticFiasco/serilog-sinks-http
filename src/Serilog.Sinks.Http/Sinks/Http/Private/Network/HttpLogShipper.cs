@@ -32,7 +32,7 @@ namespace Serilog.Sinks.Http.Private.Network
 
         private static readonly TimeSpan RequiredLevelCheckInterval = TimeSpan.FromMinutes(2);
         
-        private IHttpClient client;
+        private IHttpClient httpClient;
         private readonly string requestUri;
         private readonly int batchPostingLimit;
         private readonly IBufferFiles bufferFiles;
@@ -44,7 +44,7 @@ namespace Serilog.Sinks.Http.Private.Network
         private volatile bool unloading;
 
         public HttpLogShipper(
-            IHttpClient client,
+            IHttpClient httpClient,
             string requestUri,
             IBufferFiles bufferFiles,
             int batchPostingLimit,
@@ -53,7 +53,7 @@ namespace Serilog.Sinks.Http.Private.Network
         {
             if (batchPostingLimit <= 0) throw new ArgumentException("batchPostingLimit must be 1 or greater", nameof(batchPostingLimit));
 
-            this.client = client ?? throw new ArgumentNullException(nameof(client));
+            this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
             this.bufferFiles = bufferFiles ?? throw new ArgumentNullException(nameof(bufferFiles));
             this.batchPostingLimit = batchPostingLimit;
@@ -69,8 +69,8 @@ namespace Serilog.Sinks.Http.Private.Network
         {
             CloseAndFlush();
 
-            client?.Dispose();
-            client = null;
+            httpClient?.Dispose();
+            httpClient = null;
         }
 
         private void SetTimer()
@@ -126,7 +126,7 @@ namespace Serilog.Sinks.Http.Private.Network
 
                             var content = new StringContent(payload, Encoding.UTF8, ContentType);
 
-                            var result = await client.PostAsync(requestUri, content).ConfigureAwait(false);
+                            var result = await httpClient.PostAsync(requestUri, content).ConfigureAwait(false);
                             if (result.IsSuccessStatusCode)
                             {
                                 connectionSchedule.MarkSuccess();
