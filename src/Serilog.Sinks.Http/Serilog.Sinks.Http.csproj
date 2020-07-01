@@ -18,7 +18,8 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageReleaseNotes>For release notes, please see the change log on GitHub.</PackageReleaseNotes>
     <!-- Embed symbols in NuGet package -->
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <!-- SourceLink -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <RepositoryUrl>https://github.com/FantasticFiasco/serilog-sinks-http.git</RepositoryUrl>
