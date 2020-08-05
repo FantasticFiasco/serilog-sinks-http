@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+### :zap: Added
+
+-  [#49](https://github.com/FantasticFiasco/serilog-sinks-http/issues/49), [#123](https://github.com/FantasticFiasco/serilog-sinks-http/issues/123) [BREAKING CHANGE] Improve support for configuring HTTP client when using [Serilog.Settings.Configuration](https://github.com/serilog/serilog-settings-configuration). See [Custom HTTP client in wiki](https://github.com/FantasticFiasco/serilog-sinks-http/wiki/Custom-HTTP-client) for more information. (discovered by [@brunorsantos](https://github.com/brunorsantos))
+
 ## [6.0.0] - 2020-05-13
 
 ### :zap: Added

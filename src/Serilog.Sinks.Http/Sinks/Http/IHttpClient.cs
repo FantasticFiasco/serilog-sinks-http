@@ -15,6 +15,7 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace Serilog.Sinks.Http
 {
@@ -23,6 +24,12 @@ namespace Serilog.Sinks.Http
     /// </summary>
     public interface IHttpClient : IDisposable
     {
+        /// <summary>
+        /// Configures the HTTP client.
+        /// </summary>
+        /// <param name="configuration">The application configuration properties.</param>
+        void Configure(IConfiguration configuration);
+
         /// <summary>
         /// Sends a POST request to the specified Uri as an asynchronous operation.
         /// </summary>

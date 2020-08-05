@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Serilog.Sinks.Http;
 using Serilog.Sinks.Http.BatchFormatters;
@@ -37,6 +38,8 @@ namespace Serilog.Support
                 .Select(logEvent => logEvent.RenderedMessage)
                 .ToArray();
 
+        public IConfiguration Configuration { get; private set; }
+
         public async Task WaitAsync(int expectedLogEventCount)
         {
             // 10 000 iterations, each waiting at least 1ms, means that a test has 10s to pass
@@ -58,6 +61,9 @@ namespace Serilog.Support
 
         public void SimulateNetworkFailure() =>
             simulateNetworkFailure = true;
+
+
+        public void Configure(IConfiguration configuration) => Configuration = configuration;
 
         public async Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content)
         {

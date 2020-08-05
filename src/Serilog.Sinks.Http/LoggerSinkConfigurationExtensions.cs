@@ -15,6 +15,7 @@
 using System;
 using System.ComponentModel;
 using System.Net.Http;
+using Microsoft.Extensions.Configuration;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Formatting;
@@ -64,6 +65,12 @@ namespace Serilog
         /// A custom <see cref="IHttpClient"/> implementation. Default value is
         /// <see cref="HttpClient"/>.
         /// </param>
+        /// <param name="configuration">
+        /// Configuration passed to <paramref name="httpClient"/>. Parameter is either manually
+        /// specified when configuring the sink in source code or automatically passed in when
+        /// configuring the sink using
+        /// <see href="https://www.nuget.org/packages/Serilog.Settings.Configuration">Serilog.Settings.Configuration</see>.
+        /// </param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         public static LoggerConfiguration Http(
             this LoggerSinkConfiguration sinkConfiguration,
@@ -74,7 +81,8 @@ namespace Serilog
             ITextFormatter textFormatter = null,
             IBatchFormatter batchFormatter = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IHttpClient httpClient = null)
+            IHttpClient httpClient = null,
+            IConfiguration configuration = null)
         {
             if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
@@ -83,6 +91,7 @@ namespace Serilog
             textFormatter = textFormatter ?? new NormalRenderedTextFormatter();
             batchFormatter = batchFormatter ?? new DefaultBatchFormatter();
             httpClient = httpClient ?? new DefaultHttpClient();
+            httpClient.Configure(configuration);
 
             var sink = queueLimit != null
                 ? new HttpSink(requestUri, batchPostingLimit, queueLimit.Value, period.Value, textFormatter, batchFormatter, httpClient)
@@ -105,7 +114,8 @@ namespace Serilog
             ITextFormatter textFormatter = null,
             IBatchFormatter batchFormatter = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IHttpClient httpClient = null)
+            IHttpClient httpClient = null,
+            IConfiguration configuration = null)
         {
             return DurableHttpUsingTimeRolledBuffers(
                 sinkConfiguration: sinkConfiguration,
@@ -119,7 +129,8 @@ namespace Serilog
                 textFormatter: textFormatter,
                 batchFormatter: batchFormatter,
                 restrictedToMinimumLevel: restrictedToMinimumLevel,
-                httpClient: httpClient);
+                httpClient: httpClient,
+                configuration: configuration);
         }
 
         /// <summary>
@@ -175,6 +186,12 @@ namespace Serilog
         /// A custom <see cref="IHttpClient"/> implementation. Default value is
         /// <see cref="HttpClient"/>.
         /// </param>
+        /// <param name="configuration">
+        /// Configuration passed to <paramref name="httpClient"/>. Parameter is either manually
+        /// specified when configuring the sink in source code or automatically passed in when
+        /// configuring the sink using
+        /// <see href="https://www.nuget.org/packages/Serilog.Settings.Configuration">Serilog.Settings.Configuration</see>.
+        /// </param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         public static LoggerConfiguration DurableHttpUsingTimeRolledBuffers(
             this LoggerSinkConfiguration sinkConfiguration,
@@ -188,7 +205,8 @@ namespace Serilog
             ITextFormatter textFormatter = null,
             IBatchFormatter batchFormatter = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IHttpClient httpClient = null)
+            IHttpClient httpClient = null,
+            IConfiguration configuration = null)
         {
             if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
@@ -197,6 +215,7 @@ namespace Serilog
             textFormatter = textFormatter ?? new NormalRenderedTextFormatter();
             batchFormatter = batchFormatter ?? new DefaultBatchFormatter();
             httpClient = httpClient ?? new DefaultHttpClient();
+            httpClient.Configure(configuration);
 
             var sink = new TimeRolledDurableHttpSink(
                 requestUri: requestUri,
@@ -268,6 +287,12 @@ namespace Serilog
         /// A custom <see cref="IHttpClient"/> implementation. Default value is
         /// <see cref="HttpClient"/>.
         /// </param>
+        /// <param name="configuration">
+        /// Configuration passed to <paramref name="httpClient"/>. Parameter is either manually
+        /// specified when configuring the sink in source code or automatically passed in when
+        /// configuring the sink using
+        /// <see href="https://www.nuget.org/packages/Serilog.Settings.Configuration">Serilog.Settings.Configuration</see>.
+        /// </param>
         /// <returns>Logger configuration, allowing configuration to continue.</returns>
         public static LoggerConfiguration DurableHttpUsingFileSizeRolledBuffers(
             this LoggerSinkConfiguration sinkConfiguration,
@@ -281,7 +306,8 @@ namespace Serilog
             ITextFormatter textFormatter = null,
             IBatchFormatter batchFormatter = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IHttpClient httpClient = null)
+            IHttpClient httpClient = null,
+            IConfiguration configuration = null)
         {
             if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
@@ -290,6 +316,7 @@ namespace Serilog
             textFormatter = textFormatter ?? new NormalRenderedTextFormatter();
             batchFormatter = batchFormatter ?? new DefaultBatchFormatter();
             httpClient = httpClient ?? new DefaultHttpClient();
+            httpClient.Configure(configuration);
 
             var sink = new FileSizeRolledDurableHttpSink(
                 requestUri: requestUri,
