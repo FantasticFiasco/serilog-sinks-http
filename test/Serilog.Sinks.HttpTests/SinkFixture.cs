@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Support;
@@ -13,6 +14,14 @@ namespace Serilog
     public abstract class SinkFixture : IDisposable
     {
         protected abstract Logger Logger { get; }
+        protected abstract IConfiguration Configuration { get; }
+
+        [Fact]
+        public void ConfigureHttpClient()
+        {
+            // Assert
+            HttpClientMock.Instance.Configuration.ShouldBe(Configuration);
+        }
 
         [Theory]
         [InlineData(LogEventLevel.Verbose)]

@@ -14,8 +14,12 @@ namespace Serilog
             Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
                 .CreateLogger();
+
+            Configuration = configuration;
         }
 
         protected override Logger Logger { get; }
+
+        protected override IConfiguration Configuration { get; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Extensions.Configuration;
 using Serilog.Core;
 using Serilog.Sinks.Http.BatchFormatters;
 using Serilog.Sinks.Http.TextFormatters;
@@ -8,7 +9,10 @@ namespace Serilog
 {
     public class HttpSinkGivenCodeConfigurationShould : SinkFixture
     {
-        public HttpSinkGivenCodeConfigurationShould() =>
+        public HttpSinkGivenCodeConfigurationShould()
+        {
+            var configuration = new ConfigurationBuilder().Build();
+
             Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .WriteTo
@@ -19,9 +23,15 @@ namespace Serilog
                     period: TimeSpan.FromMilliseconds(1),
                     textFormatter: new NormalRenderedTextFormatter(),
                     batchFormatter: new DefaultBatchFormatter(),
-                    httpClient: new HttpClientMock())
+                    httpClient: new HttpClientMock(),
+                    configuration: configuration)
                 .CreateLogger();
 
+            Configuration = configuration;
+        }
+
         protected override Logger Logger { get; }
+
+        protected override IConfiguration Configuration { get; }
     }
 }

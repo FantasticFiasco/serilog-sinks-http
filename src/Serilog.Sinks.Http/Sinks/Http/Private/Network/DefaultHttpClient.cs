@@ -14,6 +14,7 @@
 
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace Serilog.Sinks.Http.Private.Network
 {
@@ -23,6 +24,11 @@ namespace Serilog.Sinks.Http.Private.Network
 
         public DefaultHttpClient() =>
             httpClient = new HttpClient();
+
+        public void Configure(IConfiguration configuration)
+        {
+            // The default HTTP client requires no configuration
+        }
 
         public Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content) =>
             httpClient.PostAsync(requestUri, content);

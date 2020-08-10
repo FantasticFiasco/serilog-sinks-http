@@ -1,5 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- GENERAL -->
+
   <PropertyGroup>
     <AssemblyName>Serilog.Sinks.Http</AssemblyName>
     <Description>A Serilog sink sending log events over HTTP.</Description>
@@ -30,8 +32,14 @@
     <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.3.0" />
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
     <!-- SourceLink -->
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="assets\serilog-sink-nuget.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <!-- .NET FRAMEWORK -->
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net45' Or '$(TargetFramework)' == 'net461'">
     <Reference Include="System" />
@@ -43,8 +51,14 @@
     <DefineConstants>$(DefineConstants);HRESULTS</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="assets\serilog-sink-nuget.png" Pack="true" PackagePath="\"/>
+  <!-- .NET STANDARD -->
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.6" />
   </ItemGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <DefineConstants>$(DefineConstants);NETSTANDARD_2_0</DefineConstants>
+  </PropertyGroup>
 
 </Project>
