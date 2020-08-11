@@ -10,6 +10,8 @@ namespace Serilog.Support.Fixtures
         private const string WikiUrl = "https://raw.githubusercontent.com/wiki/FantasticFiasco/serilog-sinks-http/{0}";
         private const string DescriptionRegexFormat = "- `{0}` - (?<description>.*)$";
 
+        private static readonly Regex LinkRegex = new Regex(@"\[(?<link>[\w\s.]+)\]\((?<url>[\w.:/]+)\)");
+
         private string pageContent;
         
         public async Task LoadAsync(string wikiPage)
@@ -27,8 +29,29 @@ namespace Serilog.Support.Fixtures
             var match = descriptionRegex.Match(pageContent);
             if (!match.Success) throw new Exception($"GitHub wiki does not contain a description of parameter \"{parameterName}\"");
 
-            return match.Groups["description"].Value
-                .Replace("`", string.Empty);    // Remove code indicator
+            return
+                RemoveLinks(
+                    RemoveCodeIndicator(
+                        match.Groups["description"].Value));
+        }
+
+        private static string RemoveCodeIndicator(string description)
+        {
+            return description.Replace("`", string.Empty);
+        }
+
+        private static string RemoveLinks(string description)
+        {
+            var matches = LinkRegex.Matches(description);
+
+            foreach (Match match in matches)
+            {
+                description = description.Replace(
+                    match.Groups[0].Value,
+                    match.Groups["link"].Value);
+            }
+
+            return description;
         }
     }
 }
