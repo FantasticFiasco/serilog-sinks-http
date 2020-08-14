@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+## [7.0.1] - 2020-08-14
+
 ### :syringe: Fixed
 
 - [#127](https://github.com/FantasticFiasco/serilog-sinks-http/issues/127) NuGet package does not show an icon
