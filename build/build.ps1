@@ -26,18 +26,16 @@ foreach ($source in Get-ChildItem .\src\*)
 
     Write-Host "build: Packaging project in $source"
 
-    # if ($tagged_build)
-    # {
-    #     & dotnet build -c Release
-    #     & dotnet pack -c Release -o ..\..\artifacts --no-build
-    # }
-    # else
-    # {
-    #     & dotnet build -c Release --version-suffix=$git_sha
-    #     & dotnet pack -c Release -o ..\..\artifacts --version-suffix=$git_sha --no-build
-    # }
-    & dotnet build -c Release --version-suffix=deterministic-builds
-    & dotnet pack -c Release -o ..\..\artifacts --version-suffix=deterministic-builds --no-build
+    if ($tagged_build)
+    {
+        & dotnet build -c Release
+        & dotnet pack -c Release -o ..\..\artifacts --no-build
+    }
+    else
+    {
+        & dotnet build -c Release --version-suffix=$git_sha
+        & dotnet pack -c Release -o ..\..\artifacts --version-suffix=$git_sha --no-build
+    }
 
     if ($LASTEXITCODE -ne 0)
     {
