@@ -10,6 +10,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 - [#127](https://github.com/FantasticFiasco/serilog-sinks-http/issues/127) NuGet package does not show an icon
 - Configure [SourceLink](https://github.com/dotnet/sourcelink) to embed untracked sources
+- Configure [SourceLink](https://github.com/dotnet/sourcelink) to use deterministic builds when running on AppVeyor
 
 ## [7.0.0] - 2020-08-12
 
