@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 ### :syringe: Fixed
 
 - [#127](https://github.com/FantasticFiasco/serilog-sinks-http/issues/127) NuGet package does not show an icon
+- Configure [SourceLink](https://github.com/dotnet/sourcelink) to embed untracked sources
 
 ## [7.0.0] - 2020-08-12
 
