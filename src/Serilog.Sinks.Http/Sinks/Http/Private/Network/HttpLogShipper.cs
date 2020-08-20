@@ -1,4 +1,4 @@
-﻿// Copyright 2015-2019 Serilog Contributors
+﻿// Copyright 2015-2020 Serilog Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ namespace Serilog.Sinks.Http.Private.Network
         private const string ContentType = "application/json";
 
         private static readonly TimeSpan RequiredLevelCheckInterval = TimeSpan.FromMinutes(2);
-        
+
         private IHttpClient httpClient;
         private readonly string requestUri;
         private readonly int batchPostingLimit;
@@ -58,7 +58,7 @@ namespace Serilog.Sinks.Http.Private.Network
             this.bufferFiles = bufferFiles ?? throw new ArgumentNullException(nameof(bufferFiles));
             this.batchPostingLimit = batchPostingLimit;
             this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
-            
+
             connectionSchedule = new ExponentialBackoffConnectionSchedule(period);
             timer = new PortableTimer(OnTick);
 
