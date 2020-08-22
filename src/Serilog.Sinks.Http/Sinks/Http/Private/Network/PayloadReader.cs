@@ -46,8 +46,8 @@ namespace Serilog.Sinks.Http.Private.Network
 
             stream.Position = nextLineBeginsAtOffset;
 
-            while (count < batchPostingLimit &&
-                    TryReadLine(stream, ref nextLineBeginsAtOffset, out var nextLine))
+            while (count < batchPostingLimit
+                   && TryReadLine(stream, ref nextLineBeginsAtOffset, out var nextLine))
             {
                 // Count is the indicator that work was done, so advances even in the (rare) case an
                 // oversized event is dropped
@@ -76,7 +76,7 @@ namespace Serilog.Sinks.Http.Private.Network
             if (nextLine == null)
                 return false;
 
-            nextStart += Encoding.UTF8.GetByteCount(nextLine) + Encoding.UTF8.GetByteCount(Environment.NewLine);
+            nextStart += ByteSize.GetFrom(nextLine) + ByteSize.GetFrom(Environment.NewLine);
 
             if (includesBom)
             {

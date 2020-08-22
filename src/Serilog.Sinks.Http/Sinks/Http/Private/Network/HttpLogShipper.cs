@@ -153,9 +153,9 @@ namespace Serilog.Sinks.Http.Private.Network
 
                             // Only advance the bookmark if no other process has the
                             // current file locked, and its length is as we found it.
-                            if (fileSet.Length == 2 &&
-                                fileSet.First() == currentFile &&
-                                IsUnlockedAtLength(currentFile, nextLineBeginsAtOffset))
+                            if (fileSet.Length == 2
+                                && fileSet.First() == currentFile
+                                && IsUnlockedAtLength(currentFile, nextLineBeginsAtOffset))
                             {
                                 bookmark.WriteBookmark(0, fileSet[1]);
                             }

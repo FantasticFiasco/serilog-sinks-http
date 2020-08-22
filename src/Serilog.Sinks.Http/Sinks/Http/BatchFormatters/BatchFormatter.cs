@@ -87,8 +87,8 @@ namespace Serilog.Sinks.Http.BatchFormatters
         /// <returns>true if body size is within acceptable range; otherwise false.</returns>
         protected bool CheckEventBodySize(string json)
         {
-            if (eventBodyLimitBytes.HasValue &&
-                Encoding.UTF8.GetByteCount(json) > eventBodyLimitBytes.Value)
+            if (eventBodyLimitBytes.HasValue
+                && ByteSize.GetFrom(json) > eventBodyLimitBytes.Value)
             {
                 SelfLog.WriteLine(
                     "Event JSON representation exceeds the byte size limit of {0} set for this sink and will be dropped; data: {1}",
