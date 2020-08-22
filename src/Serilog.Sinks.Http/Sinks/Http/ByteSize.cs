@@ -17,7 +17,7 @@ using System.Text;
 namespace Serilog.Sinks.Http
 {
     /// <summary>
-    /// Class defining various multipliers of byte. 
+    /// Class defining various multipliers of the unit byte.
     /// </summary>
     public static class ByteSize
     {
