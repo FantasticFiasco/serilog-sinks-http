@@ -16,6 +16,9 @@ using System.Text;
 
 namespace Serilog.Sinks.Http
 {
+    /// <summary>
+    /// Class 
+    /// </summary>
     public static class ByteSize
     {
         public const long B = 1;
@@ -24,6 +27,8 @@ namespace Serilog.Sinks.Http
 
         public const long MB = 1024 * KB;
 
-        public static long GetFrom(string text) => Encoding.UTF8.GetByteCount(text);
+        public const long GB = 1024 * MB;
+
+        public static long From(string text) => Encoding.UTF8.GetByteCount(text);
     }
 }

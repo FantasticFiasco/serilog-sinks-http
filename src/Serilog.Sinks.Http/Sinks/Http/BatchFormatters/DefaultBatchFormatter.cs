@@ -40,7 +40,7 @@ namespace Serilog.Sinks.Http.BatchFormatters
         /// is dropped rather than being sent to the server. Specify null for no limit. Default
         /// value is 256 KB.
         /// </param>
-        public DefaultBatchFormatter(long? eventBodyLimitBytes = 256 * 1024)
+        public DefaultBatchFormatter(long? eventBodyLimitBytes = 256 * ByteSize.KB)
             : base(eventBodyLimitBytes)
         {
         }

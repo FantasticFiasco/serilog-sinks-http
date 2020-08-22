@@ -76,7 +76,7 @@ namespace Serilog.Sinks.Http.Private.Network
             if (nextLine == null)
                 return false;
 
-            nextStart += ByteSize.GetFrom(nextLine) + ByteSize.GetFrom(Environment.NewLine);
+            nextStart += ByteSize.From(nextLine) + ByteSize.From(Environment.NewLine);
 
             if (includesBom)
             {
