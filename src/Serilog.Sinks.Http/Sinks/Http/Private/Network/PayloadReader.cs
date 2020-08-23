@@ -24,6 +24,11 @@ namespace Serilog.Sinks.Http.Private.Network
         private const char CR = '\r';
         private const char LF = '\n';
 
+        /// <summary>
+        /// The length of the Byte Order Marks (BOM).
+        /// </summary>
+        public const int BomLength = 3;
+
         public static string[] Read(
             string fileName,
             ref long nextLineBeginsAtOffset,
@@ -80,7 +85,7 @@ namespace Serilog.Sinks.Http.Private.Network
 
             if (includesBom)
             {
-                nextStart += 3;
+                nextStart += BomLength;
             }
 
             return true;

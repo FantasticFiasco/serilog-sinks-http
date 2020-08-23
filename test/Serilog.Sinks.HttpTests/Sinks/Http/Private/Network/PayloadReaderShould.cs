@@ -11,85 +11,91 @@ namespace Serilog.Sinks.Http.Private.Network
         private const string Foo = "{ \"foo\": 1 }";
         private const string Bar = "{ \"bar\": 2 }";
 
-        private long nextLineBeginsAtOffset = 1;    // Start at offset 1 to get around the issue with BOM
+        private long nextLineBeginsAtOffset;
         private int count;
 
         [Fact]
         public void ReadLogEvent()
         {
             // Arrange
-            // The initial space is there to adapt to offset 1
-            var fileContent = $" {Foo}{Environment.NewLine}";
+            using (var stream = new MemoryStream())
+            using (var writer = new StreamWriter(stream, Encoding.UTF8))
+            {
+                writer.Write(Foo + Environment.NewLine);
+                writer.Flush();
 
-            var stream = new MemoryStream(Encoding.UTF8.GetBytes(fileContent));
+                // Act
+                var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
 
-            // Act
-            var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
-
-            // Assert
-            actual.ShouldBe(new[] { Foo });
-            nextLineBeginsAtOffset.ShouldBe(fileContent.Length);
-            count.ShouldBe(1);
+                // Assert
+                actual.ShouldBe(new[] { Foo });
+                nextLineBeginsAtOffset.ShouldBe(stream.Length);
+                count.ShouldBe(1);
+            }
         }
 
         [Fact]
         public void NotReadLogEventGivenPartiallyWritten()
         {
             // Arrange
-            // The initial space is there to adapt to offset 1, and the partially written log event
-            // is missing new line
-            var fileContent = $" {Foo}";
+            using (var stream = new MemoryStream())
+            using (var writer = new StreamWriter(stream, Encoding.UTF8))
+            {
+                // The partially written log event is missing new line
+                writer.Write(Foo);
+                writer.Flush();
 
-            var stream = new MemoryStream(Encoding.UTF8.GetBytes(fileContent));
+                // Act
+                var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
 
-            // Act
-            var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
-
-            // Assert
-            actual.ShouldBeEmpty();
-            nextLineBeginsAtOffset.ShouldBe(fileContent.IndexOf(Foo, StringComparison.InvariantCulture));
-            count.ShouldBe(0);
+                // Assert
+                actual.ShouldBeEmpty();
+                nextLineBeginsAtOffset.ShouldBe(0);
+                count.ShouldBe(0);
+            }
         }
 
         [Fact]
         public void ReadLogEvents()
         {
             // Arrange
-            // The initial space is there to adapt to offset 1
-            var fileContent =
-                $" {Foo}{Environment.NewLine}" +
-                $"{Bar}{Environment.NewLine}";
+            using (var stream = new MemoryStream())
+            using (var writer = new StreamWriter(stream, Encoding.UTF8))
+            {
+                writer.Write(Foo + Environment.NewLine);
+                writer.Write(Bar + Environment.NewLine);
+                writer.Flush();
 
-            var stream = new MemoryStream(Encoding.UTF8.GetBytes(fileContent));
+                // Act
+                var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
 
-            // Act
-            var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
-
-            // Assert
-            actual.ShouldBe(new[] { Foo, Bar });
-            nextLineBeginsAtOffset.ShouldBe(fileContent.Length);
-            count.ShouldBe(2);
+                // Assert
+                actual.ShouldBe(new[] { Foo, Bar });
+                nextLineBeginsAtOffset.ShouldBe(stream.Length);
+                count.ShouldBe(2);
+            }
         }
 
         [Fact]
         public void NotReadEventsGivenPartiallyWritten()
         {
             // Arrange
-            // The initial space is there to adapt to offset 1, and the partially written log event
-            // is missing new line
-            var fileContent =
-                $" {Foo}{Environment.NewLine}" +
-                $"{Bar}";
+            using (var stream = new MemoryStream())
+            using (var writer = new StreamWriter(stream, Encoding.UTF8))
+            {
+                writer.Write(Foo + Environment.NewLine);
+                // The partially written log event is missing new line
+                writer.Write(Bar);
+                writer.Flush();
 
-            var stream = new MemoryStream(Encoding.UTF8.GetBytes(fileContent));
+                // Act
+                var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
 
-            // Act
-            var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
-
-            // Assert
-            actual.ShouldBe(new [] { Foo });
-            nextLineBeginsAtOffset.ShouldBe(fileContent.IndexOf(Bar, StringComparison.InvariantCulture));
-            count.ShouldBe(1);
+                // Assert
+                actual.ShouldBe(new[] { Foo });
+                nextLineBeginsAtOffset.ShouldBe(PayloadReader.BomLength + Foo.Length + Environment.NewLine.Length);
+                count.ShouldBe(1);
+            }
         }
     }
 }
