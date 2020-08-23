@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+### :zap: Added
+
+- Add class `ByteSize` which helps specifying multipliers of the unit *byte*.
+
 ## [7.0.1] - 2020-08-14
 
 ### :syringe: Fixed

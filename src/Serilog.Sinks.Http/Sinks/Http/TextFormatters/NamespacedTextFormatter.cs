@@ -199,8 +199,8 @@ namespace Serilog.Sinks.Http.TextFormatters
         {
             foreach (var token in template.Tokens)
             {
-                if (token is PropertyToken namedProperty &&
-                    namedProperty.PropertyName == propertyName)
+                if (token is PropertyToken namedProperty
+                    && namedProperty.PropertyName == propertyName)
                 {
                     return true;
                 }

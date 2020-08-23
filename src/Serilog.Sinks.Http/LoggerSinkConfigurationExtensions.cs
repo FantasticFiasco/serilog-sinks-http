@@ -298,7 +298,7 @@ namespace Serilog
             this LoggerSinkConfiguration sinkConfiguration,
             string requestUri,
             string bufferBaseFileName = "Buffer",
-            long? bufferFileSizeLimitBytes = 1024 * 1024 * 1024,
+            long? bufferFileSizeLimitBytes = ByteSize.GB,
             bool bufferFileShared = false,
             int? retainedBufferFileCountLimit = 31,
             int batchPostingLimit = 1000,
