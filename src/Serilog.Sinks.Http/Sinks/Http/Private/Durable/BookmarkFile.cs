@@ -20,6 +20,8 @@ namespace Serilog.Sinks.Http.Private.Durable
 {
     public class BookmarkFile : IDisposable
     {
+        private static readonly Encoding Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+
         private readonly FileStream fileStream;
 
         public BookmarkFile(string bookmarkFileName)
@@ -41,7 +43,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             if (fileStream.Length != 0)
             {
                 // Important not to dispose this StreamReader as the stream must remain open
-                var reader = new StreamReader(fileStream, Encoding.UTF8, false, 128);
+                var reader = new StreamReader(fileStream, Encoding, false, 128);
                 var bookmark = reader.ReadLine();
 
                 if (bookmark != null)
@@ -62,7 +64,7 @@ namespace Serilog.Sinks.Http.Private.Durable
 
         public void WriteBookmark(long nextLineBeginsAtOffset, string currentFile)
         {
-            using var writer = new StreamWriter(fileStream);
+            using var writer = new StreamWriter(fileStream, Encoding);
             writer.WriteLine("{0}:::{1}", nextLineBeginsAtOffset, currentFile);
         }
 
