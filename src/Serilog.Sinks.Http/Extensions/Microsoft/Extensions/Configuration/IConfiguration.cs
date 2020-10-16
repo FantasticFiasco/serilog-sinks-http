@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if !NETSTANDARD_2_0
+#if NET45 || NETSTANDARD_1_3
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.Configuration
 {
