@@ -10,6 +10,10 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 - Add class `ByteSize` which helps specifying multipliers of the unit *byte*.
 
+### :syringe: Fixed
+
+- [#135](https://github.com/FantasticFiasco/serilog-sinks-http/issues/135) The type `IConfiguration` exists in both `Microsoft.Extensions.Configuration.Abstractions` and `Serilog.Sinks.Http` (discovered by [@brian-pickens-web](https://github.com/brian-pickens-web) and contributed by [@aleksaradz](https://github.com/aleksaradz))
+
 ## [7.0.1] - 2020-08-14
 
 ### :syringe: Fixed
