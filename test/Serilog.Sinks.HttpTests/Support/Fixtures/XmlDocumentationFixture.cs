@@ -122,12 +122,10 @@ namespace Serilog.Support.Fixtures
 
         private static string GetValue(XNode node)
         {
-            using (var reader = node.CreateReader())
-            {
-                reader.MoveToContent();
+            using var reader = node.CreateReader();
+            reader.MoveToContent();
 
-                return reader.ReadInnerXml();
-            }
+            return reader.ReadInnerXml();
         }
 
         private static Type ProbeType(string fullName)

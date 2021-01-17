@@ -62,10 +62,8 @@ namespace Serilog.Sinks.Http.Private.Network
 
         public void WriteBookmark(long nextLineBeginsAtOffset, string currentFile)
         {
-            using (var writer = new StreamWriter(fileStream))
-            {
-                writer.WriteLine("{0}:::{1}", nextLineBeginsAtOffset, currentFile);
-            }
+            using var writer = new StreamWriter(fileStream);
+            writer.WriteLine("{0}:::{1}", nextLineBeginsAtOffset, currentFile);
         }
 
         public void Dispose() =>

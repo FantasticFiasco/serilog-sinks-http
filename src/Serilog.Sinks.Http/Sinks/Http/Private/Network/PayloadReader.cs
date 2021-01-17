@@ -35,10 +35,8 @@ namespace Serilog.Sinks.Http.Private.Network
             ref int count,
             int batchPostingLimit)
         {
-            using (var stream = System.IO.File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                return Read(stream, ref nextLineBeginsAtOffset, ref count, batchPostingLimit);
-            }
+            using var stream = System.IO.File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            return Read(stream, ref nextLineBeginsAtOffset, ref count, batchPostingLimit);
         }
 
         public static string[] Read(

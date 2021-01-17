@@ -89,84 +89,82 @@ namespace Serilog.Sinks.Http.Private.Network
                 {
                     count = 0;
 
-                    using (var bookmark = new BookmarkFile(bufferFiles.BookmarkFileName))
+                    using var bookmark = new BookmarkFile(bufferFiles.BookmarkFileName);
+                    bookmark.TryReadBookmark(out var nextLineBeginsAtOffset, out var currentFile);
+
+                    var fileSet = bufferFiles.Get();
+
+                    if (currentFile == null || !System.IO.File.Exists(currentFile))
                     {
-                        bookmark.TryReadBookmark(out var nextLineBeginsAtOffset, out var currentFile);
+                        nextLineBeginsAtOffset = 0;
+                        currentFile = fileSet.FirstOrDefault();
+                    }
 
-                        var fileSet = bufferFiles.Get();
+                    if (currentFile == null)
+                        continue;
 
-                        if (currentFile == null || !System.IO.File.Exists(currentFile))
+                    var logEvents = PayloadReader.Read(
+                        currentFile,
+                        ref nextLineBeginsAtOffset,
+                        ref count,
+                        batchPostingLimit);
+
+                    var payloadWriter = new StringWriter();
+                    batchFormatter.Format(logEvents, payloadWriter);
+                    var payload = payloadWriter.ToString();
+
+                    if (count > 0 || nextRequiredLevelCheckUtc < DateTime.UtcNow)
+                    {
+                        lock (stateLock)
                         {
-                            nextLineBeginsAtOffset = 0;
-                            currentFile = fileSet.FirstOrDefault();
+                            nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
                         }
 
-                        if (currentFile == null)
+                        if (string.IsNullOrEmpty(payload))
                             continue;
 
-                        var logEvents = PayloadReader.Read(
-                            currentFile,
-                            ref nextLineBeginsAtOffset,
-                            ref count,
-                            batchPostingLimit);
+                        var content = new StringContent(payload, Encoding.UTF8, ContentType);
 
-                        var payloadWriter = new StringWriter();
-                        batchFormatter.Format(logEvents, payloadWriter);
-                        var payload = payloadWriter.ToString();
-
-                        if (count > 0 || nextRequiredLevelCheckUtc < DateTime.UtcNow)
+                        var result = await httpClient.PostAsync(requestUri, content).ConfigureAwait(false);
+                        if (result.IsSuccessStatusCode)
                         {
-                            lock (stateLock)
-                            {
-                                nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
-                            }
+                            connectionSchedule.MarkSuccess();
 
-                            if (string.IsNullOrEmpty(payload))
-                                continue;
-
-                            var content = new StringContent(payload, Encoding.UTF8, ContentType);
-
-                            var result = await httpClient.PostAsync(requestUri, content).ConfigureAwait(false);
-                            if (result.IsSuccessStatusCode)
-                            {
-                                connectionSchedule.MarkSuccess();
-
-                                bookmark.WriteBookmark(nextLineBeginsAtOffset, currentFile);
-                            }
-                            else
-                            {
-                                connectionSchedule.MarkFailure();
-
-                                SelfLog.WriteLine(
-                                    "Received failed HTTP shipping result {0}: {1}",
-                                    result.StatusCode,
-                                    await result.Content.ReadAsStringAsync().ConfigureAwait(false));
-
-                                break;
-                            }
+                            bookmark.WriteBookmark(nextLineBeginsAtOffset, currentFile);
                         }
                         else
                         {
-                            // For whatever reason, there's nothing waiting to send. This means we should try connecting
-                            // again at the regular interval, so mark the attempt as successful.
-                            connectionSchedule.MarkSuccess();
+                            connectionSchedule.MarkFailure();
 
-                            // Only advance the bookmark if no other process has the
-                            // current file locked, and its length is as we found it.
-                            if (fileSet.Length == 2
-                                && fileSet.First() == currentFile
-                                && IsUnlockedAtLength(currentFile, nextLineBeginsAtOffset))
-                            {
-                                bookmark.WriteBookmark(0, fileSet[1]);
-                            }
+                            SelfLog.WriteLine(
+                                "Received failed HTTP shipping result {0}: {1}",
+                                result.StatusCode,
+                                await result.Content.ReadAsStringAsync().ConfigureAwait(false));
 
-                            if (fileSet.Length > 2)
-                            {
-                                // Once there's a third file waiting to ship, we do our
-                                // best to move on, though a lock on the current file
-                                // will delay this.
-                                System.IO.File.Delete(fileSet[0]);
-                            }
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        // For whatever reason, there's nothing waiting to send. This means we should try connecting
+                        // again at the regular interval, so mark the attempt as successful.
+                        connectionSchedule.MarkSuccess();
+
+                        // Only advance the bookmark if no other process has the
+                        // current file locked, and its length is as we found it.
+                        if (fileSet.Length == 2
+                            && fileSet.First() == currentFile
+                            && IsUnlockedAtLength(currentFile, nextLineBeginsAtOffset))
+                        {
+                            bookmark.WriteBookmark(0, fileSet[1]);
+                        }
+
+                        if (fileSet.Length > 2)
+                        {
+                            // Once there's a third file waiting to ship, we do our
+                            // best to move on, though a lock on the current file
+                            // will delay this.
+                            System.IO.File.Delete(fileSet[0]);
                         }
                     }
                 } while (count == batchPostingLimit);
@@ -192,10 +190,8 @@ namespace Serilog.Sinks.Http.Private.Network
         {
             try
             {
-                using (var fileStream = System.IO.File.Open(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read))
-                {
-                    return fileStream.Length <= maxLength;
-                }
+                using var fileStream = System.IO.File.Open(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+                return fileStream.Length <= maxLength;
             }
 #if HRESULTS
             catch (IOException ex)
