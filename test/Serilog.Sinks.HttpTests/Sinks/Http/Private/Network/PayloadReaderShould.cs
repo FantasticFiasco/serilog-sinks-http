@@ -18,84 +18,81 @@ namespace Serilog.Sinks.Http.Private.Network
         public void ReadLogEvent()
         {
             // Arrange
-            using (var stream = new MemoryStream())
-            using (var writer = new StreamWriter(stream, Encoding.UTF8))
-            {
-                writer.Write(Foo + Environment.NewLine);
-                writer.Flush();
+            using var stream = new MemoryStream();
+            using var writer = new StreamWriter(stream, Encoding.UTF8);
 
-                // Act
-                var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
+            writer.Write(Foo + Environment.NewLine);
+            writer.Flush();
 
-                // Assert
-                actual.ShouldBe(new[] { Foo });
-                nextLineBeginsAtOffset.ShouldBe(stream.Length);
-                count.ShouldBe(1);
-            }
+            // Act
+            var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
+
+            // Assert
+            actual.ShouldBe(new[] { Foo });
+            nextLineBeginsAtOffset.ShouldBe(stream.Length);
+            count.ShouldBe(1);
         }
 
         [Fact]
         public void NotReadLogEventGivenPartiallyWritten()
         {
             // Arrange
-            using (var stream = new MemoryStream())
-            using (var writer = new StreamWriter(stream, Encoding.UTF8))
-            {
-                // The partially written log event is missing new line
-                writer.Write(Foo);
-                writer.Flush();
+            using var stream = new MemoryStream();
+            using var writer = new StreamWriter(stream, Encoding.UTF8);
 
-                // Act
-                var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
+            // The partially written log event is missing new line
+            writer.Write(Foo);
+            writer.Flush();
 
-                // Assert
-                actual.ShouldBeEmpty();
-                nextLineBeginsAtOffset.ShouldBe(0);
-                count.ShouldBe(0);
-            }
+            // Act
+            var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
+
+            // Assert
+            actual.ShouldBeEmpty();
+            nextLineBeginsAtOffset.ShouldBe(0);
+            count.ShouldBe(0);
         }
 
         [Fact]
         public void ReadLogEvents()
         {
             // Arrange
-            using (var stream = new MemoryStream())
-            using (var writer = new StreamWriter(stream, Encoding.UTF8))
-            {
-                writer.Write(Foo + Environment.NewLine);
-                writer.Write(Bar + Environment.NewLine);
-                writer.Flush();
+            using var stream = new MemoryStream();
+            using var writer = new StreamWriter(stream, Encoding.UTF8);
 
-                // Act
-                var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
+            writer.Write(Foo + Environment.NewLine);
+            writer.Write(Bar + Environment.NewLine);
+            writer.Flush();
 
-                // Assert
-                actual.ShouldBe(new[] { Foo, Bar });
-                nextLineBeginsAtOffset.ShouldBe(stream.Length);
-                count.ShouldBe(2);
-            }
+            // Act
+            var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
+
+            // Assert
+            actual.ShouldBe(new[] { Foo, Bar });
+            nextLineBeginsAtOffset.ShouldBe(stream.Length);
+            count.ShouldBe(2);
         }
 
         [Fact]
         public void NotReadEventsGivenPartiallyWritten()
         {
             // Arrange
-            using (var stream = new MemoryStream())
-            using (var writer = new StreamWriter(stream, Encoding.UTF8))
-            {
-                writer.Write(Foo + Environment.NewLine);
-                // The partially written log event is missing new line
-                writer.Write(Bar);
-                writer.Flush();
+            using var stream = new MemoryStream();
+            using var writer = new StreamWriter(stream, Encoding.UTF8);
 
-                // Act
-                var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
+            writer.Write(Foo + Environment.NewLine);
 
-                // Assert
-                actual.ShouldBe(new[] { Foo });
-                nextLineBeginsAtOffset.ShouldBe(PayloadReader.BomLength + Foo.Length + Environment.NewLine.Length);
-                count.ShouldBe(1);
-            }
+            // The partially written log event is missing new line
+            writer.Write(Bar);
+            writer.Flush();
+
+            // Act
+            var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
+
+            // Assert
+            actual.ShouldBe(new[] { Foo });
+            nextLineBeginsAtOffset.ShouldBe(PayloadReader.BomLength + Foo.Length + Environment.NewLine.Length);
+            count.ShouldBe(1);
         }
     }
 }
