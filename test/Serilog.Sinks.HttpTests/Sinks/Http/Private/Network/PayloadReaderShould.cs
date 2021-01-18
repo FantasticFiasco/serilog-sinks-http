@@ -34,25 +34,6 @@ namespace Serilog.Sinks.Http.Private.Network
         }
 
         [Fact]
-        public void NotReadLogEventGivenPartiallyWritten()
-        {
-            // Arrange
-            using var stream = new MemoryStream();
-
-            using var writer = new StreamWriter(stream, Encoding.UTF8);
-            writer.Write(FooLogEvent);  // The partially written log event is missing new line
-            writer.Flush();
-
-            // Act
-            var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
-
-            // Assert
-            actual.ShouldBeEmpty();
-            nextLineBeginsAtOffset.ShouldBe(0);
-            count.ShouldBe(0);
-        }
-
-        [Fact]
         public void ReadLogEvents()
         {
             // Arrange
@@ -73,7 +54,26 @@ namespace Serilog.Sinks.Http.Private.Network
         }
 
         [Fact]
-        public void NotReadEventsGivenPartiallyWritten()
+        public void NotReadFirstLogEventGivenPartiallyWritten()
+        {
+            // Arrange
+            using var stream = new MemoryStream();
+
+            using var writer = new StreamWriter(stream, Encoding.UTF8);
+            writer.Write(FooLogEvent);  // The partially written log event is missing new line
+            writer.Flush();
+
+            // Act
+            var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
+
+            // Assert
+            actual.ShouldBeEmpty();
+            nextLineBeginsAtOffset.ShouldBe(0);
+            count.ShouldBe(0);
+        }
+
+        [Fact]
+        public void NotReadSecondLogEventGivenPartiallyWritten()
         {
             // Arrange
             using var stream = new MemoryStream();
