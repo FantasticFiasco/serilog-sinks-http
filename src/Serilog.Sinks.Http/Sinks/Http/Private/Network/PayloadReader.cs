@@ -52,8 +52,6 @@ namespace Serilog.Sinks.Http.Private.Network
             while (count < batchPostingLimit
                    && TryReadLine(stream, ref nextLineBeginsAtOffset, out var nextLine))
             {
-                // Count is the indicator that work was done, so advances even in the (rare) case an
-                // oversized event is dropped
                 count++;
 
                 logEvents.Add(nextLine);
