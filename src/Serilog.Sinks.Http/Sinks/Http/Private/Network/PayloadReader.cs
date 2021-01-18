@@ -52,9 +52,8 @@ namespace Serilog.Sinks.Http.Private.Network
             while (count < batchPostingLimit
                    && TryReadLine(stream, ref nextLineBeginsAtOffset, out var nextLine))
             {
-                count++;
-
                 logEvents.Add(nextLine);
+                count++;
             }
 
             return logEvents.ToArray();
@@ -73,10 +72,11 @@ namespace Serilog.Sinks.Http.Private.Network
             current.Position = nextStart;
 
             nextLine = ReadLine(current);
-
             if (nextLine == null)
+            {
                 return false;
-
+            }
+            
             nextStart += ByteSize.From(nextLine) + ByteSize.From(Environment.NewLine);
 
             if (includesBom)
