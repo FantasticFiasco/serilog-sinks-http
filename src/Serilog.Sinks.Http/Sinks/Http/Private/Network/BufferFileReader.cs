@@ -33,24 +33,27 @@ namespace Serilog.Sinks.Http.Private.Network
             string fileName,
             ref long nextLineBeginsAtOffset,
             ref int count,
-            int batchPostingLimit)
+            int batchPostingLimit,
+            long batchSizeLimit)
         {
             using var stream = System.IO.File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            return Read(stream, ref nextLineBeginsAtOffset, ref count, batchPostingLimit);
+            return Read(stream, ref nextLineBeginsAtOffset, ref count, batchPostingLimit, batchSizeLimit);
         }
 
         public static string[] Read(
             Stream stream,
             ref long nextLineBeginsAtOffset,
             ref int count,
-            int batchPostingLimit)
+            int batchPostingLimit,
+            long batchSizeLimit)
         {
             var logEvents = new List<string>();
 
             stream.Position = nextLineBeginsAtOffset;
+            long batchSize = 0;
 
             while (count < batchPostingLimit
-                   && TryReadLine(stream, ref nextLineBeginsAtOffset, out var nextLine))
+                   && TryReadLine(stream, ref nextLineBeginsAtOffset, out var nextLine, ref batchSize, batchSizeLimit))
             {
                 logEvents.Add(nextLine);
                 count++;
@@ -59,7 +62,7 @@ namespace Serilog.Sinks.Http.Private.Network
             return logEvents.ToArray();
         }
 
-        private static bool TryReadLine(Stream current, ref long nextStart, out string nextLine)
+        private static bool TryReadLine(Stream current, ref long nextStart, out string nextLine, ref long batchSize, long batchSizeLimit)
         {
             var includesBom = nextStart == 0;
 
@@ -76,7 +79,13 @@ namespace Serilog.Sinks.Http.Private.Network
             {
                 return false;
             }
-            
+
+            batchSize += nextLine.Length;
+            if (batchSize > batchSizeLimit)
+            {
+                return false;
+            }
+
             nextStart += ByteSize.From(nextLine) + ByteSize.From(Environment.NewLine);
 
             if (includesBom)

@@ -107,7 +107,8 @@ namespace Serilog.Sinks.Http.Private.Network
                         currentFile,
                         ref nextLineBeginsAtOffset,
                         ref count,
-                        batchPostingLimit);
+                        batchPostingLimit,
+                        long.MaxValue);
 
                     var payloadWriter = new StringWriter();
                     batchFormatter.Format(logEvents, payloadWriter);

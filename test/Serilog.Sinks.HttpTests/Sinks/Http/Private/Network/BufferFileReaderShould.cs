@@ -25,7 +25,7 @@ namespace Serilog.Sinks.Http.Private.Network
             writer.Flush();
 
             // Act
-            var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
+            var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue, long.MaxValue);
 
             // Assert
             actual.ShouldBe(new[] { FooLogEvent });
@@ -45,7 +45,7 @@ namespace Serilog.Sinks.Http.Private.Network
             writer.Flush();
 
             // Act
-            var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
+            var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue, long.MaxValue);
 
             // Assert
             actual.ShouldBe(new[] { FooLogEvent, BarLogEvent });
@@ -64,7 +64,7 @@ namespace Serilog.Sinks.Http.Private.Network
             writer.Flush();
 
             // Act
-            var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
+            var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue, long.MaxValue);
 
             // Assert
             actual.ShouldBeEmpty();
@@ -84,7 +84,7 @@ namespace Serilog.Sinks.Http.Private.Network
             writer.Flush();
 
             // Act
-            var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
+            var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue, long.MaxValue);
 
             // Assert
             actual.ShouldBe(new[] { FooLogEvent });
@@ -106,7 +106,29 @@ namespace Serilog.Sinks.Http.Private.Network
             const int batchPostingLimit = 1;
 
             // Act
-            var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, ref count, batchPostingLimit);
+            var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, ref count, batchPostingLimit, long.MaxValue);
+
+            // Assert
+            actual.ShouldBe(new[] { FooLogEvent });
+            nextLineBeginsAtOffset.ShouldBe(BufferFileReader.BomLength + FooLogEvent.Length + Environment.NewLine.Length);
+            count.ShouldBe(1);
+        }
+
+        [Fact]
+        public void RespectBatchSizeLimit()
+        {
+            // Arrange
+            using var stream = new MemoryStream();
+
+            using var writer = new StreamWriter(stream, Encoding.UTF8);
+            writer.Write(FooLogEvent + Environment.NewLine);
+            writer.Write(BarLogEvent + Environment.NewLine);
+            writer.Flush();
+
+            var batchSizeLimit = FooLogEvent.Length + BufferFileReader.BomLength;
+
+            // Act
+            var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue, batchSizeLimit);
 
             // Assert
             actual.ShouldBe(new[] { FooLogEvent });
