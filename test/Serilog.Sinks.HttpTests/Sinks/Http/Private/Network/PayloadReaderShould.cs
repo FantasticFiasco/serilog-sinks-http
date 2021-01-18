@@ -91,5 +91,27 @@ namespace Serilog.Sinks.Http.Private.Network
             nextLineBeginsAtOffset.ShouldBe(PayloadReader.BomLength + FooLogEvent.Length + Environment.NewLine.Length);
             count.ShouldBe(1);
         }
+
+        [Fact]
+        public void RespectBatchPostingLimit()
+        {
+            // Arrange
+            using var stream = new MemoryStream();
+
+            using var writer = new StreamWriter(stream, Encoding.UTF8);
+            writer.Write(FooLogEvent + Environment.NewLine);
+            writer.Write(BarLogEvent + Environment.NewLine);
+            writer.Flush();
+
+            const int batchPostingLimit = 1;
+
+            // Act
+            var actual = PayloadReader.Read(stream, ref nextLineBeginsAtOffset, ref count, batchPostingLimit);
+
+            // Assert
+            actual.ShouldBe(new[] { FooLogEvent });
+            nextLineBeginsAtOffset.ShouldBe(PayloadReader.BomLength + FooLogEvent.Length + Environment.NewLine.Length);
+            count.ShouldBe(1);
+        }
     }
 }
