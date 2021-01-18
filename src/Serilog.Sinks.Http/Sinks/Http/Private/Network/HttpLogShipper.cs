@@ -103,7 +103,7 @@ namespace Serilog.Sinks.Http.Private.Network
                     if (currentFile == null)
                         continue;
 
-                    var logEvents = BufferReader.Read(
+                    var logEvents = BufferFileReader.Read(
                         currentFile,
                         ref nextLineBeginsAtOffset,
                         ref count,

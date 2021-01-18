@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Serilog.Sinks.Http.Private.Network
 {
-    public class BufferReaderShould
+    public class BufferFileReaderShould
     {
         private const string FooLogEvent = "{ \"foo\": 1 }";
         private const string BarLogEvent = "{ \"bar\": 2 }";
@@ -25,7 +25,7 @@ namespace Serilog.Sinks.Http.Private.Network
             writer.Flush();
 
             // Act
-            var actual = BufferReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
+            var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
 
             // Assert
             actual.ShouldBe(new[] { FooLogEvent });
@@ -45,7 +45,7 @@ namespace Serilog.Sinks.Http.Private.Network
             writer.Flush();
 
             // Act
-            var actual = BufferReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
+            var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
 
             // Assert
             actual.ShouldBe(new[] { FooLogEvent, BarLogEvent });
@@ -64,7 +64,7 @@ namespace Serilog.Sinks.Http.Private.Network
             writer.Flush();
 
             // Act
-            var actual = BufferReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
+            var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
 
             // Assert
             actual.ShouldBeEmpty();
@@ -84,11 +84,11 @@ namespace Serilog.Sinks.Http.Private.Network
             writer.Flush();
 
             // Act
-            var actual = BufferReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
+            var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue);
 
             // Assert
             actual.ShouldBe(new[] { FooLogEvent });
-            nextLineBeginsAtOffset.ShouldBe(BufferReader.BomLength + FooLogEvent.Length + Environment.NewLine.Length);
+            nextLineBeginsAtOffset.ShouldBe(BufferFileReader.BomLength + FooLogEvent.Length + Environment.NewLine.Length);
             count.ShouldBe(1);
         }
 
@@ -106,11 +106,11 @@ namespace Serilog.Sinks.Http.Private.Network
             const int batchPostingLimit = 1;
 
             // Act
-            var actual = BufferReader.Read(stream, ref nextLineBeginsAtOffset, ref count, batchPostingLimit);
+            var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, ref count, batchPostingLimit);
 
             // Assert
             actual.ShouldBe(new[] { FooLogEvent });
-            nextLineBeginsAtOffset.ShouldBe(BufferReader.BomLength + FooLogEvent.Length + Environment.NewLine.Length);
+            nextLineBeginsAtOffset.ShouldBe(BufferFileReader.BomLength + FooLogEvent.Length + Environment.NewLine.Length);
             count.ShouldBe(1);
         }
     }

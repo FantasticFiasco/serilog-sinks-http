@@ -19,7 +19,7 @@ using System.Text;
 
 namespace Serilog.Sinks.Http.Private.Network
 {
-    public static class BufferReader
+    public static class BufferFileReader
     {
         private const char CR = '\r';
         private const char LF = '\n';
