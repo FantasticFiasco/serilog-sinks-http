@@ -38,7 +38,7 @@ namespace Serilog.Sinks.Http.Private.Network
         private readonly IBufferFiles bufferFiles;
         private readonly ExponentialBackoffConnectionSchedule connectionSchedule;
         private readonly PortableTimer timer;
-        private readonly object stateLock = new object();
+        private readonly object stateLock = new();
         private readonly IBatchFormatter batchFormatter;
         private DateTime nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
         private volatile bool unloading;

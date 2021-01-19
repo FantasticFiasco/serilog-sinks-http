@@ -22,7 +22,7 @@ namespace Serilog.Sinks.Http.Private.Network
 {
     public class TimeRolledBufferFiles : IBufferFiles
     {
-        private static readonly Regex BufferPathFormatRegex = new Regex(
+        private static readonly Regex BufferPathFormatRegex = new(
             $"(?<prefix>.+)(?:{string.Join("|", Enum.GetNames(typeof(DateFormats)).Select(x => $"{{{x}}}"))})(?<postfix>.+)");
 
         private readonly IDirectoryService directoryService;

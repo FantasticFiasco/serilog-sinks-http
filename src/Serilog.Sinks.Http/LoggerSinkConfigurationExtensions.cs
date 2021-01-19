@@ -87,10 +87,10 @@ namespace Serilog
             if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
             // Default values
-            period =  period ?? TimeSpan.FromSeconds(2);
-            textFormatter = textFormatter ?? new NormalRenderedTextFormatter();
-            batchFormatter = batchFormatter ?? new DefaultBatchFormatter();
-            httpClient = httpClient ?? new DefaultHttpClient();
+            period ??= TimeSpan.FromSeconds(2);
+            textFormatter ??= new NormalRenderedTextFormatter();
+            batchFormatter ??= new DefaultBatchFormatter();
+            httpClient ??= new DefaultHttpClient();
             httpClient.Configure(configuration);
 
             var sink = queueLimit != null
@@ -211,10 +211,10 @@ namespace Serilog
             if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
             // Default values
-            period = period ?? TimeSpan.FromSeconds(2);
-            textFormatter = textFormatter ?? new NormalRenderedTextFormatter();
-            batchFormatter = batchFormatter ?? new DefaultBatchFormatter();
-            httpClient = httpClient ?? new DefaultHttpClient();
+            period ??= TimeSpan.FromSeconds(2);
+            textFormatter ??= new NormalRenderedTextFormatter();
+            batchFormatter ??= new DefaultBatchFormatter();
+            httpClient ??= new DefaultHttpClient();
             httpClient.Configure(configuration);
 
             var sink = new TimeRolledDurableHttpSink(
@@ -312,10 +312,10 @@ namespace Serilog
             if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
             // Default values
-            period = period ?? TimeSpan.FromSeconds(2);
-            textFormatter = textFormatter ?? new NormalRenderedTextFormatter();
-            batchFormatter = batchFormatter ?? new DefaultBatchFormatter();
-            httpClient = httpClient ?? new DefaultHttpClient();
+            period ??= TimeSpan.FromSeconds(2);
+            textFormatter ??= new NormalRenderedTextFormatter();
+            batchFormatter ??= new DefaultBatchFormatter();
+            httpClient ??= new DefaultHttpClient();
             httpClient.Configure(configuration);
 
             var sink = new FileSizeRolledDurableHttpSink(

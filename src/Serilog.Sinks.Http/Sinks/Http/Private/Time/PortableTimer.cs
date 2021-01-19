@@ -20,7 +20,7 @@ namespace Serilog.Sinks.Http.Private.Time
 {
     public class PortableTimer : IDisposable
     {
-        private readonly object stateLock = new object();
+        private readonly object stateLock = new();
         private readonly Func<Task> onTick;
         private readonly Timer timer;
 
