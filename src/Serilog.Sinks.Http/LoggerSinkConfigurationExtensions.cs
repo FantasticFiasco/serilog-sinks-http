@@ -167,6 +167,9 @@ namespace Serilog
         /// <param name="batchPostingLimit">
         /// The maximum number of events to post in a single batch. Default value is 1000.
         /// </param>
+        /// <param name="approximateBatchSizeLimit">
+        /// TODO: Write documentation
+        /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
         /// </param>
@@ -201,6 +204,7 @@ namespace Serilog
             bool bufferFileShared = false,
             int? retainedBufferFileCountLimit = 31,
             int batchPostingLimit = 1000,
+            long approximateBatchSizeLimit = long.MaxValue,
             TimeSpan? period = null,
             ITextFormatter textFormatter = null,
             IBatchFormatter batchFormatter = null,
@@ -224,6 +228,7 @@ namespace Serilog
                 bufferFileShared: bufferFileShared,
                 retainedBufferFileCountLimit: retainedBufferFileCountLimit,
                 batchPostingLimit: batchPostingLimit,
+                approximateBatchSizeLimit: approximateBatchSizeLimit,
                 period: period.Value,
                 textFormatter: textFormatter,
                 batchFormatter: batchFormatter,
@@ -268,6 +273,9 @@ namespace Serilog
         /// <param name="batchPostingLimit">
         /// The maximum number of events to post in a single batch. Default value is 1000.
         /// </param>
+        /// <param name="approximateBatchSizeLimit">
+        /// TODO: Write documentation
+        /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
         /// </param>
@@ -302,6 +310,7 @@ namespace Serilog
             bool bufferFileShared = false,
             int? retainedBufferFileCountLimit = 31,
             int batchPostingLimit = 1000,
+            long approximateBatchSizeLimit = long.MaxValue,
             TimeSpan? period = null,
             ITextFormatter textFormatter = null,
             IBatchFormatter batchFormatter = null,
@@ -325,6 +334,7 @@ namespace Serilog
                 bufferFileShared: bufferFileShared,
                 retainedBufferFileCountLimit: retainedBufferFileCountLimit,
                 batchPostingLimit: batchPostingLimit,
+                approximateBatchSizeLimit: approximateBatchSizeLimit,
                 period: period.Value,
                 textFormatter: textFormatter,
                 batchFormatter: batchFormatter,

@@ -27,6 +27,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 false,
                 31,
                 1000,
+                5 * ByteSize.MB,
                 TimeSpan.FromSeconds(2),
                 new NormalTextFormatter(),
                 new ArrayBatchFormatter(),
@@ -51,6 +52,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 false,
                 31,
                 1000,
+                5 * ByteSize.MB,
                 TimeSpan.FromSeconds(2),
                 new NormalTextFormatter(),
                 new ArrayBatchFormatter(),
@@ -73,6 +75,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 false,
                 null,
                 1,
+                5 * ByteSize.MB,
                 TimeSpan.FromMilliseconds(1),         // 1 ms period
                 new NormalTextFormatter(),
                 new ArrayBatchFormatter(),
