@@ -125,7 +125,7 @@ namespace Serilog.Sinks.Http.Private.Network
             writer.Write(BarLogEvent + Environment.NewLine);
             writer.Flush();
 
-            var batchSizeLimit = FooLogEvent.Length + BufferFileReader.BomLength;
+            var batchSizeLimit = stream.Length * 2 / 3;
 
             // Act
             var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue, batchSizeLimit);
@@ -133,6 +133,30 @@ namespace Serilog.Sinks.Http.Private.Network
             // Assert
             actual.ShouldBe(new[] { FooLogEvent });
             nextLineBeginsAtOffset.ShouldBe(BufferFileReader.BomLength + FooLogEvent.Length + Environment.NewLine.Length);
+            count.ShouldBe(1);
+        }
+
+        [Fact(Skip = "Let's implement this edge case while feature is beta tested")]
+        public void SkipLogEventGivenItExceedsBatchSizeLimit()
+        {
+            // Arrange
+            using var stream = new MemoryStream();
+
+            const string logEventExceedingBatchSizeLimit = "{ \"foo\": \"This document exceeds the batch size limit\" }";
+
+            using var writer = new StreamWriter(stream, Encoding.UTF8);
+            writer.Write(logEventExceedingBatchSizeLimit + Environment.NewLine);
+            writer.Write(BarLogEvent + Environment.NewLine);
+            writer.Flush();
+
+            var batchSizeLimit = stream.Length * 2 / 3;
+
+            // Act
+            var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, ref count, int.MaxValue, batchSizeLimit);
+
+            // Assert
+            actual.ShouldBe(new[] { BarLogEvent });
+            nextLineBeginsAtOffset.ShouldBe(BufferFileReader.BomLength + BarLogEvent.Length + Environment.NewLine.Length);
             count.ShouldBe(1);
         }
     }
