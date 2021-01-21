@@ -86,12 +86,10 @@ namespace Serilog.Sinks.Http.Private.Network
         {
             try
             {
-                int count;
+                var batch = new Batch();
 
                 do
                 {
-                    count = 0;
-
                     using var bookmark = new BookmarkFile(bufferFiles.BookmarkFileName);
                     bookmark.TryReadBookmark(out var nextLineBeginsAtOffset, out var currentFile);
 
@@ -106,18 +104,17 @@ namespace Serilog.Sinks.Http.Private.Network
                     if (currentFile == null)
                         continue;
 
-                    var logEvents = BufferFileReader.Read(
+                    batch = BufferFileReader.Read(
                         currentFile,
                         ref nextLineBeginsAtOffset,
-                        ref count,
                         batchPostingLimit,
                         batchSizeLimit);
 
                     var payloadWriter = new StringWriter();
-                    batchFormatter.Format(logEvents, payloadWriter);
+                    batchFormatter.Format(batch.LogEvents, payloadWriter);
                     var payload = payloadWriter.ToString();
 
-                    if (count > 0 || nextRequiredLevelCheckUtc < DateTime.UtcNow)
+                    if (batch.LogEvents.Count > 0 || nextRequiredLevelCheckUtc < DateTime.UtcNow)
                     {
                         lock (stateLock)
                         {
@@ -171,7 +168,7 @@ namespace Serilog.Sinks.Http.Private.Network
                             System.IO.File.Delete(fileSet[0]);
                         }
                     }
-                } while (count == batchPostingLimit);
+                } while (batch.HasReachedLimit);
             }
             catch (Exception e)
             {

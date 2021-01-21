@@ -19,6 +19,13 @@ using System.Text;
 
 namespace Serilog.Sinks.Http.Private.Network
 {
+    public class Batch
+    {
+        public List<string> LogEvents { get; } = new();
+
+        public bool HasReachedLimit { get; set; }
+    }
+
     public static class BufferFileReader
     {
         private const char CR = '\r';
@@ -29,71 +36,70 @@ namespace Serilog.Sinks.Http.Private.Network
         /// </summary>
         public const int BomLength = 3;
 
-        public static string[] Read(
+        public static Batch Read(
             string fileName,
             ref long nextLineBeginsAtOffset,
-            ref int count,
             int batchPostingLimit,
             long batchSizeLimit)
         {
             using var stream = System.IO.File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            return Read(stream, ref nextLineBeginsAtOffset, ref count, batchPostingLimit, batchSizeLimit);
+            return Read(stream, ref nextLineBeginsAtOffset, batchPostingLimit, batchSizeLimit);
         }
 
-        public static string[] Read(
+        public static Batch Read(
             Stream stream,
             ref long nextLineBeginsAtOffset,
-            ref int count,
             int batchPostingLimit,
             long batchSizeLimit)
         {
-            var logEvents = new List<string>();
-
-            stream.Position = nextLineBeginsAtOffset;
+            var batch = new Batch();
             long batchSize = 0;
 
-            while (count < batchPostingLimit
-                   && TryReadLine(stream, ref nextLineBeginsAtOffset, out var nextLine, ref batchSize, batchSizeLimit))
+            while (true)
             {
-                logEvents.Add(nextLine);
-                count++;
+                if (stream.Length <= nextLineBeginsAtOffset)
+                {
+                    break;
+                }
+                
+                stream.Position = nextLineBeginsAtOffset;
+
+                // Read next log event
+                var nextLine = ReadLine(stream);
+                if (nextLine == null)
+                {
+                    break;
+                }
+
+                // Respect batch size limit
+                batchSize += ByteSize.From(nextLine);
+                if (batchSize > batchSizeLimit)
+                {
+                    batch.HasReachedLimit = true;
+                    break;
+                }
+
+                // Update cursor
+                var includesBom = nextLineBeginsAtOffset == 0;
+                nextLineBeginsAtOffset += ByteSize.From(nextLine) + ByteSize.From(Environment.NewLine);
+
+                if (includesBom)
+                {
+                    nextLineBeginsAtOffset += BomLength;
+                }
+
+                // Add log event
+                batch.LogEvents.Add(nextLine);
+
+                // Respect batch posting limit
+                if (batch.LogEvents.Count == batchPostingLimit)
+                {
+                    batch.HasReachedLimit = true;
+                    break;
+                }
             }
 
-            return logEvents.ToArray();
-        }
-
-        private static bool TryReadLine(Stream current, ref long nextStart, out string nextLine, ref long batchSize, long batchSizeLimit)
-        {
-            var includesBom = nextStart == 0;
-
-            if (current.Length <= nextStart)
-            {
-                nextLine = null;
-                return false;
-            }
-
-            current.Position = nextStart;
-
-            nextLine = ReadLine(current);
-            if (nextLine == null)
-            {
-                return false;
-            }
-
-            batchSize += nextLine.Length;
-            if (batchSize > batchSizeLimit)
-            {
-                return false;
-            }
-
-            nextStart += ByteSize.From(nextLine) + ByteSize.From(Environment.NewLine);
-
-            if (includesBom)
-            {
-                nextStart += BomLength;
-            }
-
-            return true;
+            return batch;
         }
 
         private static string ReadLine(Stream stream)
