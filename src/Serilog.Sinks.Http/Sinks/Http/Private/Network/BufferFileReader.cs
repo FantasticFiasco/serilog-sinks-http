@@ -70,8 +70,11 @@ namespace Serilog.Sinks.Http.Private.Network
                     break;
                 }
 
+                // Calculate the size of the next log event
+                var nextLineSizeBytes = ByteSize.From(nextLine) + ByteSize.From(Environment.NewLine);
+
                 // Respect batch size limit
-                batchSizeBytes += ByteSize.From(nextLine);
+                batchSizeBytes += nextLineSizeBytes;
                 if (batchSizeBytes > batchSizeLimitBytes)
                 {
                     batch.HasReachedLimit = true;
@@ -80,7 +83,7 @@ namespace Serilog.Sinks.Http.Private.Network
 
                 // Update cursor
                 var includesBom = nextLineBeginsAtOffset == 0;
-                nextLineBeginsAtOffset += ByteSize.From(nextLine) + ByteSize.From(Environment.NewLine);
+                nextLineBeginsAtOffset += nextLineSizeBytes;
 
                 if (includesBom)
                 {
