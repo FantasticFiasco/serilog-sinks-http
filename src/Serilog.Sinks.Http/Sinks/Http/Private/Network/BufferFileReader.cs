@@ -22,7 +22,6 @@ namespace Serilog.Sinks.Http.Private.Network
     public class Batch
     {
         public List<string> LogEvents { get; } = new();
-
         public bool HasReachedLimit { get; set; }
     }
 
