@@ -170,10 +170,10 @@ namespace Serilog
         /// </param>
         /// <param name="batchSizeLimitBytes">
         /// The approximate maximum size, in bytes, for a single batch. The value is an approximate
-        /// because only the size of the log events are considered, the extra payload added by the
-        /// batch formatter is not considered in the calculation. This means that you will have to
-        /// define a value low enough to accomodate for the extra size added by the batch
-        /// formatter. Default value is long.MaxValue.
+        /// because only the size of the log events are considered. The extra characters added by
+        /// the batch formatter, where the sequence of serialized log events are transformed into a
+        /// JSON array, are not considered. Please make sure to accomodate for those. Default value
+        /// is long.MaxValue.
         /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
@@ -281,10 +281,10 @@ namespace Serilog
         /// </param>
         /// <param name="batchSizeLimitBytes">
         /// The approximate maximum size, in bytes, for a single batch. The value is an approximate
-        /// because only the size of the log events are considered, the extra payload added by the
-        /// batch formatter is not considered in the calculation. This means that you will have to
-        /// define a value low enough to accomodate for the extra size added by the batch
-        /// formatter. Default value is long.MaxValue.
+        /// because only the size of the log events are considered. The extra characters added by
+        /// the batch formatter, where the sequence of serialized log events are transformed into a
+        /// JSON array, are not considered. Please make sure to accomodate for those. Default value
+        /// is long.MaxValue.
         /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
