@@ -35,7 +35,7 @@ namespace Serilog.Sinks.Http.Private.Network
         private IHttpClient httpClient;
         private readonly string requestUri;
         private readonly int batchPostingLimit;
-        private readonly long batchSizeLimit;
+        private readonly long batchSizeLimitBytes;
         private readonly IBufferFiles bufferFiles;
         private readonly ExponentialBackoffConnectionSchedule connectionSchedule;
         private readonly PortableTimer timer;
@@ -49,7 +49,7 @@ namespace Serilog.Sinks.Http.Private.Network
             string requestUri,
             IBufferFiles bufferFiles,
             int batchPostingLimit,
-            long batchSizeLimit,
+            long batchSizeLimitBytes,
             TimeSpan period,
             IBatchFormatter batchFormatter)
         {
@@ -59,7 +59,7 @@ namespace Serilog.Sinks.Http.Private.Network
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
             this.bufferFiles = bufferFiles ?? throw new ArgumentNullException(nameof(bufferFiles));
             this.batchPostingLimit = batchPostingLimit;
-            this.batchSizeLimit = batchSizeLimit;
+            this.batchSizeLimitBytes = batchSizeLimitBytes;
             this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
 
             connectionSchedule = new ExponentialBackoffConnectionSchedule(period);
@@ -108,7 +108,7 @@ namespace Serilog.Sinks.Http.Private.Network
                         currentFile,
                         ref nextLineBeginsAtOffset,
                         batchPostingLimit,
-                        batchSizeLimit);
+                        batchSizeLimitBytes);
 
                     var payloadWriter = new StringWriter();
                     batchFormatter.Format(batch.LogEvents, payloadWriter);

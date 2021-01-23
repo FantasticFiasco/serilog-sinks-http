@@ -46,7 +46,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
             bool bufferFileShared,
             int? retainedBufferFileCountLimit,
             int batchPostingLimit,
-            long approximateBatchSizeLimit,
+            long batchSizeLimitBytes,
             TimeSpan period,
             ITextFormatter textFormatter,
             IBatchFormatter batchFormatter,
@@ -60,7 +60,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 requestUri,
                 new TimeRolledBufferFiles(new DirectoryService(), bufferPathFormat),
                 batchPostingLimit,
-                approximateBatchSizeLimit,
+                batchSizeLimitBytes,
                 period,
                 batchFormatter);
 

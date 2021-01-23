@@ -39,20 +39,20 @@ namespace Serilog.Sinks.Http.Private.Network
             string fileName,
             ref long nextLineBeginsAtOffset,
             int batchPostingLimit,
-            long batchSizeLimit)
+            long batchSizeLimitBytes)
         {
             using var stream = System.IO.File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            return Read(stream, ref nextLineBeginsAtOffset, batchPostingLimit, batchSizeLimit);
+            return Read(stream, ref nextLineBeginsAtOffset, batchPostingLimit, batchSizeLimitBytes);
         }
 
         public static Batch Read(
             Stream stream,
             ref long nextLineBeginsAtOffset,
             int batchPostingLimit,
-            long batchSizeLimit)
+            long batchSizeLimitBytes)
         {
             var batch = new Batch();
-            long batchSize = 0;
+            long batchSizeBytes = 0;
 
             while (true)
             {
@@ -71,8 +71,8 @@ namespace Serilog.Sinks.Http.Private.Network
                 }
 
                 // Respect batch size limit
-                batchSize += ByteSize.From(nextLine);
-                if (batchSize > batchSizeLimit)
+                batchSizeBytes += ByteSize.From(nextLine);
+                if (batchSizeBytes > batchSizeLimitBytes)
                 {
                     batch.HasReachedLimit = true;
                     break;

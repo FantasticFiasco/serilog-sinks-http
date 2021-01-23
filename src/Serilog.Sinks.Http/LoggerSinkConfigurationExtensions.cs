@@ -168,8 +168,8 @@ namespace Serilog
         /// <param name="batchPostingLimit">
         /// The maximum number of events to post in a single batch. Default value is 1000.
         /// </param>
-        /// <param name="approximateBatchSizeLimit">
-        /// The approximate size in bytes to post in a single batch. The value is an approximate
+        /// <param name="batchSizeLimitBytes">
+        /// The approximate maximum size, in bytes, for a single batch. The value is an approximate
         /// because only the size of the log events are considered, the extra payload added by the
         /// batch formatter is not considered in the calculation. This means that you will have to
         /// define a value low enough to accomodate for the extra size added by the batch
@@ -209,7 +209,7 @@ namespace Serilog
             bool bufferFileShared = false,
             int? retainedBufferFileCountLimit = 31,
             int batchPostingLimit = 1000,
-            long approximateBatchSizeLimit = long.MaxValue,
+            long batchSizeLimitBytes = long.MaxValue,
             TimeSpan? period = null,
             ITextFormatter textFormatter = null,
             IBatchFormatter batchFormatter = null,
@@ -233,7 +233,7 @@ namespace Serilog
                 bufferFileShared: bufferFileShared,
                 retainedBufferFileCountLimit: retainedBufferFileCountLimit,
                 batchPostingLimit: batchPostingLimit,
-                approximateBatchSizeLimit: approximateBatchSizeLimit,
+                batchSizeLimitBytes: batchSizeLimitBytes,
                 period: period.Value,
                 textFormatter: textFormatter,
                 batchFormatter: batchFormatter,
@@ -279,8 +279,8 @@ namespace Serilog
         /// <param name="batchPostingLimit">
         /// The maximum number of events to post in a single batch. Default value is 1000.
         /// </param>
-        /// <param name="approximateBatchSizeLimit">
-        /// The approximate size in bytes to post in a single batch. The value is an approximate
+        /// <param name="batchSizeLimitBytes">
+        /// The approximate maximum size, in bytes, for a single batch. The value is an approximate
         /// because only the size of the log events are considered, the extra payload added by the
         /// batch formatter is not considered in the calculation. This means that you will have to
         /// define a value low enough to accomodate for the extra size added by the batch
@@ -320,7 +320,7 @@ namespace Serilog
             bool bufferFileShared = false,
             int? retainedBufferFileCountLimit = 31,
             int batchPostingLimit = 1000,
-            long approximateBatchSizeLimit = long.MaxValue,
+            long batchSizeLimitBytes = long.MaxValue,
             TimeSpan? period = null,
             ITextFormatter textFormatter = null,
             IBatchFormatter batchFormatter = null,
@@ -344,7 +344,7 @@ namespace Serilog
                 bufferFileShared: bufferFileShared,
                 retainedBufferFileCountLimit: retainedBufferFileCountLimit,
                 batchPostingLimit: batchPostingLimit,
-                approximateBatchSizeLimit: approximateBatchSizeLimit,
+                batchSizeLimitBytes: batchSizeLimitBytes,
                 period: period.Value,
                 textFormatter: textFormatter,
                 batchFormatter: batchFormatter,
