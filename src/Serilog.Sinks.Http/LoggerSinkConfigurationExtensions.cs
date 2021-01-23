@@ -152,8 +152,8 @@ namespace Serilog
         /// "Buffer-{HalfHour}.json" or "Buffer-{Hour}.json".
         /// </param>
         /// <param name="bufferFileSizeLimitBytes">
-        /// The approximate maximum size, in bytes, to which a buffer file for a specific time interval will be
-        /// allowed to grow. By default no limit will be applied.
+        /// The approximate maximum size, in bytes, to which a buffer file for a specific time
+        /// interval will be allowed to grow. By default no limit will be applied.
         /// </param>
         /// <param name="bufferFileShared">
         /// Allow the buffer file to be shared by multiple processes. Default value is false.
@@ -161,14 +161,19 @@ namespace Serilog
         /// <param name="retainedBufferFileCountLimit">
         /// The maximum number of buffer files that will be retained, including the current buffer
         /// file. Under normal operation only 2 files will be kept, however if the log server is
-        /// unreachable, the number of files specified by <paramref name="retainedBufferFileCountLimit"/>
-        /// will be kept on the file system. For unlimited retention, pass null. Default value is 31.
+        /// unreachable, the number of files specified by
+        /// <paramref name="retainedBufferFileCountLimit"/> will be kept on the file system. For
+        /// unlimited retention, pass null. Default value is 31.
         /// </param>
         /// <param name="batchPostingLimit">
         /// The maximum number of events to post in a single batch. Default value is 1000.
         /// </param>
         /// <param name="approximateBatchSizeLimit">
-        /// TODO: Write documentation
+        /// The approximate size in bytes to post in a single batch. The value is an approximate
+        /// because only the size of the log events are considered, the extra payload added by the
+        /// batch formatter is not considered in the calculation. This means that you will have to
+        /// define a value low enough to accomodate for the extra size added by the batch
+        /// formatter. Default value is long.MaxValue.
         /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
@@ -267,14 +272,19 @@ namespace Serilog
         /// <param name="retainedBufferFileCountLimit">
         /// The maximum number of buffer files that will be retained, including the current buffer
         /// file. Under normal operation only 2 files will be kept, however if the log server is
-        /// unreachable, the number of files specified by <paramref name="retainedBufferFileCountLimit"/>
-        /// will be kept on the file system. For unlimited retention, pass null. Default value is 31.
+        /// unreachable, the number of files specified by
+        /// <paramref name="retainedBufferFileCountLimit"/> will be kept on the file system. For
+        /// unlimited retention, pass null. Default value is 31.
         /// </param>
         /// <param name="batchPostingLimit">
         /// The maximum number of events to post in a single batch. Default value is 1000.
         /// </param>
         /// <param name="approximateBatchSizeLimit">
-        /// TODO: Write documentation
+        /// The approximate size in bytes to post in a single batch. The value is an approximate
+        /// because only the size of the log events are considered, the extra payload added by the
+        /// batch formatter is not considered in the calculation. This means that you will have to
+        /// define a value low enough to accomodate for the extra size added by the batch
+        /// formatter. Default value is long.MaxValue.
         /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
