@@ -21,6 +21,7 @@ namespace Serilog
                 .DurableHttpUsingTimeRolledBuffers(
                     requestUri: "some/route",
                     batchPostingLimit: 100,
+                    batchSizeLimitBytes: 1048576,
                     period: TimeSpan.FromMilliseconds(1),
                     textFormatter: new NormalRenderedTextFormatter(),
                     batchFormatter: new DefaultBatchFormatter(),
