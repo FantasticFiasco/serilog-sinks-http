@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Serilog.Debugging;
 
 namespace Serilog.Sinks.Http.Private.Network
 {
@@ -63,27 +64,38 @@ namespace Serilog.Sinks.Http.Private.Network
                 
                 stream.Position = nextLineBeginsAtOffset;
 
-                // Read next log event
-                var nextLine = ReadLine(stream);
-                if (nextLine == null)
+                // Read log event
+                var line = ReadLine(stream);
+                if (line == null)
                 {
                     break;
                 }
 
-                // Calculate the size of the next log event
-                var nextLineSizeBytes = ByteSize.From(nextLine) + ByteSize.From(Environment.NewLine);
+                // Calculate the size of the log event
+                var lineSizeBytes = ByteSize.From(line) + ByteSize.From(Environment.NewLine);
+                var includeLine = true;
 
                 // Respect batch size limit
-                batchSizeBytes += nextLineSizeBytes;
-                if (batchSizeBytes > batchSizeLimitBytes)
+                if (lineSizeBytes > batchSizeLimitBytes)
                 {
+                    // This single log event exceeds the batch size limit, let's drop it
+                    includeLine = false;
+
+                    SelfLog.WriteLine(
+                        "Event exceeds the batch size limit of {0} bytes set for this sink and will be dropped; data: {1}",
+                        batchSizeLimitBytes,
+                        line);
+                }
+                else if (batchSizeBytes + lineSizeBytes > batchSizeLimitBytes)
+                {
+                    // Tha accumulated size of the batch is exceeding the batch size limit
                     batch.HasReachedLimit = true;
                     break;
                 }
 
                 // Update cursor
                 var includesBom = nextLineBeginsAtOffset == 0;
-                nextLineBeginsAtOffset += nextLineSizeBytes;
+                nextLineBeginsAtOffset += lineSizeBytes;
 
                 if (includesBom)
                 {
@@ -91,8 +103,12 @@ namespace Serilog.Sinks.Http.Private.Network
                 }
 
                 // Add log event
-                batch.LogEvents.Add(nextLine);
-
+                if (includeLine)
+                {
+                    batch.LogEvents.Add(line);
+                    batchSizeBytes += lineSizeBytes;
+                }
+                
                 // Respect batch posting limit
                 if (batch.LogEvents.Count == batchPostingLimit)
                 {

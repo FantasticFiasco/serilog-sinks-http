@@ -90,7 +90,7 @@ namespace Serilog.Sinks.Http.BatchFormatters
                 && ByteSize.From(json) > eventBodyLimitBytes.Value)
             {
                 SelfLog.WriteLine(
-                    "Event JSON representation exceeds the byte size limit of {0} set for this sink and will be dropped; data: {1}",
+                    "Event JSON representation exceeds the size limit of {0} bytes set for this sink and will be dropped; data: {1}",
                     eventBodyLimitBytes,
                     json);
 

@@ -135,7 +135,7 @@ namespace Serilog.Sinks.Http.Private.Network
             nextLineBeginsAtOffset.ShouldBe(BufferFileReader.BomLength + FooLogEvent.Length + Environment.NewLine.Length);
         }
 
-        [Fact(Skip = "Let's implement this edge case while feature is beta tested")]
+        [Fact]
         public void SkipLogEventGivenItExceedsBatchSizeLimit()
         {
             // Arrange
@@ -148,7 +148,7 @@ namespace Serilog.Sinks.Http.Private.Network
             writer.Write(BarLogEvent + Environment.NewLine);
             writer.Flush();
 
-            var batchSizeLimit = stream.Length * 2 / 3;
+            var batchSizeLimit = ByteSize.From(logEventExceedingBatchSizeLimit) - 1;
 
             // Act
             var actual = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, int.MaxValue, batchSizeLimit);
@@ -156,7 +156,7 @@ namespace Serilog.Sinks.Http.Private.Network
             // Assert
             actual.LogEvents.ShouldBe(new[] { BarLogEvent });
             actual.HasReachedLimit.ShouldBeFalse();
-            nextLineBeginsAtOffset.ShouldBe(BufferFileReader.BomLength + BarLogEvent.Length + Environment.NewLine.Length);
+            nextLineBeginsAtOffset.ShouldBe(stream.Length);
         }
     }
 }
