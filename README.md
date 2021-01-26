@@ -24,12 +24,12 @@ __Package__ - [Serilog.Sinks.Http](https://www.nuget.org/packages/serilog.sinks.
 
 ## Super simple to use
 
-In the following example, the sink will POST log events to `http://www.mylogs.com` over HTTP.
+In the following example, the sink will POST log events to `http://www.mylogs.com` over HTTP. Because breaking changes in this sink, more often than not, is the result of the introduction of a new parameter, we use named arguments instead of positional. I would urge you to do the same.
 
 ```csharp
 ILogger log = new LoggerConfiguration()
   .MinimumLevel.Verbose()
-  .WriteTo.Http("http://www.mylogs.com")
+  .WriteTo.Http(requestUri: "http://www.mylogs.com")
   .CreateLogger();
 
 log.Information("Logging {@Heartbeat} from {Computer}", heartbeat, computer);
