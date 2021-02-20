@@ -18,7 +18,7 @@ __Package__ - [Serilog.Sinks.Http](https://www.nuget.org/packages/serilog.sinks.
 - [Sample applications](#sample-applications)
 - [Install via NuGet](#install-via-nuget)
 - [Donations](#donations)
-- [Credit](#credit)
+- [Contributors](#contributors)
 
 ---
 
@@ -131,8 +131,25 @@ To install the sink, run the following command in the Package Manager Console:
 PM> Install-Package Serilog.Sinks.Http
 ```
 
-## Credit
+## Contributors
 
-Thank you [JetBrains](https://www.jetbrains.com/) for your important initiative to support the open source community with free licenses to your products.
+The following users have made significant contributions to this project. Thank you so much!
 
-![JetBrains](./doc/resources/jetbrains.png)
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://jetbrains.com/opensource"><img src="https://avatars.githubusercontent.com/u/878437?v=4?s=100" width="100px;" alt=""/><br /><sub><b>JetBrains</b></sub></a><br /><a href="#infra-JetBrains" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
+    <td align="center"><a href="https://augustoproiete.net/"><img src="https://avatars.githubusercontent.com/u/177608?v=4?s=100" width="100px;" alt=""/><br /><sub><b>C. Augusto Proiete</b></sub></a><br /><a href="#financial-augustoproiete" title="Financial">💵</a> <a href="#question-augustoproiete" title="Answering Questions">💬</a> <a href="https://github.com/FantasticFiasco/serilog-sinks-http/commits?author=augustoproiete" title="Code">💻</a> <a href="#ideas-augustoproiete" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="https://github.com/lhaussknecht"><img src="https://avatars.githubusercontent.com/u/140147?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Louis Haußknecht</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/commits?author=lhaussknecht" title="Code">💻</a> <a href="#ideas-lhaussknecht" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/FantasticFiasco/serilog-sinks-http/issues?q=author%3Alhaussknecht" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/rob-somerville"><img src="https://avatars.githubusercontent.com/u/12766610?v=4?s=100" width="100px;" alt=""/><br /><sub><b>rob-somerville</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/commits?author=rob-somerville" title="Code">💻</a> <a href="#ideas-rob-somerville" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/FantasticFiasco/serilog-sinks-http/issues?q=author%3Arob-somerville" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/kvpt"><img src="https://avatars.githubusercontent.com/u/1446221?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Kevin Petit</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/commits?author=kvpt" title="Code">💻</a> <a href="#ideas-kvpt" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/FantasticFiasco/serilog-sinks-http/issues?q=author%3Akvpt" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="https://github.com/aleksaradz"><img src="https://avatars.githubusercontent.com/u/72725560?v=4?s=100" width="100px;" alt=""/><br /><sub><b>aleksaradz</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/commits?author=aleksaradz" title="Code">💻</a> <a href="#ideas-aleksaradz" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/FantasticFiasco/serilog-sinks-http/issues?q=author%3Aaleksaradz" title="Bug reports">🐛</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->

@@ -1,0 +1,80 @@
+{
+  "projectName": "serilog-sinks-http",
+  "projectOwner": "FantasticFiasco",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitConvention": "none",
+  "contributors": [
+    {
+      "login": "JetBrains",
+      "name": "JetBrains",
+      "avatar_url": "https://avatars.githubusercontent.com/u/878437?v=4",
+      "profile": "https://jetbrains.com/opensource",
+      "contributions": [
+        "infra"
+      ]
+    },
+    {
+      "login": "augustoproiete",
+      "name": "C. Augusto Proiete",
+      "avatar_url": "https://avatars.githubusercontent.com/u/177608?v=4",
+      "profile": "https://augustoproiete.net/",
+      "contributions": [
+        "financial",
+        "question",
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "lhaussknecht",
+      "name": "Louis Haußknecht",
+      "avatar_url": "https://avatars.githubusercontent.com/u/140147?v=4",
+      "profile": "https://github.com/lhaussknecht",
+      "contributions": [
+        "code",
+        "ideas",
+        "bug"
+      ]
+    },
+    {
+      "login": "rob-somerville",
+      "name": "rob-somerville",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12766610?v=4",
+      "profile": "https://github.com/rob-somerville",
+      "contributions": [
+        "code",
+        "ideas",
+        "bug"
+      ]
+    },
+    {
+      "login": "kvpt",
+      "name": "Kevin Petit",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1446221?v=4",
+      "profile": "https://github.com/kvpt",
+      "contributions": [
+        "code",
+        "ideas",
+        "bug"
+      ]
+    },
+    {
+      "login": "aleksaradz",
+      "name": "aleksaradz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72725560?v=4",
+      "profile": "https://github.com/aleksaradz",
+      "contributions": [
+        "code",
+        "ideas",
+        "bug"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}
