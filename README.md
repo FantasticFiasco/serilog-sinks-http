@@ -17,7 +17,6 @@ __Package__ - [Serilog.Sinks.Http](https://www.nuget.org/packages/serilog.sinks.
 - [Typical use cases](#typical-use-cases)
 - [Sample applications](#sample-applications)
 - [Install via NuGet](#install-via-nuget)
-- [Donations](#donations)
 - [Contributors](#contributors)
 
 ---
