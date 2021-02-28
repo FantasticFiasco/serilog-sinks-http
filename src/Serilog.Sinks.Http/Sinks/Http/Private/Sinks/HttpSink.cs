@@ -50,34 +50,18 @@ namespace Serilog.Sinks.Http.Private.Sinks
         public HttpSink(
             string requestUri,
             int batchPostingLimit,
-            int queueLimit,
+            long batchSizeLimitBytes,
+            int? queueLimit,
             TimeSpan period,
             ITextFormatter textFormatter,
             IBatchFormatter batchFormatter,
             IHttpClient httpClient)
-            : base(batchPostingLimit, period, queueLimit)
-        {
-            this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
-            this.textFormatter = textFormatter ?? throw new ArgumentNullException(nameof(textFormatter));
-            this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
-            this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpSink"/> class.
-        /// </summary>
-        /// <remarks>
-        /// We need two constructors since <see cref="PeriodicBatchingSink"/> is behaving
-        /// differently depending on whether we specify a queue limit or not.
-        /// </remarks>
-        public HttpSink(
-            string requestUri,
-            int batchPostingLimit,
-            TimeSpan period,
-            ITextFormatter textFormatter,
-            IBatchFormatter batchFormatter,
-            IHttpClient httpClient)
-            : base(batchPostingLimit, period)
+            : base(new PeriodicBatchingSinkOptions
+            {
+                BatchSizeLimit: batchPostingLimit,
+                Period = period,
+                QueueLimit = queueLimit
+            })
         {
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
             this.textFormatter = textFormatter ?? throw new ArgumentNullException(nameof(textFormatter));

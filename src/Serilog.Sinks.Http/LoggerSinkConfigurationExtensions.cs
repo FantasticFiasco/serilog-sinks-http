@@ -42,6 +42,13 @@ namespace Serilog
         /// <param name="batchPostingLimit">
         /// The maximum number of events to post in a single batch. Default value is 1000.
         /// </param>
+        /// <param name="batchSizeLimitBytes">
+        /// The approximate maximum size, in bytes, for a single batch. The value is an approximate
+        /// because only the size of the log events are considered. The extra characters added by
+        /// the batch formatter, where the sequence of serialized log events are transformed into a
+        /// payload, are not considered. Please make sure to accommodate for those. Default value
+        /// is long.MaxValue.
+        /// </param>
         /// <param name="queueLimit">
         /// The maximum number of events stored in the queue in memory, waiting to be posted over
         /// the network. Default value is infinitely.
@@ -76,6 +83,7 @@ namespace Serilog
             this LoggerSinkConfiguration sinkConfiguration,
             string requestUri,
             int batchPostingLimit = 1000,
+            long batchSizeLimitBytes = long.MaxValue,
             int? queueLimit = null,
             TimeSpan? period = null,
             ITextFormatter textFormatter = null,
@@ -93,9 +101,14 @@ namespace Serilog
             httpClient ??= new DefaultHttpClient();
             httpClient.Configure(configuration);
 
-            var sink = queueLimit != null
-                ? new HttpSink(requestUri, batchPostingLimit, queueLimit.Value, period.Value, textFormatter, batchFormatter, httpClient)
-                : new HttpSink(requestUri, batchPostingLimit, period.Value, textFormatter, batchFormatter, httpClient);
+            var sink = new HttpSink(
+                requestUri: requestUri,
+                batchPostingLimit: batchPostingLimit,
+                queueLimit: queueLimit,
+                period: period.Value,
+                textFormatter: textFormatter,
+                batchFormatter: batchFormatter,
+                httpClient: httpClient);
 
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
         }
@@ -172,7 +185,7 @@ namespace Serilog
         /// The approximate maximum size, in bytes, for a single batch. The value is an approximate
         /// because only the size of the log events are considered. The extra characters added by
         /// the batch formatter, where the sequence of serialized log events are transformed into a
-        /// JSON array, are not considered. Please make sure to accomodate for those. Default value
+        /// payload, are not considered. Please make sure to accommodate for those. Default value
         /// is long.MaxValue.
         /// </param>
         /// <param name="period">
@@ -283,7 +296,7 @@ namespace Serilog
         /// The approximate maximum size, in bytes, for a single batch. The value is an approximate
         /// because only the size of the log events are considered. The extra characters added by
         /// the batch formatter, where the sequence of serialized log events are transformed into a
-        /// JSON array, are not considered. Please make sure to accomodate for those. Default value
+        /// payload, are not considered. Please make sure to accommodate for those. Default value
         /// is long.MaxValue.
         /// </param>
         /// <param name="period">
