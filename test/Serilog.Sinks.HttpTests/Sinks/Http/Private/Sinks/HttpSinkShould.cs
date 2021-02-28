@@ -20,6 +20,8 @@ namespace Serilog.Sinks.Http.Private.Sinks
             using (new HttpSink(
                 "some/route",
                 1,
+                ByteSize.MB,
+                null,
                 TimeSpan.FromMilliseconds(1),         // 1 ms period
                 new NormalTextFormatter(),
                 new ArrayBatchFormatter(),
@@ -49,11 +51,13 @@ namespace Serilog.Sinks.Http.Private.Sinks
             using var sink = new HttpSink(
                 "some/route",
                 1,
+                ByteSize.MB,
                 1,                                   // Queue only holds 1 event
                 TimeSpan.FromMilliseconds(1),        // 1 ms period
                 new NormalTextFormatter(),
                 new ArrayBatchFormatter(),
                 httpClient);
+
             // Act
             foreach (var logEvent in logEvents)
             {
