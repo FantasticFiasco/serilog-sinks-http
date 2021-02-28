@@ -19,6 +19,7 @@ namespace Serilog
                 .Http(
                     requestUri: "some/route",
                     batchPostingLimit: 100,
+                    batchSizeLimitBytes: 1048576,
                     queueLimit: 10000,
                     period: TimeSpan.FromMilliseconds(1),
                     textFormatter: new NormalRenderedTextFormatter(),
