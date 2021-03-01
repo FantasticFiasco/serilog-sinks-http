@@ -38,9 +38,8 @@ namespace Serilog.Sinks.Http.Private.Sinks
         private readonly string requestUri;
         private readonly ITextFormatter textFormatter;
         private readonly IBatchFormatter batchFormatter;
+        private readonly IHttpClient httpClient;
         private readonly PeriodicBatchingSink sink;
-
-        private IHttpClient httpClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpSink"/> class.
@@ -60,12 +59,20 @@ namespace Serilog.Sinks.Http.Private.Sinks
             this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
             this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 
+            // TODO: Respect batchSizeLimitBytes
+
             sink = new PeriodicBatchingSink(this, new PeriodicBatchingSinkOptions
             {
                 BatchSizeLimit = batchPostingLimit,
                 Period = period,
                 QueueLimit = queueLimit
             });
+        }
+
+        /// <inheritdoc />
+        public void Emit(LogEvent logEvent)
+        {
+            sink.Emit(logEvent);
         }
 
         /// <inheritdoc />
@@ -84,16 +91,16 @@ namespace Serilog.Sinks.Http.Private.Sinks
             }
         }
 
-        /// <inheritdoc />
-        protected override void Dispose(bool disposing)
+        public Task OnEmptyBatchAsync()
         {
-            base.Dispose(disposing);
+            return Task.FromResult<bool>(true);
+        }
 
-            if (disposing)
-            {
-                httpClient?.Dispose();
-                httpClient = null;
-            }
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            sink?.Dispose();
+            httpClient?.Dispose();
         }
 
         private string FormatPayload(IEnumerable<LogEvent> logEvents)
@@ -104,13 +111,5 @@ namespace Serilog.Sinks.Http.Private.Sinks
 
             return payload.ToString();
         }
-
-        public void Emit(LogEvent logEvent) => throw new NotImplementedException();
-
-        Task IBatchedLogEventSink.EmitBatchAsync(IEnumerable<LogEvent> batch) => throw new NotImplementedException();
-
-        public Task OnEmptyBatchAsync() => throw new NotImplementedException();
-
-        public void Dispose() => throw new NotImplementedException();
     }
 }

@@ -104,6 +104,7 @@ namespace Serilog
             var sink = new HttpSink(
                 requestUri: requestUri,
                 batchPostingLimit: batchPostingLimit,
+                batchSizeLimitBytes: batchSizeLimitBytes,
                 queueLimit: queueLimit,
                 period: period.Value,
                 textFormatter: textFormatter,
