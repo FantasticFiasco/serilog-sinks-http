@@ -24,7 +24,7 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.PeriodicBatching;
 
-namespace Serilog.Sinks.Http.Private.Sinks
+namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
 {
     /// <summary>
     /// A non-durable sink that sends log events using HTTP POST over the network. A non-durable

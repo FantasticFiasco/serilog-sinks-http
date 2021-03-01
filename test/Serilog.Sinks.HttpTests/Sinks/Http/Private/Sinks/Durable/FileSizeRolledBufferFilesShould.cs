@@ -4,7 +4,7 @@ using Serilog.Sinks.Http.Private.IO;
 using Shouldly;
 using Xunit;
 
-namespace Serilog.Sinks.Http.Private.Buffers.File
+namespace Serilog.Sinks.Http.Private.Sinks.Durable
 {
     public class FileSizeRolledBufferFilesShould
     {

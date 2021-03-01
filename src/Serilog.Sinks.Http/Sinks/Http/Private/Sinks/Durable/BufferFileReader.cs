@@ -18,7 +18,7 @@ using System.IO;
 using System.Text;
 using Serilog.Debugging;
 
-namespace Serilog.Sinks.Http.Private.Buffers.File
+namespace Serilog.Sinks.Http.Private.Sinks.Durable
 {
     public class Batch
     {

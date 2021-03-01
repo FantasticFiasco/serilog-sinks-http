@@ -16,7 +16,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
-namespace Serilog.Sinks.Http.Private.Network
+namespace Serilog.Sinks.Http.Private.Http
 {
     public class DefaultHttpClient : IHttpClient
     {

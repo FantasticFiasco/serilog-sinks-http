@@ -21,8 +21,10 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.Http;
 using Serilog.Sinks.Http.BatchFormatters;
-using Serilog.Sinks.Http.Private.Network;
+using Serilog.Sinks.Http.Private.Http;
 using Serilog.Sinks.Http.Private.Sinks;
+using Serilog.Sinks.Http.Private.Sinks.Durable;
+using Serilog.Sinks.Http.Private.Sinks.NonDurable;
 using Serilog.Sinks.Http.TextFormatters;
 
 namespace Serilog
