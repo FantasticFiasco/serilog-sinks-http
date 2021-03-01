@@ -16,7 +16,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace Serilog.Sinks.Http.Private.Network
+namespace Serilog.Sinks.Http.Private.Buffers.File
 {
     public class BookmarkFile : IDisposable
     {

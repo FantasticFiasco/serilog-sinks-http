@@ -18,7 +18,7 @@ using System.IO;
 using System.Text;
 using Serilog.Debugging;
 
-namespace Serilog.Sinks.Http.Private.Network
+namespace Serilog.Sinks.Http.Private.Buffers.File
 {
     public class Batch
     {
@@ -61,7 +61,7 @@ namespace Serilog.Sinks.Http.Private.Network
                 {
                     break;
                 }
-                
+
                 stream.Position = nextLineBeginsAtOffset;
 
                 // Read log event
@@ -108,7 +108,7 @@ namespace Serilog.Sinks.Http.Private.Network
                     batch.LogEvents.Add(line);
                     batchSizeBytes += lineSizeBytes;
                 }
-                
+
                 // Respect batch posting limit
                 if (batch.LogEvents.Count == batchPostingLimit)
                 {

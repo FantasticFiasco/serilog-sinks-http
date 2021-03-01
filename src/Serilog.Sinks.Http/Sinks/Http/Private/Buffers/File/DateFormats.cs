@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Serilog.Sinks.Http.Private.Network
+namespace Serilog.Sinks.Http.Private.Buffers.File
 {
     public enum DateFormats
     {

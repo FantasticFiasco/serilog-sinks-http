@@ -18,6 +18,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog.Core;
 using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
@@ -30,23 +31,20 @@ namespace Serilog.Sinks.Http.Private.Sinks
     /// sink will lose data after a system or process restart.
     /// </summary>
     /// <seealso cref="PeriodicBatchingSink" />
-    public class HttpSink : PeriodicBatchingSink
+    public class HttpSink : ILogEventSink, IBatchedLogEventSink, IDisposable
     {
         private const string ContentType = "application/json";
 
         private readonly string requestUri;
         private readonly ITextFormatter textFormatter;
         private readonly IBatchFormatter batchFormatter;
+        private readonly PeriodicBatchingSink sink;
 
         private IHttpClient httpClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpSink"/> class.
         /// </summary>
-        /// <remarks>
-        /// We need two constructors since <see cref="PeriodicBatchingSink"/> is behaving
-        /// differently depending on whether we specify a queue limit or not.
-        /// </remarks>
         public HttpSink(
             string requestUri,
             int batchPostingLimit,
@@ -56,21 +54,22 @@ namespace Serilog.Sinks.Http.Private.Sinks
             ITextFormatter textFormatter,
             IBatchFormatter batchFormatter,
             IHttpClient httpClient)
-            : base(new PeriodicBatchingSinkOptions
-            {
-                BatchSizeLimit: batchPostingLimit,
-                Period = period,
-                QueueLimit = queueLimit
-            })
         {
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
             this.textFormatter = textFormatter ?? throw new ArgumentNullException(nameof(textFormatter));
             this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
             this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+
+            sink = new PeriodicBatchingSink(this, new PeriodicBatchingSinkOptions
+            {
+                BatchSizeLimit = batchPostingLimit,
+                Period = period,
+                QueueLimit = queueLimit
+            });
         }
 
         /// <inheritdoc />
-        protected override async Task EmitBatchAsync(IEnumerable<LogEvent> logEvents)
+        public async Task EmitBatchAsync(IEnumerable<LogEvent> logEvents)
         {
             var payload = FormatPayload(logEvents);
             var content = new StringContent(payload, Encoding.UTF8, ContentType);
@@ -105,5 +104,13 @@ namespace Serilog.Sinks.Http.Private.Sinks
 
             return payload.ToString();
         }
+
+        public void Emit(LogEvent logEvent) => throw new NotImplementedException();
+
+        Task IBatchedLogEventSink.EmitBatchAsync(IEnumerable<LogEvent> batch) => throw new NotImplementedException();
+
+        public Task OnEmptyBatchAsync() => throw new NotImplementedException();
+
+        public void Dispose() => throw new NotImplementedException();
     }
 }

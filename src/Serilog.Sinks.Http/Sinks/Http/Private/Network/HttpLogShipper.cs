@@ -20,6 +20,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Sinks.Http.Private.Time;
+using Serilog.Sinks.Http.Private.Buffers.File;
 #if HRESULTS
 using System.Runtime.InteropServices;
 #endif

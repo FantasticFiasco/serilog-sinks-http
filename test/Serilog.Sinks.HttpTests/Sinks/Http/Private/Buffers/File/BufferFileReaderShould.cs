@@ -4,7 +4,7 @@ using System.Text;
 using Shouldly;
 using Xunit;
 
-namespace Serilog.Sinks.Http.Private.Network
+namespace Serilog.Sinks.Http.Private.Buffers.File
 {
     public class BufferFileReaderShould
     {
@@ -12,7 +12,7 @@ namespace Serilog.Sinks.Http.Private.Network
         private const string BarLogEvent = "{ \"bar\": 2 }";
 
         private long nextLineBeginsAtOffset;
-        
+
         [Fact]
         public void ReadLogEvent()
         {
