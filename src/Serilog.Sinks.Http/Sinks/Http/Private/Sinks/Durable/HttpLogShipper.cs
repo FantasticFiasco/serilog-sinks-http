@@ -39,7 +39,7 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
         private readonly IBufferFiles bufferFiles;
         private readonly ExponentialBackoffConnectionSchedule connectionSchedule;
         private readonly PortableTimer timer;
-        private readonly object stateLock = new();
+        private readonly object syncRoot = new();
         private readonly IBatchFormatter batchFormatter;
         private DateTime nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
         private volatile bool unloading;
@@ -78,7 +78,7 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
 
         private void SetTimer()
         {
-            // Note, called under stateLock
+            // Note, called under syncRoot
             timer.Start(connectionSchedule.NextInterval);
         }
 
@@ -116,7 +116,7 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
 
                     if (batch.LogEvents.Count > 0 || nextRequiredLevelCheckUtc < DateTime.UtcNow)
                     {
-                        lock (stateLock)
+                        lock (syncRoot)
                         {
                             nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
                         }
@@ -177,7 +177,7 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
             }
             finally
             {
-                lock (stateLock)
+                lock (syncRoot)
                 {
                     if (!unloading)
                     {
@@ -219,7 +219,7 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
 
         private void CloseAndFlush()
         {
-            lock (stateLock)
+            lock (syncRoot)
             {
                 if (unloading)
                     return;

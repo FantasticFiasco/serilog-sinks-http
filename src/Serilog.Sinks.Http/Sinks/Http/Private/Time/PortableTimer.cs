@@ -20,7 +20,7 @@ namespace Serilog.Sinks.Http.Private.Time
 {
     public class PortableTimer : IDisposable
     {
-        private readonly object stateLock = new();
+        private readonly object syncRoot = new();
         private readonly Func<Task> onTick;
         private readonly Timer timer;
 
@@ -38,7 +38,7 @@ namespace Serilog.Sinks.Http.Private.Time
         {
             if (interval < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(interval));
 
-            lock (stateLock)
+            lock (syncRoot)
             {
                 if (disposed)
                 {
@@ -51,7 +51,7 @@ namespace Serilog.Sinks.Http.Private.Time
 
         public void Dispose()
         {
-            lock (stateLock)
+            lock (syncRoot)
             {
                 if (disposed)
                 {
@@ -60,7 +60,7 @@ namespace Serilog.Sinks.Http.Private.Time
 
                 while (running)
                 {
-                    Monitor.Wait(stateLock);
+                    Monitor.Wait(syncRoot);
                 }
 
                 timer.Dispose();
@@ -73,7 +73,7 @@ namespace Serilog.Sinks.Http.Private.Time
         {
             try
             {
-                lock (stateLock)
+                lock (syncRoot)
                 {
                     if (disposed)
                     {
@@ -85,7 +85,7 @@ namespace Serilog.Sinks.Http.Private.Time
 
                     if (running)
                     {
-                        Monitor.Wait(stateLock);
+                        Monitor.Wait(syncRoot);
 
                         if (disposed)
                         {
@@ -100,10 +100,10 @@ namespace Serilog.Sinks.Http.Private.Time
             }
             finally
             {
-                lock (stateLock)
+                lock (syncRoot)
                 {
                     running = false;
-                    Monitor.PulseAll(stateLock);
+                    Monitor.PulseAll(syncRoot);
                 }
             }
         }
