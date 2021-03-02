@@ -15,6 +15,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Serilog.Core;
 using Serilog.Debugging;
@@ -42,6 +44,8 @@ namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
         private readonly PortableTimer timer;
         private readonly LogEventQueue<LogEvent> queue;
 
+        private Batch currentBatch;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpSink"/> class.
         /// </summary>
@@ -65,6 +69,8 @@ namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
             connectionSchedule = new ExponentialBackoffConnectionSchedule(period);
             timer = new PortableTimer(OnTick);
             queue = new LogEventQueue<LogEvent>(queueLimit);
+
+            SetTimer(); 
         }
 
         /// <inheritdoc />
@@ -72,10 +78,10 @@ namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
         {
             if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
 
-            bool success = queue.TryEnqueue(logEvent);
+            var success = queue.TryEnqueue(logEvent);
             if (!success)
             {
-                SelfLog.WriteLine("The queue has reached its limit and log event will be dropped");
+                SelfLog.WriteLine("Queue has reached its limit and the log event will be dropped");
             }
         }
 
@@ -84,6 +90,12 @@ namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
         {
             timer?.Dispose();
             httpClient?.Dispose();
+        }
+
+        private void SetTimer()
+        {
+            // Note, called under syncRoot
+            timer.Start(connectionSchedule.NextInterval);
         }
 
         // /// <inheritdoc />
@@ -102,12 +114,50 @@ namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
         //     }
         // }
 
-        // public Task OnEmptyBatchAsync()
-        // {
-        //     return Task.FromResult<bool>(true);
-        // }
+        private async Task OnTick()
+        {
+            try
+            {
+                do
+                {
+                    if (currentBatch == null)
+                    {
+                        currentBatch = new Batch();
+                        while (currentBatch.LogEvents.Count < batchPostingLimit
+                            && queue.TryDequeue(out var logEvent))
+                        {
+                            currentBatch.LogEvents.Add(logEvent);
+                        }
+                    }
 
-        private Task OnTick() => throw new NotImplementedException();
+                    if (currentBatch.LogEvents.Count == 0)
+                    {
+                        currentBatch = null;
+                        return;
+                    }
+
+                    var payload = FormatPayload(currentBatch.LogEvents);
+                    var content = new StringContent(payload, Encoding.UTF8, ContentType);
+
+                    var result = await httpClient
+                        .PostAsync(requestUri, content)
+                        .ConfigureAwait(false);
+
+                    if (!result.IsSuccessStatusCode)
+                    {
+                        throw new LoggingFailedException($"Received failed result {result.StatusCode} when posting events to {requestUri}");
+                    }
+
+                    connectionSchedule.MarkSuccess();
+                } while (currentBatch != null && currentBatch.HasReachedLimit);
+            }
+            catch (Exception e)
+            {
+                SelfLog.WriteLine("Exception while emitting periodic batch from {0}: {1}", this, e);
+                connectionSchedule.MarkFailure();
+            }
+            
+        }
 
         private string FormatPayload(IEnumerable<LogEvent> logEvents)
         {

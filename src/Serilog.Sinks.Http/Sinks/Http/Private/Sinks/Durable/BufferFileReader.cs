@@ -13,19 +13,12 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Serilog.Debugging;
 
 namespace Serilog.Sinks.Http.Private.Sinks.Durable
 {
-    public class Batch
-    {
-        public List<string> LogEvents { get; } = new();
-        public bool HasReachedLimit { get; set; }
-    }
-
     public static class BufferFileReader
     {
         private const char CR = '\r';
