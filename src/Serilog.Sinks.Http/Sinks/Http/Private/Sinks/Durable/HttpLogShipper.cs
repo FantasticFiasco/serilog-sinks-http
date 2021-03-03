@@ -32,7 +32,7 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
 
         private static readonly TimeSpan RequiredLevelCheckInterval = TimeSpan.FromMinutes(2);
 
-        private IHttpClient httpClient;
+        private readonly IHttpClient httpClient;
         private readonly string requestUri;
         private readonly int batchPostingLimit;
         private readonly long batchSizeLimitBytes;
@@ -73,7 +73,6 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
             CloseAndFlush();
 
             httpClient?.Dispose();
-            httpClient = null;
         }
 
         private void SetTimer()
