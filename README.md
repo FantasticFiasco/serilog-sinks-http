@@ -13,6 +13,7 @@ __Package__ - [Serilog.Sinks.Http](https://www.nuget.org/packages/serilog.sinks.
 
 ## Table of contents
 
+- [Introduction](#introduction)
 - [Super simple to use](#super-simple-to-use)
 - [Typical use cases](#typical-use-cases)
 - [Sample applications](#sample-applications)
@@ -20,6 +21,14 @@ __Package__ - [Serilog.Sinks.Http](https://www.nuget.org/packages/serilog.sinks.
 - [Contributors](#contributors)
 
 ---
+
+## Introduction
+
+This project started out with a wish to send log events to the Elastic Stack. I had prior experience of [Elastic Filebeat](https://www.elastic.co/beats/filebeat) and didn't like it. I thought the value it added was lower than the complexity it introduced.
+
+Knowing that [Serilog.Sinks.Seq](https://github.com/serilog/serilog-sinks-seq) existed, and knowing that the code was of really good quality, I blatantly copied many of the core files into this project and started developing a general HTTP sink.
+
+And here we are today. I hope you'll find the sink useful. If not, don't hesitate to open an issue.
 
 ## Super simple to use
 
