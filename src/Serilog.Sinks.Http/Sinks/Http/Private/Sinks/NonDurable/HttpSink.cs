@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
@@ -42,9 +41,11 @@ namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
         private readonly IHttpClient httpClient;
         private readonly ExponentialBackoffConnectionSchedule connectionSchedule;
         private readonly PortableTimer timer;
-        private readonly LogEventQueue<LogEvent> queue;
+        private readonly object syncRoot = new();
+        private readonly LogEventQueue queue;
 
-        private Batch currentBatch;
+        private Batch unsentBatch;
+        private volatile bool isDisposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpSink"/> class.
@@ -68,7 +69,7 @@ namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
 
             connectionSchedule = new ExponentialBackoffConnectionSchedule(period);
             timer = new PortableTimer(OnTick);
-            queue = new LogEventQueue<LogEvent>(queueLimit);
+            queue = new LogEventQueue(queueLimit);
 
             SetTimer(); 
         }
@@ -78,7 +79,11 @@ namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
         {
             if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
 
-            var success = queue.TryEnqueue(logEvent);
+            var formattedLogEventWriter = new StringWriter();
+            textFormatter.Format(logEvent, formattedLogEventWriter);
+            var formattedLogEvent = formattedLogEventWriter.ToString();
+
+            var success = queue.TryEnqueue(formattedLogEvent);
             if (!success)
             {
                 SelfLog.WriteLine("Queue has reached its limit and the log event will be dropped");
@@ -88,7 +93,17 @@ namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
         /// <inheritdoc />
         public void Dispose()
         {
+            lock (syncRoot)
+            {
+                if (isDisposed)
+                    return;
+
+                isDisposed = true;
+            }
+
             timer?.Dispose();
+
+            OnTick().GetAwaiter().GetResult();
             httpClient?.Dispose();
         }
 
@@ -118,54 +133,70 @@ namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
         {
             try
             {
+                Batch batch = null;
+
                 do
                 {
-                    if (currentBatch == null)
+                    batch = unsentBatch ?? LogEventQueueReader.Read(batchPostingLimit, batchSizeLimitBytes);
+
+                    if (batch.LogEvents.Count > 0)
                     {
-                        currentBatch = new Batch();
-                        while (currentBatch.LogEvents.Count < batchPostingLimit
-                            && queue.TryDequeue(out var logEvent))
+                        var payloadWriter = new StringWriter();
+                        batchFormatter.Format(batch.LogEvents, payloadWriter);
+                        var payload = payloadWriter.ToString();
+
+                        if (string.IsNullOrEmpty(payload))
+                            continue;
+
+                        var content = new StringContent(payload, Encoding.UTF8, ContentType);
+
+                        var result = await httpClient
+                            .PostAsync(requestUri, content)
+                            .ConfigureAwait(false);
+
+                        if (result.IsSuccessStatusCode)
                         {
-                            currentBatch.LogEvents.Add(logEvent);
+                            connectionSchedule.MarkSuccess();
+                            unsentBatch = null;
+                        }
+                        else
+                        {
+                            connectionSchedule.MarkFailure();
+                            unsentBatch = batch;
+
+                            SelfLog.WriteLine(
+                                "Received failed HTTP shipping result {0}: {1}",
+                                result.StatusCode,
+                                await result.Content.ReadAsStringAsync().ConfigureAwait(false));
+
+                            break;
                         }
                     }
-
-                    if (currentBatch.LogEvents.Count == 0)
+                    else
                     {
-                        currentBatch = null;
-                        return;
+                        // For whatever reason, there's nothing waiting to send. This means we should try connecting
+                        // again at the regular interval, so mark the attempt as successful.
+                        connectionSchedule.MarkSuccess();
                     }
 
-                    var payload = FormatPayload(currentBatch.LogEvents);
-                    var content = new StringContent(payload, Encoding.UTF8, ContentType);
 
-                    var result = await httpClient
-                        .PostAsync(requestUri, content)
-                        .ConfigureAwait(false);
-
-                    if (!result.IsSuccessStatusCode)
-                    {
-                        throw new LoggingFailedException($"Received failed result {result.StatusCode} when posting events to {requestUri}");
-                    }
-
-                    connectionSchedule.MarkSuccess();
-                } while (currentBatch != null && currentBatch.HasReachedLimit);
+                } while (batch != null && batch.HasReachedLimit);
             }
             catch (Exception e)
             {
                 SelfLog.WriteLine("Exception while emitting periodic batch from {0}: {1}", this, e);
                 connectionSchedule.MarkFailure();
             }
-            
-        }
-
-        private string FormatPayload(IEnumerable<LogEvent> logEvents)
-        {
-            var payload = new StringWriter();
-
-            batchFormatter.Format(logEvents, textFormatter, payload);
-
-            return payload.ToString();
+            finally
+            {
+                lock (syncRoot)
+                {
+                    if (!isDisposed)
+                    {
+                        SetTimer();
+                    }
+                }
+            }
         }
     }
 }

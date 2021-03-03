@@ -51,7 +51,7 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
             IBatchFormatter batchFormatter,
             IHttpClient httpClient)
         {
-            if (bufferFileSizeLimitBytes.HasValue && bufferFileSizeLimitBytes < 0)
+            if (bufferFileSizeLimitBytes < 0)
                 throw new ArgumentOutOfRangeException(nameof(bufferFileSizeLimitBytes), "Negative value provided; file size limit must be non-negative.");
 
             shipper = new HttpLogShipper(

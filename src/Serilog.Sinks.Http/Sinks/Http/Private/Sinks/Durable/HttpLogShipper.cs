@@ -30,8 +30,6 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
     {
         private const string ContentType = "application/json";
 
-        private static readonly TimeSpan RequiredLevelCheckInterval = TimeSpan.FromMinutes(2);
-
         private readonly IHttpClient httpClient;
         private readonly string requestUri;
         private readonly int batchPostingLimit;
@@ -41,7 +39,6 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
         private readonly PortableTimer timer;
         private readonly object syncRoot = new();
         private readonly IBatchFormatter batchFormatter;
-        private DateTime nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
         private volatile bool isDisposed;
 
         public HttpLogShipper(
@@ -94,7 +91,7 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
         {
             try
             {
-                var batch = new Batch();
+                Batch batch = null;
 
                 do
                 {
@@ -118,23 +115,21 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
                         batchPostingLimit,
                         batchSizeLimitBytes);
 
-                    var payloadWriter = new StringWriter();
-                    batchFormatter.Format(batch.LogEvents, payloadWriter);
-                    var payload = payloadWriter.ToString();
-
-                    if (batch.LogEvents.Count > 0 || nextRequiredLevelCheckUtc < DateTime.UtcNow)
+                    if (batch.LogEvents.Count > 0)
                     {
-                        lock (syncRoot)
-                        {
-                            nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
-                        }
+                        var payloadWriter = new StringWriter();
+                        batchFormatter.Format(batch.LogEvents, payloadWriter);
+                        var payload = payloadWriter.ToString();
 
                         if (string.IsNullOrEmpty(payload))
                             continue;
 
                         var content = new StringContent(payload, Encoding.UTF8, ContentType);
 
-                        var result = await httpClient.PostAsync(requestUri, content).ConfigureAwait(false);
+                        var result = await httpClient
+                            .PostAsync(requestUri, content)
+                            .ConfigureAwait(false);
+
                         if (result.IsSuccessStatusCode)
                         {
                             connectionSchedule.MarkSuccess();
@@ -176,7 +171,7 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
                             System.IO.File.Delete(fileSet[0]);
                         }
                     }
-                } while (batch.HasReachedLimit);
+                } while (batch != null && batch.HasReachedLimit);
             }
             catch (Exception e)
             {
@@ -203,12 +198,12 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
                 return fileStream.Length <= maxLength;
             }
 #if HRESULTS
-            catch (IOException ex)
+            catch (IOException e)
             {
-                var errorCode = Marshal.GetHRForException(ex) & ((1 << 16) - 1);
+                var errorCode = Marshal.GetHRForException(e) & ((1 << 16) - 1);
                 if (errorCode != 32 && errorCode != 33)
                 {
-                    SelfLog.WriteLine("Unexpected I/O exception while testing locked status of {0}: {1}", file, ex);
+                    SelfLog.WriteLine("Unexpected I/O exception while testing locked status of {0}: {1}", file, e);
                 }
             }
 #else
@@ -217,9 +212,9 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
                 // Where no HRESULT is available, assume IOExceptions indicate a locked file
             }
 #endif
-            catch (Exception ex)
+            catch (Exception e)
             {
-                SelfLog.WriteLine("Unexpected exception while testing locked status of {0}: {1}", file, ex);
+                SelfLog.WriteLine("Unexpected exception while testing locked status of {0}: {1}", file, e);
             }
 
             return false;

@@ -18,23 +18,23 @@ using System.Collections.Generic;
 
 namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
 {
-    public class LogEventQueue<T>
+    public class LogEventQueue
     {
         private readonly int? queueLimit;
-        private readonly Queue<T> queue;
+        private readonly Queue<string> queue;
         private readonly object syncRoot = new();
 
         public LogEventQueue(int? queueLimit)
         {
-            if (queueLimit.HasValue && queueLimit.Value < 1)
+            if (queueLimit < 1)
                 throw new ArgumentException("queueLimit must be either null or greater than 0", nameof(queueLimit));
 
             this.queueLimit = queueLimit;
 
-            queue = new Queue<T>();
+            queue = new Queue<string>();
         }
 
-        public bool TryEnqueue(T item)
+        public bool TryEnqueue(string logEvent)
         {
             lock (syncRoot)
             {
@@ -43,22 +43,22 @@ namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
                     return false;
                 }
 
-                queue.Enqueue(item);
+                queue.Enqueue(logEvent);
                 return true;
             }
         }
 
-        public bool TryDequeue(out T result)
+        public bool TryDequeue(out string logEvent)
         {
             lock (syncRoot)
             {
                 if (queue.Count == 0)
                 {
-                    result = default(T);
+                    logEvent = null;
                     return false;
                 }
 
-                result = queue.Dequeue();
+                logEvent = queue.Dequeue();
                 return true;
             }
         }
