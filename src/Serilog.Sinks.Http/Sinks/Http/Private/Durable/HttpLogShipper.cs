@@ -14,88 +14,62 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Serilog.Core;
 using Serilog.Debugging;
-using Serilog.Events;
-using Serilog.Formatting;
 using Serilog.Sinks.Http.Private.Time;
+#if HRESULTS
+using System.Runtime.InteropServices;
+#endif
 
-namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
+namespace Serilog.Sinks.Http.Private.Durable
 {
-    /// <summary>
-    /// A non-durable sink that sends log events using HTTP POST over the network. A non-durable
-    /// sink will lose data after a system or process restart.
-    /// </summary>
-    public class HttpSink : ILogEventSink, IDisposable
+    public class HttpLogShipper : IDisposable
     {
         private const string ContentType = "application/json";
 
+        private readonly IHttpClient httpClient;
         private readonly string requestUri;
         private readonly int batchPostingLimit;
         private readonly long batchSizeLimitBytes;
-        private readonly ITextFormatter textFormatter;
-        private readonly IBatchFormatter batchFormatter;
-        private readonly IHttpClient httpClient;
+        private readonly IBufferFiles bufferFiles;
         private readonly ExponentialBackoffConnectionSchedule connectionSchedule;
         private readonly PortableTimer timer;
         private readonly object syncRoot = new();
-        private readonly LogEventQueue queue;
-
-        private Batch unsentBatch;
+        private readonly IBatchFormatter batchFormatter;
         private volatile bool isDisposed;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpSink"/> class.
-        /// </summary>
-        public HttpSink(
+        public HttpLogShipper(
+            IHttpClient httpClient,
             string requestUri,
+            IBufferFiles bufferFiles,
             int batchPostingLimit,
             long batchSizeLimitBytes,
-            int? queueLimit,
             TimeSpan period,
-            ITextFormatter textFormatter,
-            IBatchFormatter batchFormatter,
-            IHttpClient httpClient)
+            IBatchFormatter batchFormatter)
         {
+            if (batchPostingLimit <= 0) throw new ArgumentException("batchPostingLimit must be 1 or greater", nameof(batchPostingLimit));
+
+            this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
+            this.bufferFiles = bufferFiles ?? throw new ArgumentNullException(nameof(bufferFiles));
             this.batchPostingLimit = batchPostingLimit;
             this.batchSizeLimitBytes = batchSizeLimitBytes;
-            this.textFormatter = textFormatter ?? throw new ArgumentNullException(nameof(textFormatter));
             this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
-            this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 
             connectionSchedule = new ExponentialBackoffConnectionSchedule(period);
             timer = new PortableTimer(OnTick);
-            queue = new LogEventQueue(queueLimit);
 
-            SetTimer(); 
+            SetTimer();
         }
 
-        /// <inheritdoc />
-        public void Emit(LogEvent logEvent)
-        {
-            if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
-
-            var formattedLogEventWriter = new StringWriter();
-            textFormatter.Format(logEvent, formattedLogEventWriter);
-            var formattedLogEvent = formattedLogEventWriter.ToString();
-
-            var success = queue.TryEnqueue(formattedLogEvent);
-            if (!success)
-            {
-                SelfLog.WriteLine("Queue has reached its limit and the log event will be dropped");
-            }
-        }
-
-        /// <inheritdoc />
         public void Dispose()
         {
             lock (syncRoot)
             {
-                if (isDisposed)
+                if (isDisposed) 
                     return;
 
                 isDisposed = true;
@@ -113,22 +87,6 @@ namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
             timer.Start(connectionSchedule.NextInterval);
         }
 
-        // /// <inheritdoc />
-        // public async Task EmitBatchAsync(IEnumerable<LogEvent> logEvents)
-        // {
-        //     var payload = FormatPayload(logEvents);
-        //     var content = new StringContent(payload, Encoding.UTF8, ContentType);
-
-        //     var result = await httpClient
-        //         .PostAsync(requestUri, content)
-        //         .ConfigureAwait(false);
-
-        //     if (!result.IsSuccessStatusCode)
-        //     {
-        //         throw new LoggingFailedException($"Received failed result {result.StatusCode} when posting events to {requestUri}");
-        //     }
-        // }
-
         private async Task OnTick()
         {
             try
@@ -137,7 +95,25 @@ namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
 
                 do
                 {
-                    batch = unsentBatch ?? LogEventQueueReader.Read(batchPostingLimit, batchSizeLimitBytes);
+                    using var bookmark = new BookmarkFile(bufferFiles.BookmarkFileName);
+                    bookmark.TryReadBookmark(out var nextLineBeginsAtOffset, out var currentFile);
+
+                    var fileSet = bufferFiles.Get();
+
+                    if (currentFile == null || !System.IO.File.Exists(currentFile))
+                    {
+                        nextLineBeginsAtOffset = 0;
+                        currentFile = fileSet.FirstOrDefault();
+                    }
+
+                    if (currentFile == null)
+                        continue;
+
+                    batch = BufferFileReader.Read(
+                        currentFile,
+                        ref nextLineBeginsAtOffset,
+                        batchPostingLimit,
+                        batchSizeLimitBytes);
 
                     if (batch.LogEvents.Count > 0)
                     {
@@ -157,12 +133,12 @@ namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
                         if (result.IsSuccessStatusCode)
                         {
                             connectionSchedule.MarkSuccess();
-                            unsentBatch = null;
+
+                            bookmark.WriteBookmark(nextLineBeginsAtOffset, currentFile);
                         }
                         else
                         {
                             connectionSchedule.MarkFailure();
-                            unsentBatch = batch;
 
                             SelfLog.WriteLine(
                                 "Received failed HTTP shipping result {0}: {1}",
@@ -177,9 +153,24 @@ namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
                         // For whatever reason, there's nothing waiting to send. This means we should try connecting
                         // again at the regular interval, so mark the attempt as successful.
                         connectionSchedule.MarkSuccess();
+
+                        // Only advance the bookmark if no other process has the
+                        // current file locked, and its length is as we found it.
+                        if (fileSet.Length == 2
+                            && fileSet.First() == currentFile
+                            && IsUnlockedAtLength(currentFile, nextLineBeginsAtOffset))
+                        {
+                            bookmark.WriteBookmark(0, fileSet[1]);
+                        }
+
+                        if (fileSet.Length > 2)
+                        {
+                            // Once there's a third file waiting to ship, we do our
+                            // best to move on, though a lock on the current file
+                            // will delay this.
+                            System.IO.File.Delete(fileSet[0]);
+                        }
                     }
-
-
                 } while (batch != null && batch.HasReachedLimit);
             }
             catch (Exception e)
@@ -197,6 +188,36 @@ namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
                     }
                 }
             }
+        }
+
+        private static bool IsUnlockedAtLength(string file, long maxLength)
+        {
+            try
+            {
+                using var fileStream = System.IO.File.Open(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+                return fileStream.Length <= maxLength;
+            }
+#if HRESULTS
+            catch (IOException e)
+            {
+                var errorCode = Marshal.GetHRForException(e) & ((1 << 16) - 1);
+                if (errorCode != 32 && errorCode != 33)
+                {
+                    SelfLog.WriteLine("Unexpected I/O exception while testing locked status of {0}: {1}", file, e);
+                }
+            }
+#else
+            catch (IOException)
+            {
+                // Where no HRESULT is available, assume IOExceptions indicate a locked file
+            }
+#endif
+            catch (Exception e)
+            {
+                SelfLog.WriteLine("Unexpected exception while testing locked status of {0}: {1}", file, e);
+            }
+
+            return false;
         }
     }
 }

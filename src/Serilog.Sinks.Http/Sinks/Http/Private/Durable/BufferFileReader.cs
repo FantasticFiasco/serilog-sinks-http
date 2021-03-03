@@ -17,7 +17,7 @@ using System.IO;
 using System.Text;
 using Serilog.Debugging;
 
-namespace Serilog.Sinks.Http.Private.Sinks.Durable
+namespace Serilog.Sinks.Http.Private.Durable
 {
     public static class BufferFileReader
     {

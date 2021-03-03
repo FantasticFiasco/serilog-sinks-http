@@ -4,30 +4,38 @@ using Serilog.Sinks.Http.Private.IO;
 using Shouldly;
 using Xunit;
 
-namespace Serilog.Sinks.Http.Private.Sinks.Durable
+namespace Serilog.Sinks.Http.Private.Durable
 {
-    public class TimeRolledBufferFilesShould
+    public class FileSizeRolledBufferFilesShould
     {
-        private const string BufferPathFormat = "Buffer-{Date}.json";
+        private const string BufferBaseFileName = "Buffer";
 
         private readonly Mock<IDirectoryService> directoryService;
-        private readonly TimeRolledBufferFiles bufferFiles;
+        private readonly FileSizeRolledBufferFiles bufferFiles;
 
-        public TimeRolledBufferFilesShould()
+        public FileSizeRolledBufferFilesShould()
         {
             directoryService = new Mock<IDirectoryService>();
-            bufferFiles = new TimeRolledBufferFiles(directoryService.Object, BufferPathFormat);
+            bufferFiles = new FileSizeRolledBufferFiles(directoryService.Object, BufferBaseFileName);
         }
 
         [Fact]
-        public void HandleDates()
+        public void HandleThreeDigits()
         {
             // Arrange
             var fileNames = new[]
             {
                 "Buffer-20001020.json",
-                "Buffer-20001021.json",
-                "Buffer-20001022.json"
+                "Buffer-20001020_001.json",
+                "Buffer-20001020_002.json",
+                "Buffer-20001020_003.json",
+                "Buffer-20001020_004.json",
+                "Buffer-20001020_005.json",
+                "Buffer-20001020_006.json",
+                "Buffer-20001020_007.json",
+                "Buffer-20001020_008.json",
+                "Buffer-20001020_009.json",
+                "Buffer-20001020_010.json"
             };
 
             directoryService
@@ -42,14 +50,14 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
         }
 
         [Fact]
-        public void HandleHours()
+        public void HandleFourDigits()
         {
             // Arrange
             var fileNames = new[]
             {
-                "Buffer-2000102016.json",
-                "Buffer-2000102017.json",
-                "Buffer-2000102018.json"
+                "Buffer-20001020_999.json",
+                "Buffer-20001020_1000.json",
+                "Buffer-20001020_1001.json"
             };
 
             directoryService
@@ -64,14 +72,14 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
         }
 
         [Fact]
-        public void HandleHalfHours()
+        public void HandleFiveDigits()
         {
             // Arrange
             var fileNames = new[]
             {
-                "Buffer-200010201600.json",
-                "Buffer-200010201630.json",
-                "Buffer-200010201700.json"
+                "Buffer-20001020_9999.json",
+                "Buffer-20001020_10000.json",
+                "Buffer-20001020_10001.json"
             };
 
             directoryService

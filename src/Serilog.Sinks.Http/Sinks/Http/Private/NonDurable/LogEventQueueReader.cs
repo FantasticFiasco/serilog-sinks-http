@@ -1,4 +1,4 @@
-﻿// Copyright 2015-2021 Serilog Contributors
+﻿// Copyright 2015-2020 Serilog Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Collections.Generic;
-
-namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
+namespace Serilog.Sinks.Http.Private.NonDurable
 {
-    public class Batch
+    public static class LogEventQueueReader
     {
-        public List<string> LogEvents { get; } = new();
-        public bool HasReachedLimit { get; set; }
+        public static Batch Read(int batchPostingLimit, long batchSizeLimitBytes)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

@@ -18,7 +18,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Serilog.Sinks.Http.Private.IO;
 
-namespace Serilog.Sinks.Http.Private.Sinks.Durable
+namespace Serilog.Sinks.Http.Private.Durable
 {
     public class TimeRolledBufferFiles : IBufferFiles
     {

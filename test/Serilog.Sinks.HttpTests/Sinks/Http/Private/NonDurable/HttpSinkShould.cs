@@ -7,7 +7,7 @@ using Serilog.Support;
 using Shouldly;
 using Xunit;
 
-namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
+namespace Serilog.Sinks.Http.Private.NonDurable
 {
     public class HttpSinkShould
     {

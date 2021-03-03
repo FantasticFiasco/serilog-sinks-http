@@ -4,7 +4,7 @@ using System.Text;
 using Shouldly;
 using Xunit;
 
-namespace Serilog.Sinks.Http.Private.Sinks.Durable
+namespace Serilog.Sinks.Http.Private.Durable
 {
     public class BufferFileReaderShould
     {

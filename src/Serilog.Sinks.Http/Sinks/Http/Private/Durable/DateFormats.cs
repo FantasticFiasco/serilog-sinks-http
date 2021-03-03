@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
+namespace Serilog.Sinks.Http.Private.Durable
 {
-    public static class LogEventQueueReader
+    public enum DateFormats
     {
-        public static Batch Read(int batchPostingLimit, long batchSizeLimitBytes)
-        {
-            throw new System.NotImplementedException();
-        }
+        Date,
+        Hour,
+        HalfHour
     }
 }
