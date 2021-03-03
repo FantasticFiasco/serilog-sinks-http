@@ -32,7 +32,6 @@ namespace Serilog.Sinks.Http.Private.Sinks.NonDurable
             this.queueLimit = queueLimit;
 
             queue = new Queue<T>();
-            syncRoot = new object();
         }
 
         public bool TryEnqueue(T item)

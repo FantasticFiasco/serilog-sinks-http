@@ -42,7 +42,7 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
         private readonly object syncRoot = new();
         private readonly IBatchFormatter batchFormatter;
         private DateTime nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
-        private volatile bool unloading;
+        private volatile bool isDisposed;
 
         public HttpLogShipper(
             IHttpClient httpClient,
@@ -70,8 +70,17 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
 
         public void Dispose()
         {
-            CloseAndFlush();
+            lock (syncRoot)
+            {
+                if (isDisposed) 
+                    return;
 
+                isDisposed = true;
+            }
+
+            timer?.Dispose();
+
+            OnTick().GetAwaiter().GetResult();
             httpClient?.Dispose();
         }
 
@@ -178,7 +187,7 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
             {
                 lock (syncRoot)
                 {
-                    if (!unloading)
+                    if (!isDisposed)
                     {
                         SetTimer();
                     }
@@ -214,21 +223,6 @@ namespace Serilog.Sinks.Http.Private.Sinks.Durable
             }
 
             return false;
-        }
-
-        private void CloseAndFlush()
-        {
-            lock (syncRoot)
-            {
-                if (unloading)
-                    return;
-
-                unloading = true;
-            }
-
-            timer.Dispose();
-
-            OnTick().GetAwaiter().GetResult();
         }
     }
 }
