@@ -20,7 +20,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         public void ReturnSinkGivenValidBufferFileSizeLimitBytes(int? bufferFileSizeLimitBytes)
         {
             // Arrange
-            Func<FileSizeRolledDurableHttpSink> actual = () => new FileSizeRolledDurableHttpSink(
+            Func<FileSizeRolledDurableHttpSink> got = () => new FileSizeRolledDurableHttpSink(
                 "some/route",
                 "Buffer",
                 bufferFileSizeLimitBytes,
@@ -34,7 +34,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 new HttpClientMock());
 
             // Act & Assert
-            actual.ShouldNotThrow();
+            got.ShouldNotThrow();
         }
 
         [Theory]
@@ -45,7 +45,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         public void ThrowExceptionGivenInvalidBufferFileSizeLimitBytes(int? bufferFileSizeLimitBytes)
         {
             // Arrange
-            Func<FileSizeRolledDurableHttpSink> actual = () => new FileSizeRolledDurableHttpSink(
+            Func<FileSizeRolledDurableHttpSink> got = () => new FileSizeRolledDurableHttpSink(
                 "some/route",
                 "Buffer",
                 bufferFileSizeLimitBytes,
@@ -59,7 +59,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 new HttpClientMock());
 
             // Act & Assert
-            actual.ShouldThrow<ArgumentOutOfRangeException>();
+            got.ShouldThrow<ArgumentOutOfRangeException>();
         }
 
         [Fact]

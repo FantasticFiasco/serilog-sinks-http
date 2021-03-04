@@ -23,7 +23,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         public void ReturnSinkGivenValidBufferPathFormat(string bufferPathFormat)
         {
             // Arrange
-            Func<TimeRolledDurableHttpSink> actual = () => new TimeRolledDurableHttpSink(
+            Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
                 "some/route",
                 bufferPathFormat,
                 null,
@@ -37,7 +37,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 new HttpClientMock());
 
             // Act & Assert
-            actual.ShouldNotThrow();
+            got.ShouldNotThrow();
         }
 
         [Theory]
@@ -78,7 +78,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         public void ThrowExceptionGivenInvalidBufferPathFormat(string bufferPathFormat)
         {
             // Arrange
-            Func<TimeRolledDurableHttpSink> actual = () => new TimeRolledDurableHttpSink(
+            Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
                 "some/route",
                 bufferPathFormat,
                 null,
@@ -92,7 +92,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 new HttpClientMock());
 
             // Act & Assert
-            actual.ShouldThrow<ArgumentException>();
+            got.ShouldThrow<ArgumentException>();
         }
 
         [Theory]
@@ -105,7 +105,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         public void ReturnSinkGivenValidBufferFileSizeLimitBytes(int? bufferFileSizeLimitBytes)
         {
             // Arrange
-            Func<TimeRolledDurableHttpSink> actual = () => new TimeRolledDurableHttpSink(
+            Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
                 "some/route",
                 "Buffer-{Date}.json",
                 bufferFileSizeLimitBytes,
@@ -119,7 +119,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 new HttpClientMock());
 
             // Act & Assert
-            actual.ShouldNotThrow();
+            got.ShouldNotThrow();
         }
 
         [Theory]
@@ -130,7 +130,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         public void ThrowExceptionGivenInvalidBufferFileSizeLimitBytes(int? bufferFileSizeLimitBytes)
         {
             // Arrange
-            Func<TimeRolledDurableHttpSink> actual = () => new TimeRolledDurableHttpSink(
+            Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
                 "some/route",
                 "Buffer-{Date}.json",
                 bufferFileSizeLimitBytes,
@@ -144,7 +144,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 new HttpClientMock());
 
             // Act & Assert
-            actual.ShouldThrow<ArgumentOutOfRangeException>();
+            got.ShouldThrow<ArgumentOutOfRangeException>();
         }
 
         [Fact]

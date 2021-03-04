@@ -23,7 +23,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         public void HandleDates()
         {
             // Arrange
-            var fileNames = new[]
+            var want = new[]
             {
                 "Buffer-20001020.json",
                 "Buffer-20001021.json",
@@ -32,20 +32,20 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             directoryService
                 .Setup(mock => mock.GetFiles(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(fileNames.Reverse().ToArray);  // Reverse expected elements
+                .Returns(want.Reverse().ToArray);  // Reverse expected elements
 
             // Act
-            var actual = bufferFiles.Get();
+            var got = bufferFiles.Get();
 
             // Assert
-            actual.ShouldBe(fileNames);
+            got.ShouldBe(want);
         }
 
         [Fact]
         public void HandleHours()
         {
             // Arrange
-            var fileNames = new[]
+            var want = new[]
             {
                 "Buffer-2000102016.json",
                 "Buffer-2000102017.json",
@@ -54,20 +54,20 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             directoryService
                 .Setup(mock => mock.GetFiles(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(fileNames.Reverse().ToArray);  // Reverse expected elements
+                .Returns(want.Reverse().ToArray);  // Reverse expected elements
 
             // Act
-            var actual = bufferFiles.Get();
+            var got = bufferFiles.Get();
 
             // Assert
-            actual.ShouldBe(fileNames);
+            got.ShouldBe(want);
         }
 
         [Fact]
         public void HandleHalfHours()
         {
             // Arrange
-            var fileNames = new[]
+            var want = new[]
             {
                 "Buffer-200010201600.json",
                 "Buffer-200010201630.json",
@@ -76,13 +76,13 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             directoryService
                 .Setup(mock => mock.GetFiles(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(fileNames.Reverse().ToArray);  // Reverse expected elements
+                .Returns(want.Reverse().ToArray);  // Reverse expected elements
 
             // Act
-            var actual = bufferFiles.Get();
+            var got = bufferFiles.Get();
 
             // Assert
-            actual.ShouldBe(fileNames);
+            got.ShouldBe(want);
         }
     }
 }

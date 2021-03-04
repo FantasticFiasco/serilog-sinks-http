@@ -34,11 +34,11 @@ namespace Serilog.Sinks.Http.BatchFormatters
             batchFormatter.Format(logEvents, textFormatter, output);
 
             // Assert
-            var actual = JsonConvert.DeserializeObject<DefaultBatch>(output.ToString());
+            var got = JsonConvert.DeserializeObject<DefaultBatch>(output.ToString());
 
-            actual.Events.Length.ShouldBe(2);
-            actual.Events[0].RenderedMessage.ShouldBe("Event 1");
-            actual.Events[1].RenderedMessage.ShouldBe("Event 2");
+            got.Events.Length.ShouldBe(2);
+            got.Events[0].RenderedMessage.ShouldBe("Event 1");
+            got.Events[1].RenderedMessage.ShouldBe("Event 2");
         }
 
         [Fact]
@@ -58,11 +58,11 @@ namespace Serilog.Sinks.Http.BatchFormatters
             batchFormatter.Format(formattedLogEvents, output);
 
             // Assert
-            var actual = JsonConvert.DeserializeObject<DefaultBatch>(output.ToString());
+            var got = JsonConvert.DeserializeObject<DefaultBatch>(output.ToString());
 
-            actual.Events.Length.ShouldBe(2);
-            actual.Events[0].RenderedMessage.ShouldBe("Event 1");
-            actual.Events[1].RenderedMessage.ShouldBe("Event 2");
+            got.Events.Length.ShouldBe(2);
+            got.Events[0].RenderedMessage.ShouldBe("Event 1");
+            got.Events[1].RenderedMessage.ShouldBe("Event 2");
         }
 
         [Fact]
@@ -75,8 +75,8 @@ namespace Serilog.Sinks.Http.BatchFormatters
             batchFormatter.Format(logEvents, textFormatter, output);
 
             // Assert
-            var actual = JsonConvert.DeserializeObject<DefaultBatch>(output.ToString());
-            actual.Events.ShouldBeEmpty();
+            var got = JsonConvert.DeserializeObject<DefaultBatch>(output.ToString());
+            got.Events.ShouldBeEmpty();
         }
     }
 }
