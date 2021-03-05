@@ -35,40 +35,61 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
         public void Enqueue(string logEvent)
         {
-            var success = TryEnqueue(logEvent);
-            if (!success)
+            var result = TryEnqueue(logEvent);
+            if (result != EnqueueResult.Ok)
             {
                 throw new Exception("Queue has reached its limit");
             }
         }
 
-        public bool TryEnqueue(string logEvent)
+        public EnqueueResult TryEnqueue(string logEvent)
         {
             lock (syncRoot)
             {
                 if (queueLimit.HasValue && queueLimit.Value == queue.Count)
                 {
-                    return false;
+                    return EnqueueResult.QueueFull;
                 }
 
                 queue.Enqueue(logEvent);
-                return true;
+                return EnqueueResult.Ok;
             }
         }
 
-        public bool TryDequeue(out string logEvent)
+        public DequeueResult TryDequeue(long maxSize, out string logEvent)
         {
             lock (syncRoot)
             {
                 if (queue.Count == 0)
                 {
                     logEvent = null;
-                    return false;
+                    return DequeueResult.QueueEmpty;
                 }
 
-                logEvent = queue.Dequeue();
-                return true;
+                logEvent = queue.Peek();
+
+                if (ByteSize.From(logEvent) > maxSize)
+                {
+                    logEvent = null;
+                    return DequeueResult.MaxSizeViolation;
+                }
+
+                queue.Dequeue();
+                return DequeueResult.Ok;
             }
+        }
+
+        public enum EnqueueResult
+        {
+            Ok,
+            QueueFull
+        }
+
+        public enum DequeueResult
+        {
+            Ok,
+            QueueEmpty,
+            MaxSizeViolation
         }
     }
 }

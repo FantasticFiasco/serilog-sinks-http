@@ -19,7 +19,11 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             var got = LogEventQueueReader.Read(queue, int.MaxValue, long.MaxValue);
 
             // Assert
-            got.LogEvents.ShouldBe(new[] { FooLogEvent });
+            got.LogEvents.ShouldBe(
+                new[]
+                {
+                    FooLogEvent
+                });
             got.HasReachedLimit.ShouldBeFalse();
         }
 
@@ -35,7 +39,11 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             var got = LogEventQueueReader.Read(queue, int.MaxValue, long.MaxValue);
 
             // Assert
-            got.LogEvents.ShouldBe(new[] { FooLogEvent, BarLogEvent });
+            got.LogEvents.ShouldBe(
+                new[]
+                {
+                    FooLogEvent, BarLogEvent
+                });
             got.HasReachedLimit.ShouldBeFalse();
         }
 
@@ -53,7 +61,11 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             var got = LogEventQueueReader.Read(queue, batchPostingLimit, long.MaxValue);
 
             // Assert
-            got.LogEvents.ShouldBe(new[] { FooLogEvent });
+            got.LogEvents.ShouldBe(
+                new[]
+                {
+                    FooLogEvent
+                });
             got.HasReachedLimit.ShouldBeTrue();
         }
 
@@ -71,7 +83,11 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             var got = LogEventQueueReader.Read(queue, int.MaxValue, batchSizeLimit);
 
             // Assert
-            got.LogEvents.ShouldBe(new[] { FooLogEvent });
+            got.LogEvents.ShouldBe(
+                new[]
+                {
+                    FooLogEvent
+                });
             got.HasReachedLimit.ShouldBeTrue();
         }
 

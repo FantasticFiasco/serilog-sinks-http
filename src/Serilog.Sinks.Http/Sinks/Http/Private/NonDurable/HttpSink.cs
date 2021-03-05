@@ -79,12 +79,12 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         {
             if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
 
-            var formattedLogEventWriter = new StringWriter();
-            textFormatter.Format(logEvent, formattedLogEventWriter);
-            var formattedLogEvent = formattedLogEventWriter.ToString();
+            var writer = new StringWriter();
+            textFormatter.Format(logEvent, writer);
+            var formattedLogEvent = writer.ToString();
 
-            var success = queue.TryEnqueue(formattedLogEvent);
-            if (!success)
+            var result = queue.TryEnqueue(formattedLogEvent);
+            if (result == LogEventQueue.EnqueueResult.QueueFull)
             {
                 SelfLog.WriteLine("Queue has reached its limit and the log event will be dropped");
             }
@@ -112,22 +112,6 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             // Note, called under syncRoot
             timer.Start(connectionSchedule.NextInterval);
         }
-
-        // /// <inheritdoc />
-        // public async Task EmitBatchAsync(IEnumerable<LogEvent> logEvents)
-        // {
-        //     var payload = FormatPayload(logEvents);
-        //     var content = new StringContent(payload, Encoding.UTF8, ContentType);
-
-        //     var result = await httpClient
-        //         .PostAsync(requestUri, content)
-        //         .ConfigureAwait(false);
-
-        //     if (!result.IsSuccessStatusCode)
-        //     {
-        //         throw new LoggingFailedException($"Received failed result {result.StatusCode} when posting events to {requestUri}");
-        //     }
-        // }
 
         private async Task OnTick()
         {

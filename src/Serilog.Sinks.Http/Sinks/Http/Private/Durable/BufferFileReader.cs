@@ -81,7 +81,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 }
                 else if (batchSizeBytes + lineSizeBytes > batchSizeLimitBytes)
                 {
-                    // Tha accumulated size of the batch is exceeding the batch size limit
+                    // The accumulated size of the batch is exceeding the batch size limit
                     batch.HasReachedLimit = true;
                     break;
                 }
