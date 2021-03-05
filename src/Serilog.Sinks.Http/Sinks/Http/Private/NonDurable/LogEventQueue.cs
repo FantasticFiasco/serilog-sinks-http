@@ -33,6 +33,15 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             queue = new Queue<string>();
         }
 
+        public void Enqueue(string logEvent)
+        {
+            var success = TryEnqueue(logEvent);
+            if (!success)
+            {
+                throw new Exception("Queue has reached its limit");
+            }
+        }
+
         public bool TryEnqueue(string logEvent)
         {
             lock (syncRoot)

@@ -10,9 +10,9 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         {
             // Arrange
             var queue = new LogEventQueue(null);
-            var enqueueSuccess1 = queue.TryEnqueue("1");
-            var enqueueSuccess2 = queue.TryEnqueue("2");
-            var enqueueSuccess3 = queue.TryEnqueue("3");
+            queue.Enqueue("1");
+            queue.Enqueue("2");
+            queue.Enqueue("3");
 
             // Act
             var dequeueSuccess1 = queue.TryDequeue(out var got1);
@@ -21,10 +21,6 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             var dequeueSuccess4 = queue.TryDequeue(out var got4);
 
             // Assert
-            enqueueSuccess1.ShouldBeTrue();
-            enqueueSuccess2.ShouldBeTrue();
-            enqueueSuccess3.ShouldBeTrue();
-
             dequeueSuccess1.ShouldBeTrue();
             dequeueSuccess2.ShouldBeTrue();
             dequeueSuccess3.ShouldBeTrue();
@@ -41,18 +37,15 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         {
             // Arrange
             var queue = new LogEventQueue(3);
-            var enqueueSuccess1 = queue.TryEnqueue("1");
-            var enqueueSuccess2 = queue.TryEnqueue("2");
-            var enqueueSuccess3 = queue.TryEnqueue("3");
+            queue.Enqueue("1");
+            queue.Enqueue("2");
+            queue.Enqueue("3");
 
             // Act
-            var enqueueSuccess4 = queue.TryEnqueue("4");
+            var enqueueSuccess = queue.TryEnqueue("4");
 
             // Assert
-            enqueueSuccess1.ShouldBeTrue();
-            enqueueSuccess2.ShouldBeTrue();
-            enqueueSuccess3.ShouldBeTrue();
-            enqueueSuccess4.ShouldBeFalse();
+            enqueueSuccess.ShouldBeFalse();
         }
     }
 }

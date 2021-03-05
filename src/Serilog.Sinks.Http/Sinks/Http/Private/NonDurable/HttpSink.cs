@@ -137,7 +137,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
                 do
                 {
-                    batch = unsentBatch ?? LogEventQueueReader.Read(batchPostingLimit, batchSizeLimitBytes);
+                    batch = unsentBatch ?? LogEventQueueReader.Read(queue, batchPostingLimit, batchSizeLimitBytes);
 
                     if (batch.LogEvents.Count > 0)
                     {

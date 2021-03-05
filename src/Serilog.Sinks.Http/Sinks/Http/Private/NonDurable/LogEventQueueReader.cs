@@ -16,7 +16,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 {
     public static class LogEventQueueReader
     {
-        public static Batch Read(int batchPostingLimit, long batchSizeLimitBytes)
+        public static Batch Read(LogEventQueue queue, int batchPostingLimit, long batchSizeLimitBytes)
         {
             throw new System.NotImplementedException();
         }
