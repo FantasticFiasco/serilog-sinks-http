@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <VersionPrefix>7.2.0</VersionPrefix>
-    <VersionSuffix></VersionSuffix>
+    <VersionSuffix>beta.1</VersionSuffix>
     <Authors>Mattias Kindborg</Authors>
     <Company />
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
