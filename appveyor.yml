@@ -5,7 +5,7 @@ version: '{build}'
 configuration: Release
 
 build_script:
-  - wsl: ./build/build.sh
+  - cmd: wsl ./build/build.sh
   - ps: ./build/build.ps1
 
 test: off
