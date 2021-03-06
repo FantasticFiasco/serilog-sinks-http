@@ -21,8 +21,8 @@ Write-Host "build: git sha: $git_sha"
 
 [xml]$build_props = Get-Content -Path .\Directory.Build.props
 $version_prefix = $build_props.Project.PropertyGroup.VersionPrefix
-$version_suffix = $build_props.Project.PropertyGroup.VersionSuffix
 Write-Host "build: build props version prefix: $version_prefix"
+$version_suffix = $build_props.Project.PropertyGroup.VersionSuffix
 Write-Host "build: build props version suffix: $version_suffix"
 
 # Build and pack
