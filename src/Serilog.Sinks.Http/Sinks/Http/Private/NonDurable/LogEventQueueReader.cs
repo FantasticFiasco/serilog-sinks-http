@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Serilog.Debugging;
 
 namespace Serilog.Sinks.Http.Private.NonDurable
@@ -30,7 +29,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 if (result == LogEventQueue.DequeueResult.Ok)
                 {
                     batch.LogEvents.Add(logEvent);
-                    remainingBatchSizeBytes -= ByteSize.From(logEvent) + ByteSize.From(Environment.NewLine);
+                    remainingBatchSizeBytes -= ByteSize.From(logEvent);
 
                     // Respect batch posting limit
                     if (batch.LogEvents.Count == batchPostingLimit)
