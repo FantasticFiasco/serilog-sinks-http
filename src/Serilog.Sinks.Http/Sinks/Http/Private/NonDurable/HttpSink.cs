@@ -45,7 +45,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         private readonly LogEventQueue queue;
 
         private Batch unsentBatch;
-        private volatile bool isDisposed;
+        private volatile bool disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpSink"/> class.
@@ -95,10 +95,10 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         {
             lock (syncRoot)
             {
-                if (isDisposed)
+                if (disposed)
                     return;
 
-                isDisposed = true;
+                disposed = true;
             }
 
             timer?.Dispose();
@@ -175,7 +175,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             {
                 lock (syncRoot)
                 {
-                    if (!isDisposed)
+                    if (!disposed)
                     {
                         SetTimer();
                     }

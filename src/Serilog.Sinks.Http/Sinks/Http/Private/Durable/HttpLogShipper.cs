@@ -39,7 +39,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         private readonly PortableTimer timer;
         private readonly object syncRoot = new();
         private readonly IBatchFormatter batchFormatter;
-        private volatile bool isDisposed;
+        private volatile bool disposed;
 
         public HttpLogShipper(
             IHttpClient httpClient,
@@ -69,10 +69,10 @@ namespace Serilog.Sinks.Http.Private.Durable
         {
             lock (syncRoot)
             {
-                if (isDisposed) 
+                if (disposed) 
                     return;
 
-                isDisposed = true;
+                disposed = true;
             }
 
             timer?.Dispose();
@@ -182,7 +182,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             {
                 lock (syncRoot)
                 {
-                    if (!isDisposed)
+                    if (!disposed)
                     {
                         SetTimer();
                     }
