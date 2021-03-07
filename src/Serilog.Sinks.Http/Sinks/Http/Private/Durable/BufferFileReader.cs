@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.IO;
 using System.Text;
 using Serilog.Debugging;
@@ -23,6 +22,9 @@ namespace Serilog.Sinks.Http.Private.Durable
     {
         private const char CR = '\r';
         private const char LF = '\n';
+
+        private static readonly string CRLFString = $"{CR}{LF}";
+        private static readonly string LFString = $"{LF}";
 
         /// <summary>
         /// The length of the Byte Order Marks (BOM).
@@ -59,13 +61,13 @@ namespace Serilog.Sinks.Http.Private.Durable
 
                 // Read log event
                 var line = ReadLine(stream);
-                if (line == null)
+                if (line.Text == null)
                 {
                     break;
                 }
 
                 // Calculate the size of the log event
-                var lineSizeBytes = ByteSize.From(line) + ByteSize.From(Environment.NewLine);
+                var lineSizeBytes = ByteSize.From(line.Text);
                 var includeLine = true;
 
                 // Respect batch size limit
@@ -87,18 +89,13 @@ namespace Serilog.Sinks.Http.Private.Durable
                 }
 
                 // Update cursor
-                var includesBom = nextLineBeginsAtOffset == 0;
-                nextLineBeginsAtOffset += lineSizeBytes;
-
-                if (includesBom)
-                {
-                    nextLineBeginsAtOffset += BomLength;
-                }
+                var bomLength = nextLineBeginsAtOffset == 0 ? BomLength : 0;
+                nextLineBeginsAtOffset += bomLength + lineSizeBytes + ByteSize.From(line.NewLine);
 
                 // Add log event
                 if (includeLine)
                 {
-                    batch.LogEvents.Add(line);
+                    batch.LogEvents.Add(line.Text);
                     batchSizeBytes += lineSizeBytes;
                 }
 
@@ -113,7 +110,13 @@ namespace Serilog.Sinks.Http.Private.Durable
             return batch;
         }
 
-        private static string ReadLine(Stream stream)
+        private struct Line
+        {
+            public string Text;
+            public string NewLine;
+        }
+
+        private static Line ReadLine(Stream stream)
         {
             // Important not to dispose this StreamReader as the stream must remain open
             var reader = new StreamReader(stream, Encoding.UTF8, false, 128);
@@ -130,13 +133,17 @@ namespace Serilog.Sinks.Http.Private.Durable
                 //   - The current log event hasn't yet been completely flushed to disk
                 if (character == -1)
                 {
-                    return null;
+                    return new Line { Text = null, NewLine = null };
                 }
 
                 // Are we done, have we read the line?
-                if (character == CR || character == LF)
+                if (character == CR)
                 {
-                    return lineBuilder.ToString();
+                    return new Line { Text = lineBuilder.ToString(), NewLine = CRLFString };
+                }
+                if (character == LF)
+                {
+                    return new Line { Text = lineBuilder.ToString(), NewLine = LFString };
                 }
 
                 lineBuilder.Append((char)character);
