@@ -74,6 +74,33 @@
         "ideas",
         "bug"
       ]
+    },
+    {
+      "login": "michaeltdaniels",
+      "name": "michaeltdaniels",
+      "avatar_url": "https://avatars.githubusercontent.com/u/45430678?v=4",
+      "profile": "https://github.com/michaeltdaniels",
+      "contributions": [
+        "ideas"
+      ]
+    },
+    {
+      "login": "dusse1dorf",
+      "name": "dusse1dorf",
+      "avatar_url": "https://avatars.githubusercontent.com/u/37047967?v=4",
+      "profile": "https://github.com/dusse1dorf",
+      "contributions": [
+        "ideas"
+      ]
+    },
+    {
+      "login": "vaibhavepatel",
+      "name": "vaibhavepatel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/23142694?v=4",
+      "profile": "https://github.com/vaibhavepatel",
+      "contributions": [
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7
