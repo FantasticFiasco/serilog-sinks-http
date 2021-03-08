@@ -44,11 +44,11 @@ namespace Serilog
         /// The maximum number of events to post in a single batch. Default value is 1000.
         /// </param>
         /// <param name="batchSizeLimitBytes">
-        /// The approximate maximum size, in bytes, for a single batch. The value is an approximate
-        /// because only the size of the log events are considered. The extra characters added by
-        /// the batch formatter, where the sequence of serialized log events are transformed into a
-        /// payload, are not considered. Please make sure to accommodate for those. Default value
-        /// is long.MaxValue.
+        /// The approximate maximum size, in bytes, for a single batch. The value is an
+        /// approximation because only the size of the log events are considered. The extra7
+        /// characters added by the batch formatter, where the sequence of serialized log events
+        /// are transformed into a payload, are not considered. Please make sure to accommodate for
+        /// those. Default value is long.MaxValue.
         /// </param>
         /// <param name="queueLimit">
         /// The maximum number of events stored in the queue in memory, waiting to be posted over
@@ -184,11 +184,11 @@ namespace Serilog
         /// The maximum number of events to post in a single batch. Default value is 1000.
         /// </param>
         /// <param name="batchSizeLimitBytes">
-        /// The approximate maximum size, in bytes, for a single batch. The value is an approximate
-        /// because only the size of the log events are considered. The extra characters added by
-        /// the batch formatter, where the sequence of serialized log events are transformed into a
-        /// payload, are not considered. Please make sure to accommodate for those. Default value
-        /// is long.MaxValue.
+        /// The approximate maximum size, in bytes, for a single batch. The value is an
+        /// approximation because only the size of the log events are considered. The extra7
+        /// characters added by the batch formatter, where the sequence of serialized log events
+        /// are transformed into a payload, are not considered. Please make sure to accommodate for
+        /// those. Default value is long.MaxValue.
         /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
@@ -295,11 +295,11 @@ namespace Serilog
         /// The maximum number of events to post in a single batch. Default value is 1000.
         /// </param>
         /// <param name="batchSizeLimitBytes">
-        /// The approximate maximum size, in bytes, for a single batch. The value is an approximate
-        /// because only the size of the log events are considered. The extra characters added by
-        /// the batch formatter, where the sequence of serialized log events are transformed into a
-        /// payload, are not considered. Please make sure to accommodate for those. Default value
-        /// is long.MaxValue.
+        /// The approximate maximum size, in bytes, for a single batch. The value is an
+        /// approximation because only the size of the log events are considered. The extra7
+        /// characters added by the batch formatter, where the sequence of serialized log events
+        /// are transformed into a payload, are not considered. Please make sure to accommodate for
+        /// those. Default value is long.MaxValue.
         /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
