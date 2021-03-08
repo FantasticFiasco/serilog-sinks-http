@@ -1,4 +1,4 @@
-﻿// Copyright 2015-2020 Serilog Contributors
+﻿// Copyright 2015-2018 Serilog Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,57 +18,61 @@ using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.Http.Private.IO;
-using Serilog.Sinks.Http.Private.Network;
-using Serilog.Sinks.RollingFile;
 
-namespace Serilog.Sinks.Http.Private.Sinks
+namespace Serilog.Sinks.Http.Private.Durable
 {
     /// <summary>
     /// A durable sink that sends log events using HTTP POST over the network. A durable
     /// sink will persist log events on disk in buffer files before sending them over the
     /// network, thus protecting against data loss after a system or process restart. The
-    /// buffer files will use a rolling behavior based on time interval.
+    /// buffer files will use a rolling behavior based on file size.
     /// </summary>
     /// <seealso cref="ILogEventSink" />
     /// <seealso cref="IDisposable" />
-    public class TimeRolledDurableHttpSink : ILogEventSink, IDisposable
+    public class FileSizeRolledDurableHttpSink : ILogEventSink, IDisposable
     {
         private readonly HttpLogShipper shipper;
         private readonly ILogEventSink sink;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TimeRolledDurableHttpSink"/> class.
+        /// Initializes a new instance of the <see cref="FileSizeRolledDurableHttpSink"/> class.
         /// </summary>
-        public TimeRolledDurableHttpSink(
+        public FileSizeRolledDurableHttpSink(
             string requestUri,
-            string bufferPathFormat,
+            string bufferBaseFileName,
             long? bufferFileSizeLimitBytes,
             bool bufferFileShared,
             int? retainedBufferFileCountLimit,
             int batchPostingLimit,
+            long batchSizeLimitBytes,
             TimeSpan period,
             ITextFormatter textFormatter,
             IBatchFormatter batchFormatter,
             IHttpClient httpClient)
         {
-            if (bufferFileSizeLimitBytes.HasValue && bufferFileSizeLimitBytes < 0)
+            if (bufferFileSizeLimitBytes < 0)
                 throw new ArgumentOutOfRangeException(nameof(bufferFileSizeLimitBytes), "Negative value provided; file size limit must be non-negative.");
 
             shipper = new HttpLogShipper(
                 httpClient,
                 requestUri,
-                new TimeRolledBufferFiles(new DirectoryService(), bufferPathFormat),
+                new FileSizeRolledBufferFiles(new DirectoryService(), bufferBaseFileName),
                 batchPostingLimit,
+                batchSizeLimitBytes,
                 period,
                 batchFormatter);
 
-            sink = new RollingFileSink(
-                bufferPathFormat,
-                textFormatter,
-                bufferFileSizeLimitBytes,
-                retainedBufferFileCountLimit,
-                Encoding.UTF8,
-                shared: bufferFileShared);
+            sink = new LoggerConfiguration()
+                .WriteTo.File(
+                    textFormatter,
+                    $"{bufferBaseFileName}-.json",
+                    fileSizeLimitBytes: bufferFileSizeLimitBytes,
+                    shared: bufferFileShared,
+                    rollOnFileSizeLimit: true,
+                    retainedFileCountLimit: retainedBufferFileCountLimit,
+                    rollingInterval: RollingInterval.Day,
+                    encoding: Encoding.UTF8)
+                .CreateLogger();
         }
 
         /// <inheritdoc />

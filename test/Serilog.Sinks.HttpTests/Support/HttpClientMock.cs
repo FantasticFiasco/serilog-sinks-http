@@ -43,7 +43,7 @@ namespace Serilog.Support
         public async Task WaitAsync(int expectedLogEventCount)
         {
             // 10 000 iterations, each waiting at least 1ms, means that a test has 10s to pass
-            for (int i = 0; i < 10_000; i++)
+            for (var i = 0; i < 10_000; i++)
             {
                 if (LogEvents.Length == expectedLogEventCount)
                 {

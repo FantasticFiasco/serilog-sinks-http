@@ -7,7 +7,7 @@ using Serilog.Support;
 using Shouldly;
 using Xunit;
 
-namespace Serilog.Sinks.Http.Private.Sinks
+namespace Serilog.Sinks.Http.Private.NonDurable
 {
     public class HttpSinkShould
     {
@@ -20,6 +20,8 @@ namespace Serilog.Sinks.Http.Private.Sinks
             using (new HttpSink(
                 "some/route",
                 1,
+                ByteSize.MB,
+                null,
                 TimeSpan.FromMilliseconds(1),         // 1 ms period
                 new NormalTextFormatter(),
                 new ArrayBatchFormatter(),
@@ -46,26 +48,26 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 .Select(number => Some.LogEvent("Event {number}", number))
                 .ToArray();
 
-            using (var sink = new HttpSink(
+            using var sink = new HttpSink(
                 "some/route",
                 1,
+                ByteSize.MB,
                 1,                                   // Queue only holds 1 event
                 TimeSpan.FromMilliseconds(1),        // 1 ms period
                 new NormalTextFormatter(),
                 new ArrayBatchFormatter(),
-                httpClient))
+                httpClient);
+
+            // Act
+            foreach (var logEvent in logEvents)
             {
-                // Act
-                foreach (var logEvent in logEvents)
-                {
-                    sink.Emit(logEvent);
-                }
-
-                await Task.Delay(TimeSpan.FromMilliseconds(10));    // Sleep 10x the period
-
-                // Assert
-                httpClient.LogEvents.Length.ShouldBeLessThan(logEvents.Length);    // Some log events will have been dropped
+                sink.Emit(logEvent);
             }
+
+            await Task.Delay(TimeSpan.FromMilliseconds(10));    // Sleep 10x the period
+
+            // Assert
+            httpClient.LogEvents.Length.ShouldBeLessThan(logEvents.Length);    // Some log events will have been dropped
         }
     }
 }

@@ -37,11 +37,11 @@ namespace Serilog
             foreach (var parameterName in parameterNames)
             {
                 // Act
-                var wikiDescription = gitHubWikiFixture.GetDescription(parameterName);
-                var codeDescription = xmlDocumentationFixture.GetDescription(extensionName, parameterName);
+                var got = gitHubWikiFixture.GetDescription(parameterName);
+                var want = xmlDocumentationFixture.GetDescription(extensionName, parameterName);
 
                 // Assert
-                wikiDescription.ShouldBe(codeDescription);
+                got.ShouldBe(want);
             }
         }
     }

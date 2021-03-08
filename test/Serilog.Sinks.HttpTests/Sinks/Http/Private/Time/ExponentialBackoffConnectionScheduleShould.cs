@@ -18,14 +18,14 @@ namespace Serilog.Sinks.Http.Private.Time
         public void ReturnPeriodDuringSuccess(int periodInSeconds)
         {
             // Arrange
-            var period = TimeSpan.FromSeconds(periodInSeconds);
-            var schedule = new ExponentialBackoffConnectionSchedule(period);
+            var want = TimeSpan.FromSeconds(periodInSeconds);
+            var schedule = new ExponentialBackoffConnectionSchedule(want);
 
             // Act
-            var actual = schedule.NextInterval;
+            var got = schedule.NextInterval;
 
             // Assert
-            actual.ShouldBe(period);
+            got.ShouldBe(want);
         }
 
         [Theory]
@@ -40,16 +40,16 @@ namespace Serilog.Sinks.Http.Private.Time
         public void ReturnPeriodAfterFirstFailure(int periodInSeconds)
         {
             // Arrange
-            var period = TimeSpan.FromSeconds(periodInSeconds);
-            var schedule = new ExponentialBackoffConnectionSchedule(period);
+            var want = TimeSpan.FromSeconds(periodInSeconds);
+            var schedule = new ExponentialBackoffConnectionSchedule(want);
 
             schedule.MarkFailure();
 
             // Act
-            var actual = schedule.NextInterval;
+            var got = schedule.NextInterval;
 
             // Assert
-            actual.ShouldBe(period);
+            got.ShouldBe(want);
         }
 
         [Theory]

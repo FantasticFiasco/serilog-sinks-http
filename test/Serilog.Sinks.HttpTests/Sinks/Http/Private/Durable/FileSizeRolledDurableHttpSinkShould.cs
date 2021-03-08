@@ -6,7 +6,7 @@ using Serilog.Support;
 using Shouldly;
 using Xunit;
 
-namespace Serilog.Sinks.Http.Private.Sinks
+namespace Serilog.Sinks.Http.Private.Durable
 {
     public class FileSizeRolledDurableHttpSinkShould
     {
@@ -20,20 +20,21 @@ namespace Serilog.Sinks.Http.Private.Sinks
         public void ReturnSinkGivenValidBufferFileSizeLimitBytes(int? bufferFileSizeLimitBytes)
         {
             // Arrange
-            Func<FileSizeRolledDurableHttpSink> actual = () => new FileSizeRolledDurableHttpSink(
+            Func<FileSizeRolledDurableHttpSink> got = () => new FileSizeRolledDurableHttpSink(
                 "some/route",
                 "Buffer",
                 bufferFileSizeLimitBytes,
                 false,
                 31,
                 1000,
+                ByteSize.MB,
                 TimeSpan.FromSeconds(2),
                 new NormalTextFormatter(),
                 new ArrayBatchFormatter(),
                 new HttpClientMock());
 
             // Act & Assert
-            actual.ShouldNotThrow();
+            got.ShouldNotThrow();
         }
 
         [Theory]
@@ -44,20 +45,21 @@ namespace Serilog.Sinks.Http.Private.Sinks
         public void ThrowExceptionGivenInvalidBufferFileSizeLimitBytes(int? bufferFileSizeLimitBytes)
         {
             // Arrange
-            Func<FileSizeRolledDurableHttpSink> actual = () => new FileSizeRolledDurableHttpSink(
+            Func<FileSizeRolledDurableHttpSink> got = () => new FileSizeRolledDurableHttpSink(
                 "some/route",
                 "Buffer",
                 bufferFileSizeLimitBytes,
                 false,
                 31,
                 1000,
+                ByteSize.MB,
                 TimeSpan.FromSeconds(2),
                 new NormalTextFormatter(),
                 new ArrayBatchFormatter(),
                 new HttpClientMock());
 
             // Act & Assert
-            actual.ShouldThrow<ArgumentOutOfRangeException>();
+            got.ShouldThrow<ArgumentOutOfRangeException>();
         }
 
         [Fact]
@@ -73,6 +75,7 @@ namespace Serilog.Sinks.Http.Private.Sinks
                 false,
                 null,
                 1,
+                ByteSize.MB,
                 TimeSpan.FromMilliseconds(1),         // 1 ms period
                 new NormalTextFormatter(),
                 new ArrayBatchFormatter(),

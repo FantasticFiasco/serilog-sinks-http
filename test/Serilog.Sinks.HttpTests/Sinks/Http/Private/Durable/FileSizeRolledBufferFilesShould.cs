@@ -4,7 +4,7 @@ using Serilog.Sinks.Http.Private.IO;
 using Shouldly;
 using Xunit;
 
-namespace Serilog.Sinks.Http.Private.Network
+namespace Serilog.Sinks.Http.Private.Durable
 {
     public class FileSizeRolledBufferFilesShould
     {
@@ -23,7 +23,7 @@ namespace Serilog.Sinks.Http.Private.Network
         public void HandleThreeDigits()
         {
             // Arrange
-            var fileNames = new[]
+            var want = new[]
             {
                 "Buffer-20001020.json",
                 "Buffer-20001020_001.json",
@@ -40,20 +40,20 @@ namespace Serilog.Sinks.Http.Private.Network
 
             directoryService
                 .Setup(mock => mock.GetFiles(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(fileNames.Reverse().ToArray);  // Reverse expected elements
+                .Returns(want.Reverse().ToArray);  // Reverse expected elements
 
             // Act
-            var actual = bufferFiles.Get();
+            var got = bufferFiles.Get();
 
             // Assert
-            actual.ShouldBe(fileNames);
+            got.ShouldBe(want);
         }
 
         [Fact]
         public void HandleFourDigits()
         {
             // Arrange
-            var fileNames = new[]
+            var want = new[]
             {
                 "Buffer-20001020_999.json",
                 "Buffer-20001020_1000.json",
@@ -62,20 +62,20 @@ namespace Serilog.Sinks.Http.Private.Network
 
             directoryService
                 .Setup(mock => mock.GetFiles(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(fileNames.Reverse().ToArray);  // Reverse expected elements
+                .Returns(want.Reverse().ToArray);  // Reverse expected elements
 
             // Act
-            var actual = bufferFiles.Get();
+            var got = bufferFiles.Get();
 
             // Assert
-            actual.ShouldBe(fileNames);
+            got.ShouldBe(want);
         }
 
         [Fact]
         public void HandleFiveDigits()
         {
             // Arrange
-            var fileNames = new[]
+            var want = new[]
             {
                 "Buffer-20001020_9999.json",
                 "Buffer-20001020_10000.json",
@@ -84,13 +84,13 @@ namespace Serilog.Sinks.Http.Private.Network
 
             directoryService
                 .Setup(mock => mock.GetFiles(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(fileNames.Reverse().ToArray);  // Reverse expected elements
+                .Returns(want.Reverse().ToArray);  // Reverse expected elements
 
             // Act
-            var actual = bufferFiles.Get();
+            var got = bufferFiles.Get();
 
             // Assert
-            actual.ShouldBe(fileNames);
+            got.ShouldBe(want);
         }
     }
 }

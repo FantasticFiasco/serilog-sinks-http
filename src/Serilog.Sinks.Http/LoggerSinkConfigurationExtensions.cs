@@ -21,8 +21,9 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.Http;
 using Serilog.Sinks.Http.BatchFormatters;
-using Serilog.Sinks.Http.Private.Network;
-using Serilog.Sinks.Http.Private.Sinks;
+using Serilog.Sinks.Http.Private.Durable;
+using Serilog.Sinks.Http.Private.Http;
+using Serilog.Sinks.Http.Private.NonDurable;
 using Serilog.Sinks.Http.TextFormatters;
 
 namespace Serilog
@@ -41,6 +42,13 @@ namespace Serilog
         /// <param name="requestUri">The URI the request is sent to.</param>
         /// <param name="batchPostingLimit">
         /// The maximum number of events to post in a single batch. Default value is 1000.
+        /// </param>
+        /// <param name="batchSizeLimitBytes">
+        /// The approximate maximum size, in bytes, for a single batch. The value is an
+        /// approximation because only the size of the log events are considered. The extra
+        /// characters added by the batch formatter, where the sequence of serialized log events
+        /// are transformed into a payload, are not considered. Please make sure to accommodate for
+        /// those. Default value is long.MaxValue.
         /// </param>
         /// <param name="queueLimit">
         /// The maximum number of events stored in the queue in memory, waiting to be posted over
@@ -76,6 +84,7 @@ namespace Serilog
             this LoggerSinkConfiguration sinkConfiguration,
             string requestUri,
             int batchPostingLimit = 1000,
+            long batchSizeLimitBytes = long.MaxValue,
             int? queueLimit = null,
             TimeSpan? period = null,
             ITextFormatter textFormatter = null,
@@ -87,15 +96,21 @@ namespace Serilog
             if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
             // Default values
-            period =  period ?? TimeSpan.FromSeconds(2);
-            textFormatter = textFormatter ?? new NormalRenderedTextFormatter();
-            batchFormatter = batchFormatter ?? new DefaultBatchFormatter();
-            httpClient = httpClient ?? new DefaultHttpClient();
+            period ??= TimeSpan.FromSeconds(2);
+            textFormatter ??= new NormalRenderedTextFormatter();
+            batchFormatter ??= new DefaultBatchFormatter();
+            httpClient ??= new DefaultHttpClient();
             httpClient.Configure(configuration);
 
-            var sink = queueLimit != null
-                ? new HttpSink(requestUri, batchPostingLimit, queueLimit.Value, period.Value, textFormatter, batchFormatter, httpClient)
-                : new HttpSink(requestUri, batchPostingLimit, period.Value, textFormatter, batchFormatter, httpClient);
+            var sink = new HttpSink(
+                requestUri: requestUri,
+                batchPostingLimit: batchPostingLimit,
+                batchSizeLimitBytes: batchSizeLimitBytes,
+                queueLimit: queueLimit,
+                period: period.Value,
+                textFormatter: textFormatter,
+                batchFormatter: batchFormatter,
+                httpClient: httpClient);
 
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
         }
@@ -152,8 +167,8 @@ namespace Serilog
         /// "Buffer-{HalfHour}.json" or "Buffer-{Hour}.json".
         /// </param>
         /// <param name="bufferFileSizeLimitBytes">
-        /// The approximate maximum size, in bytes, to which a buffer file for a specific time interval will be
-        /// allowed to grow. By default no limit will be applied.
+        /// The approximate maximum size, in bytes, to which a buffer file for a specific time
+        /// interval will be allowed to grow. By default no limit will be applied.
         /// </param>
         /// <param name="bufferFileShared">
         /// Allow the buffer file to be shared by multiple processes. Default value is false.
@@ -161,11 +176,19 @@ namespace Serilog
         /// <param name="retainedBufferFileCountLimit">
         /// The maximum number of buffer files that will be retained, including the current buffer
         /// file. Under normal operation only 2 files will be kept, however if the log server is
-        /// unreachable, the number of files specified by <paramref name="retainedBufferFileCountLimit"/>
-        /// will be kept on the file system. For unlimited retention, pass null. Default value is 31.
+        /// unreachable, the number of files specified by
+        /// <paramref name="retainedBufferFileCountLimit"/> will be kept on the file system. For
+        /// unlimited retention, pass null. Default value is 31.
         /// </param>
         /// <param name="batchPostingLimit">
         /// The maximum number of events to post in a single batch. Default value is 1000.
+        /// </param>
+        /// <param name="batchSizeLimitBytes">
+        /// The approximate maximum size, in bytes, for a single batch. The value is an
+        /// approximation because only the size of the log events are considered. The extra
+        /// characters added by the batch formatter, where the sequence of serialized log events
+        /// are transformed into a payload, are not considered. Please make sure to accommodate for
+        /// those. Default value is long.MaxValue.
         /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
@@ -201,6 +224,7 @@ namespace Serilog
             bool bufferFileShared = false,
             int? retainedBufferFileCountLimit = 31,
             int batchPostingLimit = 1000,
+            long batchSizeLimitBytes = long.MaxValue,
             TimeSpan? period = null,
             ITextFormatter textFormatter = null,
             IBatchFormatter batchFormatter = null,
@@ -211,10 +235,10 @@ namespace Serilog
             if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
             // Default values
-            period = period ?? TimeSpan.FromSeconds(2);
-            textFormatter = textFormatter ?? new NormalRenderedTextFormatter();
-            batchFormatter = batchFormatter ?? new DefaultBatchFormatter();
-            httpClient = httpClient ?? new DefaultHttpClient();
+            period ??= TimeSpan.FromSeconds(2);
+            textFormatter ??= new NormalRenderedTextFormatter();
+            batchFormatter ??= new DefaultBatchFormatter();
+            httpClient ??= new DefaultHttpClient();
             httpClient.Configure(configuration);
 
             var sink = new TimeRolledDurableHttpSink(
@@ -224,6 +248,7 @@ namespace Serilog
                 bufferFileShared: bufferFileShared,
                 retainedBufferFileCountLimit: retainedBufferFileCountLimit,
                 batchPostingLimit: batchPostingLimit,
+                batchSizeLimitBytes: batchSizeLimitBytes,
                 period: period.Value,
                 textFormatter: textFormatter,
                 batchFormatter: batchFormatter,
@@ -262,11 +287,19 @@ namespace Serilog
         /// <param name="retainedBufferFileCountLimit">
         /// The maximum number of buffer files that will be retained, including the current buffer
         /// file. Under normal operation only 2 files will be kept, however if the log server is
-        /// unreachable, the number of files specified by <paramref name="retainedBufferFileCountLimit"/>
-        /// will be kept on the file system. For unlimited retention, pass null. Default value is 31.
+        /// unreachable, the number of files specified by
+        /// <paramref name="retainedBufferFileCountLimit"/> will be kept on the file system. For
+        /// unlimited retention, pass null. Default value is 31.
         /// </param>
         /// <param name="batchPostingLimit">
         /// The maximum number of events to post in a single batch. Default value is 1000.
+        /// </param>
+        /// <param name="batchSizeLimitBytes">
+        /// The approximate maximum size, in bytes, for a single batch. The value is an
+        /// approximation because only the size of the log events are considered. The extra
+        /// characters added by the batch formatter, where the sequence of serialized log events
+        /// are transformed into a payload, are not considered. Please make sure to accommodate for
+        /// those. Default value is long.MaxValue.
         /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
@@ -302,6 +335,7 @@ namespace Serilog
             bool bufferFileShared = false,
             int? retainedBufferFileCountLimit = 31,
             int batchPostingLimit = 1000,
+            long batchSizeLimitBytes = long.MaxValue,
             TimeSpan? period = null,
             ITextFormatter textFormatter = null,
             IBatchFormatter batchFormatter = null,
@@ -312,10 +346,10 @@ namespace Serilog
             if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
             // Default values
-            period = period ?? TimeSpan.FromSeconds(2);
-            textFormatter = textFormatter ?? new NormalRenderedTextFormatter();
-            batchFormatter = batchFormatter ?? new DefaultBatchFormatter();
-            httpClient = httpClient ?? new DefaultHttpClient();
+            period ??= TimeSpan.FromSeconds(2);
+            textFormatter ??= new NormalRenderedTextFormatter();
+            batchFormatter ??= new DefaultBatchFormatter();
+            httpClient ??= new DefaultHttpClient();
             httpClient.Configure(configuration);
 
             var sink = new FileSizeRolledDurableHttpSink(
@@ -325,6 +359,7 @@ namespace Serilog
                 bufferFileShared: bufferFileShared,
                 retainedBufferFileCountLimit: retainedBufferFileCountLimit,
                 batchPostingLimit: batchPostingLimit,
+                batchSizeLimitBytes: batchSizeLimitBytes,
                 period: period.Value,
                 textFormatter: textFormatter,
                 batchFormatter: batchFormatter,

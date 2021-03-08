@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Serilog.Formatting.Json;
-
-namespace Serilog.Sinks.Http.TextFormatters
+namespace Serilog.Sinks.Http.Private.Durable
 {
-    internal static class ValueFormatter
+    public enum DateFormats
     {
-        internal static readonly JsonValueFormatter Instance = new();
+        Date,
+        Hour,
+        HalfHour
     }
 }
