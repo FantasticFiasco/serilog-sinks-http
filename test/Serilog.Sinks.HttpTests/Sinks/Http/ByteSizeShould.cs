@@ -9,7 +9,7 @@ namespace Serilog.Sinks.Http
         public void ReturnByteValue()
         {
             // Act
-            const long got = ByteSize.B;
+            var got = ByteSize.B;
 
             // Assert
             got.ShouldBe(1);
@@ -19,7 +19,7 @@ namespace Serilog.Sinks.Http
         public void ReturnKiloByteValue()
         {
             // Act
-            const long got = ByteSize.KB;
+            var got = ByteSize.KB;
 
             // Assert
             got.ShouldBe(1024);
@@ -29,7 +29,7 @@ namespace Serilog.Sinks.Http
         public void ReturnMegaByteValue()
         {
             // Act
-            const long got = ByteSize.MB;
+            var got = ByteSize.MB;
 
             // Assert
             got.ShouldBe(1048576);
@@ -39,7 +39,7 @@ namespace Serilog.Sinks.Http
         public void ReturnGigaByteValue()
         {
             // Act
-            const long got = ByteSize.GB;
+            var got = ByteSize.GB;
 
             // Assert
             got.ShouldBe(1073741824);
