@@ -86,7 +86,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             var result = queue.TryEnqueue(formattedLogEvent);
             if (result == LogEventQueue.EnqueueResult.QueueFull)
             {
-                SelfLog.WriteLine("Queue has reached its limit and the log event will be dropped");
+                SelfLog.WriteLine("Queue has reached its limit and the log event will be dropped; data: {0}", formattedLogEvent);
             }
         }
 
