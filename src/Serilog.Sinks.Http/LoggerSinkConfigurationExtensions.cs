@@ -45,7 +45,7 @@ namespace Serilog
         /// </param>
         /// <param name="batchSizeLimitBytes">
         /// The approximate maximum size, in bytes, for a single batch. The value is an
-        /// approximation because only the size of the log events are considered. The extra7
+        /// approximation because only the size of the log events are considered. The extra
         /// characters added by the batch formatter, where the sequence of serialized log events
         /// are transformed into a payload, are not considered. Please make sure to accommodate for
         /// those. Default value is long.MaxValue.
@@ -185,7 +185,7 @@ namespace Serilog
         /// </param>
         /// <param name="batchSizeLimitBytes">
         /// The approximate maximum size, in bytes, for a single batch. The value is an
-        /// approximation because only the size of the log events are considered. The extra7
+        /// approximation because only the size of the log events are considered. The extra
         /// characters added by the batch formatter, where the sequence of serialized log events
         /// are transformed into a payload, are not considered. Please make sure to accommodate for
         /// those. Default value is long.MaxValue.
@@ -296,7 +296,7 @@ namespace Serilog
         /// </param>
         /// <param name="batchSizeLimitBytes">
         /// The approximate maximum size, in bytes, for a single batch. The value is an
-        /// approximation because only the size of the log events are considered. The extra7
+        /// approximation because only the size of the log events are considered. The extra
         /// characters added by the batch formatter, where the sequence of serialized log events
         /// are transformed into a payload, are not considered. Please make sure to accommodate for
         /// those. Default value is long.MaxValue.
