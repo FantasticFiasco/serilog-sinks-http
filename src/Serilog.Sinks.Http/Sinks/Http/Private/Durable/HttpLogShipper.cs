@@ -39,6 +39,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         private readonly PortableTimer timer;
         private readonly object syncRoot = new();
         private readonly IBatchFormatter batchFormatter;
+
         private volatile bool disposed;
 
         public HttpLogShipper(
