@@ -19,10 +19,11 @@ namespace Serilog
             this.xmlDocumentationFixture = xmlDocumentationFixture;
         }
 
-        [TheoryOnMasterBranch]
-        [InlineData("HTTP-sink.md", "Http")]
-        [InlineData("Durable-file-size-rolled-HTTP-sink.md", "DurableHttpUsingFileSizeRolledBuffers")]
-        [InlineData("Durable-time-rolled-HTTP-sink.md", "DurableHttpUsingTimeRolledBuffers")]
+        [Fact(Skip = "Skip until v8 is released")]
+        // [TheoryOnMasterBranch]
+        // [InlineData("HTTP-sink.md", "Http")]
+        // [InlineData("Durable-file-size-rolled-HTTP-sink.md", "DurableHttpUsingFileSizeRolledBuffers")]
+        // [InlineData("Durable-time-rolled-HTTP-sink.md", "DurableHttpUsingTimeRolledBuffers")]
         public async Task MatchCode(string wikiPage, string extensionName)
         {
             // Arrange
