@@ -10,6 +10,86 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 - [#116](https://github.com/FantasticFiasco/serilog-sinks-http/issues/116) [BREAKING CHANGE] Support specifying `batchSizeLimitBytes` when creating the sink, thus limiting the size of the payloads sent to the log server (proposed by [@michaeltdaniels](https://github.com/michaeltdaniels))
 
+**Migration guide**
+
+By far the easiest way to migrate your code is to stop using positional arguments and instead use named arguments.
+
+If you use the non-durable sink please make the following changes to your code.
+
+```csharp
+// Before migration
+log = new LoggerConfiguration()
+  .WriteTo.Http("http://www.mylogs.com", 500, 500)
+  .CreateLogger();
+
+// After migration
+log = new LoggerConfiguration()
+  .WriteTo.Http(
+    requestUri: "http://www.mylogs.com",
+    batchPostingLimit: 500,
+    // new argument batchSizeLimitBytes is positioned here
+    queueLimit: 500)
+  .CreateLogger();
+```
+
+If you use the durable file size rolled sink please make the following changes to your code.
+
+```csharp
+// Before migration
+log = new LoggerConfiguration()
+  .WriteTo.DurableHttpUsingFileSizeRolledBuffers(
+      "http://www.mylogs.com",
+      "MyBuffer",
+      ByteSize.GB,
+      false,
+      10,
+      500,
+      TimeSpan.FromSeconds(10)
+  .CreateLogger();
+
+// After migration
+log = new LoggerConfiguration()
+  .WriteTo.DurableHttpUsingFileSizeRolledBuffers(
+      requestUri: "http://www.mylogs.com",
+      bufferBaseFileName: "MyBuffer",
+      bufferFileSizeLimitBytes: ByteSize.GB,
+      bufferFileShared: false,
+      retainedBufferFileCountLimit: 10,
+      batchPostingLimit: 500,
+      // new argument batchSizeLimitBytes is positioned here
+      period: TimeSpan.FromSeconds(10)
+  .CreateLogger();
+```
+
+If you use the durable time rolled sink please make the following changes to your code.
+
+```csharp
+// Before migration
+log = new LoggerConfiguration()
+  .WriteTo.DurableHttpUsingTimeRolledBuffers(
+      "http://www.mylogs.com",
+      "MyBuffer-{Date}.json",
+      ByteSize.GB,
+      false,
+      10,
+      500,
+      TimeSpan.FromSeconds(10)
+  .CreateLogger();
+
+// After migration
+log = new LoggerConfiguration()
+  .WriteTo.DurableHttpUsingTimeRolledBuffers(
+      requestUri: "http://www.mylogs.com",
+      bufferPathFormat: "MyBuffer-{Date}.json",
+      bufferFileSizeLimitBytes: ByteSize.GB,
+      bufferFileShared: false,
+      retainedBufferFileCountLimit: 10,
+      batchPostingLimit: 500,
+      // new argument batchSizeLimitBytes is positioned here
+      period: TimeSpan.FromSeconds(10)
+  .CreateLogger();
+```
+
 ### :syringe: Fixed
 
 - Durable buffer files are no longer created with an initial [BOM](https://en.wikipedia.org/wiki/Byte_order_mark)
