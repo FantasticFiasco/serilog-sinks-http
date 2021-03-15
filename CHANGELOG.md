@@ -10,6 +10,10 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 - [#116](https://github.com/FantasticFiasco/serilog-sinks-http/issues/116) [BREAKING CHANGE] Support specifying `batchSizeLimitBytes` when creating the sink, thus limiting the size of the payloads sent to the log server (proposed by [@michaeltdaniels](https://github.com/michaeltdaniels))
 
+### :dizzy: Changed
+
+- Durable buffer files are no longer created with an initial [BOM](https://en.wikipedia.org/wiki/Byte_order_mark)
+
 ## [7.2.0] - 2020-10-19
 
 ### :zap: Added
