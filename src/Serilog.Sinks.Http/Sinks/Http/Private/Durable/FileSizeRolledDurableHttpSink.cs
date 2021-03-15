@@ -64,14 +64,13 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             sink = new LoggerConfiguration()
                 .WriteTo.File(
-                    textFormatter,
-                    $"{bufferBaseFileName}-.json",
+                    formatter: textFormatter,
+                    path: $"{bufferBaseFileName}-.json",
                     fileSizeLimitBytes: bufferFileSizeLimitBytes,
                     shared: bufferFileShared,
-                    rollOnFileSizeLimit: true,
-                    retainedFileCountLimit: retainedBufferFileCountLimit,
                     rollingInterval: RollingInterval.Day,
-                    encoding: Encoding.UTF8)
+                    rollOnFileSizeLimit: true,
+                    retainedFileCountLimit: retainedBufferFileCountLimit)
                 .CreateLogger();
         }
 

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Text;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
@@ -64,11 +63,10 @@ namespace Serilog.Sinks.Http.Private.Durable
                 batchFormatter);
 
             sink = new RollingFileSink(
-                bufferPathFormat,
-                textFormatter,
-                bufferFileSizeLimitBytes,
-                retainedBufferFileCountLimit,
-                Encoding.UTF8,
+                pathFormat: bufferPathFormat,
+                textFormatter: textFormatter,
+                fileSizeLimitBytes: bufferFileSizeLimitBytes,
+                retainedFileCountLimit: retainedBufferFileCountLimit,
                 shared: bufferFileShared);
         }
 

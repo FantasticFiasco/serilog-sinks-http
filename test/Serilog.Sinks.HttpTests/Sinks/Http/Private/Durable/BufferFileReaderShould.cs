@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Text;
 using Shouldly;
 using Xunit;
 
@@ -19,7 +18,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Arrange
             using var stream = new MemoryStream();
 
-            using var writer = new StreamWriter(stream, Encoding.UTF8);
+            using var writer = new StreamWriter(stream, BufferFileReader.Encoding);
             writer.Write(FooLogEvent + Environment.NewLine);
             writer.Flush();
 
@@ -38,7 +37,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Arrange
             using var stream = new MemoryStream();
 
-            using var writer = new StreamWriter(stream, Encoding.UTF8);
+            using var writer = new StreamWriter(stream, BufferFileReader.Encoding);
             writer.Write(FooLogEvent + Environment.NewLine);
             writer.Write(BarLogEvent + Environment.NewLine);
             writer.Flush();
@@ -58,7 +57,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Arrange
             using var stream = new MemoryStream();
 
-            using var writer = new StreamWriter(stream, Encoding.UTF8);
+            using var writer = new StreamWriter(stream, BufferFileReader.Encoding);
             writer.Write(FooLogEvent);  // The partially written log event is missing new line
             writer.Flush();
 
@@ -77,7 +76,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Arrange
             using var stream = new MemoryStream();
 
-            using var writer = new StreamWriter(stream, Encoding.UTF8);
+            using var writer = new StreamWriter(stream, BufferFileReader.Encoding);
             writer.Write(FooLogEvent + Environment.NewLine);
             writer.Write(BarLogEvent);  // The partially written log event is missing new line
             writer.Flush();
@@ -88,7 +87,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Assert
             got.LogEvents.ShouldBe(new[] { FooLogEvent });
             got.HasReachedLimit.ShouldBeFalse();
-            nextLineBeginsAtOffset.ShouldBe(BufferFileReader.BomLength + FooLogEvent.Length + Environment.NewLine.Length);
+            nextLineBeginsAtOffset.ShouldBe(FooLogEvent.Length + Environment.NewLine.Length);
         }
 
         [Fact]
@@ -97,7 +96,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Arrange
             using var stream = new MemoryStream();
 
-            using var writer = new StreamWriter(stream, Encoding.UTF8);
+            using var writer = new StreamWriter(stream, BufferFileReader.Encoding);
             writer.Write(FooLogEvent + Environment.NewLine);
             writer.Write(BarLogEvent + Environment.NewLine);
             writer.Flush();
@@ -110,7 +109,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Assert
             got.LogEvents.ShouldBe(new[] { FooLogEvent });
             got.HasReachedLimit.ShouldBeTrue();
-            nextLineBeginsAtOffset.ShouldBe(BufferFileReader.BomLength + FooLogEvent.Length + Environment.NewLine.Length);
+            nextLineBeginsAtOffset.ShouldBe(FooLogEvent.Length + Environment.NewLine.Length);
         }
 
         [Fact]
@@ -119,7 +118,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Arrange
             using var stream = new MemoryStream();
 
-            using var writer = new StreamWriter(stream, Encoding.UTF8);
+            using var writer = new StreamWriter(stream, BufferFileReader.Encoding);
             writer.Write(FooLogEvent + Environment.NewLine);
             writer.Write(BarLogEvent + Environment.NewLine);
             writer.Flush();
@@ -132,7 +131,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Assert
             got.LogEvents.ShouldBe(new[] { FooLogEvent });
             got.HasReachedLimit.ShouldBeTrue();
-            nextLineBeginsAtOffset.ShouldBe(BufferFileReader.BomLength + FooLogEvent.Length + Environment.NewLine.Length);
+            nextLineBeginsAtOffset.ShouldBe(FooLogEvent.Length + Environment.NewLine.Length);
         }
 
         [Fact]
@@ -143,7 +142,7 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             const string logEventExceedingBatchSizeLimit = "{ \"foo\": \"This document exceeds the batch size limit\" }";
 
-            using var writer = new StreamWriter(stream, Encoding.UTF8);
+            using var writer = new StreamWriter(stream, BufferFileReader.Encoding);
             writer.Write(logEventExceedingBatchSizeLimit + Environment.NewLine);
             writer.Write(BarLogEvent + Environment.NewLine);
             writer.Flush();

@@ -20,16 +20,13 @@ namespace Serilog.Sinks.Http.Private.Durable
 {
     public static class BufferFileReader
     {
+        public static readonly Encoding Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+
         private const char CR = '\r';
         private const char LF = '\n';
 
         private static readonly string CRLFString = $"{CR}{LF}";
         private static readonly string LFString = $"{LF}";
-
-        /// <summary>
-        /// The length of the Byte Order Marks (BOM).
-        /// </summary>
-        public const int BomLength = 3;
 
         public static Batch Read(
             string fileName,
@@ -89,8 +86,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 }
 
                 // Update cursor
-                var bomLength = nextLineBeginsAtOffset == 0 ? BomLength : 0;
-                nextLineBeginsAtOffset += bomLength + lineSizeBytes + ByteSize.From(line.NewLine);
+                nextLineBeginsAtOffset += lineSizeBytes + ByteSize.From(line.NewLine);
 
                 // Add log event
                 if (includeLine)
@@ -119,7 +115,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         private static Line ReadLine(Stream stream)
         {
             // Important not to dispose this StreamReader as the stream must remain open
-            var reader = new StreamReader(stream, Encoding.UTF8, false, 128);
+            var reader = new StreamReader(stream, Encoding, false, 128);
             var lineBuilder = new StringBuilder();
 
             while (true)
