@@ -14,6 +14,7 @@
 
 using System;
 using System.ComponentModel;
+using System.IO.Compression;
 using System.Net.Http;
 using Microsoft.Extensions.Configuration;
 using Serilog.Configuration;
@@ -178,6 +179,13 @@ namespace Serilog
         /// The formatter batching multiple log events into a payload that can be sent over the
         /// network. Default value is <see cref="DefaultBatchFormatter"/>.
         /// </param>
+        /// <param name="enableGzip">
+        /// Allow the logs to be sent over the network compressed.
+        /// </param>
+        /// <param name="compressionLevel">
+        /// The compression level used to send logs over the network when gzip is enabled.
+        /// Default value is <see cref="CompressionLevel"/>.
+        /// </param>
         /// <param name="restrictedToMinimumLevel">
         /// The minimum level for events passed through the sink. Default value is
         /// <see cref="LevelAlias.Minimum"/>.
@@ -204,6 +212,8 @@ namespace Serilog
             TimeSpan? period = null,
             ITextFormatter textFormatter = null,
             IBatchFormatter batchFormatter = null,
+            bool enableGzip = false,
+            CompressionLevel compressionLevel = CompressionLevel.Fastest,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             IHttpClient httpClient = null,
             IConfiguration configuration = null)
@@ -227,6 +237,8 @@ namespace Serilog
                 period: period.Value,
                 textFormatter: textFormatter,
                 batchFormatter: batchFormatter,
+                enableGzip: enableGzip,
+                compressionLevel: compressionLevel,
                 httpClient: httpClient);
 
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
@@ -279,6 +291,13 @@ namespace Serilog
         /// The formatter batching multiple log events into a payload that can be sent over the
         /// network. Default value is <see cref="DefaultBatchFormatter"/>.
         /// </param>
+        /// <param name="enableGzip">
+        /// Allow the logs to be sent over the network compressed.
+        /// </param>
+        /// <param name="compressionLevel">
+        /// The compression level used to send logs over the network when gzip is enabled.
+        /// Default value is <see cref="CompressionLevel"/>.
+        /// </param>
         /// <param name="restrictedToMinimumLevel">
         /// The minimum level for events passed through the sink. Default value is
         /// <see cref="LevelAlias.Minimum"/>.
@@ -305,6 +324,8 @@ namespace Serilog
             TimeSpan? period = null,
             ITextFormatter textFormatter = null,
             IBatchFormatter batchFormatter = null,
+            bool enableGzip = false,
+            CompressionLevel compressionLevel = CompressionLevel.Fastest,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             IHttpClient httpClient = null,
             IConfiguration configuration = null)
@@ -328,6 +349,8 @@ namespace Serilog
                 period: period.Value,
                 textFormatter: textFormatter,
                 batchFormatter: batchFormatter,
+                enableGzip: enableGzip,
+                compressionLevel: compressionLevel,
                 httpClient: httpClient);
 
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);

@@ -20,6 +20,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Sinks.Http.Private.Time;
+using System.IO.Compression;
 #if HRESULTS
 using System.Runtime.InteropServices;
 #endif
@@ -28,7 +29,7 @@ namespace Serilog.Sinks.Http.Private.Network
 {
     public class HttpLogShipper : IDisposable
     {
-        private const string ContentType = "application/json";
+        private const string JsonContentType = "application/json";
 
         private static readonly TimeSpan RequiredLevelCheckInterval = TimeSpan.FromMinutes(2);
 
@@ -42,6 +43,8 @@ namespace Serilog.Sinks.Http.Private.Network
         private readonly IBatchFormatter batchFormatter;
         private DateTime nextRequiredLevelCheckUtc = DateTime.UtcNow.Add(RequiredLevelCheckInterval);
         private volatile bool unloading;
+        private readonly bool enableGzip;
+        private readonly CompressionLevel compressionLevel;
 
         public HttpLogShipper(
             IHttpClient httpClient,
@@ -49,7 +52,9 @@ namespace Serilog.Sinks.Http.Private.Network
             IBufferFiles bufferFiles,
             int batchPostingLimit,
             TimeSpan period,
-            IBatchFormatter batchFormatter)
+            IBatchFormatter batchFormatter,
+            bool enableGzip,
+            CompressionLevel compressionLevel)
         {
             if (batchPostingLimit <= 0) throw new ArgumentException("batchPostingLimit must be 1 or greater", nameof(batchPostingLimit));
 
@@ -58,6 +63,8 @@ namespace Serilog.Sinks.Http.Private.Network
             this.bufferFiles = bufferFiles ?? throw new ArgumentNullException(nameof(bufferFiles));
             this.batchPostingLimit = batchPostingLimit;
             this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
+            this.enableGzip = enableGzip;
+            this.compressionLevel = compressionLevel;
 
             connectionSchedule = new ExponentialBackoffConnectionSchedule(period);
             timer = new PortableTimer(OnTick);
@@ -124,7 +131,37 @@ namespace Serilog.Sinks.Http.Private.Network
                             if (string.IsNullOrEmpty(payload))
                                 continue;
 
-                            var content = new StringContent(payload, Encoding.UTF8, ContentType);
+                            byte[] payloadBytes = null;
+
+                            using (var inputStream = new MemoryStream(ConvertToBytes(payload)))
+                            {
+                                if(enableGzip)
+                                {
+                                    var outputStream = new MemoryStream();
+                                    using (var gzipStream = new GZipStream(outputStream, compressionLevel))
+                                    {
+                                        await inputStream.CopyToAsync(gzipStream);
+                                    }
+                                    payloadBytes = outputStream.ToArray();
+                                }
+                                else
+                                {
+                                    payloadBytes = inputStream.ToArray();
+                                }
+                            }
+
+                            var contentStream = new MemoryStream(payloadBytes);
+                            var content = new StreamContent(contentStream);
+
+                            if (enableGzip)
+                            {
+                                content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+                                content.Headers.Add("Content-Encoding", "gzip");
+                            }
+                            else
+                            {
+                                content.Headers.Add("Content-Type", JsonContentType);
+                            }
 
                             var result = await httpClient.PostAsync(requestUri, content).ConfigureAwait(false);
                             if (result.IsSuccessStatusCode)
@@ -187,6 +224,8 @@ namespace Serilog.Sinks.Http.Private.Network
                 }
             }
         }
+
+        private static byte[] ConvertToBytes(string value) => Encoding.UTF8.GetBytes(value);
 
         private static bool IsUnlockedAtLength(string file, long maxLength)
         {
