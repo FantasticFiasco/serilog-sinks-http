@@ -20,6 +20,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Sinks.Http.Private.Time;
+using System.IO.Compression;
+
 #if HRESULTS
 using System.Runtime.InteropServices;
 #endif
@@ -28,7 +30,9 @@ namespace Serilog.Sinks.Http.Private.Durable
 {
     public class HttpLogShipper : IDisposable
     {
-        private const string ContentType = "application/json";
+        private const string JsonContentType = "application/json";
+
+        private static readonly TimeSpan RequiredLevelCheckInterval = TimeSpan.FromMinutes(2);
 
         private readonly IHttpClient httpClient;
         private readonly string requestUri;
@@ -39,6 +43,9 @@ namespace Serilog.Sinks.Http.Private.Durable
         private readonly PortableTimer timer;
         private readonly object syncRoot = new();
         private readonly IBatchFormatter batchFormatter;
+        
+        private readonly bool enableGzip;
+        private readonly CompressionLevel compressionLevel;
 
         private volatile bool disposed;
 
@@ -49,7 +56,9 @@ namespace Serilog.Sinks.Http.Private.Durable
             int batchPostingLimit,
             long batchSizeLimitBytes,
             TimeSpan period,
-            IBatchFormatter batchFormatter)
+            IBatchFormatter batchFormatter,
+            bool enableGzip,
+            CompressionLevel compressionLevel)
         {
             if (batchPostingLimit <= 0) throw new ArgumentException("batchPostingLimit must be 1 or greater", nameof(batchPostingLimit));
 
@@ -59,6 +68,8 @@ namespace Serilog.Sinks.Http.Private.Durable
             this.batchPostingLimit = batchPostingLimit;
             this.batchSizeLimitBytes = batchSizeLimitBytes;
             this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
+            this.enableGzip = enableGzip;
+            this.compressionLevel = compressionLevel;
 
             connectionSchedule = new ExponentialBackoffConnectionSchedule(period);
             timer = new PortableTimer(OnTick);
@@ -125,7 +136,37 @@ namespace Serilog.Sinks.Http.Private.Durable
                         if (string.IsNullOrEmpty(payload))
                             continue;
 
-                        var content = new StringContent(payload, Encoding.UTF8, ContentType);
+                            byte[] payloadBytes = null;
+
+                            using (var inputStream = new MemoryStream(ConvertToBytes(payload)))
+                            {
+                                if(enableGzip)
+                                {
+                                    var outputStream = new MemoryStream();
+                                    using (var gzipStream = new GZipStream(outputStream, compressionLevel))
+                                    {
+                                        await inputStream.CopyToAsync(gzipStream);
+                                    }
+                                    payloadBytes = outputStream.ToArray();
+                                }
+                                else
+                                {
+                                    payloadBytes = inputStream.ToArray();
+                                }
+                            }
+
+                            var contentStream = new MemoryStream(payloadBytes);
+                            var content = new StreamContent(contentStream);
+
+                            if (enableGzip)
+                            {
+                                content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+                                content.Headers.Add("Content-Encoding", "gzip");
+                            }
+                            else
+                            {
+                                content.Headers.Add("Content-Type", JsonContentType);
+                            }
 
                         var result = await httpClient
                             .PostAsync(requestUri, content)
@@ -190,6 +231,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 }
             }
         }
+        private static byte[] ConvertToBytes(string value) => Encoding.UTF8.GetBytes(value);
 
         private static bool IsUnlockedAtLength(string file, long maxLength)
         {

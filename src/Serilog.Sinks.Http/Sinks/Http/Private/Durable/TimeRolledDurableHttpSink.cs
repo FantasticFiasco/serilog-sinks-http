@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using System;
+using System.IO.Compression;
+using System.Text;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
@@ -48,6 +50,8 @@ namespace Serilog.Sinks.Http.Private.Durable
             TimeSpan period,
             ITextFormatter textFormatter,
             IBatchFormatter batchFormatter,
+            bool enableGzip,
+            CompressionLevel compressionLevel,
             IHttpClient httpClient)
         {
             if (bufferFileSizeLimitBytes < 0)
@@ -60,7 +64,9 @@ namespace Serilog.Sinks.Http.Private.Durable
                 batchPostingLimit,
                 batchSizeLimitBytes,
                 period,
-                batchFormatter);
+                batchFormatter,
+                enableGzip,
+                compressionLevel);
 
             sink = new RollingFileSink(
                 pathFormat: bufferPathFormat,
