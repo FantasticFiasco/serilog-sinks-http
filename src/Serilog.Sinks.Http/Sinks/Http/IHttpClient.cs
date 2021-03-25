@@ -25,6 +25,7 @@ namespace Serilog.Sinks.Http
     /// Interface responsible for posting HTTP requests.
     /// </summary>
     /// <seealso cref="JsonHttpClient"/>
+    /// <seealso cref="JsonGzipHttpClient"/>
     public interface IHttpClient : IDisposable
     {
         /// <summary>
