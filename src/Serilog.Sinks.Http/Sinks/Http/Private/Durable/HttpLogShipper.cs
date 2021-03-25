@@ -20,7 +20,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Sinks.Http.Private.Time;
-using System.IO.Compression;
 
 #if HRESULTS
 using System.Runtime.InteropServices;
@@ -30,10 +29,6 @@ namespace Serilog.Sinks.Http.Private.Durable
 {
     public class HttpLogShipper : IDisposable
     {
-        private const string JsonContentType = "application/json";
-
-        private static readonly TimeSpan RequiredLevelCheckInterval = TimeSpan.FromMinutes(2);
-
         private readonly IHttpClient httpClient;
         private readonly string requestUri;
         private readonly int batchPostingLimit;
@@ -43,9 +38,6 @@ namespace Serilog.Sinks.Http.Private.Durable
         private readonly PortableTimer timer;
         private readonly object syncRoot = new();
         private readonly IBatchFormatter batchFormatter;
-        
-        private readonly bool enableGzip;
-        private readonly CompressionLevel compressionLevel;
 
         private volatile bool disposed;
 
@@ -56,9 +48,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             int batchPostingLimit,
             long batchSizeLimitBytes,
             TimeSpan period,
-            IBatchFormatter batchFormatter,
-            bool enableGzip,
-            CompressionLevel compressionLevel)
+            IBatchFormatter batchFormatter)
         {
             if (batchPostingLimit <= 0) throw new ArgumentException("batchPostingLimit must be 1 or greater", nameof(batchPostingLimit));
 
@@ -68,8 +58,6 @@ namespace Serilog.Sinks.Http.Private.Durable
             this.batchPostingLimit = batchPostingLimit;
             this.batchSizeLimitBytes = batchSizeLimitBytes;
             this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
-            this.enableGzip = enableGzip;
-            this.compressionLevel = compressionLevel;
 
             connectionSchedule = new ExponentialBackoffConnectionSchedule(period);
             timer = new PortableTimer(OnTick);
@@ -129,50 +117,23 @@ namespace Serilog.Sinks.Http.Private.Durable
 
                     if (batch.LogEvents.Count > 0)
                     {
-                        var payloadWriter = new StringWriter();
-                        batchFormatter.Format(batch.LogEvents, payloadWriter);
-                        var payload = payloadWriter.ToString();
+                        HttpResponseMessage response;
 
-                        if (string.IsNullOrEmpty(payload))
-                            continue;
+                        using (var contentStream = new MemoryStream())
+                        using (var contentWriter = new StreamWriter(contentStream, Encoding.UTF8))
+                        {
+                            // TODO: Rethink problem with flush and position
+                            batchFormatter.Format(batch.LogEvents, contentWriter);
 
-                            byte[] payloadBytes = null;
+                            if (contentStream.Length == 0)
+                                continue;
 
-                            using (var inputStream = new MemoryStream(ConvertToBytes(payload)))
-                            {
-                                if(enableGzip)
-                                {
-                                    var outputStream = new MemoryStream();
-                                    using (var gzipStream = new GZipStream(outputStream, compressionLevel))
-                                    {
-                                        await inputStream.CopyToAsync(gzipStream);
-                                    }
-                                    payloadBytes = outputStream.ToArray();
-                                }
-                                else
-                                {
-                                    payloadBytes = inputStream.ToArray();
-                                }
-                            }
+                            response = await httpClient
+                                .PostAsync(requestUri, contentStream)
+                                .ConfigureAwait(false);
+                        }
 
-                            var contentStream = new MemoryStream(payloadBytes);
-                            var content = new StreamContent(contentStream);
-
-                            if (enableGzip)
-                            {
-                                content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
-                                content.Headers.Add("Content-Encoding", "gzip");
-                            }
-                            else
-                            {
-                                content.Headers.Add("Content-Type", JsonContentType);
-                            }
-
-                        var result = await httpClient
-                            .PostAsync(requestUri, content)
-                            .ConfigureAwait(false);
-
-                        if (result.IsSuccessStatusCode)
+                        if (response.IsSuccessStatusCode)
                         {
                             connectionSchedule.MarkSuccess();
 
@@ -184,8 +145,8 @@ namespace Serilog.Sinks.Http.Private.Durable
 
                             SelfLog.WriteLine(
                                 "Received failed HTTP shipping result {0}: {1}",
-                                result.StatusCode,
-                                await result.Content.ReadAsStringAsync().ConfigureAwait(false));
+                                response.StatusCode,
+                                await response.Content.ReadAsStringAsync().ConfigureAwait(false));
 
                             break;
                         }
@@ -231,7 +192,6 @@ namespace Serilog.Sinks.Http.Private.Durable
                 }
             }
         }
-        private static byte[] ConvertToBytes(string value) => Encoding.UTF8.GetBytes(value);
 
         private static bool IsUnlockedAtLength(string file, long maxLength)
         {

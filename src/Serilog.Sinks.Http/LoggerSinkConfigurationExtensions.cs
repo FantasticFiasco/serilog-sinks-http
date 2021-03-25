@@ -15,15 +15,14 @@
 using System;
 using System.ComponentModel;
 using System.IO.Compression;
-using System.Net.Http;
 using Microsoft.Extensions.Configuration;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.Http;
 using Serilog.Sinks.Http.BatchFormatters;
+using Serilog.Sinks.Http.HttpClients;
 using Serilog.Sinks.Http.Private.Durable;
-using Serilog.Sinks.Http.Private.Http;
 using Serilog.Sinks.Http.Private.NonDurable;
 using Serilog.Sinks.Http.TextFormatters;
 
@@ -72,7 +71,7 @@ namespace Serilog
         /// </param>
         /// <param name="httpClient">
         /// A custom <see cref="IHttpClient"/> implementation. Default value is
-        /// <see cref="HttpClient"/>.
+        /// <see cref="JsonHttpClient"/>.
         /// </param>
         /// <param name="configuration">
         /// Configuration passed to <paramref name="httpClient"/>. Parameter is either manually
@@ -100,7 +99,7 @@ namespace Serilog
             period ??= TimeSpan.FromSeconds(2);
             textFormatter ??= new NormalRenderedTextFormatter();
             batchFormatter ??= new DefaultBatchFormatter();
-            httpClient ??= new DefaultHttpClient();
+            httpClient ??= new JsonHttpClient();
             httpClient.Configure(configuration);
 
             var sink = new HttpSink(
@@ -215,7 +214,7 @@ namespace Serilog
         /// </param>
         /// <param name="httpClient">
         /// A custom <see cref="IHttpClient"/> implementation. Default value is
-        /// <see cref="HttpClient"/>.
+        /// <see cref="JsonHttpClient"/>.
         /// </param>
         /// <param name="configuration">
         /// Configuration passed to <paramref name="httpClient"/>. Parameter is either manually
@@ -248,7 +247,7 @@ namespace Serilog
             period ??= TimeSpan.FromSeconds(2);
             textFormatter ??= new NormalRenderedTextFormatter();
             batchFormatter ??= new DefaultBatchFormatter();
-            httpClient ??= new DefaultHttpClient();
+            httpClient ??= new JsonHttpClient();
             httpClient.Configure(configuration);
 
             var sink = new TimeRolledDurableHttpSink(
@@ -262,8 +261,6 @@ namespace Serilog
                 period: period.Value,
                 textFormatter: textFormatter,
                 batchFormatter: batchFormatter,
-                enableGzip: enableGzip,
-                compressionLevel: compressionLevel,
                 httpClient: httpClient);
 
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
@@ -337,7 +334,7 @@ namespace Serilog
         /// </param>
         /// <param name="httpClient">
         /// A custom <see cref="IHttpClient"/> implementation. Default value is
-        /// <see cref="HttpClient"/>.
+        /// <see cref="JsonHttpClient"/>.
         /// </param>
         /// <param name="configuration">
         /// Configuration passed to <paramref name="httpClient"/>. Parameter is either manually
@@ -370,7 +367,7 @@ namespace Serilog
             period ??= TimeSpan.FromSeconds(2);
             textFormatter ??= new NormalRenderedTextFormatter();
             batchFormatter ??= new DefaultBatchFormatter();
-            httpClient ??= new DefaultHttpClient();
+            httpClient ??= new JsonHttpClient();
             httpClient.Configure(configuration);
 
             var sink = new FileSizeRolledDurableHttpSink(
@@ -384,8 +381,6 @@ namespace Serilog
                 period: period.Value,
                 textFormatter: textFormatter,
                 batchFormatter: batchFormatter,
-                enableGzip: enableGzip,
-                compressionLevel: compressionLevel,
                 httpClient: httpClient);
 
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);

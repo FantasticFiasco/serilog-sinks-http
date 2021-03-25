@@ -31,8 +31,6 @@ namespace Serilog.Sinks.Http.Private.NonDurable
     /// </summary>
     public class HttpSink : ILogEventSink, IDisposable
     {
-        private const string ContentType = "application/json";
-
         private readonly string requestUri;
         private readonly int batchPostingLimit;
         private readonly long batchSizeLimitBytes;
@@ -125,20 +123,23 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
                     if (batch.LogEvents.Count > 0)
                     {
-                        var payloadWriter = new StringWriter();
-                        batchFormatter.Format(batch.LogEvents, payloadWriter);
-                        var payload = payloadWriter.ToString();
+                        HttpResponseMessage response;
 
-                        if (string.IsNullOrEmpty(payload))
-                            continue;
+                        using (var contentStream = new MemoryStream())
+                        using (var contentWriter = new StreamWriter(contentStream, Encoding.UTF8))
+                        {
+                            // TODO: Rethink problem with flush and position
+                            batchFormatter.Format(batch.LogEvents, contentWriter);
 
-                        var content = new StringContent(payload, Encoding.UTF8, ContentType);
+                            if (contentStream.Length == 0)
+                                continue;
 
-                        var result = await httpClient
-                            .PostAsync(requestUri, content)
-                            .ConfigureAwait(false);
+                            response = await httpClient
+                                .PostAsync(requestUri, contentStream)
+                                .ConfigureAwait(false);
+                        }
 
-                        if (result.IsSuccessStatusCode)
+                        if (response.IsSuccessStatusCode)
                         {
                             connectionSchedule.MarkSuccess();
                             unsentBatch = null;
@@ -150,8 +151,8 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
                             SelfLog.WriteLine(
                                 "Received failed HTTP shipping result {0}: {1}",
-                                result.StatusCode,
-                                await result.Content.ReadAsStringAsync().ConfigureAwait(false));
+                                response.StatusCode,
+                                await response.Content.ReadAsStringAsync().ConfigureAwait(false));
 
                             break;
                         }
