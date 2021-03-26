@@ -13,14 +13,22 @@ namespace Serilog.Sinks.Http.HttpClients
         private const string JsonContentType = "application/json";
         private const string GzipContentEncoding = "gzip";
 
+        private readonly CompressionLevel compressionLevel;
         private readonly HttpClient httpClient;
 
-        public JsonGzipHttpClient() => httpClient = new HttpClient();
+        public JsonGzipHttpClient()
+            : this(CompressionLevel.Fastest)
+        {
+        }
+
+        public JsonGzipHttpClient(CompressionLevel compressionLevel)
+        {
+            this.compressionLevel = compressionLevel;
+
+            httpClient = new HttpClient();
+        }
 
         ~JsonGzipHttpClient() => Dispose(false);
-
-        // TODO: Investigate the difference in compression ratio between Fastest and Optimal
-        protected virtual CompressionLevel CompressionLevel { get; } = CompressionLevel.Fastest;
 
         public virtual void Configure(IConfiguration configuration)
         {
@@ -30,7 +38,7 @@ namespace Serilog.Sinks.Http.HttpClients
         public virtual async Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream)
         {
             using var output = new MemoryStream();
-            using (var gzipStream = new GZipStream(output, CompressionLevel))
+            using (var gzipStream = new GZipStream(output, compressionLevel))
             {
                 await contentStream
                     .CopyToAsync(gzipStream)

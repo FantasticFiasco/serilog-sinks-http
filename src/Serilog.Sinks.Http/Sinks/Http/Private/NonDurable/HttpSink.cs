@@ -128,8 +128,10 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                         using (var contentStream = new MemoryStream())
                         using (var contentWriter = new StreamWriter(contentStream, Encoding.UTF8))
                         {
-                            // TODO: Rethink problem with flush and position
                             batchFormatter.Format(batch.LogEvents, contentWriter);
+
+                            await contentWriter.FlushAsync();
+                            contentStream.Position = 0;
 
                             if (contentStream.Length == 0)
                                 continue;
