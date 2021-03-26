@@ -39,15 +39,15 @@ namespace Serilog.Sinks.Http.HttpClients
         public virtual async Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream)
         {
             using var output = new MemoryStream();
-            using (var gzipStream = new GZipStream(output, CompressionLevel))
-            {
-                await contentStream
-                    .CopyToAsync(gzipStream)
-                    .ConfigureAwait(false);
-            }
+            using var gzipStream = new GZipStream(output, CompressionLevel);
+            
+            await contentStream
+                .CopyToAsync(gzipStream)
+                .ConfigureAwait(false);
 
-            using var encodedStream = new MemoryStream(output.ToArray());
-            var content = new StreamContent(encodedStream);
+            output.Position = 0;
+
+            var content = new StreamContent(output);
             content.Headers.Add("Content-Type", JsonContentType);
             content.Headers.Add("Content-Encoding", GzipContentEncoding);
 
