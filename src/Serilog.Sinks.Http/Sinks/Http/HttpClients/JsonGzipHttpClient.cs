@@ -1,4 +1,18 @@
-﻿using System;
+﻿// Copyright 2015-2021 Serilog Contributors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
@@ -7,7 +21,11 @@ using Microsoft.Extensions.Configuration;
 
 namespace Serilog.Sinks.Http.HttpClients
 {
-    // TODO: Document
+    /// <summary>
+    /// HTTP client sending Gzip encoded JSON over the network.
+    /// </summary>
+    /// <seealso cref="JsonHttpClient"/>
+    /// <seealso cref="IHttpClient"/>
     public class JsonGzipHttpClient : IHttpClient
     {
         private const string JsonContentType = "application/json";
@@ -15,11 +33,19 @@ namespace Serilog.Sinks.Http.HttpClients
 
         private readonly HttpClient httpClient;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonGzipHttpClient"/> class with
+        /// fastest compression level.
+        /// </summary>
         public JsonGzipHttpClient()
             : this(CompressionLevel.Fastest)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonGzipHttpClient"/> class with
+        /// specified compression level.
+        /// </summary>
         public JsonGzipHttpClient(CompressionLevel compressionLevel)
         {
             httpClient = new HttpClient();
@@ -29,13 +55,17 @@ namespace Serilog.Sinks.Http.HttpClients
 
         ~JsonGzipHttpClient() => Dispose(false);
 
+        /// <summary>
+        /// Gets or sets the compression level.
+        /// </summary>
         protected CompressionLevel CompressionLevel { get; set; }
 
+        /// <inheritdoc />
         public virtual void Configure(IConfiguration configuration)
         {
         }
 
-        // TODO: Implement with lower memory footprint
+        /// <inheritdoc />
         public virtual async Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream)
         {
             using var output = new MemoryStream();
@@ -58,6 +88,7 @@ namespace Serilog.Sinks.Http.HttpClients
             return response;
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             Dispose(true);

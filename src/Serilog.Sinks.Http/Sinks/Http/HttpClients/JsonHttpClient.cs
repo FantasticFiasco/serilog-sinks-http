@@ -20,21 +20,30 @@ using Microsoft.Extensions.Configuration;
 
 namespace Serilog.Sinks.Http.HttpClients
 {
-    // TODO: Document
+    /// <summary>
+    /// HTTP client sending JSON over the network.
+    /// </summary>
+    /// <seealso cref="JsonGzipHttpClient"/>
+    /// <seealso cref="IHttpClient"/>
     public class JsonHttpClient : IHttpClient
     {
         private const string JsonContentType = "application/json";
 
         private readonly HttpClient httpClient;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonHttpClient"/> class.
+        /// </summary>
         public JsonHttpClient() => httpClient = new HttpClient();
 
         ~JsonHttpClient() => Dispose(false);
 
+        /// <inheritdoc />
         public virtual void Configure(IConfiguration configuration)
         {
         }
 
+        /// <inheritdoc />
         public virtual async Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream)
         {
             using var content = new StreamContent(contentStream);
@@ -47,6 +56,7 @@ namespace Serilog.Sinks.Http.HttpClients
             return response;
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             Dispose(true);
