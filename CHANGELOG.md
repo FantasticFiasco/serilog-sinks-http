@@ -6,8 +6,6 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
-TODO: Update
-
 ### :zap: Added
 
 - [#116](https://github.com/FantasticFiasco/serilog-sinks-http/issues/116) [BREAKING CHANGE] Support specifying `batchSizeLimitBytes` when creating the sink, thus limiting the size of the payloads sent to the log server (proposed by [@michaeltdaniels](https://github.com/michaeltdaniels))
@@ -91,6 +89,14 @@ log = new LoggerConfiguration()
       period: TimeSpan.FromSeconds(10)
   .CreateLogger();
 ```
+
+- [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) [BREAKING CHANGE] Support for content encoding [Gzip](https://en.wikipedia.org/wiki/Gzip) using HTTP client `JsonGzipHttpClient` (contribution by [@vaibhavepatel](https://github.com/vaibhavepatel))
+
+**Migration guide**
+
+The default HTTP client has been renamed from `DefaultHttpClient` to
+
+TODO: Update
 
 ### :syringe: Fixed
 
