@@ -32,7 +32,7 @@ And here we are today. I hope you'll find the sink useful. If not, don't hesitat
 
 ## Super simple to use
 
-In the following example, the sink will POST log events to `http://www.mylogs.com` over HTTP. Because breaking changes in this sink, more often than not, is the result of the introduction of a new parameter, we use named arguments instead of positional. I would urge you to do the same.
+In the following example, the sink will POST log events to `http://www.mylogs.com` over HTTP. We configure the sink using **[named arguments](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/named-and-optional-arguments#named-arguments) instead of positional** because historically we've seen that most breaking changes where the result of a new parameter describing a new feature. Using named arguments means that you more often than not can migrate to new major versions without any changes to your code.
 
 ```csharp
 ILogger log = new LoggerConfiguration()
