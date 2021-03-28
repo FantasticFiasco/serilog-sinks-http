@@ -90,13 +90,48 @@ log = new LoggerConfiguration()
   .CreateLogger();
 ```
 
-- [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) [BREAKING CHANGE] Support for content encoding [Gzip](https://en.wikipedia.org/wiki/Gzip) using HTTP client `JsonGzipHttpClient` (contribution by [@vaibhavepatel](https://github.com/vaibhavepatel))
+- [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) Support for content encoding [Gzip](https://en.wikipedia.org/wiki/Gzip) using HTTP client `JsonGzipHttpClient` (contribution by [@vaibhavepatel](https://github.com/vaibhavepatel))
+
+### :dizzy: Changed
+
+- [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) [BREAKING CHANGE] Interface `IHttpClient` as changed to accommodate for different HTTP content types.
 
 **Migration guide**
 
-The default HTTP client has been renamed from `DefaultHttpClient` to
+You will have to migrate your code if you've implemented your own version of `IHttpClient`. The signature of `IHttpClient.PostAsync` has changed from `Task<HttpResponseMessage> PostAsync(string, HttpContent)` to `Task<HttpResponseMessage> PostAsync(string, Stream)`.
 
-TODO: Update
+```csharp
+// Before migration
+public class MyHttpClient : IHttpClient
+{
+  // Code removed for brevity...
+
+  public async Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content)
+  {
+    // Here you probably have some code updating the content,
+    // and then you send the request
+    return await httpClient.PostAsync(requestUri, content)
+  }
+}
+
+// After migration
+public class MyHttpClient : IHttpClient
+{
+  // Code removed for brevity...
+
+  public async Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream)
+  {
+    using (var content = new StreamContent(contentStream))
+    {
+      content.Headers.Add("Content-Type", "application/json");
+
+      // Here you probably have some code updating the content,
+      // and then you send the request
+      return await httpClient.PostAsync(requestUri, content)
+    }
+  }
+}
+```
 
 ### :syringe: Fixed
 
