@@ -47,7 +47,16 @@ namespace Serilog
         /// approximation because only the size of the log events are considered. The extra
         /// characters added by the batch formatter, where the sequence of serialized log events
         /// are transformed into a payload, are not considered. Please make sure to accommodate for
-        /// those. Default value is long.MaxValue.
+        /// those.
+        /// <para />
+        /// Another thing to mention is that although the sink does its best to optimize for this
+        /// limit, if you decide to use an implementation of <seealso cref="IHttpClient"/> that is
+        /// compressing the payload, e.g. <seealso cref="JsonGzipHttpClient"/>, this parameter
+        /// describes the uncompressed size of the log events. The compressed size might be
+        /// significantly smaller depending on the compression algorithm and the repetitiveness of
+        /// the log events.
+        /// <para />
+        /// Default value is long.MaxValue.
         /// </param>
         /// <param name="queueLimit">
         /// The maximum number of events stored in the queue in memory, waiting to be posted over
@@ -187,7 +196,16 @@ namespace Serilog
         /// approximation because only the size of the log events are considered. The extra
         /// characters added by the batch formatter, where the sequence of serialized log events
         /// are transformed into a payload, are not considered. Please make sure to accommodate for
-        /// those. Default value is long.MaxValue.
+        /// those.
+        /// <para />
+        /// Another thing to mention is that although the sink does its best to optimize for this
+        /// limit, if you decide to use an implementation of <seealso cref="IHttpClient"/> that is
+        /// compressing the payload, e.g. <seealso cref="JsonGzipHttpClient"/>, this parameter
+        /// describes the uncompressed size of the log events. The compressed size might be
+        /// significantly smaller depending on the compression algorithm and the repetitiveness of
+        /// the log events.
+        /// <para />
+        /// Default value is long.MaxValue.
         /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
@@ -298,7 +316,16 @@ namespace Serilog
         /// approximation because only the size of the log events are considered. The extra
         /// characters added by the batch formatter, where the sequence of serialized log events
         /// are transformed into a payload, are not considered. Please make sure to accommodate for
-        /// those. Default value is long.MaxValue.
+        /// those.
+        /// <para />
+        /// Another thing to mention is that although the sink does its best to optimize for this
+        /// limit, if you decide to use an implementation of <seealso cref="IHttpClient"/> that is
+        /// compressing the payload, e.g. <seealso cref="JsonGzipHttpClient"/>, this parameter
+        /// describes the uncompressed size of the log events. The compressed size might be
+        /// significantly smaller depending on the compression algorithm and the repetitiveness of
+        /// the log events.
+        /// <para />
+        /// Default value is long.MaxValue.
         /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.

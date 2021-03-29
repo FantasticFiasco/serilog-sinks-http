@@ -24,6 +24,10 @@ namespace Serilog.Sinks.Http.HttpClients
     /// <summary>
     /// HTTP client sending Gzip encoded JSON over the network.
     /// </summary>
+    /// <remarks>
+    /// This sink will, in comparison to <seealso cref="JsonHttpClient"/>, send smaller requests
+    /// over the network at the expense of increased CPU and memory utilization.
+    /// </remarks>
     /// <seealso cref="JsonHttpClient"/>
     /// <seealso cref="IHttpClient"/>
     public class JsonGzipHttpClient : IHttpClient
