@@ -98,7 +98,7 @@ log = new LoggerConfiguration()
 
 **Migration guide**
 
-You will have to migrate your code if you've implemented your own version of `IHttpClient`. The signature of `IHttpClient.PostAsync` has changed from `Task<HttpResponseMessage> PostAsync(string, HttpContent)` to `Task<HttpResponseMessage> PostAsync(string, Stream)`.
+You will have to migrate your code if you've implemented your own version of `IHttpClient`. The signature of method `IHttpClient.PostAsync` has changed from `Task<HttpResponseMessage> PostAsync(string, HttpContent)` to `Task<HttpResponseMessage> PostAsync(string, Stream)`.
 
 ```csharp
 // Before migration
