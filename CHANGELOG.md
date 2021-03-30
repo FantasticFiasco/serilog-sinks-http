@@ -27,7 +27,7 @@ log = new LoggerConfiguration()
   .WriteTo.Http(
     requestUri: "http://www.mylogs.com",
     batchPostingLimit: 500,
-    // new argument batchSizeLimitBytes is positioned here
+    // the new argument batchSizeLimitBytes is positioned here
     queueLimit: 500)
   .CreateLogger();
 ```
@@ -56,7 +56,7 @@ log = new LoggerConfiguration()
       bufferFileShared: false,
       retainedBufferFileCountLimit: 10,
       batchPostingLimit: 500,
-      // new argument batchSizeLimitBytes is positioned here
+      // the new argument batchSizeLimitBytes is positioned here
       period: TimeSpan.FromSeconds(10)
   .CreateLogger();
 ```
@@ -85,7 +85,7 @@ log = new LoggerConfiguration()
       bufferFileShared: false,
       retainedBufferFileCountLimit: 10,
       batchPostingLimit: 500,
-      // new argument batchSizeLimitBytes is positioned here
+      // the new argument batchSizeLimitBytes is positioned here
       period: TimeSpan.FromSeconds(10)
   .CreateLogger();
 ```
