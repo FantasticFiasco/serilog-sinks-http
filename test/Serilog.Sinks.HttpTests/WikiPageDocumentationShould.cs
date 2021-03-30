@@ -1,8 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using Serilog.Configuration;
-using Serilog.Support.Fixtures;
-using Shouldly;
+﻿using Serilog.Support.Fixtures;
 using Xunit;
 
 namespace Serilog

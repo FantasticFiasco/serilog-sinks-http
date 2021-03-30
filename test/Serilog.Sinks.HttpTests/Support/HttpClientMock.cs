@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -65,7 +66,7 @@ namespace Serilog.Support
 
         public void Configure(IConfiguration configuration) => Configuration = configuration;
 
-        public async Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content)
+        public async Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream)
         {
             if (simulateNetworkFailure)
             {
@@ -78,7 +79,8 @@ namespace Serilog.Support
 
             try
             {
-                batch = JsonConvert.DeserializeObject<DefaultBatch>(await content.ReadAsStringAsync());
+                using var reader = new StreamReader(contentStream);
+                batch = JsonConvert.DeserializeObject<DefaultBatch>(await reader.ReadToEndAsync());
             }
             catch (Exception)
             {
@@ -89,7 +91,7 @@ namespace Serilog.Support
 
             return new HttpResponseMessage
             {
-                Content = content
+                Content = new StreamContent(contentStream)
             };
         }
 

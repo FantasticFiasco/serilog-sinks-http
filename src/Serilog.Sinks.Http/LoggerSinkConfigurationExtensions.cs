@@ -14,15 +14,14 @@
 
 using System;
 using System.ComponentModel;
-using System.Net.Http;
 using Microsoft.Extensions.Configuration;
 using Serilog.Configuration;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.Http;
 using Serilog.Sinks.Http.BatchFormatters;
+using Serilog.Sinks.Http.HttpClients;
 using Serilog.Sinks.Http.Private.Durable;
-using Serilog.Sinks.Http.Private.Http;
 using Serilog.Sinks.Http.Private.NonDurable;
 using Serilog.Sinks.Http.TextFormatters;
 
@@ -48,7 +47,16 @@ namespace Serilog
         /// approximation because only the size of the log events are considered. The extra
         /// characters added by the batch formatter, where the sequence of serialized log events
         /// are transformed into a payload, are not considered. Please make sure to accommodate for
-        /// those. Default value is long.MaxValue.
+        /// those.
+        /// <para />
+        /// Another thing to mention is that although the sink does its best to optimize for this
+        /// limit, if you decide to use an implementation of <seealso cref="IHttpClient"/> that is
+        /// compressing the payload, e.g. <seealso cref="JsonGzipHttpClient"/>, this parameter
+        /// describes the uncompressed size of the log events. The compressed size might be
+        /// significantly smaller depending on the compression algorithm and the repetitiveness of
+        /// the log events.
+        /// <para />
+        /// Default value is long.MaxValue.
         /// </param>
         /// <param name="queueLimit">
         /// The maximum number of events stored in the queue in memory, waiting to be posted over
@@ -71,7 +79,7 @@ namespace Serilog
         /// </param>
         /// <param name="httpClient">
         /// A custom <see cref="IHttpClient"/> implementation. Default value is
-        /// <see cref="HttpClient"/>.
+        /// <see cref="JsonHttpClient"/>.
         /// </param>
         /// <param name="configuration">
         /// Configuration passed to <paramref name="httpClient"/>. Parameter is either manually
@@ -99,7 +107,7 @@ namespace Serilog
             period ??= TimeSpan.FromSeconds(2);
             textFormatter ??= new NormalRenderedTextFormatter();
             batchFormatter ??= new DefaultBatchFormatter();
-            httpClient ??= new DefaultHttpClient();
+            httpClient ??= new JsonHttpClient();
             httpClient.Configure(configuration);
 
             var sink = new HttpSink(
@@ -188,7 +196,16 @@ namespace Serilog
         /// approximation because only the size of the log events are considered. The extra
         /// characters added by the batch formatter, where the sequence of serialized log events
         /// are transformed into a payload, are not considered. Please make sure to accommodate for
-        /// those. Default value is long.MaxValue.
+        /// those.
+        /// <para />
+        /// Another thing to mention is that although the sink does its best to optimize for this
+        /// limit, if you decide to use an implementation of <seealso cref="IHttpClient"/> that is
+        /// compressing the payload, e.g. <seealso cref="JsonGzipHttpClient"/>, this parameter
+        /// describes the uncompressed size of the log events. The compressed size might be
+        /// significantly smaller depending on the compression algorithm and the repetitiveness of
+        /// the log events.
+        /// <para />
+        /// Default value is long.MaxValue.
         /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
@@ -207,7 +224,7 @@ namespace Serilog
         /// </param>
         /// <param name="httpClient">
         /// A custom <see cref="IHttpClient"/> implementation. Default value is
-        /// <see cref="HttpClient"/>.
+        /// <see cref="JsonHttpClient"/>.
         /// </param>
         /// <param name="configuration">
         /// Configuration passed to <paramref name="httpClient"/>. Parameter is either manually
@@ -238,7 +255,7 @@ namespace Serilog
             period ??= TimeSpan.FromSeconds(2);
             textFormatter ??= new NormalRenderedTextFormatter();
             batchFormatter ??= new DefaultBatchFormatter();
-            httpClient ??= new DefaultHttpClient();
+            httpClient ??= new JsonHttpClient();
             httpClient.Configure(configuration);
 
             var sink = new TimeRolledDurableHttpSink(
@@ -299,7 +316,16 @@ namespace Serilog
         /// approximation because only the size of the log events are considered. The extra
         /// characters added by the batch formatter, where the sequence of serialized log events
         /// are transformed into a payload, are not considered. Please make sure to accommodate for
-        /// those. Default value is long.MaxValue.
+        /// those.
+        /// <para />
+        /// Another thing to mention is that although the sink does its best to optimize for this
+        /// limit, if you decide to use an implementation of <seealso cref="IHttpClient"/> that is
+        /// compressing the payload, e.g. <seealso cref="JsonGzipHttpClient"/>, this parameter
+        /// describes the uncompressed size of the log events. The compressed size might be
+        /// significantly smaller depending on the compression algorithm and the repetitiveness of
+        /// the log events.
+        /// <para />
+        /// Default value is long.MaxValue.
         /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
@@ -318,7 +344,7 @@ namespace Serilog
         /// </param>
         /// <param name="httpClient">
         /// A custom <see cref="IHttpClient"/> implementation. Default value is
-        /// <see cref="HttpClient"/>.
+        /// <see cref="JsonHttpClient"/>.
         /// </param>
         /// <param name="configuration">
         /// Configuration passed to <paramref name="httpClient"/>. Parameter is either manually
@@ -349,7 +375,7 @@ namespace Serilog
             period ??= TimeSpan.FromSeconds(2);
             textFormatter ??= new NormalRenderedTextFormatter();
             batchFormatter ??= new DefaultBatchFormatter();
-            httpClient ??= new DefaultHttpClient();
+            httpClient ??= new JsonHttpClient();
             httpClient.Configure(configuration);
 
             var sink = new FileSizeRolledDurableHttpSink(

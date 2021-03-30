@@ -20,6 +20,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Sinks.Http.Private.Time;
+
 #if HRESULTS
 using System.Runtime.InteropServices;
 #endif
@@ -28,8 +29,6 @@ namespace Serilog.Sinks.Http.Private.Durable
 {
     public class HttpLogShipper : IDisposable
     {
-        private const string ContentType = "application/json";
-
         private readonly IHttpClient httpClient;
         private readonly string requestUri;
         private readonly int batchPostingLimit;
@@ -118,20 +117,25 @@ namespace Serilog.Sinks.Http.Private.Durable
 
                     if (batch.LogEvents.Count > 0)
                     {
-                        var payloadWriter = new StringWriter();
-                        batchFormatter.Format(batch.LogEvents, payloadWriter);
-                        var payload = payloadWriter.ToString();
+                        HttpResponseMessage response;
 
-                        if (string.IsNullOrEmpty(payload))
-                            continue;
+                        using (var contentStream = new MemoryStream())
+                        using (var contentWriter = new StreamWriter(contentStream, Encoding.UTF8))
+                        {
+                            batchFormatter.Format(batch.LogEvents, contentWriter);
 
-                        var content = new StringContent(payload, Encoding.UTF8, ContentType);
+                            await contentWriter.FlushAsync();
+                            contentStream.Position = 0;
 
-                        var result = await httpClient
-                            .PostAsync(requestUri, content)
-                            .ConfigureAwait(false);
+                            if (contentStream.Length == 0)
+                                continue;
 
-                        if (result.IsSuccessStatusCode)
+                            response = await httpClient
+                                .PostAsync(requestUri, contentStream)
+                                .ConfigureAwait(false);
+                        }
+
+                        if (response.IsSuccessStatusCode)
                         {
                             connectionSchedule.MarkSuccess();
 
@@ -143,8 +147,8 @@ namespace Serilog.Sinks.Http.Private.Durable
 
                             SelfLog.WriteLine(
                                 "Received failed HTTP shipping result {0}: {1}",
-                                result.StatusCode,
-                                await result.Content.ReadAsStringAsync().ConfigureAwait(false));
+                                response.StatusCode,
+                                await response.Content.ReadAsStringAsync().ConfigureAwait(false));
 
                             break;
                         }
