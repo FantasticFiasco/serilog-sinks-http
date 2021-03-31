@@ -35,7 +35,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 FileShare.Read);
         }
 
-        public void TryReadBookmark(out long nextLineBeginsAtOffset, out string currentFile)
+        public void TryReadBookmark(out long nextLineBeginsAtOffset, out string? currentFile)
         {
             nextLineBeginsAtOffset = 0;
             currentFile = null;

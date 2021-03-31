@@ -108,8 +108,8 @@ namespace Serilog.Sinks.Http.Private.Durable
 
         private struct Line
         {
-            public string Text;
-            public string NewLine;
+            public string? Text;
+            public string? NewLine;
         }
 
         private static Line ReadLine(Stream stream)

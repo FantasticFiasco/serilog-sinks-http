@@ -75,10 +75,10 @@ namespace Serilog.Sinks.Http.Private.Durable
                 disposed = true;
             }
 
-            timer?.Dispose();
+            timer.Dispose();
 
             OnTick().GetAwaiter().GetResult();
-            httpClient?.Dispose();
+            httpClient.Dispose();
         }
 
         private void SetTimer()
@@ -91,7 +91,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         {
             try
             {
-                Batch batch = null;
+                Batch? batch = null;
 
                 do
                 {

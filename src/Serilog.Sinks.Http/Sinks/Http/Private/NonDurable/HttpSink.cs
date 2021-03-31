@@ -42,7 +42,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         private readonly object syncRoot = new();
         private readonly LogEventQueue queue;
 
-        private Batch unsentBatch;
+        private Batch? unsentBatch;
         private volatile bool disposed;
 
         /// <summary>
@@ -99,10 +99,10 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 disposed = true;
             }
 
-            timer?.Dispose();
+            timer.Dispose();
 
             OnTick().GetAwaiter().GetResult();
-            httpClient?.Dispose();
+            httpClient.Dispose();
         }
 
         private void SetTimer()
@@ -115,7 +115,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         {
             try
             {
-                Batch batch = null;
+                Batch? batch;
 
                 do
                 {
@@ -167,7 +167,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                     }
 
 
-                } while (batch != null && batch.HasReachedLimit);
+                } while (batch.HasReachedLimit);
             }
             catch (Exception e)
             {

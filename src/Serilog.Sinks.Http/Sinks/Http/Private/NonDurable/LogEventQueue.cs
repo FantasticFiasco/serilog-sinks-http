@@ -62,7 +62,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             {
                 if (queue.Count == 0)
                 {
-                    logEvent = null;
+                    logEvent = string.Empty;
                     return DequeueResult.QueueEmpty;
                 }
 
@@ -70,7 +70,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
                 if (ByteSize.From(logEvent) > maxSize)
                 {
-                    logEvent = null;
+                    logEvent = string.Empty;
                     return DequeueResult.MaxSizeViolation;
                 }
 
