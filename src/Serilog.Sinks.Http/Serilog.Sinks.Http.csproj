@@ -9,6 +9,7 @@
     <RootNamespace>Serilog</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
     <!-- Strong naming -->
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
