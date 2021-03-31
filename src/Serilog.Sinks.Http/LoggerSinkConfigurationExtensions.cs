@@ -95,11 +95,11 @@ namespace Serilog
             long batchSizeLimitBytes = long.MaxValue,
             int? queueLimit = null,
             TimeSpan? period = null,
-            ITextFormatter textFormatter = null,
-            IBatchFormatter batchFormatter = null,
+            ITextFormatter? textFormatter = null,
+            IBatchFormatter? batchFormatter = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IHttpClient httpClient = null,
-            IConfiguration configuration = null)
+            IHttpClient? httpClient = null,
+            IConfiguration? configuration = null)
         {
             if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
@@ -108,7 +108,11 @@ namespace Serilog
             textFormatter ??= new NormalRenderedTextFormatter();
             batchFormatter ??= new DefaultBatchFormatter();
             httpClient ??= new JsonHttpClient();
-            httpClient.Configure(configuration);
+
+            if (configuration != null)
+            {
+                httpClient.Configure(configuration);
+            }
 
             var sink = new HttpSink(
                 requestUri: requestUri,
@@ -134,11 +138,11 @@ namespace Serilog
             int? retainedBufferFileCountLimit = 31,
             int batchPostingLimit = 1000,
             TimeSpan? period = null,
-            ITextFormatter textFormatter = null,
-            IBatchFormatter batchFormatter = null,
+            ITextFormatter? textFormatter = null,
+            IBatchFormatter? batchFormatter = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IHttpClient httpClient = null,
-            IConfiguration configuration = null)
+            IHttpClient? httpClient = null,
+            IConfiguration? configuration = null)
         {
             return DurableHttpUsingTimeRolledBuffers(
                 sinkConfiguration: sinkConfiguration,
@@ -243,11 +247,11 @@ namespace Serilog
             int batchPostingLimit = 1000,
             long batchSizeLimitBytes = long.MaxValue,
             TimeSpan? period = null,
-            ITextFormatter textFormatter = null,
-            IBatchFormatter batchFormatter = null,
+            ITextFormatter? textFormatter = null,
+            IBatchFormatter? batchFormatter = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IHttpClient httpClient = null,
-            IConfiguration configuration = null)
+            IHttpClient? httpClient = null,
+            IConfiguration? configuration = null)
         {
             if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
@@ -256,7 +260,11 @@ namespace Serilog
             textFormatter ??= new NormalRenderedTextFormatter();
             batchFormatter ??= new DefaultBatchFormatter();
             httpClient ??= new JsonHttpClient();
-            httpClient.Configure(configuration);
+
+            if (configuration != null)
+            {
+                httpClient.Configure(configuration);
+            }
 
             var sink = new TimeRolledDurableHttpSink(
                 requestUri: requestUri,
@@ -363,11 +371,11 @@ namespace Serilog
             int batchPostingLimit = 1000,
             long batchSizeLimitBytes = long.MaxValue,
             TimeSpan? period = null,
-            ITextFormatter textFormatter = null,
-            IBatchFormatter batchFormatter = null,
+            ITextFormatter? textFormatter = null,
+            IBatchFormatter? batchFormatter = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IHttpClient httpClient = null,
-            IConfiguration configuration = null)
+            IHttpClient? httpClient = null,
+            IConfiguration? configuration = null)
         {
             if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
 
@@ -376,7 +384,11 @@ namespace Serilog
             textFormatter ??= new NormalRenderedTextFormatter();
             batchFormatter ??= new DefaultBatchFormatter();
             httpClient ??= new JsonHttpClient();
-            httpClient.Configure(configuration);
+
+            if (configuration != null)
+            {
+                httpClient.Configure(configuration);
+            }
 
             var sink = new FileSizeRolledDurableHttpSink(
                 requestUri: requestUri,
