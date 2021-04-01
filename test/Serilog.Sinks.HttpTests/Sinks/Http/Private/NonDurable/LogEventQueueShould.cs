@@ -29,7 +29,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             got1.ShouldBe("1");
             got2.ShouldBe("2");
             got3.ShouldBe("3");
-            got4.ShouldBeNull();
+            got4.ShouldBe("");
         }
 
         [Fact]
@@ -74,7 +74,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
             // Assert
             result.ShouldBe(LogEventQueue.DequeueResult.QueueEmpty);
-            got.ShouldBeNull();
+            got.ShouldBe("");
         }
 
         [Theory]
@@ -92,7 +92,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
             // Assert
             got.ShouldBe(want);
-            dequeuedLogEvent.ShouldBe(want == LogEventQueue.DequeueResult.Ok ? logEvent : null);
+            dequeuedLogEvent.ShouldBe(want == LogEventQueue.DequeueResult.Ok ? logEvent : "");
         }
     }
 }
