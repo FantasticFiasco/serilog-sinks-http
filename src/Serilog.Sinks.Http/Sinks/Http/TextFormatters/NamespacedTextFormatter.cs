@@ -170,14 +170,16 @@ namespace Serilog.Sinks.Http.TextFormatters
 
         private void WriteOpenNamespace(TextWriter output)
         {
-            output.Write(subComponent != null ?
-                $"\"{component}\":{{\"{subComponent}\":{{" :
-                $"\"{component}\":{{");
+            output.Write(subComponent != null
+                ? $"\"{component}\":{{\"{subComponent}\":{{"
+                : $"\"{component}\":{{");
         }
 
         private void WriteCloseNamespace(TextWriter output)
         {
-            output.Write(subComponent != null ? "}}" : "}");
+            output.Write(subComponent != null
+                ? "}}"
+                : "}");
         }
 
         private static void WriteProperties(IEnumerable<KeyValuePair<string, LogEventPropertyValue>> properties, TextWriter output)

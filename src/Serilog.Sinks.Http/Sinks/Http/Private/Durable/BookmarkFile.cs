@@ -68,7 +68,9 @@ namespace Serilog.Sinks.Http.Private.Durable
             writer.WriteLine("{0}:::{1}", nextLineBeginsAtOffset, currentFile);
         }
 
-        public void Dispose() =>
-            fileStream?.Dispose();
+        public void Dispose()
+        {
+            fileStream.Dispose();
+        }
     }
 }

@@ -47,8 +47,9 @@ namespace Serilog.Sinks.Http
         /// </summary>
         /// <param name="text">The string containing the set of characters to encode.</param>
         /// <returns>The number of bytes produced by encoding the specified characters.</returns>
-        public static long From(string? text) => text != null
-            ? Encoding.UTF8.GetByteCount(text)
-            : 0;
+        public static long From(string text)
+        {
+            return Encoding.UTF8.GetByteCount(text);
+        }
     }
 }

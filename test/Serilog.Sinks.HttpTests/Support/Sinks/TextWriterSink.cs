@@ -16,7 +16,9 @@ namespace Serilog.Support.Sinks
             this.formatter = formatter;
         }
 
-        public void Emit(LogEvent logEvent) =>
+        public void Emit(LogEvent logEvent)
+        {
             formatter.Format(logEvent, output);
+        }
     }
 }

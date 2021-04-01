@@ -37,11 +37,11 @@ namespace Serilog.Sinks.Http.BatchFormatters
 		/// is dropped rather than being sent to the server. Specify null for no limit.
 		/// </param>
 		protected BatchFormatter(long? eventBodyLimitBytes)
-		{
-			this.eventBodyLimitBytes = eventBodyLimitBytes;
-		}
+        {
+            this.eventBodyLimitBytes = eventBodyLimitBytes;
+        }
 
-		/// <summary>
+        /// <summary>
 		/// Format the log events into a payload.
 		/// </summary>
 		/// <param name="logEvents">

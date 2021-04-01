@@ -71,14 +71,16 @@ namespace Serilog.Sinks.Http.Private.Durable
         }
 
         /// <inheritdoc />
-        public void Emit(LogEvent logEvent) =>
+        public void Emit(LogEvent logEvent)
+        {
             sink.Emit(logEvent);
+        }
 
         /// <inheritdoc />
         public void Dispose()
         {
             (sink as IDisposable)?.Dispose();
-            shipper?.Dispose();
+            shipper.Dispose();
         }
     }
 }

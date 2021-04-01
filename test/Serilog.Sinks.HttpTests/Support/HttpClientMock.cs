@@ -30,14 +30,21 @@ namespace Serilog.Support
 
         public static HttpClientMock Instance { get; private set; }
 
-        public int BatchCount =>
-            batches.Count;
+        public int BatchCount
+        {
+            get { return batches.Count; }
+        }
 
-        public string[] LogEvents =>
-            batches
-                .SelectMany(batch => batch.Events)
-                .Select(logEvent => logEvent.RenderedMessage)
-                .ToArray();
+        public string[] LogEvents
+        {
+            get
+            {
+                return batches
+                    .SelectMany(batch => batch.Events)
+                    .Select(logEvent => logEvent.RenderedMessage)
+                    .ToArray();
+            }
+        }
 
         public IConfiguration Configuration { get; private set; }
 
@@ -60,11 +67,15 @@ namespace Serilog.Support
             }
         }
 
-        public void SimulateNetworkFailure() =>
+        public void SimulateNetworkFailure()
+        {
             simulateNetworkFailure = true;
+        }
 
-
-        public void Configure(IConfiguration configuration) => Configuration = configuration;
+        public void Configure(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
 
         public async Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream)
         {
