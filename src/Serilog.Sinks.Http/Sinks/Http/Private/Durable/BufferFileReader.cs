@@ -58,7 +58,7 @@ namespace Serilog.Sinks.Http.Private.Durable
 
                 // Read log event
                 var line = ReadLine(stream);
-                if (line.Text == null)
+                if (string.IsNullOrEmpty(line.Text))
                 {
                     break;
                 }
@@ -129,7 +129,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 //   - The current log event hasn't yet been completely flushed to disk
                 if (character == -1)
                 {
-                    return new Line { Text = null, NewLine = null };
+                    return new Line { Text = string.Empty, NewLine = string.Empty };
                 }
 
                 // Are we done, have we read the line?

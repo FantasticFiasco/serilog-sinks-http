@@ -17,8 +17,10 @@ namespace Serilog.Sinks.Http.TextFormatters
 
         private ILogger logger;
 
-        public NamespacedTextFormatterShould() =>
+        public NamespacedTextFormatterShould()
+        {
             output = new StringWriter();
+        }
 
         [Theory]
         [InlineData(LogEventLevel.Verbose)]
@@ -447,14 +449,18 @@ namespace Serilog.Sinks.Http.TextFormatters
             output.ToString().ShouldBeEmpty();
         }
 
-        private ILogger CreateLogger(ITextFormatter formatter) =>
-            new LoggerConfiguration()
+        private ILogger CreateLogger(ITextFormatter formatter)
+        {
+            return new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .WriteTo.Sink(new TextWriterSink(output, formatter))
                 .CreateLogger();
+        }
 
-        private JObject GetEvent() =>
-            JObject.Parse(output.ToString());
+        private JObject GetEvent()
+        {
+            return JObject.Parse(output.ToString());
+        }
 
         private class Formatter : NamespacedTextFormatter
         {

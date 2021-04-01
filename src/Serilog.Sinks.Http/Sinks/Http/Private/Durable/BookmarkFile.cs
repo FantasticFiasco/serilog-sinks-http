@@ -35,7 +35,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 FileShare.Read);
         }
 
-        public void TryReadBookmark(out long nextLineBeginsAtOffset, out string currentFile)
+        public void TryReadBookmark(out long nextLineBeginsAtOffset, out string? currentFile)
         {
             nextLineBeginsAtOffset = 0;
             currentFile = null;
@@ -68,7 +68,9 @@ namespace Serilog.Sinks.Http.Private.Durable
             writer.WriteLine("{0}:::{1}", nextLineBeginsAtOffset, currentFile);
         }
 
-        public void Dispose() =>
-            fileStream?.Dispose();
+        public void Dispose()
+        {
+            fileStream.Dispose();
+        }
     }
 }

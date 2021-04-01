@@ -38,7 +38,7 @@ namespace Serilog.Sinks.Http.TextFormatters
     public abstract class NamespacedTextFormatter : ITextFormatter
     {
         private readonly string component;
-        private readonly string subComponent;
+        private readonly string? subComponent;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NamespacedTextFormatter"/> class.
@@ -53,7 +53,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         /// from the serialized JSON document, and the message properties will be serialized as
         /// properties of <paramref name="component"/>. Default value is null.
         /// </param>
-        protected NamespacedTextFormatter(string component, string subComponent = null)
+        protected NamespacedTextFormatter(string component, string? subComponent = null)
         {
             this.component = component ?? throw new ArgumentNullException(nameof(component));
             this.subComponent = subComponent;
@@ -170,14 +170,16 @@ namespace Serilog.Sinks.Http.TextFormatters
 
         private void WriteOpenNamespace(TextWriter output)
         {
-            output.Write(subComponent != null ?
-                $"\"{component}\":{{\"{subComponent}\":{{" :
-                $"\"{component}\":{{");
+            output.Write(subComponent != null
+                ? $"\"{component}\":{{\"{subComponent}\":{{"
+                : $"\"{component}\":{{");
         }
 
         private void WriteCloseNamespace(TextWriter output)
         {
-            output.Write(subComponent != null ? "}}" : "}");
+            output.Write(subComponent != null
+                ? "}}"
+                : "}");
         }
 
         private static void WriteProperties(IEnumerable<KeyValuePair<string, LogEventPropertyValue>> properties, TextWriter output)

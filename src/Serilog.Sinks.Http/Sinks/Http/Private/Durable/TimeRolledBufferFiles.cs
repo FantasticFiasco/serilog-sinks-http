@@ -46,7 +46,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             var postfix = bufferPathFormatMatch.Groups["postfix"];
 
             BookmarkFileName = Path.GetFullPath(prefix.Value.TrimEnd('-') + ".bookmark");
-            logFolder = Path.GetDirectoryName(BookmarkFileName);
+            logFolder = Path.GetDirectoryName(BookmarkFileName) ?? throw new Exception("Cannot get directory of bookmark file");
             candidateSearchPath = $"{Path.GetFileName(prefix.Value)}*{postfix.Value}";
         }
 

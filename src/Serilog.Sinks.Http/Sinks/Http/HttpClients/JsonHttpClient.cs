@@ -34,9 +34,15 @@ namespace Serilog.Sinks.Http.HttpClients
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonHttpClient"/> class.
         /// </summary>
-        public JsonHttpClient() => httpClient = new HttpClient();
+        public JsonHttpClient()
+        {
+            httpClient = new HttpClient();
+        }
 
-        ~JsonHttpClient() => Dispose(false);
+        ~JsonHttpClient()
+        {
+            Dispose(false);
+        }
 
         /// <inheritdoc />
         public virtual void Configure(IConfiguration configuration)

@@ -57,7 +57,10 @@ namespace Serilog.Sinks.Http.HttpClients
             CompressionLevel = compressionLevel;
         }
 
-        ~JsonGzipHttpClient() => Dispose(false);
+        ~JsonGzipHttpClient()
+        {
+            Dispose(false);
+        }
 
         /// <summary>
         /// Gets or sets the compression level.
