@@ -20,22 +20,11 @@ using Serilog.Sinks.Http.Private.IO;
 
 namespace Serilog.Sinks.Http.Private.Durable
 {
-    /// <summary>
-    /// A durable sink that sends log events using HTTP POST over the network. A durable
-    /// sink will persist log events on disk in buffer files before sending them over the
-    /// network, thus protecting against data loss after a system or process restart. The
-    /// buffer files will use a rolling behavior based on file size.
-    /// </summary>
-    /// <seealso cref="ILogEventSink" />
-    /// <seealso cref="IDisposable" />
     public class FileSizeRolledDurableHttpSink : ILogEventSink, IDisposable
     {
         private readonly HttpLogShipper shipper;
         private readonly ILogEventSink sink;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FileSizeRolledDurableHttpSink"/> class.
-        /// </summary>
         public FileSizeRolledDurableHttpSink(
             string requestUri,
             string bufferBaseFileName,
@@ -73,13 +62,11 @@ namespace Serilog.Sinks.Http.Private.Durable
                 .CreateLogger();
         }
 
-        /// <inheritdoc />
         public void Emit(LogEvent logEvent)
         {
             sink.Emit(logEvent);
         }
 
-        /// <inheritdoc />
         public void Dispose()
         {
             (sink as IDisposable)?.Dispose();

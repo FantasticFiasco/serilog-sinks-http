@@ -34,9 +34,9 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             this.directoryService = directoryService ?? throw new ArgumentNullException(nameof(directoryService));
 
-            BookmarkFileName = Path.GetFullPath(bufferBaseFileName + ".bookmark");
+            BookmarkFileName = Path.GetFullPath($"{bufferBaseFileName}.bookmark");
             logFolder = Path.GetDirectoryName(BookmarkFileName) ?? throw new Exception("Cannot get directory of bookmark file");
-            candidateSearchPath = Path.GetFileName(bufferBaseFileName) + "-*.json";
+            candidateSearchPath = $"{Path.GetFileName(bufferBaseFileName)}-*.json";
             fileNameMatcher = new Regex("^" + Regex.Escape(Path.GetFileName(bufferBaseFileName)) + "-(?<date>\\d{8})(?<sequence>_[0-9]{3,}){0,1}\\.json$");
         }
 

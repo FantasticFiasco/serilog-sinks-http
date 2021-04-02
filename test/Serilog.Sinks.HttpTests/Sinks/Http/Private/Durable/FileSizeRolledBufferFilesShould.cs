@@ -1,6 +1,6 @@
-﻿using System.Linq;
-using Moq;
+﻿using Moq;
 using Serilog.Sinks.Http.Private.IO;
+using Serilog.Support;
 using Shouldly;
 using Xunit;
 
@@ -8,15 +8,13 @@ namespace Serilog.Sinks.Http.Private.Durable
 {
     public class FileSizeRolledBufferFilesShould
     {
-        private const string BufferBaseFileName = "Buffer";
-
         private readonly Mock<IDirectoryService> directoryService;
         private readonly FileSizeRolledBufferFiles bufferFiles;
 
         public FileSizeRolledBufferFilesShould()
         {
             directoryService = new Mock<IDirectoryService>();
-            bufferFiles = new FileSizeRolledBufferFiles(directoryService.Object, BufferBaseFileName);
+            bufferFiles = new FileSizeRolledBufferFiles(directoryService.Object, "Buffer");
         }
 
         [Fact]
@@ -40,7 +38,7 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             directoryService
                 .Setup(mock => mock.GetFiles(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(want.Reverse().ToArray);  // Reverse expected elements
+                .Returns(Randomize.Values(want));
 
             // Act
             var got = bufferFiles.Get();
@@ -62,7 +60,7 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             directoryService
                 .Setup(mock => mock.GetFiles(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(want.Reverse().ToArray);  // Reverse expected elements
+                .Returns(Randomize.Values(want));
 
             // Act
             var got = bufferFiles.Get();
@@ -84,7 +82,7 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             directoryService
                 .Setup(mock => mock.GetFiles(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(want.Reverse().ToArray);  // Reverse expected elements
+                .Returns(Randomize.Values(want));
 
             // Act
             var got = bufferFiles.Get();

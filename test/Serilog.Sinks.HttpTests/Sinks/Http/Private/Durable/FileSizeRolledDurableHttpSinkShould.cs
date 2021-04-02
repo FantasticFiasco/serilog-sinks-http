@@ -21,17 +21,17 @@ namespace Serilog.Sinks.Http.Private.Durable
         {
             // Arrange
             Func<FileSizeRolledDurableHttpSink> got = () => new FileSizeRolledDurableHttpSink(
-                "https://www.mylogs.com",
-                "Buffer",
-                bufferFileSizeLimitBytes,
-                false,
-                31,
-                1000,
-                ByteSize.MB,
-                TimeSpan.FromSeconds(2),
-                new NormalTextFormatter(),
-                new ArrayBatchFormatter(),
-                new HttpClientMock());
+                requestUri: "https://www.mylogs.com",
+                bufferBaseFileName: "Buffer",
+                bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
+                bufferFileShared: false,
+                retainedBufferFileCountLimit: 31,
+                batchPostingLimit: 1000,
+                batchSizeLimitBytes: ByteSize.MB,
+                period: TimeSpan.FromSeconds(2),
+                textFormatter: new NormalTextFormatter(),
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient: new HttpClientMock());
 
             // Act & Assert
             got.ShouldNotThrow();
@@ -46,17 +46,17 @@ namespace Serilog.Sinks.Http.Private.Durable
         {
             // Arrange
             Func<FileSizeRolledDurableHttpSink> got = () => new FileSizeRolledDurableHttpSink(
-                "https://www.mylogs.com",
-                "Buffer",
-                bufferFileSizeLimitBytes,
-                false,
-                31,
-                1000,
-                ByteSize.MB,
-                TimeSpan.FromSeconds(2),
-                new NormalTextFormatter(),
-                new ArrayBatchFormatter(),
-                new HttpClientMock());
+                requestUri: "https://www.mylogs.com",
+                bufferBaseFileName: "Buffer",
+                bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
+                bufferFileShared: false,
+                retainedBufferFileCountLimit: 31,
+                batchPostingLimit: 1000,
+                batchSizeLimitBytes: ByteSize.MB,
+                period: TimeSpan.FromSeconds(2),
+                textFormatter: new NormalTextFormatter(),
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient: new HttpClientMock());
 
             // Act & Assert
             got.ShouldThrow<ArgumentOutOfRangeException>();
@@ -69,17 +69,17 @@ namespace Serilog.Sinks.Http.Private.Durable
             var httpClient = new HttpClientMock();
 
             using (new FileSizeRolledDurableHttpSink(
-                "https://www.mylogs.com",
-                "Buffer",
-                null,
-                false,
-                null,
-                1,
-                ByteSize.MB,
-                TimeSpan.FromMilliseconds(1),         // 1 ms period
-                new NormalTextFormatter(),
-                new ArrayBatchFormatter(),
-                httpClient))
+                requestUri: "https://www.mylogs.com",
+                bufferBaseFileName: "Buffer",
+                bufferFileSizeLimitBytes: null,
+                bufferFileShared: false,
+                retainedBufferFileCountLimit: null,
+                batchPostingLimit: 1,
+                batchSizeLimitBytes: ByteSize.MB,
+                period: TimeSpan.FromMilliseconds(1),         // 1 ms period
+                textFormatter: new NormalTextFormatter(),
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient: httpClient))
             {
                 // Act
                 await Task.Delay(TimeSpan.FromMilliseconds(10));    // Sleep 10x the period

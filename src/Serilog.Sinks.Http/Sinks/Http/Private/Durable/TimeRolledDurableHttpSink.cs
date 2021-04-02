@@ -17,29 +17,18 @@ using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.Http.Private.IO;
-using Serilog.Sinks.RollingFile;
 
 namespace Serilog.Sinks.Http.Private.Durable
 {
-    /// <summary>
-    /// A durable sink that sends log events using HTTP POST over the network. A durable
-    /// sink will persist log events on disk in buffer files before sending them over the
-    /// network, thus protecting against data loss after a system or process restart. The
-    /// buffer files will use a rolling behavior based on time interval.
-    /// </summary>
-    /// <seealso cref="ILogEventSink" />
-    /// <seealso cref="IDisposable" />
     public class TimeRolledDurableHttpSink : ILogEventSink, IDisposable
     {
         private readonly HttpLogShipper shipper;
         private readonly ILogEventSink sink;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TimeRolledDurableHttpSink"/> class.
-        /// </summary>
         public TimeRolledDurableHttpSink(
             string requestUri,
-            string bufferPathFormat,
+            string bufferBaseFileName,
+            BufferRollingInterval bufferRollingInterval,
             long? bufferFileSizeLimitBytes,
             bool bufferFileShared,
             int? retainedBufferFileCountLimit,
@@ -56,27 +45,29 @@ namespace Serilog.Sinks.Http.Private.Durable
             shipper = new HttpLogShipper(
                 httpClient,
                 requestUri,
-                new TimeRolledBufferFiles(new DirectoryService(), bufferPathFormat),
+                new TimeRolledBufferFiles(new DirectoryService(), bufferBaseFileName),
                 batchPostingLimit,
                 batchSizeLimitBytes,
                 period,
                 batchFormatter);
 
-            sink = new RollingFileSink(
-                pathFormat: bufferPathFormat,
-                textFormatter: textFormatter,
-                fileSizeLimitBytes: bufferFileSizeLimitBytes,
-                retainedFileCountLimit: retainedBufferFileCountLimit,
-                shared: bufferFileShared);
+            sink = new LoggerConfiguration()
+                .WriteTo.File(
+                    formatter: textFormatter,
+                    path: $"{bufferBaseFileName}-.json",
+                    fileSizeLimitBytes: bufferFileSizeLimitBytes,
+                    shared: bufferFileShared,
+                    rollingInterval: bufferRollingInterval.ToRollingInterval(),
+                    rollOnFileSizeLimit: false,
+                    retainedFileCountLimit: retainedBufferFileCountLimit)
+                .CreateLogger();
         }
 
-        /// <inheritdoc />
         public void Emit(LogEvent logEvent)
         {
             sink.Emit(logEvent);
         }
 
-        /// <inheritdoc />
         public void Dispose()
         {
             (sink as IDisposable)?.Dispose();

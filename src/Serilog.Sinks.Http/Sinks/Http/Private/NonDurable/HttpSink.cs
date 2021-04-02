@@ -24,10 +24,6 @@ using Serilog.Sinks.Http.Private.Time;
 
 namespace Serilog.Sinks.Http.Private.NonDurable
 {
-    /// <summary>
-    /// A non-durable sink that sends log events using HTTP POST over the network. A non-durable
-    /// sink will lose data after a system or process restart.
-    /// </summary>
     public class HttpSink : ILogEventSink, IDisposable
     {
         private readonly string requestUri;
@@ -44,9 +40,6 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         private Batch? unsentBatch;
         private volatile bool disposed;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HttpSink"/> class.
-        /// </summary>
         public HttpSink(
             string requestUri,
             int batchPostingLimit,
@@ -71,7 +64,6 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             SetTimer(); 
         }
 
-        /// <inheritdoc />
         public void Emit(LogEvent logEvent)
         {
             if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
@@ -87,7 +79,6 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             }
         }
 
-        /// <inheritdoc />
         public void Dispose()
         {
             lock (syncRoot)
