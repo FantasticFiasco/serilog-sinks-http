@@ -71,7 +71,6 @@ If ($is_pull_request -eq $false)
 
     foreach ($testResult in Get-ChildItem .\test\Serilog.Sinks.HttpTests\TestResults\*\coverage.cobertura.xml)
     {
-        Write-Host "$testResult"
-        # bash codecov.sh -f ""
+        bash codecov.sh -f "$testResult"
     }
 }
