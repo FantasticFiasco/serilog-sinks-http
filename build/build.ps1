@@ -1,73 +1,84 @@
 $logo = (Invoke-WebRequest "https://raw.githubusercontent.com/FantasticFiasco/logo/master/logo.raw").toString();
 Write-Host "$logo" -ForegroundColor Green
 
-Write-Host "build: build started"
-Write-Host "build: dotnet cli v$(dotnet --version)"
-
 Push-Location $PSScriptRoot\..
+
+Write-Host "[info] dotnet cli v$(dotnet --version)"
+
+$tagged_build = if ($env:APPVEYOR_REPO_TAG -eq "true") { $true } else { $false }
+Write-Host "[info] triggered by git tag: $tagged_build"
+
+$git_sha = $env:APPVEYOR_REPO_COMMIT.Substring(0, 7)
+Write-Host "[info] git sha: $git_sha"
+
+$is_pull_request = if ("$env:APPVEYOR_PULL_REQUEST_NUMBER" -eq "") { $false } else { $true }
+Write-Host "[info] is pull request: $is_pull_request"
+
+[xml]$build_props = Get-Content -Path .\Directory.Build.props
+$version_prefix = $build_props.Project.PropertyGroup.VersionPrefix
+Write-Host "[info] build props version prefix: $version_prefix"
+$version_suffix = $build_props.Project.PropertyGroup.VersionSuffix
+Write-Host "[info] build props version suffix: $version_suffix"
 
 # Clean artifacts
 if (Test-Path .\artifacts)
 {
-    Write-Host "build: cleaning .\artifacts"
+    Write-Host "[build] cleaning .\artifacts"
     Remove-Item .\artifacts -Force -Recurse
 }
 
-$tagged_build = if ($env:APPVEYOR_REPO_TAG -eq "true") { $true } else { $false }
-Write-Host "build: triggered by git tag: $tagged_build"
-
-$git_sha = $env:APPVEYOR_REPO_COMMIT.Substring(0, 7)
-Write-Host "build: git sha: $git_sha"
-
-[xml]$build_props = Get-Content -Path .\Directory.Build.props
-$version_prefix = $build_props.Project.PropertyGroup.VersionPrefix
-Write-Host "build: build props version prefix: $version_prefix"
-$version_suffix = $build_props.Project.PropertyGroup.VersionSuffix
-Write-Host "build: build props version suffix: $version_suffix"
-
 # Build and pack
-foreach ($source in Get-ChildItem .\src\*)
+if ($tagged_build)
 {
-    Push-Location $source
+    Write-Host "[build] build"
+    & dotnet build -c Release
 
-    Write-Host "build: packaging project in $source"
-
-    if ($tagged_build)
+    Write-Host "[build] pack"
+    & dotnet pack -c Release -o ..\..\artifacts --no-build
+}
+else
+{
+    # Use git tag if version suffix isn't specified
+    if ($version_suffix -eq "")
     {
-        & dotnet build -c Release
-        & dotnet pack -c Release -o ..\..\artifacts --no-build
-    }
-    else
-    {
-        # Use git tag if version suffix isn't specified
-        if ($version_suffix -eq "")
-        {
-            $version_suffix = $git_sha
-        }
-
-        & dotnet build -c Release --version-suffix=$version_suffix
-        & dotnet pack -c Release -o ..\..\artifacts --version-suffix=$version_suffix --no-build
+        $version_suffix = $git_sha
     }
 
-    if ($LASTEXITCODE -ne 0)
-    {
-        exit 1
-    }
+    Write-Host "[build] build"
+    & dotnet build -c Release --version-suffix=$version_suffix
 
-    Pop-Location
+    Write-Host "[build] pack"
+    & dotnet pack -c Release -o ..\..\artifacts --version-suffix=$version_suffix --no-build
+}
+
+if ($LASTEXITCODE -ne 0)
+{
+    exit 1
 }
 
 # Test
-foreach ($test in Get-ChildItem test/*Tests)
+Write-Host "[test] test"
+& dotnet test -c Release --no-build --collect:"XPlat Code Coverage"
+if ($LASTEXITCODE -ne 0)
 {
-    Push-Location $test
-
-    Write-Host "build: testing project in $test"
-
-    & dotnet test -c Release
-    if ($LASTEXITCODE -ne 0) { exit 2 }
-
-    Pop-Location
+    exit 1
 }
 
-Pop-Location
+If ($is_pull_request -eq $false)
+{
+    foreach ($testResult in Get-ChildItem .\test\Serilog.Sinks.HttpTests\TestResults\*)
+    {
+        Push-Location $testResult
+
+        Write-Host "[test] upload coverage report from $testResult"
+        Invoke-WebRequest -Uri "https://codecov.io/bash" -OutFile codecov.sh
+        bash codecov.sh -f "coverage.cobertura.xml"
+
+        if ($LASTEXITCODE -ne 0)
+        {
+            exit 1
+        }
+
+        Pop-Location
+    }
+}

@@ -1,5 +1,9 @@
 image: Visual Studio 2019
 
+environment:
+  CODECOV_TOKEN:
+    secure: uzWFsXMOpyPLNJGvLp7wteEt8wnCNH/1MNq17Ky5WCEqQ2Bhfq8OIZZBqVmH6CDQ
+
 version: '{build}'
 
 configuration: Release
