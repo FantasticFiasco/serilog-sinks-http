@@ -69,8 +69,9 @@ If ($is_pull_request -eq $false)
     Write-Host "[test] upload coverage report"
     Invoke-WebRequest -Uri "https://codecov.io/bash" -OutFile codecov.sh
 
-    foreach ($testResult in .\test\Serilog.Sinks.HttpTests\TestResults\*)
+    foreach ($testResult in Get-ChildItem .\test\Serilog.Sinks.HttpTests\TestResults\*\coverage.cobertura.xml)
     {
-        bash codecov.sh -f "$testResult\coverage.cobertura.xml"
+        Write-Host "$testResult"
+        # bash codecov.sh -f ""
     }
 }
