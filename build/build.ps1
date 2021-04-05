@@ -26,48 +26,31 @@ $version_suffix = $build_props.Project.PropertyGroup.VersionSuffix
 Write-Host "build: build props version suffix: $version_suffix"
 
 # Build and pack
-foreach ($source in Get-ChildItem .\src\*)
+if ($tagged_build)
 {
-    Push-Location $source
-
-    Write-Host "build: packaging project in $source"
-
-    if ($tagged_build)
+    & dotnet build -c Release
+    & dotnet pack -c Release -o ..\..\artifacts --no-build
+}
+else
+{
+    # Use git tag if version suffix isn't specified
+    if ($version_suffix -eq "")
     {
-        & dotnet build -c Release
-        & dotnet pack -c Release -o ..\..\artifacts --no-build
-    }
-    else
-    {
-        # Use git tag if version suffix isn't specified
-        if ($version_suffix -eq "")
-        {
-            $version_suffix = $git_sha
-        }
-
-        & dotnet build -c Release --version-suffix=$version_suffix
-        & dotnet pack -c Release -o ..\..\artifacts --version-suffix=$version_suffix --no-build
+        $version_suffix = $git_sha
     }
 
-    if ($LASTEXITCODE -ne 0)
-    {
-        exit 1
-    }
+    & dotnet build -c Release --version-suffix=$version_suffix
+    & dotnet pack -c Release -o ..\..\artifacts --version-suffix=$version_suffix --no-build
+}
 
-    Pop-Location
+if ($LASTEXITCODE -ne 0)
+{
+    exit 1
 }
 
 # Test
-foreach ($test in Get-ChildItem test/*Tests)
+& dotnet test -c Release --no-build --collect:"XPlat Code Coverage"
+if ($LASTEXITCODE -ne 0)
 {
-    Push-Location $test
-
-    Write-Host "build: testing project in $test"
-
-    & dotnet test -c Release --no-build --collect:"XPlat Code Coverage"
-    if ($LASTEXITCODE -ne 0) { exit 2 }
-
-    Pop-Location
+    exit 1
 }
-
-Pop-Location
