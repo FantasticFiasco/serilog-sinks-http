@@ -64,11 +64,11 @@ if ($LASTEXITCODE -ne 0)
     exit 1
 }
 
-& ls .\test\Serilog.Sinks.HttpTests\TestResults
+& ls
 
-# If ($is_pull_request -eq $false)
-# {
-#     Write-Host "[test] upload coverage report"
-#     Invoke-WebRequest -Uri "https://codecov.io/bash" -OutFile codecov.sh
-#     bash codecov.sh -f "coverage.opencover.xml"
-# }
+If ($is_pull_request -eq $false)
+{
+    Write-Host "[test] upload coverage report"
+    Invoke-WebRequest -Uri "https://codecov.io/bash" -OutFile codecov.sh
+    bash codecov.sh -f '.\test\Serilog.Sinks.HttpTests\TestResults'
+}
