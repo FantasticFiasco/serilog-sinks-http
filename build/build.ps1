@@ -11,7 +11,7 @@ Write-Host "[info] triggered by git tag: $tagged_build"
 $git_sha = $env:APPVEYOR_REPO_COMMIT.Substring(0, 7)
 Write-Host "[info] git sha: $git_sha"
 
-$is_pull_request = if ($env:APPVEYOR_PULL_REQUEST_NUMBER -eq "") { $false } else { $true }
+$is_pull_request = if ("$env:APPVEYOR_PULL_REQUEST_NUMBER" -eq "") { $false } else { $true }
 Write-Host "[info] is pull request: $is_pull_request"
 
 [xml]$build_props = Get-Content -Path .\Directory.Build.props
