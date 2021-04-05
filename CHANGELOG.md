@@ -135,7 +135,7 @@ public class MyHttpClient : IHttpClient
 
 ### :skull: Removed
 
-- Extension method `DurableHttp` which was marked as deprecated in v5.2.0
+- [#182](https://github.com/FantasticFiasco/serilog-sinks-http/issues/182) Extension method `DurableHttp` which was marked as deprecated in v5.2.0
 
 **Migration guide**
 
