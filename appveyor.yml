@@ -2,7 +2,7 @@ image: Visual Studio 2019
 
 environment:
   CODECOV_TOKEN:
-    secure: uzWFsXMOpyPLNJGvLp7wteEt8wnCNH/1MNq17Ky5WCEqQ2Bhfq8OIZZBqVmH6CDQ
+    secure: CLymVqW7hE8y789T1gGdjRyzuqXOXO4btdOHZPqyfYo2zrA8bUcsA5ca9H+FRXdq
 
 version: '{build}'
 
