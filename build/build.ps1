@@ -64,7 +64,7 @@ foreach ($test in Get-ChildItem test/*Tests)
 
     Write-Host "build: testing project in $test"
 
-    & dotnet test -c Release --no-build --collect:"XPlat Code Coverage"
+    dotnet test -c Release --no-build --collect:"XPlat Code Coverage"
     if ($LASTEXITCODE -ne 0) { exit 2 }
 
     Pop-Location
