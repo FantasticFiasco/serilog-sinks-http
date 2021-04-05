@@ -64,8 +64,6 @@ if ($LASTEXITCODE -ne 0)
     exit 1
 }
 
-& ls
-
 If ($is_pull_request -eq $false)
 {
     Write-Host "[test] upload coverage report"
