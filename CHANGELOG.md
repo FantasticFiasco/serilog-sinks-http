@@ -44,7 +44,7 @@ log = new LoggerConfiguration()
       false,
       10,
       500,
-      TimeSpan.FromSeconds(10)
+      TimeSpan.FromSeconds(10))
   .CreateLogger();
 
 // After migration
@@ -57,7 +57,7 @@ log = new LoggerConfiguration()
       retainedBufferFileCountLimit: 10,
       batchPostingLimit: 500,
       // the new argument batchSizeLimitBytes is positioned here
-      period: TimeSpan.FromSeconds(10)
+      period: TimeSpan.FromSeconds(10))
   .CreateLogger();
 ```
 
@@ -73,7 +73,7 @@ log = new LoggerConfiguration()
       false,
       10,
       500,
-      TimeSpan.FromSeconds(10)
+      TimeSpan.FromSeconds(10))
   .CreateLogger();
 
 // After migration
@@ -86,7 +86,7 @@ log = new LoggerConfiguration()
       retainedBufferFileCountLimit: 10,
       batchPostingLimit: 500,
       // the new argument batchSizeLimitBytes is positioned here
-      period: TimeSpan.FromSeconds(10)
+      period: TimeSpan.FromSeconds(10))
   .CreateLogger();
 ```
 
@@ -129,6 +129,58 @@ public class MyHttpClient : IHttpClient
       // and then you send the request
       return await httpClient.PostAsync(requestUri, content)
     }
+  }
+}
+```
+
+### :skull: Removed
+
+- [#182](https://github.com/FantasticFiasco/serilog-sinks-http/issues/182) Extension method `DurableHttp` which was marked as deprecated in v5.2.0
+
+**Migration guide**
+
+Given you are configuring the sink in code you should do the following changes.
+
+```csharp
+// Before migration
+log = new LoggerConfiguration()
+  .WriteTo.DurableHttp(requestUri: "http://www.mylogs.com")
+  .CreateLogger();
+
+// After migration
+log = new LoggerConfiguration()
+  .WriteTo.DurableHttpUsingTimeRolledBuffers(requestUri: "http://www.mylogs.com")
+  .CreateLogger();
+```
+
+Given you are configuring the sink in application configuration you should do the following changes.
+
+```json
+// Before migration
+{
+  "Serilog": {
+    "WriteTo": [
+      {
+        "Name": "DurableHttp",
+        "Args": {
+          "requestUri": "http://www.mylogs.com"
+        }
+      }
+    ]
+  }
+}
+
+// After migration
+{
+  "Serilog": {
+    "WriteTo": [
+      {
+        "Name": "DurableHttpUsingTimeRolledBuffers",
+        "Args": {
+          "requestUri": "http://www.mylogs.com"
+        }
+      }
+    ]
   }
 }
 ```
