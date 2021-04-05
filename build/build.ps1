@@ -71,7 +71,7 @@ If ($is_pull_request -eq $false)
 
     foreach ($testResult in Get-ChildItem .\test\Serilog.Sinks.HttpTests\TestResults\*)
     {
-        bash codecov.sh -f "$testResult"
+        bash codecov.sh -s "$testResult"
 
         if ($LASTEXITCODE -ne 0)
         {
