@@ -68,5 +68,5 @@ If ($is_pull_request -eq $false)
 {
     Write-Host "[test] upload coverage report"
     Invoke-WebRequest -Uri "https://codecov.io/bash" -OutFile codecov.sh
-    bash codecov.sh -f '.\test\Serilog.Sinks.HttpTests\TestResults\**\coverage.cobertura.xml'
+    bash codecov.sh -f '.\test\Serilog.Sinks.HttpTests\TestResults\*\coverage.cobertura.xml'
 }
