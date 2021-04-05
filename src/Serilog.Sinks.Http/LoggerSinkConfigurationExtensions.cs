@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.ComponentModel;
 using Microsoft.Extensions.Configuration;
 using Serilog.Configuration;
 using Serilog.Events;
@@ -125,39 +124,6 @@ namespace Serilog
                 httpClient: httpClient);
 
             return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
-        }
-
-        [Obsolete("Use DurableHttpUsingTimeRolledBuffers instead of this sink provider")]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public static LoggerConfiguration DurableHttp(
-            this LoggerSinkConfiguration sinkConfiguration,
-            string requestUri,
-            string bufferPathFormat = "Buffer-{Date}.json",
-            long? bufferFileSizeLimitBytes = null,
-            bool bufferFileShared = false,
-            int? retainedBufferFileCountLimit = 31,
-            int batchPostingLimit = 1000,
-            TimeSpan? period = null,
-            ITextFormatter? textFormatter = null,
-            IBatchFormatter? batchFormatter = null,
-            LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IHttpClient? httpClient = null,
-            IConfiguration? configuration = null)
-        {
-            return DurableHttpUsingTimeRolledBuffers(
-                sinkConfiguration: sinkConfiguration,
-                requestUri: requestUri,
-                bufferPathFormat: bufferPathFormat,
-                bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
-                bufferFileShared: bufferFileShared,
-                retainedBufferFileCountLimit: retainedBufferFileCountLimit,
-                batchPostingLimit: batchPostingLimit,
-                period: period,
-                textFormatter: textFormatter,
-                batchFormatter: batchFormatter,
-                restrictedToMinimumLevel: restrictedToMinimumLevel,
-                httpClient: httpClient,
-                configuration: configuration);
         }
 
         /// <summary>
