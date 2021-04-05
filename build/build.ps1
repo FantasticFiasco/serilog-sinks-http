@@ -66,13 +66,12 @@ if ($LASTEXITCODE -ne 0)
 
 If ($is_pull_request -eq $false)
 {
-    Write-Host "[test] upload coverage report"
-    Invoke-WebRequest -Uri "https://codecov.io/bash" -OutFile codecov.sh
-
     foreach ($testResult in Get-ChildItem .\test\Serilog.Sinks.HttpTests\TestResults\*)
     {
         Push-Location $testResult
 
+        Write-Host "[test] upload coverage report from $testResult"
+        Invoke-WebRequest -Uri "https://codecov.io/bash" -OutFile codecov.sh
         bash codecov.sh -f "coverage.cobertura.xml"
 
         if ($LASTEXITCODE -ne 0)
