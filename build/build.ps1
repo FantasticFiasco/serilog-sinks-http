@@ -72,5 +72,10 @@ If ($is_pull_request -eq $false)
     foreach ($testResult in Get-ChildItem .\test\Serilog.Sinks.HttpTests\TestResults\*\coverage.cobertura.xml)
     {
         bash codecov.sh -f "$testResult"
+
+        if ($LASTEXITCODE -ne 0)
+        {
+            exit 1
+        }
     }
 }
