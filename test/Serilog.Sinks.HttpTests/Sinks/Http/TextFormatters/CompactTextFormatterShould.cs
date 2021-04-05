@@ -22,12 +22,6 @@ namespace Serilog.Sinks.Http.TextFormatters
             output = new StringWriter();
         }
 
-        [Fact]
-        public void Dummy()
-        {
-            "d".ShouldBeNull();
-        }
-
         [Theory]
         [InlineData(LogEventLevel.Verbose)]
         [InlineData(LogEventLevel.Debug)]
