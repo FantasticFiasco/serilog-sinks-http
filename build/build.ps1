@@ -76,7 +76,7 @@ If ($is_pull_request -eq $false)
 
         if ($LASTEXITCODE -ne 0)
         {
-            exit 2
+            exit 1
         }
 
         Pop-Location
