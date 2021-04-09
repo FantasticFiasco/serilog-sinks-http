@@ -19,7 +19,11 @@ namespace Serilog.Sinks.Http.BatchFormatters
 
         public DefaultBatchFormatterShould()
         {
-            logEvents = new[] { Some.LogEvent("Event {number}", 1), Some.LogEvent("Event {number}", 2) };
+            logEvents = new[]
+            {
+                Some.LogEvent("Event {number}", 1),
+                Some.LogEvent("Event {number}", 2)
+            };
             textFormatter = new NormalRenderedTextFormatter();
             output = new StringWriter();
         }
