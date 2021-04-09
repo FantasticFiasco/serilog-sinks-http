@@ -19,7 +19,11 @@ namespace Serilog.Sinks.Http.BatchFormatters
 
         public DefaultBatchFormatterShould()
         {
-            logEvents = new[] { Some.LogEvent("Event {number}", 1), Some.LogEvent("Event {number}", 2) };
+            logEvents = new[]
+            {
+                Some.LogEvent("Event {number}", 1),
+                Some.LogEvent("Event {number}", 2)
+            };
             textFormatter = new NormalRenderedTextFormatter();
             output = new StringWriter();
         }
@@ -63,6 +67,21 @@ namespace Serilog.Sinks.Http.BatchFormatters
             got.Events.Length.ShouldBe(2);
             got.Events[0].RenderedMessage.ShouldBe("Event 1");
             got.Events[1].RenderedMessage.ShouldBe("Event 2");
+        }
+
+        [Fact]
+        public void HandleEmptySequenceOfLogEvents()
+        {
+            // Arrange
+            var batchFormatter = new ArrayBatchFormatter();
+            var emptySequenceOfLogEvents = Enumerable.Empty<LogEvent>();
+
+            // Act
+            batchFormatter.Format(emptySequenceOfLogEvents, textFormatter, output);
+
+            // Assert
+            var got = output.ToString();
+            got.ShouldBeEmpty();
         }
 
         [Fact]
