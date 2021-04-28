@@ -15,7 +15,6 @@
 using System;
 using System.IO;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Serilog.Core;
 using Serilog.Debugging;
@@ -126,7 +125,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                         HttpResponseMessage response;
 
                         using (var contentStream = new MemoryStream())
-                        using (var contentWriter = new StreamWriter(contentStream, Encoding.UTF8))
+                        using (var contentWriter = new StreamWriter(contentStream, Encoding.UTF8WithoutBom))
                         {
                             batchFormatter.Format(batch.LogEvents, contentWriter);
 

@@ -20,8 +20,6 @@ namespace Serilog.Sinks.Http.Private.Durable
 {
     public static class BufferFileReader
     {
-        public static readonly Encoding Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
-
         private const char CR = '\r';
         private const char LF = '\n';
 
@@ -115,7 +113,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         private static Line ReadLine(Stream stream)
         {
             // Important not to dispose this StreamReader as the stream must remain open
-            var reader = new StreamReader(stream, Encoding, false, 128);
+            var reader = new StreamReader(stream, Encoding.UTF8WithoutBom, false, 128);
             var lineBuilder = new StringBuilder();
 
             while (true)

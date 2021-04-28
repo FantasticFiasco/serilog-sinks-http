@@ -86,6 +86,16 @@ namespace Serilog.Support
                 return new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
             }
 
+            // Make sure content stream doesn't contain BOM
+            var head = new byte[3];
+            await contentStream.ReadAsync(head, 0, 3);
+            if (head.SequenceEqual(System.Text.Encoding.UTF8.GetPreamble()))
+            {
+                throw new XunitException("Content stream contains UTF8 BOM");
+            }
+
+            contentStream.Position = 0;
+
             DefaultBatch batch;
 
             try
