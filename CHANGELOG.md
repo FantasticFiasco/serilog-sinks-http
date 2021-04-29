@@ -90,7 +90,7 @@ log = new LoggerConfiguration()
   .CreateLogger();
 ```
 
-- [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) Support for content encoding [Gzip](https://en.wikipedia.org/wiki/Gzip) using HTTP client `JsonGzipHttpClient` (contribution by [@vaibhavepatel](https://github.com/vaibhavepatel))
+- [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) Support for content encoding [Gzip](https://en.wikipedia.org/wiki/Gzip) using HTTP client `JsonGzipHttpClient` (contribution by [@vaibhavepatel](https://github.com/vaibhavepatel) and [@KalininAndreyVictorovich](https://github.com/KalininAndreyVictorovich))
 
 ### :dizzy: Changed
 
