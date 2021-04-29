@@ -34,7 +34,7 @@ if ($tagged_build)
     & dotnet build -c Release
 
     Write-Host "[build] pack"
-    & dotnet pack -c Release -o ..\..\artifacts --no-build
+    & dotnet pack -c Release -o .\artifacts --no-build
 }
 else
 {
@@ -48,7 +48,7 @@ else
     & dotnet build -c Release --version-suffix=$version_suffix
 
     Write-Host "[build] pack"
-    & dotnet pack -c Release -o ..\..\artifacts --version-suffix=$version_suffix --no-build
+    & dotnet pack -c Release -o .\artifacts --version-suffix=$version_suffix --no-build
 }
 
 if ($LASTEXITCODE -ne 0)
