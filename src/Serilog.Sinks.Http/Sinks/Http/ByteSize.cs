@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Text;
+using Serilog.Sinks.Http.Private;
 
 namespace Serilog.Sinks.Http
 {
@@ -49,7 +49,7 @@ namespace Serilog.Sinks.Http
         /// <returns>The number of bytes produced by encoding the specified characters.</returns>
         public static long From(string text)
         {
-            return Encoding.UTF8.GetByteCount(text);
+            return Encoding.UTF8WithoutBom.GetByteCount(text);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Arrange
             using var stream = new MemoryStream();
 
-            using var writer = new StreamWriter(stream, BufferFileReader.Encoding);
+            using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
             writer.Write(FooLogEvent + Environment.NewLine);
             writer.Flush();
 
@@ -37,7 +37,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Arrange
             using var stream = new MemoryStream();
 
-            using var writer = new StreamWriter(stream, BufferFileReader.Encoding);
+            using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
             writer.Write(FooLogEvent + Environment.NewLine);
             writer.Write(BarLogEvent + Environment.NewLine);
             writer.Flush();
@@ -57,7 +57,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Arrange
             using var stream = new MemoryStream();
 
-            using var writer = new StreamWriter(stream, BufferFileReader.Encoding);
+            using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
             writer.Write(FooLogEvent);  // The partially written log event is missing new line
             writer.Flush();
 
@@ -76,7 +76,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Arrange
             using var stream = new MemoryStream();
 
-            using var writer = new StreamWriter(stream, BufferFileReader.Encoding);
+            using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
             writer.Write(FooLogEvent + Environment.NewLine);
             writer.Write(BarLogEvent);  // The partially written log event is missing new line
             writer.Flush();
@@ -96,7 +96,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Arrange
             using var stream = new MemoryStream();
 
-            using var writer = new StreamWriter(stream, BufferFileReader.Encoding);
+            using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
             writer.Write(FooLogEvent + Environment.NewLine);
             writer.Write(BarLogEvent + Environment.NewLine);
             writer.Flush();
@@ -118,7 +118,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Arrange
             using var stream = new MemoryStream();
 
-            using var writer = new StreamWriter(stream, BufferFileReader.Encoding);
+            using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
             writer.Write(FooLogEvent + Environment.NewLine);
             writer.Write(BarLogEvent + Environment.NewLine);
             writer.Flush();
@@ -142,7 +142,7 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             const string logEventExceedingBatchSizeLimit = "{ \"foo\": \"This document exceeds the batch size limit\" }";
 
-            using var writer = new StreamWriter(stream, BufferFileReader.Encoding);
+            using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
             writer.Write(logEventExceedingBatchSizeLimit + Environment.NewLine);
             writer.Write(BarLogEvent + Environment.NewLine);
             writer.Flush();
