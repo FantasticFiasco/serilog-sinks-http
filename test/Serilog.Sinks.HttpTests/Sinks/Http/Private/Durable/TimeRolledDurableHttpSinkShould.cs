@@ -24,7 +24,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         {
             // Arrange
             Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
-                "some/route",
+                "https://www.mylogs.com",
                 bufferPathFormat,
                 null,
                 false,
@@ -79,7 +79,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         {
             // Arrange
             Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
-                "some/route",
+                "https://www.mylogs.com",
                 bufferPathFormat,
                 null,
                 false,
@@ -106,7 +106,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         {
             // Arrange
             Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
-                "some/route",
+                "https://www.mylogs.com",
                 "Buffer-{Date}.json",
                 bufferFileSizeLimitBytes,
                 false,
@@ -131,7 +131,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         {
             // Arrange
             Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
-                "some/route",
+                "https://www.mylogs.com",
                 "Buffer-{Date}.json",
                 bufferFileSizeLimitBytes,
                 false,
@@ -154,7 +154,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             var httpClient = new HttpClientMock();
 
             using (new TimeRolledDurableHttpSink(
-                "some/route",
+                "https://www.mylogs.com",
                 "Buffer-{Date}.json",
                 null,
                 false,

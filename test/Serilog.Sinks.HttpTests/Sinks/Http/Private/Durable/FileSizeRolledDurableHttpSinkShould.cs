@@ -21,7 +21,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         {
             // Arrange
             Func<FileSizeRolledDurableHttpSink> got = () => new FileSizeRolledDurableHttpSink(
-                "some/route",
+                "https://www.mylogs.com",
                 "Buffer",
                 bufferFileSizeLimitBytes,
                 false,
@@ -46,7 +46,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         {
             // Arrange
             Func<FileSizeRolledDurableHttpSink> got = () => new FileSizeRolledDurableHttpSink(
-                "some/route",
+                "https://www.mylogs.com",
                 "Buffer",
                 bufferFileSizeLimitBytes,
                 false,
@@ -69,7 +69,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             var httpClient = new HttpClientMock();
 
             using (new FileSizeRolledDurableHttpSink(
-                "some/route",
+                "https://www.mylogs.com",
                 "Buffer",
                 null,
                 false,

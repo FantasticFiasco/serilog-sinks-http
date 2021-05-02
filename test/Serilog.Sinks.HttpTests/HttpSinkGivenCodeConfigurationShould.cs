@@ -18,7 +18,7 @@ namespace Serilog
                 .MinimumLevel.Verbose()
                 .WriteTo
                 .Http(
-                    requestUri: "some/route",
+                    requestUri: "https://www.mylogs.com",
                     batchPostingLimit: 100,
                     batchSizeLimitBytes: ByteSize.MB,
                     queueLimit: 10000,

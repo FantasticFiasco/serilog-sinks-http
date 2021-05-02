@@ -18,7 +18,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             var httpClient = new HttpClientMock();
 
             using (new HttpSink(
-                "some/route",
+                "https://www.mylogs.com",
                 1,
                 ByteSize.MB,
                 null,
@@ -49,7 +49,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 .ToArray();
 
             using var sink = new HttpSink(
-                "some/route",
+                "https://www.mylogs.com",
                 1,
                 ByteSize.MB,
                 1,                                   // Queue only holds 1 event

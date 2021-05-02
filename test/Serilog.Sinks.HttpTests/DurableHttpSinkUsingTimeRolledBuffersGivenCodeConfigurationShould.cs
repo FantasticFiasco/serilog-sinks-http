@@ -20,7 +20,7 @@ namespace Serilog
                 .MinimumLevel.Verbose()
                 .WriteTo
                 .DurableHttpUsingTimeRolledBuffers(
-                    requestUri: "some/route",
+                    requestUri: "https://www.mylogs.com",
                     batchPostingLimit: 100,
                     batchSizeLimitBytes: ByteSize.MB,
                     period: TimeSpan.FromMilliseconds(1),
