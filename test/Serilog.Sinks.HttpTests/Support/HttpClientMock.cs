@@ -18,12 +18,14 @@ namespace Serilog.Support
     public class HttpClientMock : IHttpClient
     {
         private readonly ConcurrentQueue<DefaultBatch> batches;
+        private readonly ConcurrentQueue<Exception> exceptions;
 
         private bool simulateNetworkFailure;
 
         public HttpClientMock()
         {
             batches = new ConcurrentQueue<DefaultBatch>();
+            exceptions = new ConcurrentQueue<Exception>();
 
             Instance = this;
         }
@@ -53,6 +55,11 @@ namespace Serilog.Support
             // 10 000 iterations, each waiting at least 1ms, means that a test has 10s to pass
             for (var i = 0; i < 10_000; i++)
             {
+                if (!exceptions.IsEmpty)
+                {
+                    throw new AggregateException(exceptions);
+                }
+
                 if (LogEvents.Length == expectedLogEventCount)
                 {
                     break;
@@ -91,7 +98,10 @@ namespace Serilog.Support
             await contentStream.ReadAsync(head, 0, 3);
             if (head.SequenceEqual(System.Text.Encoding.UTF8.GetPreamble()))
             {
-                throw new XunitException("Content stream contains UTF8 BOM");
+                var exception = new XunitException("Posted content stream should not contain UTF8 BOM");
+                exceptions.Enqueue(exception);
+
+                throw exception;
             }
 
             contentStream.Position = 0;
@@ -105,7 +115,10 @@ namespace Serilog.Support
             }
             catch (Exception)
             {
-                throw new XunitException($"{nameof(HttpClientMock)} assume log events are formatted using {nameof(NormalRenderedTextFormatter)}, and batches are formatted using {nameof(DefaultBatchFormatter)}");
+                var exception = new XunitException($"{nameof(HttpClientMock)} assume log events are formatted using {nameof(NormalRenderedTextFormatter)}, and batches are formatted using {nameof(DefaultBatchFormatter)}");
+                exceptions.Enqueue(exception);
+
+                throw exception;
             }
 
             batches.Enqueue(batch);
