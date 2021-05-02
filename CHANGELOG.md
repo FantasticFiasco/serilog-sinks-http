@@ -19,13 +19,13 @@ If you use the non-durable sink please make the following changes to your code.
 ```csharp
 // Before migration
 log = new LoggerConfiguration()
-  .WriteTo.Http("http://www.mylogs.com", 500, 500)
+  .WriteTo.Http("https://www.mylogs.com", 500, 500)
   .CreateLogger();
 
 // After migration
 log = new LoggerConfiguration()
   .WriteTo.Http(
-    requestUri: "http://www.mylogs.com",
+    requestUri: "https://www.mylogs.com",
     batchPostingLimit: 500,
     // the new argument batchSizeLimitBytes is positioned here
     queueLimit: 500)
@@ -38,7 +38,7 @@ If you use the durable file size rolled sink please make the following changes t
 // Before migration
 log = new LoggerConfiguration()
   .WriteTo.DurableHttpUsingFileSizeRolledBuffers(
-      "http://www.mylogs.com",
+      "https://www.mylogs.com",
       "MyBuffer",
       ByteSize.GB,
       false,
@@ -50,7 +50,7 @@ log = new LoggerConfiguration()
 // After migration
 log = new LoggerConfiguration()
   .WriteTo.DurableHttpUsingFileSizeRolledBuffers(
-      requestUri: "http://www.mylogs.com",
+      requestUri: "https://www.mylogs.com",
       bufferBaseFileName: "MyBuffer",
       bufferFileSizeLimitBytes: ByteSize.GB,
       bufferFileShared: false,
@@ -67,7 +67,7 @@ If you use the durable time rolled sink please make the following changes to you
 // Before migration
 log = new LoggerConfiguration()
   .WriteTo.DurableHttpUsingTimeRolledBuffers(
-      "http://www.mylogs.com",
+      "https://www.mylogs.com",
       "MyBuffer-{Date}.json",
       ByteSize.GB,
       false,
@@ -79,7 +79,7 @@ log = new LoggerConfiguration()
 // After migration
 log = new LoggerConfiguration()
   .WriteTo.DurableHttpUsingTimeRolledBuffers(
-      requestUri: "http://www.mylogs.com",
+      requestUri: "https://www.mylogs.com",
       bufferPathFormat: "MyBuffer-{Date}.json",
       bufferFileSizeLimitBytes: ByteSize.GB,
       bufferFileShared: false,
@@ -144,12 +144,12 @@ Given you are configuring the sink in code you should do the following changes.
 ```csharp
 // Before migration
 log = new LoggerConfiguration()
-  .WriteTo.DurableHttp(requestUri: "http://www.mylogs.com")
+  .WriteTo.DurableHttp(requestUri: "https://www.mylogs.com")
   .CreateLogger();
 
 // After migration
 log = new LoggerConfiguration()
-  .WriteTo.DurableHttpUsingTimeRolledBuffers(requestUri: "http://www.mylogs.com")
+  .WriteTo.DurableHttpUsingTimeRolledBuffers(requestUri: "https://www.mylogs.com")
   .CreateLogger();
 ```
 
@@ -163,7 +163,7 @@ Given you are configuring the sink in application configuration you should do th
       {
         "Name": "DurableHttp",
         "Args": {
-          "requestUri": "http://www.mylogs.com"
+          "requestUri": "https://www.mylogs.com"
         }
       }
     ]
@@ -177,7 +177,7 @@ Given you are configuring the sink in application configuration you should do th
       {
         "Name": "DurableHttpUsingTimeRolledBuffers",
         "Args": {
-          "requestUri": "http://www.mylogs.com"
+          "requestUri": "https://www.mylogs.com"
         }
       }
     ]
