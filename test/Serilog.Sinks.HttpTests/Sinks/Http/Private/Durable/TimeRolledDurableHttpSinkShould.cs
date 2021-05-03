@@ -22,7 +22,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Arrange
             Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
                 requestUri: "https://www.mylogs.com",
-                bufferBaseFileName: "Buffer",
+                bufferBaseFileName: "SomeBuffer",
                 bufferRollingInterval: BufferRollingInterval.Day,
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: false,
@@ -48,7 +48,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Arrange
             Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
                 requestUri: "https://www.mylogs.com",
-                bufferBaseFileName: "Buffer",
+                bufferBaseFileName: "SomeBuffer",
                 bufferRollingInterval: BufferRollingInterval.Day,
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: false,
@@ -75,7 +75,7 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             using (new TimeRolledDurableHttpSink(
                 requestUri: "https://www.mylogs.com",
-                bufferBaseFileName: "Buffer",
+                bufferBaseFileName: "SomeBuffer",
                 bufferRollingInterval: BufferRollingInterval.Day,
                 bufferFileSizeLimitBytes: null,
                 bufferFileShared: false,

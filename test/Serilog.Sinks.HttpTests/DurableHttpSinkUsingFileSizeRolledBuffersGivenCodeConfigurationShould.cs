@@ -21,7 +21,7 @@ namespace Serilog
                 .WriteTo
                 .DurableHttpUsingFileSizeRolledBuffers(
                     requestUri: "https://www.mylogs.com",
-                    bufferBaseFileName: "MyBuffer",
+                    bufferBaseFileName: "SomeBuffer",
                     batchPostingLimit: 100,
                     batchSizeLimitBytes: ByteSize.MB,
                     period: TimeSpan.FromMilliseconds(1),
