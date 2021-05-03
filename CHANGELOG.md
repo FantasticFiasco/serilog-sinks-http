@@ -94,7 +94,7 @@ log = new LoggerConfiguration()
 
 ### :dizzy: Changed
 
-- [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) [BREAKING CHANGE] Interface `IHttpClient` has changed to accommodate for different HTTP content types.
+- [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) [BREAKING CHANGE] Interface `IHttpClient` has changed to accommodate for different HTTP content types
 
 **Migration guide**
 
@@ -133,7 +133,7 @@ public class MyHttpClient : IHttpClient
 }
 ```
 
-- [#162](https://github.com/FantasticFiasco/serilog-sinks-http/issues/162) [BREAKING CHANGE] Deprecated dependency [Serilog.Sinks.RollingFile](https://www.nuget.org/packages/serilog.sinks.rollingfile) has been removed.
+- [#162](https://github.com/FantasticFiasco/serilog-sinks-http/issues/162) [BREAKING CHANGE] Deprecated dependency [Serilog.Sinks.RollingFile](https://www.nuget.org/packages/serilog.sinks.rollingfile) has been removed (discovered by [@tipasergio](https://github.com/tipasergio))
 
 **Migration guide**
 
