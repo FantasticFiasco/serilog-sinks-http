@@ -166,7 +166,7 @@ Given you are configuring the sink in application configuration you should do th
   "Serilog": {
     "WriteTo": [
       {
-        "Name": "DurableHttp",
+        "Name": "DurableHttpUsingTimeRolledBuffers",
         "Args": {
           "requestUri": "https://www.mylogs.com",
           "bufferPathFormat": "MyBuffer-{Hour}.json"
