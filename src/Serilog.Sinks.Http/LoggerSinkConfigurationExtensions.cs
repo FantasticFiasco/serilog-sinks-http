@@ -279,7 +279,7 @@ namespace Serilog
         /// not clash with any other file names in the same directory. Default value is "Buffer".
         /// </param>
         /// <param name="bufferRollingInterval">
-        /// The interval at which the buffer files are rotated.
+        /// The interval at which the buffer files are rotated. Default value is Day.
         /// </param>
         /// <param name="bufferFileSizeLimitBytes">
         /// The approximate maximum size, in bytes, to which a buffer file for a specific time
