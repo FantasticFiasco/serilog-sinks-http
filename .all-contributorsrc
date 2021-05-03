@@ -112,6 +112,15 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "tipasergio",
+      "name": "Sergios",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6435956?v=4",
+      "profile": "https://github.com/tipasergio",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7
