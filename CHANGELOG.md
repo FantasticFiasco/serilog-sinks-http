@@ -137,7 +137,7 @@ public class MyHttpClient : IHttpClient
 
 **Migration guide**
 
-You will have to migrate your code if you're using `DurableHttpUsingTimeRolledBuffers`, i.e. use the durable HTTP sink with a rolling behavior defined by a time interval. The parameter `bufferPathFormat` has been renamed to `bufferBaseFileName` and the parameter `bufferRollingInterval` has been added.
+You will have to migrate your code if you're using `DurableHttpUsingTimeRolledBuffers`, i.e. use the durable HTTP sink with a rolling behavior defined by a time interval. The parameter `bufferPathFormat` has been renamed to `bufferBaseFileName`, and the parameter `bufferRollingInterval` has been added.
 
 Given you are configuring the sink in code you should do the following changes.
 
