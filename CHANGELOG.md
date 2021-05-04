@@ -94,7 +94,7 @@ log = new LoggerConfiguration()
 
 ### :dizzy: Changed
 
-- [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) [BREAKING CHANGE] Interface `IHttpClient` as changed to accommodate for different HTTP content types.
+- [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) [BREAKING CHANGE] Interface `IHttpClient` has changed to accommodate for different HTTP content types
 
 **Migration guide**
 
@@ -129,6 +129,66 @@ public class MyHttpClient : IHttpClient
       // and then you send the request
       return await httpClient.PostAsync(requestUri, content)
     }
+  }
+}
+```
+
+- [#162](https://github.com/FantasticFiasco/serilog-sinks-http/issues/162) [BREAKING CHANGE] Deprecated dependency [Serilog.Sinks.RollingFile](https://www.nuget.org/packages/serilog.sinks.rollingfile) has been removed (discovered by [@tipasergio](https://github.com/tipasergio))
+
+**Migration guide**
+
+You will have to migrate your code if you're using `DurableHttpUsingTimeRolledBuffers`, i.e. use the durable HTTP sink with a rolling behavior defined by a time interval. The parameter `bufferPathFormat` has been renamed to `bufferBaseFileName`, and the parameter `bufferRollingInterval` has been added.
+
+Given you are configuring the sink in code you should do the following changes.
+
+```csharp
+// Before migration
+log = new LoggerConfiguration()
+  .WriteTo.DurableHttpUsingTimeRolledBuffers(
+    requestUri: "https://www.mylogs.com",
+    bufferPathFormat: "MyBuffer-{Hour}.json")
+  .CreateLogger();
+
+// After migration
+log = new LoggerConfiguration()
+  .WriteTo.DurableHttpUsingTimeRolledBuffers(
+    requestUri: "https://www.mylogs.com",
+    bufferBaseFileName: "MyBuffer",
+    bufferRollingInterval: BufferRollingInterval.Hour)
+  .CreateLogger();
+```
+
+Given you are configuring the sink in application configuration you should do the following changes.
+
+```json
+// Before migration
+{
+  "Serilog": {
+    "WriteTo": [
+      {
+        "Name": "DurableHttpUsingTimeRolledBuffers",
+        "Args": {
+          "requestUri": "https://www.mylogs.com",
+          "bufferPathFormat": "MyBuffer-{Hour}.json"
+        }
+      }
+    ]
+  }
+}
+
+// After migration
+{
+  "Serilog": {
+    "WriteTo": [
+      {
+        "Name": "DurableHttpUsingTimeRolledBuffers",
+        "Args": {
+          "requestUri": "https://www.mylogs.com",
+          "bufferBaseFileName": "MyBuffer",
+          "bufferRollingInterval": "Hour"
+        }
+      }
+    ]
   }
 }
 ```

@@ -11,112 +11,28 @@ namespace Serilog.Sinks.Http.Private.Durable
     public class TimeRolledDurableHttpSinkShould
     {
         [Theory]
-        [InlineData("a{Date}b")]
-        [InlineData("a{Hour}b")]
-        [InlineData("a{HalfHour}b")]
-        [InlineData("aa{Date}bb")]
-        [InlineData("aa{Hour}bb")]
-        [InlineData("aa{HalfHour}bb")]
-        [InlineData("aaa{Date}bbb")]
-        [InlineData("aaa{Hour}bbb")]
-        [InlineData("aaa{HalfHour}bbb")]
-        public void ReturnSinkGivenValidBufferPathFormat(string bufferPathFormat)
-        {
-            // Arrange
-            Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
-                "https://www.mylogs.com",
-                bufferPathFormat,
-                null,
-                false,
-                31,
-                1000,
-                ByteSize.MB,
-                TimeSpan.FromSeconds(2),
-                new NormalTextFormatter(),
-                new ArrayBatchFormatter(),
-                new HttpClientMock());
-
-            // Act & Assert
-            got.ShouldNotThrow();
-        }
-
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData("  ")]
-        [InlineData("File.json")]
-        [InlineData("Date")]
-        [InlineData("Hour")]
-        [InlineData("HalfHour")]
-        [InlineData("{Date}")]
-        [InlineData("{Hour}")]
-        [InlineData("{HalfHour}")]
-        [InlineData("a{Date}")]
-        [InlineData("a{Hour}")]
-        [InlineData("a{HalfHour}")]
-        [InlineData("{Date}b")]
-        [InlineData("{Hour}b")]
-        [InlineData("{HalfHour}b")]
-        [InlineData("a{Date}{Hour}b")]
-        [InlineData("a{Date}{HalfHour}b")]
-        [InlineData("a{Hour}{HalfHour}b")]
-        [InlineData("{date}")]
-        [InlineData("{hour}")]
-        [InlineData("{halfhour}")]
-        [InlineData("a{date}b")]
-        [InlineData("a{hour}b")]
-        [InlineData("a{halfhour}b")]
-        [InlineData(" a{Date}b")]
-        [InlineData(" a{Hour}b")]
-        [InlineData(" a{HalfHour}b")]
-        [InlineData("a{Date}b ")]
-        [InlineData("a{Hour}b ")]
-        [InlineData("a{HalfHour}b ")]
-        [InlineData(" a{Date}b ")]
-        [InlineData(" a{Hour}b ")]
-        [InlineData(" a{HalfHour}b ")]
-        public void ThrowExceptionGivenInvalidBufferPathFormat(string bufferPathFormat)
-        {
-            // Arrange
-            Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
-                "https://www.mylogs.com",
-                bufferPathFormat,
-                null,
-                false,
-                31,
-                1000,
-                ByteSize.MB,
-                TimeSpan.FromSeconds(2),
-                new NormalTextFormatter(),
-                new ArrayBatchFormatter(),
-                new HttpClientMock());
-
-            // Act & Assert
-            got.ShouldThrow<ArgumentException>();
-        }
-
-        [Theory]
         [InlineData(null)]
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
         [InlineData(int.MaxValue)]
-        public void ReturnSinkGivenValidBufferFileSizeLimitBytes(int? bufferFileSizeLimitBytes)
+        public void ReturnSinkGivenValidBufferFileSizeLimitBytes(long? bufferFileSizeLimitBytes)
         {
             // Arrange
             Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
-                "https://www.mylogs.com",
-                "Buffer-{Date}.json",
-                bufferFileSizeLimitBytes,
-                false,
-                31,
-                1000,
-                ByteSize.MB,
-                TimeSpan.FromSeconds(2),
-                new NormalTextFormatter(),
-                new ArrayBatchFormatter(),
-                new HttpClientMock());
+                requestUri: "https://www.mylogs.com",
+                bufferBaseFileName: "SomeBuffer",
+                bufferRollingInterval: BufferRollingInterval.Day,
+                bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
+                bufferFileShared: false,
+                retainedBufferFileCountLimit: 31,
+                batchPostingLimit: 1000,
+                batchSizeLimitBytes: ByteSize.MB,
+                period: TimeSpan.FromSeconds(2),
+                textFormatter: new NormalTextFormatter(),
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient:new HttpClientMock());
 
             // Act & Assert
             got.ShouldNotThrow();
@@ -127,21 +43,22 @@ namespace Serilog.Sinks.Http.Private.Durable
         [InlineData(-10)]
         [InlineData(-100)]
         [InlineData(int.MinValue)]
-        public void ThrowExceptionGivenInvalidBufferFileSizeLimitBytes(int? bufferFileSizeLimitBytes)
+        public void ThrowExceptionGivenInvalidBufferFileSizeLimitBytes(long? bufferFileSizeLimitBytes)
         {
             // Arrange
             Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
-                "https://www.mylogs.com",
-                "Buffer-{Date}.json",
-                bufferFileSizeLimitBytes,
-                false,
-                31,
-                1000,
-                ByteSize.MB,
-                TimeSpan.FromSeconds(2),
-                new NormalTextFormatter(),
-                new ArrayBatchFormatter(),
-                new HttpClientMock());
+                requestUri: "https://www.mylogs.com",
+                bufferBaseFileName: "SomeBuffer",
+                bufferRollingInterval: BufferRollingInterval.Day,
+                bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
+                bufferFileShared: false,
+                retainedBufferFileCountLimit: 31,
+                batchPostingLimit: 1000,
+                batchSizeLimitBytes: ByteSize.MB,
+                period: TimeSpan.FromSeconds(2),
+                textFormatter: new NormalTextFormatter(),
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient: new HttpClientMock());
 
             // Act & Assert
             got.ShouldThrow<ArgumentOutOfRangeException>();
@@ -153,21 +70,25 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Arrange
             var httpClient = new HttpClientMock();
 
+            // 1 ms period
+            var period = TimeSpan.FromMilliseconds(1);
+
             using (new TimeRolledDurableHttpSink(
-                "https://www.mylogs.com",
-                "Buffer-{Date}.json",
-                null,
-                false,
-                null,
-                1,
-                ByteSize.MB,
-                TimeSpan.FromMilliseconds(1),         // 1 ms period
-                new NormalTextFormatter(),
-                new ArrayBatchFormatter(),
-                httpClient))
+                requestUri: "https://www.mylogs.com",
+                bufferBaseFileName: "SomeBuffer",
+                bufferRollingInterval: BufferRollingInterval.Day,
+                bufferFileSizeLimitBytes: null,
+                bufferFileShared: false,
+                retainedBufferFileCountLimit: null,
+                batchPostingLimit: 1,
+                batchSizeLimitBytes: ByteSize.MB,
+                period: period,
+                textFormatter: new NormalTextFormatter(),
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient: httpClient))
             {
                 // Act
-                await Task.Delay(TimeSpan.FromMilliseconds(10));    // Sleep 10x the period
+                await Task.Delay(10 * period);    // Sleep 10x the period
 
                 // Assert
                 httpClient.BatchCount.ShouldBe(0);

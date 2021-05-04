@@ -12,8 +12,6 @@ namespace Serilog
     {
         public DurableHttpSinkUsingFileSizeRolledBuffersGivenCodeConfigurationShould()
         {
-            DeleteBufferFiles();
-
             var configuration = new ConfigurationBuilder().Build();
 
             Logger = new LoggerConfiguration()
@@ -21,6 +19,7 @@ namespace Serilog
                 .WriteTo
                 .DurableHttpUsingFileSizeRolledBuffers(
                     requestUri: "https://www.mylogs.com",
+                    bufferBaseFileName: "SomeBuffer",
                     batchPostingLimit: 100,
                     batchSizeLimitBytes: ByteSize.MB,
                     period: TimeSpan.FromMilliseconds(1),

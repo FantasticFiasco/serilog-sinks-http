@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Serilog.Core;
@@ -13,6 +12,11 @@ namespace Serilog
 {
     public abstract class SinkFixture : IDisposable
     {
+        protected SinkFixture()
+        {
+            DeleteBufferFiles();
+        }
+
         protected abstract Logger Logger { get; }
         protected abstract IConfiguration Configuration { get; }
 
@@ -79,14 +83,21 @@ namespace Serilog
             HttpClientMock.Instance.Dispose();
         }
 
-        protected static void DeleteBufferFiles()
+        private static void DeleteBufferFiles()
         {
-            var files = Directory.GetFiles(Directory.GetCurrentDirectory(), "Buffer*")
-                .ToArray();
+            var files = Directory.GetFiles(Directory.GetCurrentDirectory());
 
             foreach (var file in files)
             {
-                File.Delete(file);
+                var fileName = Path.GetFileName(file);
+
+                var delete = fileName.EndsWith(".bookmark")
+                    || (fileName.Contains("Buffer") && fileName.EndsWith(".json"));
+                
+                if (delete)
+                {
+                    File.Delete(file);
+                }
             }
         }
     }

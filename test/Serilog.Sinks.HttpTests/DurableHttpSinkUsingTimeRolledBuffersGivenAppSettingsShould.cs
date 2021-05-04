@@ -7,8 +7,6 @@ namespace Serilog
     {
         public DurableHttpSinkUsingTimeRolledBuffersGivenAppSettingsShould()
         {
-            DeleteBufferFiles();
-
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings_durable_http_using_time_rolled_buffers.json")
                 .Build();

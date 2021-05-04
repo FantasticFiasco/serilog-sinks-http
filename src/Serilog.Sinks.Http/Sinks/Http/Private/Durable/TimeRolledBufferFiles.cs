@@ -15,39 +15,26 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Serilog.Sinks.Http.Private.IO;
 
 namespace Serilog.Sinks.Http.Private.Durable
 {
     public class TimeRolledBufferFiles : IBufferFiles
     {
-        private static readonly Regex BufferPathFormatRegex = new(
-            $"(?<prefix>.+)(?:{string.Join("|", Enum.GetNames(typeof(DateFormats)).Select(x => $"{{{x}}}"))})(?<postfix>.+)");
-
         private readonly IDirectoryService directoryService;
         private readonly string logFolder;
         private readonly string candidateSearchPath;
 
-        public TimeRolledBufferFiles(IDirectoryService directoryService, string bufferPathFormat)
+        public TimeRolledBufferFiles(IDirectoryService directoryService, string bufferBaseFileName)
         {
-            if (bufferPathFormat == null) throw new ArgumentNullException(nameof(bufferPathFormat));
-            if (bufferPathFormat != bufferPathFormat.Trim()) throw new ArgumentException("bufferPathFormat must not contain any leading or trailing whitespaces", nameof(bufferPathFormat));
+            if (bufferBaseFileName == null) throw new ArgumentNullException(nameof(bufferBaseFileName));
+            if (bufferBaseFileName != bufferBaseFileName.Trim()) throw new ArgumentException("bufferBaseFileName must not contain any leading or trailing whitespaces", nameof(bufferBaseFileName));
 
             this.directoryService = directoryService ?? throw new ArgumentNullException(nameof(directoryService));
 
-            var bufferPathFormatMatch = BufferPathFormatRegex.Match(bufferPathFormat);
-            if (!bufferPathFormatMatch.Success)
-            {
-                throw new ArgumentException($"Must include one of the date formats [{string.Join(", ", Enum.GetNames(typeof(DateFormats)))}]", nameof(bufferPathFormat));
-            }
-
-            var prefix = bufferPathFormatMatch.Groups["prefix"];
-            var postfix = bufferPathFormatMatch.Groups["postfix"];
-
-            BookmarkFileName = Path.GetFullPath(prefix.Value.TrimEnd('-') + ".bookmark");
+            BookmarkFileName = Path.GetFullPath($"{bufferBaseFileName}.bookmark");
             logFolder = Path.GetDirectoryName(BookmarkFileName) ?? throw new Exception("Cannot get directory of bookmark file");
-            candidateSearchPath = $"{Path.GetFileName(prefix.Value)}*{postfix.Value}";
+            candidateSearchPath = $"{Path.GetFileName(bufferBaseFileName)}-*.json";
         }
 
         public string BookmarkFileName { get; }

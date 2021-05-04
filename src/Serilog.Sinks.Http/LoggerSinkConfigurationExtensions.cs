@@ -33,8 +33,13 @@ namespace Serilog
     public static class LoggerSinkConfigurationExtensions
     {
         /// <summary>
-        /// Adds a non-durable sink that sends log events using HTTP POST over the network. A
-        /// non-durable sink will lose data after a system or process restart.
+        /// Adds a non-durable sink that sends log events using HTTP POST over the network. The log
+        /// events are stored in memory in the case that the log server cannot be reached.
+        /// <para/>
+        /// The maximum number of log events stored in memory is configurable, and given that we
+        /// reach this limit the sink will drop new log events in favor of keeping the old.
+        /// <para/>
+        /// A non-durable sink will lose data after a system or process restart.
         /// </summary>
         /// <param name="sinkConfiguration">The logger configuration.</param>
         /// <param name="requestUri">The URI the request is sent to.</param>
@@ -47,14 +52,14 @@ namespace Serilog
         /// characters added by the batch formatter, where the sequence of serialized log events
         /// are transformed into a payload, are not considered. Please make sure to accommodate for
         /// those.
-        /// <para />
+        /// <para/>
         /// Another thing to mention is that although the sink does its best to optimize for this
         /// limit, if you decide to use an implementation of <seealso cref="IHttpClient"/> that is
         /// compressing the payload, e.g. <seealso cref="JsonGzipHttpClient"/>, this parameter
         /// describes the uncompressed size of the log events. The compressed size might be
         /// significantly smaller depending on the compression algorithm and the repetitiveness of
         /// the log events.
-        /// <para />
+        /// <para/>
         /// Default value is long.MaxValue.
         /// </param>
         /// <param name="queueLimit">
@@ -101,6 +106,7 @@ namespace Serilog
             IConfiguration? configuration = null)
         {
             if (sinkConfiguration == null) throw new ArgumentNullException(nameof(sinkConfiguration));
+            if (requestUri == null) throw new ArgumentNullException(nameof(requestUri));
 
             // Default values
             period ??= TimeSpan.FromSeconds(2);
@@ -127,21 +133,23 @@ namespace Serilog
         }
 
         /// <summary>
-        /// Adds a durable sink that sends log events using HTTP POST over the network. A durable
-        /// sink will persist log events on disk in buffer files before sending them over the
-        /// network, thus protecting against data loss after a system or process restart. The
-        /// buffer files will use a rolling behavior defined by the file size specified in
-        /// <paramref name="bufferFileSizeLimitBytes"/>, i.e. a new buffer file is created when
-        /// current has passed its limit. The maximum number of retained files is defined by
-        /// <paramref name="retainedBufferFileCountLimit"/>, and when that limit is reached the
-        /// oldest file is dropped to make room for a new.
+        /// Adds a durable sink that sends log events using HTTP POST over the network. The log
+        /// events are always stored on disk in the case that the log server cannot be reached.
+        /// <para/>
+        /// The buffer files will use a rolling behavior defined by the file size specified in
+        /// <paramref name="bufferFileSizeLimitBytes"/>, i.e. a new buffer file is created when the
+        /// current buffer file has reached its limit. The maximum number of retained files is
+        /// defined by <paramref name="retainedBufferFileCountLimit"/>, and when that limit is
+        /// reached the oldest file is dropped to make room for a new.
+        /// <para/>
+        /// A durable sink will protect you against data loss after a system or process restart.
         /// </summary>
         /// <param name="sinkConfiguration">The logger configuration.</param>
         /// <param name="requestUri">The URI the request is sent to.</param>
         /// <param name="bufferBaseFileName">
         /// The relative or absolute path for a set of files that will be used to buffer events
         /// until they can be successfully transmitted across the network. Individual files will be
-        /// created using the pattern "<paramref name="bufferBaseFileName"/>*.json", which should
+        /// created using the pattern "<paramref name="bufferBaseFileName"/>-*.json", which should
         /// not clash with any other file names in the same directory. Default value is "Buffer".
         /// </param>
         /// <param name="bufferFileSizeLimitBytes">
@@ -169,14 +177,14 @@ namespace Serilog
         /// characters added by the batch formatter, where the sequence of serialized log events
         /// are transformed into a payload, are not considered. Please make sure to accommodate for
         /// those.
-        /// <para />
+        /// <para/>
         /// Another thing to mention is that although the sink does its best to optimize for this
         /// limit, if you decide to use an implementation of <seealso cref="IHttpClient"/> that is
         /// compressing the payload, e.g. <seealso cref="JsonGzipHttpClient"/>, this parameter
         /// describes the uncompressed size of the log events. The compressed size might be
         /// significantly smaller depending on the compression algorithm and the repetitiveness of
         /// the log events.
-        /// <para />
+        /// <para/>
         /// Default value is long.MaxValue.
         /// </param>
         /// <param name="period">
@@ -251,22 +259,27 @@ namespace Serilog
         }
 
         /// <summary>
-        /// Adds a durable sink that sends log events using HTTP POST over the network. A durable
-        /// sink will persist log events on disk in buffer files before sending them over the
-        /// network, thus protecting against data loss after a system or process restart. The
-        /// buffer files will use a rolling behavior defined by the time interval specified in
-        /// <paramref name="bufferPathFormat"/>, i.e. a new buffer file is created every time a new
-        /// interval is started. The maximum size of a file is defined by
-        /// <paramref name="bufferFileSizeLimitBytes"/>, and when that limit is reached all
-        /// incoming log events will be dropped until a new interval is started.
+        /// Adds a durable sink that sends log events using HTTP POST over the network. The log
+        /// events are always stored on disk in the case that the log server cannot be reached.
+        /// <para/>
+        /// The buffer files will use a rolling behavior defined by the time interval specified in
+        /// <paramref name="bufferRollingInterval"/>, i.e. a new buffer file is created every time
+        /// a new interval is started. The maximum size of a buffer file is defined by
+        /// <paramref name="bufferFileSizeLimitBytes"/>, and when that limit is reached all new log
+        /// events will be dropped until a new interval is started.
+        /// <para/>
+        /// A durable sink will protect you against data loss after a system or process restart.
         /// </summary>
         /// <param name="sinkConfiguration">The logger configuration.</param>
         /// <param name="requestUri">The URI the request is sent to.</param>
-        /// <param name="bufferPathFormat">
-        /// The relative or absolute path format for a set of files that will be used to buffer
-        /// events until they can be successfully sent over the network. Default value is
-        /// "Buffer-{Date}.json". To use file rotation that is on an 30 or 60 minute interval pass
-        /// "Buffer-{HalfHour}.json" or "Buffer-{Hour}.json".
+        /// <param name="bufferBaseFileName">
+        /// The relative or absolute path for a set of files that will be used to buffer events
+        /// until they can be successfully transmitted across the network. Individual files will be
+        /// created using the pattern "<paramref name="bufferBaseFileName"/>-*.json", which should
+        /// not clash with any other file names in the same directory. Default value is "Buffer".
+        /// </param>
+        /// <param name="bufferRollingInterval">
+        /// The interval at which the buffer files are rotated. Default value is Day.
         /// </param>
         /// <param name="bufferFileSizeLimitBytes">
         /// The approximate maximum size, in bytes, to which a buffer file for a specific time
@@ -291,14 +304,14 @@ namespace Serilog
         /// characters added by the batch formatter, where the sequence of serialized log events
         /// are transformed into a payload, are not considered. Please make sure to accommodate for
         /// those.
-        /// <para />
+        /// <para/>
         /// Another thing to mention is that although the sink does its best to optimize for this
         /// limit, if you decide to use an implementation of <seealso cref="IHttpClient"/> that is
         /// compressing the payload, e.g. <seealso cref="JsonGzipHttpClient"/>, this parameter
         /// describes the uncompressed size of the log events. The compressed size might be
         /// significantly smaller depending on the compression algorithm and the repetitiveness of
         /// the log events.
-        /// <para />
+        /// <para/>
         /// Default value is long.MaxValue.
         /// </param>
         /// <param name="period">
@@ -330,7 +343,8 @@ namespace Serilog
         public static LoggerConfiguration DurableHttpUsingTimeRolledBuffers(
             this LoggerSinkConfiguration sinkConfiguration,
             string requestUri,
-            string bufferPathFormat = "Buffer-{Date}.json",
+            string bufferBaseFileName = "Buffer",
+            BufferRollingInterval bufferRollingInterval = BufferRollingInterval.Day,
             long? bufferFileSizeLimitBytes = null,
             bool bufferFileShared = false,
             int? retainedBufferFileCountLimit = 31,
@@ -358,7 +372,8 @@ namespace Serilog
 
             var sink = new TimeRolledDurableHttpSink(
                 requestUri: requestUri,
-                bufferPathFormat: bufferPathFormat,
+                bufferBaseFileName: bufferBaseFileName,
+                bufferRollingInterval: bufferRollingInterval,
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: bufferFileShared,
                 retainedBufferFileCountLimit: retainedBufferFileCountLimit,

@@ -7,8 +7,6 @@ namespace Serilog
     {
         public DurableHttpSinkUsingFileSizeRolledBuffersGivenAppSettingsShould()
         {
-            DeleteBufferFiles();
-
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings_durable_http_using_file_size_rolled_buffers.json")
                 .Build();
