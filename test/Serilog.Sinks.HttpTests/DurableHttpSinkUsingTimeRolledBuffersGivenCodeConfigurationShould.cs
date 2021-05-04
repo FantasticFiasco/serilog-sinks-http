@@ -12,8 +12,6 @@ namespace Serilog
     {
         public DurableHttpSinkUsingTimeRolledBuffersGivenCodeConfigurationShould()
         {
-            DeleteBufferFiles();
-
             var configuration = new ConfigurationBuilder().Build();
 
             Logger = new LoggerConfiguration()
