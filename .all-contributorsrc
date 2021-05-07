@@ -121,6 +121,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "AntonSmolkov",
+      "name": "Anton Smolkov",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5318028?v=4",
+      "profile": "https://github.com/AntonSmolkov",
+      "contributions": [
+        "code",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7
