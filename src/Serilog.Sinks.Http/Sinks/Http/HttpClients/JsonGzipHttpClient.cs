@@ -81,7 +81,8 @@ namespace Serilog.Sinks.Http.HttpClients
             await contentStream
                 .CopyToAsync(gzipStream)
                 .ConfigureAwait(false);
-
+            await gzipStream.FlushAsync();
+            
             output.Position = 0;
 
             var content = new StreamContent(output);
