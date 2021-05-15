@@ -36,8 +36,8 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             BookmarkFileName = Path.GetFullPath($"{bufferBaseFileName}.bookmark");
             logFolder = Path.GetDirectoryName(BookmarkFileName) ?? throw new Exception("Cannot get directory of bookmark file");
-            candidateSearchPath = $"{Path.GetFileName(bufferBaseFileName)}-*.json";
-            fileNameMatcher = new Regex("^" + Regex.Escape(Path.GetFileName(bufferBaseFileName)) + "-(?<date>\\d{8})(?<sequence>_[0-9]{3,}){0,1}\\.json$");
+            candidateSearchPath = $"{Path.GetFileName(bufferBaseFileName)}-*.*";
+            fileNameMatcher = new Regex("^" + Regex.Escape(Path.GetFileName(bufferBaseFileName)) + "-(?<date>\\d{8})(?<sequence>_[0-9]{3,}){0,1}\\.(?<extension>json|txt)$");
         }
 
         public string BookmarkFileName { get; }
@@ -47,7 +47,8 @@ namespace Serilog.Sinks.Http.Private.Durable
             return directoryService.GetFiles(logFolder, candidateSearchPath)
                 .Select(filePath => new KeyValuePair<string, Match>(filePath, fileNameMatcher.Match(Path.GetFileName(filePath))))
                 .Where(pair => pair.Value.Success)
-                .OrderBy(pair => pair.Value.Groups["date"].Value, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(pair => pair.Value.Groups["extension"].Value == "txt" ? 1 : 0)
+                .ThenBy(pair => pair.Value.Groups["date"].Value, StringComparer.OrdinalIgnoreCase)
                 .ThenBy(pair => int.Parse("0" + pair.Value.Groups["sequence"].Value.Replace("_", string.Empty)))
                 .Select(pair => pair.Key)
                 .ToArray();
