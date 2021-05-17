@@ -37,7 +37,15 @@ namespace Serilog.Sinks.Http.Private.Durable
             BookmarkFileName = Path.GetFullPath($"{bufferBaseFileName}.bookmark");
             logFolder = Path.GetDirectoryName(BookmarkFileName) ?? throw new Exception("Cannot get directory of bookmark file");
             candidateSearchPath = $"{Path.GetFileName(bufferBaseFileName)}-*.*";
-            fileNameMatcher = new Regex("^" + Regex.Escape(Path.GetFileName(bufferBaseFileName)) + "-(?<date>\\d{8})(?<sequence>_[0-9]{3,}){0,1}\\.(?<extension>json|txt)$");
+            fileNameMatcher = new Regex(
+                "^" +                                              // Start of string
+                Regex.Escape(Path.GetFileName(bufferBaseFileName)) +  // Base file name
+                "-" +
+                "(?<date>\\d{8})" +                                       // Date in format YYYYMMDD
+                "(?<sequence>_[0-9]{3,}){0,1}" +                          // Potential sequence number
+                "\\." +
+                "(?<extension>json|txt)" +                                // File extension
+                "$");                                                     // End of string
         }
 
         public string BookmarkFileName { get; }
