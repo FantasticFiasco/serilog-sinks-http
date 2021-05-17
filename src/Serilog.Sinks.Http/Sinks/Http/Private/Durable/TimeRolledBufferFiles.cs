@@ -21,11 +21,11 @@ namespace Serilog.Sinks.Http.Private.Durable
 {
     public class TimeRolledBufferFiles : IBufferFiles
     {
-        private readonly IDirectoryService directoryService;
+        private readonly DirectoryService directoryService;
         private readonly string logFolder;
         private readonly string candidateSearchPath;
 
-        public TimeRolledBufferFiles(IDirectoryService directoryService, string bufferBaseFileName)
+        public TimeRolledBufferFiles(DirectoryService directoryService, string bufferBaseFileName)
         {
             if (bufferBaseFileName == null) throw new ArgumentNullException(nameof(bufferBaseFileName));
             if (bufferBaseFileName != bufferBaseFileName.Trim()) throw new ArgumentException("bufferBaseFileName must not contain any leading or trailing whitespaces", nameof(bufferBaseFileName));

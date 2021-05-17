@@ -23,12 +23,12 @@ namespace Serilog.Sinks.Http.Private.Durable
 {
     public class FileSizeRolledBufferFiles : IBufferFiles
     {
-        private readonly IDirectoryService directoryService;
+        private readonly DirectoryService directoryService;
         private readonly string logFolder;
         private readonly string candidateSearchPath;
         private readonly Regex fileNameMatcher;
 
-        public FileSizeRolledBufferFiles(IDirectoryService directoryService, string bufferBaseFileName)
+        public FileSizeRolledBufferFiles(DirectoryService directoryService, string bufferBaseFileName)
         {
             if (bufferBaseFileName == null) throw new ArgumentNullException(nameof(bufferBaseFileName));
 

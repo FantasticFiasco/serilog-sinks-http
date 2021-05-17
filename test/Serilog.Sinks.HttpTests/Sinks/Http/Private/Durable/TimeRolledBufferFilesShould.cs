@@ -8,12 +8,12 @@ namespace Serilog.Sinks.Http.Private.Durable
 {
     public class TimeRolledBufferFilesShould
     {
-        private readonly Mock<IDirectoryService> directoryService;
+        private readonly Mock<DirectoryService> directoryService;
         private readonly TimeRolledBufferFiles bufferFiles;
 
         public TimeRolledBufferFilesShould()
         {
-            directoryService = new Mock<IDirectoryService>();
+            directoryService = new Mock<DirectoryService>();
             bufferFiles = new TimeRolledBufferFiles(directoryService.Object, "SomeBuffer");
         }
 
