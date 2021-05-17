@@ -1,5 +1,4 @@
-﻿using Moq;
-using Serilog.Sinks.Http.Private.IO;
+﻿using Serilog.Sinks.Http.Private.IO;
 using Serilog.Support;
 using Shouldly;
 using Xunit;
@@ -8,13 +7,13 @@ namespace Serilog.Sinks.Http.Private.Durable
 {
     public class FileSizeRolledBufferFilesShould
     {
-        private readonly Mock<DirectoryService> directoryService;
+        private readonly DirectoryServiceMock directoryService;
         private readonly FileSizeRolledBufferFiles bufferFiles;
 
         public FileSizeRolledBufferFilesShould()
         {
-            directoryService = new Mock<DirectoryService>();
-            bufferFiles = new FileSizeRolledBufferFiles(directoryService.Object, "SomeBuffer");
+            directoryService = new DirectoryServiceMock();
+            bufferFiles = new FileSizeRolledBufferFiles(directoryService, "SomeBuffer");
         }
 
         [Fact]
@@ -36,9 +35,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 "SomeBuffer-20001020_010.txt"
             };
 
-            directoryService
-                .Setup(mock => mock.GetFiles(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Randomize.Values(want));
+            directoryService.Files = Randomize.Values(want);
 
             // Act
             var got = bufferFiles.Get();
@@ -79,9 +76,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 "SomeBuffer-20001020_010.txt"
             };
 
-            directoryService
-                .Setup(mock => mock.GetFiles(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Randomize.Values(want));
+            directoryService.Files = Randomize.Values(want);
 
             // Act
             var got = bufferFiles.Get();
@@ -103,9 +98,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 "SomeBuffer-20001020_1001.txt"
             };
 
-            directoryService
-                .Setup(mock => mock.GetFiles(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Randomize.Values(want));
+            directoryService.Files = Randomize.Values(want);
 
             // Act
             var got = bufferFiles.Get();
@@ -130,9 +123,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 "SomeBuffer-20001020_002.txt"
             };
 
-            directoryService
-                .Setup(mock => mock.GetFiles(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Randomize.Values(want));
+            directoryService.Files = Randomize.Values(want);
 
             // Act
             var got = bufferFiles.Get();
@@ -152,9 +143,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 "SomeBuffer-20001020_10001.txt"
             };
 
-            directoryService
-                .Setup(mock => mock.GetFiles(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Randomize.Values(want));
+            directoryService.Files = Randomize.Values(want);
 
             // Act
             var got = bufferFiles.Get();
@@ -179,9 +168,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 "SomeBuffer-20001020_003.txt"
             };
 
-            directoryService
-                .Setup(mock => mock.GetFiles(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Randomize.Values(want));
+            directoryService.Files = Randomize.Values(want);
 
             // Act
             var got = bufferFiles.Get();
