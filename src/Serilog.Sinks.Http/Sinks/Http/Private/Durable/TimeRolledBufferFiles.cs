@@ -25,16 +25,19 @@ namespace Serilog.Sinks.Http.Private.Durable
         private readonly string logFolder;
         private readonly string candidateSearchPath;
 
-        public TimeRolledBufferFiles(DirectoryService directoryService, string bufferBaseFileName)
+        public TimeRolledBufferFiles(DirectoryService directoryService, string bufferBaseFilePath)
         {
-            if (bufferBaseFileName == null) throw new ArgumentNullException(nameof(bufferBaseFileName));
-            if (bufferBaseFileName != bufferBaseFileName.Trim()) throw new ArgumentException("bufferBaseFileName must not contain any leading or trailing whitespaces", nameof(bufferBaseFileName));
+            if (bufferBaseFilePath == null) throw new ArgumentNullException(nameof(bufferBaseFilePath));
 
             this.directoryService = directoryService ?? throw new ArgumentNullException(nameof(directoryService));
 
-            BookmarkFileName = Path.GetFullPath($"{bufferBaseFileName}.bookmark");
-            logFolder = Path.GetDirectoryName(BookmarkFileName) ?? throw new Exception("Cannot get directory of bookmark file");
-            candidateSearchPath = $"{Path.GetFileName(bufferBaseFileName)}-*.json";
+            var bufferBaseFullPath = Path.GetFullPath(bufferBaseFilePath);
+            var bufferBaseFileName = Path.GetFileName(bufferBaseFilePath) ?? throw new Exception("Cannot get file name from buffer base file path");
+
+            logFolder = Path.GetDirectoryName(bufferBaseFullPath) ?? throw new Exception("Cannot get directory of buffer base file path");
+            candidateSearchPath = $"{bufferBaseFileName}-*.json";
+
+            BookmarkFileName = $"{bufferBaseFullPath}.bookmark";
         }
 
         public string BookmarkFileName { get; }
