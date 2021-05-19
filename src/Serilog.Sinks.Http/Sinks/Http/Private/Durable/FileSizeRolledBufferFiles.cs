@@ -28,24 +28,28 @@ namespace Serilog.Sinks.Http.Private.Durable
         private readonly string candidateSearchPath;
         private readonly Regex fileNameMatcher;
 
-        public FileSizeRolledBufferFiles(DirectoryService directoryService, string bufferBaseFileName)
+        public FileSizeRolledBufferFiles(DirectoryService directoryService, string bufferBaseFilePath)
         {
-            if (bufferBaseFileName == null) throw new ArgumentNullException(nameof(bufferBaseFileName));
+            if (bufferBaseFilePath == null) throw new ArgumentNullException(nameof(bufferBaseFilePath));
 
             this.directoryService = directoryService ?? throw new ArgumentNullException(nameof(directoryService));
 
-            BookmarkFileName = Path.GetFullPath($"{bufferBaseFileName}.bookmark");
-            logFolder = Path.GetDirectoryName(BookmarkFileName) ?? throw new Exception("Cannot get directory of bookmark file");
-            candidateSearchPath = $"{Path.GetFileName(bufferBaseFileName)}-*.*";
+            var bufferBaseFullPath = Path.GetFullPath(bufferBaseFilePath);
+            var bufferBaseFileName = Path.GetFileName(bufferBaseFilePath) ?? throw new Exception("Cannot get file name from buffer base file path");
+
+            logFolder = Path.GetDirectoryName(bufferBaseFullPath) ?? throw new Exception("Cannot get directory of buffer base file path");
+            candidateSearchPath = $"{bufferBaseFileName}-*.*";
             fileNameMatcher = new Regex(
-                "^" +                                              // Start of string
-                Regex.Escape(Path.GetFileName(bufferBaseFileName)) +  // Base file name
+                "^" +                            // Start of string
+                Regex.Escape(bufferBaseFileName) +      // Base file name
                 "-" +
-                "(?<date>\\d{8})" +                                       // Date in format YYYYMMDD
-                "(?<sequence>_[0-9]{3,}){0,1}" +                          // Potential sequence number
+                "(?<date>\\d{8})" +                     // Date in format YYYYMMDD
+                "(?<sequence>_[0-9]{3,}){0,1}" +        // Potential sequence number
                 "\\." +
-                "(?<extension>json|txt)" +                                // File extension
-                "$");                                                     // End of string
+                "(?<extension>json|txt)" +              // File extension
+                "$");                                   // End of string
+
+            BookmarkFileName = $"{bufferBaseFullPath}.bookmark";
         }
 
         public string BookmarkFileName { get; }
