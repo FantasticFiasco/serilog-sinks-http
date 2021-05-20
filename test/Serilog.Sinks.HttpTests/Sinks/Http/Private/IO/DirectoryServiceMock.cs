@@ -16,7 +16,9 @@ namespace Serilog.Sinks.Http.Private.IO
         public override string[] GetFiles(string path, string searchPattern)
         {
             // Turn the pattern into a regular expression
-            var filter = new Regex(searchPattern.Replace("*", ".*"));
+            var filter = new Regex(searchPattern
+                .Replace(".", "\\.")
+                .Replace("*", ".*"));
 
             return Files
                 .Where(file => filter.IsMatch(file))
