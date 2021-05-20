@@ -18,22 +18,70 @@ namespace Serilog.Sinks.Http.Private.Durable
         }
 
         [Theory]
-        [InlineData("SomeBuffer", @"{CurrentDir}\SomeBuffer.bookmark")]
-        [InlineData(@".\SomeBuffer", @"{CurrentDir}\SomeBuffer.bookmark")]
-        [InlineData(@"Folder\SomeBuffer", @"{CurrentDir}\Folder\SomeBuffer.bookmark")]
-        [InlineData(@"..\Folder\SomeBuffer", @"{CurrentDir}\..\Folder\SomeBuffer.bookmark")]
+        [InlineData("SomeBuffer", @"{CurrentDirectory}\SomeBuffer.bookmark")]
+        [InlineData(@".\SomeBuffer", @"{CurrentDirectory}\SomeBuffer.bookmark")]
+        [InlineData(@"Folder\SomeBuffer", @"{CurrentDirectory}\Folder\SomeBuffer.bookmark")]
+        [InlineData(@".\Folder\SomeBuffer", @"{CurrentDirectory}\Folder\SomeBuffer.bookmark")]
+        [InlineData(@"..\Folder\SomeBuffer", @"{CurrentDirectory}\..\Folder\SomeBuffer.bookmark")]
+        [InlineData(@".\..\Folder\SomeBuffer", @"{CurrentDirectory}\..\Folder\SomeBuffer.bookmark")]
         [InlineData(@"C:\SomeBuffer", @"C:\SomeBuffer.bookmark")]
         [InlineData(@"C:\Folder\SomeBuffer", @"C:\Folder\SomeBuffer.bookmark")]
-        public void HaveBufferFileName(string bufferBaseFilePath, string want)
+        public void HaveBookmarkFileName(string bufferBaseFilePath, string want)
         {
             // Arrange
             var bufferFiles = new FileSizeRolledBufferFiles(directoryService, bufferBaseFilePath);
 
-            want = want.Replace("{CurrentDir}", Environment.CurrentDirectory);
+            want = want.Replace("{CurrentDirectory}", Environment.CurrentDirectory);
             want = Path.GetFullPath(want);
 
             // Act
             var got = bufferFiles.BookmarkFileName;
+
+            // Assert
+            got.ShouldBe(want);
+        }
+
+        [Fact]
+        public void GetOnlyBufferFiles()
+        {
+            // Arrange
+            var bufferFiles = new FileSizeRolledBufferFiles(directoryService, "SomeBuffer");
+
+            var want = new[]
+            {
+                "SomeBuffer-20001020.txt",
+                "SomeBuffer-20001020_001.txt",
+                "SomeBuffer-20001020_010.txt",
+                "SomeBuffer-20001020_100.txt",
+                "SomeBuffer-20001020_1000.txt",
+                "SomeBuffer-20001020_10000.txt"
+            };
+
+            directoryService.Files = Randomize.Values(
+                want.Concat(new[]
+                {
+                    // Wrong extension
+                    "SomeBuffer-20001020.config",
+                    "SomeBuffer-20001020.dll",
+                    "SomeBuffer-20001020.exe",
+                    "SomeBuffer-20001020.xml",
+                    // Wrong file name format
+                    "SomeBuffer.txt",
+                    "SomeBuffer.json",
+                    "XSomeBuffer-20001020.txt",
+                    "XSomeBuffer-20001020.json",
+                    "SomeBufferX-20001020.txt",
+                    "SomeBufferX-20001020.json",
+                    "SomeBuffer-X20001020.txt",
+                    "SomeBuffer-X20001020.json",
+                    "SomeBuffer-20001020X.txt",
+                    "SomeBuffer-20001020X.json",
+                    "SomeBuffer-20001020.Xtxt",
+                    "SomeBuffer-20001020.Xjson"
+                }));
+
+            // Act
+            var got = bufferFiles.Get();
 
             // Assert
             got.ShouldBe(want);
@@ -60,14 +108,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 "SomeBuffer-20001020_010.txt"
             };
 
-            directoryService.Files = Randomize.Values(
-                want.Concat(new []
-                {
-                    "Foo.dll",
-                    "Bar.exe",
-                    "Baz.txt",
-                    "settings.json"
-                }));
+            directoryService.Files = Randomize.Values(want);
 
             // Act
             var got = bufferFiles.Get();
@@ -110,14 +151,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 "SomeBuffer-20001020_010.txt"
             };
 
-            directoryService.Files = Randomize.Values(
-                want.Concat(new[]
-                {
-                    "Foo.dll",
-                    "Bar.exe",
-                    "Baz.txt",
-                    "settings.json"
-                }));
+            directoryService.Files = Randomize.Values(want);
 
             // Act
             var got = bufferFiles.Get();
@@ -125,8 +159,6 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Assert
             got.ShouldBe(want);
         }
-
-
 
         [Fact]
         public void HandleFourDigitSequenceNumbers()
@@ -141,14 +173,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 "SomeBuffer-20001020_1001.txt"
             };
 
-            directoryService.Files = Randomize.Values(
-                want.Concat(new[]
-                {
-                    "Foo.dll",
-                    "Bar.exe",
-                    "Baz.txt",
-                    "settings.json"
-                }));
+            directoryService.Files = Randomize.Values(want);
 
             // Act
             var got = bufferFiles.Get();
@@ -175,14 +200,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 "SomeBuffer-20001020_002.txt"
             };
 
-            directoryService.Files = Randomize.Values(
-                want.Concat(new[]
-                {
-                    "Foo.dll",
-                    "Bar.exe",
-                    "Baz.txt",
-                    "settings.json"
-                }));
+            directoryService.Files = Randomize.Values(want);
 
             // Act
             var got = bufferFiles.Get();
@@ -204,14 +222,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 "SomeBuffer-20001020_10001.txt"
             };
 
-            directoryService.Files = Randomize.Values(
-                want.Concat(new[]
-                {
-                    "Foo.dll",
-                    "Bar.exe",
-                    "Baz.txt",
-                    "settings.json"
-                }));
+            directoryService.Files = Randomize.Values(want);
 
             // Act
             var got = bufferFiles.Get();
@@ -238,14 +249,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 "SomeBuffer-20001020_003.txt"
             };
 
-            directoryService.Files = Randomize.Values(
-                want.Concat(new[]
-                {
-                    "Foo.dll",
-                    "Bar.exe",
-                    "Baz.txt",
-                    "settings.json"
-                }));
+            directoryService.Files = Randomize.Values(want);
 
             // Act
             var got = bufferFiles.Get();
