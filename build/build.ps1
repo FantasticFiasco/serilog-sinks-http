@@ -14,6 +14,12 @@ function Print {
     }
 }
 
+function AssertLastExitCode {
+    if ($LASTEXITCODE -ne 0) {
+        exit 1
+    }
+}
+
 # -------------------------------------------------------------------------------------------------
 # LOGO
 # -------------------------------------------------------------------------------------------------
@@ -45,11 +51,11 @@ Print "info" "build props version suffix: $version_suffix"
 if ($is_tagged_build) {
     Print "build" "build"
     dotnet build -c Release
-    if ($LASTEXITCODE -ne 0) { exit 1 }
+    AssertLastExitCode
 
     Print "build" "pack"
     dotnet pack -c Release -o .\artifacts --no-build
-    if ($LASTEXITCODE -ne 0) { exit 1 }
+    AssertLastExitCode
 } else {
     # Use git tag if version suffix isn't specified
     if ($version_suffix -eq "") {
@@ -58,11 +64,11 @@ if ($is_tagged_build) {
 
     Print "build" "build"
     dotnet build -c Release --version-suffix=$version_suffix
-    if ($LASTEXITCODE -ne 0) { exit 1 }
+    AssertLastExitCode
 
     Print "build" "pack"
     dotnet pack -c Release -o .\artifacts --version-suffix=$version_suffix --no-build
-    if ($LASTEXITCODE -ne 0) { exit 1 }
+    AssertLastExitCode
 }
 
 # -------------------------------------------------------------------------------------------------
@@ -71,7 +77,7 @@ if ($is_tagged_build) {
 Print "test" "test started"
 
 dotnet test -c Release --no-build --collect:"XPlat Code Coverage"
-if ($LASTEXITCODE -ne 0) { exit 1 }
+AssertLastExitCode
 
 If ($is_pull_request -eq $false) {
     Print "test" "download codecov uploader"
@@ -86,6 +92,6 @@ If ($is_pull_request -eq $false) {
         Print "test" "upload coverage report $relative_test_result"
 
         .\codecov.exe -f $relative_test_result
-        if ($LASTEXITCODE -ne 0) { exit 1 }
+        AssertLastExitCode
     }
 }
