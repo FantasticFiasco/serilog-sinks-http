@@ -1,84 +1,91 @@
+# -------------------------------------------------------------------------------------------------
+# COMMON FUNCTIONS
+# -------------------------------------------------------------------------------------------------
+function Print {
+    param (
+        [string]$Category,
+        [string]$Message
+    )
+
+    if ($Category) {
+        Write-Host "[$Category] $Message" -ForegroundColor Green
+    } else {
+        Write-Host "$Message" -ForegroundColor Green
+    }
+}
+
+# -------------------------------------------------------------------------------------------------
+# LOGO
+# -------------------------------------------------------------------------------------------------
 $logo = (Invoke-WebRequest "https://raw.githubusercontent.com/FantasticFiasco/logo/master/logo.raw").toString();
-Write-Host "$logo" -ForegroundColor Green
+Print -Message $logo
 
-Push-Location $PSScriptRoot\..
+# -------------------------------------------------------------------------------------------------
+# VARIABLES
+# -------------------------------------------------------------------------------------------------
+$git_sha = "$env:APPVEYOR_REPO_COMMIT".substring(0, 7)
+$is_tagged_build = If ("$env:APPVEYOR_REPO_TAG" -eq "true") { $true } Else { $false }
+$is_pull_request = If ("$env:APPVEYOR_PULL_REQUEST_NUMBER" -eq "") { $false } Else { $true }
+Print "info" "git sha: $git_sha"
+Print "info" "is git tag: $is_tagged_build"
+Print "info" "is pull request: $is_pull_request"
 
-Write-Host "[info] dotnet cli v$(dotnet --version)"
-
-$tagged_build = if ($env:APPVEYOR_REPO_TAG -eq "true") { $true } else { $false }
-Write-Host "[info] triggered by git tag: $tagged_build"
-
-$git_sha = $env:APPVEYOR_REPO_COMMIT.Substring(0, 7)
-Write-Host "[info] git sha: $git_sha"
-
-$is_pull_request = if ("$env:APPVEYOR_PULL_REQUEST_NUMBER" -eq "") { $false } else { $true }
-Write-Host "[info] is pull request: $is_pull_request"
+# -------------------------------------------------------------------------------------------------
+# BUILD
+# -------------------------------------------------------------------------------------------------
+Print "build" "build started"
+Print "build" "dotnet cli v$(dotnet --version)"
 
 [xml]$build_props = Get-Content -Path .\Directory.Build.props
 $version_prefix = $build_props.Project.PropertyGroup.VersionPrefix
-Write-Host "[info] build props version prefix: $version_prefix"
+Print "info" "build props version prefix: $version_prefix"
 $version_suffix = $build_props.Project.PropertyGroup.VersionSuffix
-Write-Host "[info] build props version suffix: $version_suffix"
+Print "info" "build props version suffix: $version_suffix"
 
-# Clean artifacts
-if (Test-Path .\artifacts)
-{
-    Write-Host "[build] cleaning .\artifacts"
-    Remove-Item .\artifacts -Force -Recurse
-}
+if ($is_tagged_build) {
+    Print "build" "build"
+    dotnet build -c Release
+    if ($LASTEXITCODE -ne 0) { exit 1 }
 
-# Build and pack
-if ($tagged_build)
-{
-    Write-Host "[build] build"
-    & dotnet build -c Release
-
-    Write-Host "[build] pack"
-    & dotnet pack -c Release -o .\artifacts --no-build
-}
-else
-{
+    Print "build" "pack"
+    dotnet pack -c Release -o .\artifacts --no-build
+    if ($LASTEXITCODE -ne 0) { exit 1 }
+} else {
     # Use git tag if version suffix isn't specified
-    if ($version_suffix -eq "")
-    {
+    if ($version_suffix -eq "") {
         $version_suffix = $git_sha
     }
 
-    Write-Host "[build] build"
-    & dotnet build -c Release --version-suffix=$version_suffix
+    Print "build" "build"
+    dotnet build -c Release --version-suffix=$version_suffix
+    if ($LASTEXITCODE -ne 0) { exit 1 }
 
-    Write-Host "[build] pack"
-    & dotnet pack -c Release -o .\artifacts --version-suffix=$version_suffix --no-build
+    Print "build" "pack"
+    dotnet pack -c Release -o .\artifacts --version-suffix=$version_suffix --no-build
+    if ($LASTEXITCODE -ne 0) { exit 1 }
 }
 
-if ($LASTEXITCODE -ne 0)
-{
-    exit 1
-}
+# -------------------------------------------------------------------------------------------------
+# TEST
+# -------------------------------------------------------------------------------------------------
+Print "test" "test started"
 
-# Test
-Write-Host "[test] test"
-& dotnet test -c Release --no-build --collect:"XPlat Code Coverage"
-if ($LASTEXITCODE -ne 0)
-{
-    exit 1
-}
+dotnet test -c Release --no-build --collect:"XPlat Code Coverage"
+if ($LASTEXITCODE -ne 0) { exit 1 }
 
-If ($is_pull_request -eq $false)
-{
-    foreach ($testResult in Get-ChildItem .\test\Serilog.Sinks.HttpTests\TestResults\*)
-    {
-        Push-Location $testResult
+If ($is_pull_request -eq $false) {
+    Print "test" "download codecov uploader"
+    Invoke-WebRequest -Uri https://uploader.codecov.io/latest/codecov.exe -Outfile codecov.exe
 
-        Write-Host "[test] upload coverage report from $testResult"
-        Invoke-WebRequest -Uri "https://codecov.io/bash" -OutFile codecov.sh
-        bash codecov.sh -f "coverage.cobertura.xml"
+    foreach ($test_result in Get-ChildItem .\test\Serilog.Sinks.HttpTests\TestResults\*\coverage.cobertura.xml) {
+        $relative_test_result = $test_result | Resolve-Path -Relative
 
-        if ($LASTEXITCODE -ne 0)
-        {
-            exit 1
-        }
+        # CodeCode uploader cant handle "\", thus we have to replace these with "/"
+        $relative_test_result = $relative_test_result -Replace "\\", "/"
 
-        Pop-Location
+        Print "test" "upload coverage report $relative_test_result"
+
+        .\codecov.exe -f $relative_test_result
+        if ($LASTEXITCODE -ne 0) { exit 1 }
     }
 }
