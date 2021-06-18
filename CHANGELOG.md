@@ -248,6 +248,7 @@ Given you are configuring the sink in application configuration you should do th
 ### :syringe: Fixed
 
 - Durable buffer files are no longer created with an initial [BOM](https://en.wikipedia.org/wiki/Byte_order_mark)
+- [#169](https://github.com/FantasticFiasco/serilog-sinks-http/issues/169) Rename buffer files to use the file extension `.txt` instead of `.json`
 
 ## [7.2.0] - 2020-10-19
 
