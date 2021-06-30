@@ -23,21 +23,33 @@ namespace Serilog.Sinks.Http.Private.Durable
 {
     public class FileSizeRolledBufferFiles : IBufferFiles
     {
-        private readonly IDirectoryService directoryService;
+        private readonly DirectoryService directoryService;
         private readonly string logFolder;
         private readonly string candidateSearchPath;
         private readonly Regex fileNameMatcher;
 
-        public FileSizeRolledBufferFiles(IDirectoryService directoryService, string bufferBaseFileName)
+        public FileSizeRolledBufferFiles(DirectoryService directoryService, string bufferBaseFilePath)
         {
-            if (bufferBaseFileName == null) throw new ArgumentNullException(nameof(bufferBaseFileName));
+            if (bufferBaseFilePath == null) throw new ArgumentNullException(nameof(bufferBaseFilePath));
 
             this.directoryService = directoryService ?? throw new ArgumentNullException(nameof(directoryService));
 
-            BookmarkFileName = Path.GetFullPath($"{bufferBaseFileName}.bookmark");
-            logFolder = Path.GetDirectoryName(BookmarkFileName) ?? throw new Exception("Cannot get directory of bookmark file");
-            candidateSearchPath = $"{Path.GetFileName(bufferBaseFileName)}-*.json";
-            fileNameMatcher = new Regex("^" + Regex.Escape(Path.GetFileName(bufferBaseFileName)) + "-(?<date>\\d{8})(?<sequence>_[0-9]{3,}){0,1}\\.json$");
+            var bufferBaseFullPath = Path.GetFullPath(bufferBaseFilePath);
+            var bufferBaseFileName = Path.GetFileName(bufferBaseFilePath) ?? throw new Exception("Cannot get file name from buffer base file path");
+
+            logFolder = Path.GetDirectoryName(bufferBaseFullPath) ?? throw new Exception("Cannot get directory of buffer base file path");
+            candidateSearchPath = $"{bufferBaseFileName}-*.*";
+            fileNameMatcher = new Regex(
+                "^" +                            // Start of string
+                Regex.Escape(bufferBaseFileName) +      // Base file name
+                "-" +
+                "(?<date>\\d{8})" +                     // Date in format YYYYMMDD
+                "(?<sequence>_[0-9]{3,}){0,1}" +        // Potential sequence number
+                "\\." +
+                "(?<extension>json|txt)" +              // File extension
+                "$");                                   // End of string
+
+            BookmarkFileName = $"{bufferBaseFullPath}.bookmark";
         }
 
         public string BookmarkFileName { get; }
@@ -47,7 +59,8 @@ namespace Serilog.Sinks.Http.Private.Durable
             return directoryService.GetFiles(logFolder, candidateSearchPath)
                 .Select(filePath => new KeyValuePair<string, Match>(filePath, fileNameMatcher.Match(Path.GetFileName(filePath))))
                 .Where(pair => pair.Value.Success)
-                .OrderBy(pair => pair.Value.Groups["date"].Value, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(pair => pair.Value.Groups["extension"].Value == "txt" ? 1 : 0)
+                .ThenBy(pair => pair.Value.Groups["date"].Value, StringComparer.OrdinalIgnoreCase)
                 .ThenBy(pair => int.Parse("0" + pair.Value.Groups["sequence"].Value.Replace("_", string.Empty)))
                 .Select(pair => pair.Key)
                 .ToArray();

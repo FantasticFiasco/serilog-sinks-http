@@ -92,7 +92,7 @@ namespace Serilog
                 var fileName = Path.GetFileName(file);
 
                 var delete = fileName.EndsWith(".bookmark")
-                    || (fileName.Contains("Buffer") && fileName.EndsWith(".json"));
+                    || (fileName.Contains("Buffer") && fileName.EndsWith(".txt"));
                 
                 if (delete)
                 {

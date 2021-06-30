@@ -149,7 +149,7 @@ namespace Serilog
         /// <param name="bufferBaseFileName">
         /// The relative or absolute path for a set of files that will be used to buffer events
         /// until they can be successfully transmitted across the network. Individual files will be
-        /// created using the pattern "<paramref name="bufferBaseFileName"/>-*.json", which should
+        /// created using the pattern "<paramref name="bufferBaseFileName"/>-*.txt", which should
         /// not clash with any other file names in the same directory. Default value is "Buffer".
         /// </param>
         /// <param name="bufferFileSizeLimitBytes">
@@ -275,7 +275,7 @@ namespace Serilog
         /// <param name="bufferBaseFileName">
         /// The relative or absolute path for a set of files that will be used to buffer events
         /// until they can be successfully transmitted across the network. Individual files will be
-        /// created using the pattern "<paramref name="bufferBaseFileName"/>-*.json", which should
+        /// created using the pattern "<paramref name="bufferBaseFileName"/>-*.txt", which should
         /// not clash with any other file names in the same directory. Default value is "Buffer".
         /// </param>
         /// <param name="bufferRollingInterval">

@@ -13,28 +13,42 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Serilog.Sinks.Http.Private.IO;
 
 namespace Serilog.Sinks.Http.Private.Durable
 {
     public class TimeRolledBufferFiles : IBufferFiles
     {
-        private readonly IDirectoryService directoryService;
+        private readonly DirectoryService directoryService;
         private readonly string logFolder;
         private readonly string candidateSearchPath;
+        private readonly Regex fileNameMatcher;
 
-        public TimeRolledBufferFiles(IDirectoryService directoryService, string bufferBaseFileName)
+        public TimeRolledBufferFiles(DirectoryService directoryService, string bufferBaseFilePath)
         {
-            if (bufferBaseFileName == null) throw new ArgumentNullException(nameof(bufferBaseFileName));
-            if (bufferBaseFileName != bufferBaseFileName.Trim()) throw new ArgumentException("bufferBaseFileName must not contain any leading or trailing whitespaces", nameof(bufferBaseFileName));
+            if (bufferBaseFilePath == null) throw new ArgumentNullException(nameof(bufferBaseFilePath));
 
             this.directoryService = directoryService ?? throw new ArgumentNullException(nameof(directoryService));
 
-            BookmarkFileName = Path.GetFullPath($"{bufferBaseFileName}.bookmark");
-            logFolder = Path.GetDirectoryName(BookmarkFileName) ?? throw new Exception("Cannot get directory of bookmark file");
-            candidateSearchPath = $"{Path.GetFileName(bufferBaseFileName)}-*.json";
+            var bufferBaseFullPath = Path.GetFullPath(bufferBaseFilePath);
+            var bufferBaseFileName = Path.GetFileName(bufferBaseFilePath) ?? throw new Exception("Cannot get file name from buffer base file path");
+
+            logFolder = Path.GetDirectoryName(bufferBaseFullPath) ?? throw new Exception("Cannot get directory of buffer base file path");
+            candidateSearchPath = $"{bufferBaseFileName}-*.*";
+            fileNameMatcher = new Regex(
+                "^" +                            // Start of string
+                Regex.Escape(bufferBaseFileName) +      // Base file name
+                "-" +
+                "(?<timestamp>[0-9]{4,12})" +           // Timestamp in format YYYY(MM(DD(HH(MM))))
+                "\\." +
+                "(?<extension>json|txt)" +              // File extension
+                "$");                                   // End of string
+
+            BookmarkFileName = $"{bufferBaseFullPath}.bookmark";
         }
 
         public string BookmarkFileName { get; }
@@ -42,7 +56,11 @@ namespace Serilog.Sinks.Http.Private.Durable
         public string[] Get()
         {
             return directoryService.GetFiles(logFolder, candidateSearchPath)
-                .OrderBy(filePath => filePath)
+                .Select(filePath => new KeyValuePair<string, Match>(filePath, fileNameMatcher.Match(Path.GetFileName(filePath))))
+                .Where(pair => pair.Value.Success)
+                .OrderBy(pair => pair.Value.Groups["extension"].Value == "txt" ? 1 : 0)
+                .ThenBy(pair => pair.Value.Groups["timestamp"].Value, StringComparer.OrdinalIgnoreCase)
+                .Select(pair => pair.Key)
                 .ToArray();
         }
     }
