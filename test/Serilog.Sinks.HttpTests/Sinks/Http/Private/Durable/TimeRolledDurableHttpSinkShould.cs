@@ -12,7 +12,6 @@ namespace Serilog.Sinks.Http.Private.Durable
     {
         [Theory]
         [InlineData(null)]
-        [InlineData(0)]
         [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
@@ -39,6 +38,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         }
 
         [Theory]
+        [InlineData(0)]
         [InlineData(-1)]
         [InlineData(-10)]
         [InlineData(-100)]
@@ -61,7 +61,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 httpClient: new HttpClientMock());
 
             // Act & Assert
-            got.ShouldThrow<ArgumentOutOfRangeException>();
+            got.ShouldThrow<ArgumentException>();
         }
 
         [Fact]

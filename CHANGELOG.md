@@ -193,6 +193,8 @@ Given you are configuring the sink in application configuration you should do th
 }
 ```
 
+- [#206](https://github.com/FantasticFiasco/serilog-sinks-http/issues/206) [BREAKING CHANGE] Argument `bufferFileSizeLimitBytes` to extension methods `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers` no longer accepts `0` as value
+
 ### :skull: Removed
 
 - [#182](https://github.com/FantasticFiasco/serilog-sinks-http/issues/182) Extension method `DurableHttp` which was marked as deprecated in v5.2.0
