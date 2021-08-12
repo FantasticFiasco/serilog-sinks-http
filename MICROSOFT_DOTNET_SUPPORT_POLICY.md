@@ -53,6 +53,6 @@ Here is a list of [supported packages in ASP.NET 5.2.7](https://dotnet.microsoft
 
 ## ASP.NET Core
 
-Support for ASP.NET Core 2.1 on .NET Framework matches the ASP.NET Support policy for other package-based ASP.NET frameworks ([source](https://dotnet.microsoft.com/platform/support/policy/dotnet-core)).
+Support for ASP.NET Core 2.1 on .NET Framework matches the ASP.NET Support policy for other package-based ASP.NET frameworks ([source](https://dotnet.microsoft.com/platform/support/policy/dotnet-core)). Please take note that *ASP.NET Core 2.1* is still supported while support for *.NET Core 2.1* was ended in 2021-08-21.
 
 Here is a list of [supported packages in ASP.NET Core 2.1](https://dotnet.microsoft.com/platform/support/policy/aspnetcore-2.1).
