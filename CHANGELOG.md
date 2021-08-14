@@ -6,10 +6,6 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
-### :syringe: Fixed
-
-- [#208](https://github.com/FantasticFiasco/serilog-sinks-http/issues/208) Transient dependency conflict for package [Microsoft.Extensions.Configuration](https://www.nuget.org/packages/Microsoft.Extensions.Configuration) on ASP.NET Core 2.x (contribution by [@AntonSmolkov](https://github.com/AntonSmolkov))
-
 ### :zap: Added
 
 - [#116](https://github.com/FantasticFiasco/serilog-sinks-http/issues/116) [BREAKING CHANGE] Support specifying `batchSizeLimitBytes` when creating the sink, thus limiting the size of the payloads sent to the log server (proposed by [@michaeltdaniels](https://github.com/michaeltdaniels))
@@ -255,6 +251,7 @@ Given you are configuring the sink in application configuration you should do th
 
 - Durable buffer files are no longer created with an initial [BOM](https://en.wikipedia.org/wiki/Byte_order_mark)
 - [#169](https://github.com/FantasticFiasco/serilog-sinks-http/issues/169) Rename buffer files to use the file extension `.txt` instead of `.json`
+- [#208](https://github.com/FantasticFiasco/serilog-sinks-http/issues/208) Transient dependency conflict for package [Microsoft.Extensions.Configuration](https://www.nuget.org/packages/Microsoft.Extensions.Configuration) on ASP.NET Core 2.x (contribution by [@AntonSmolkov](https://github.com/AntonSmolkov))
 
 ## [7.2.0] - 2020-10-19
 
