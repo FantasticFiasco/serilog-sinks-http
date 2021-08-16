@@ -14,8 +14,6 @@
 
 using System.Collections.Generic;
 using System.IO;
-using Serilog.Events;
-using Serilog.Formatting;
 
 namespace Serilog.Sinks.Http
 {
@@ -24,20 +22,6 @@ namespace Serilog.Sinks.Http
     /// </summary>
     public interface IBatchFormatter
     {
-        /// <summary>
-        /// Format the log events into a payload.
-        /// </summary>
-        /// <param name="logEvents">
-        /// The events to format.
-        /// </param>
-        /// <param name="formatter">
-        /// The formatter turning the log events into a textual representation.
-        /// </param>
-        /// <param name="output">
-        /// The payload to send over the network.
-        /// </param>
-        void Format(IEnumerable<LogEvent> logEvents, ITextFormatter formatter, TextWriter output);
-
         /// <summary>
         /// Format the log events into a payload.
         /// </summary>
