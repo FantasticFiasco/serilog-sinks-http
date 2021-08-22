@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using Serilog.Events;
+using Serilog.Sinks.Http.TextFormatters;
 using Xunit.Sdk;
 
 namespace Serilog.Support
@@ -13,12 +15,27 @@ namespace Serilog.Support
             return LogEvent(null, messageTemplate, propertyValues);
         }
 
+        public static string SerializedLogEvent(
+            string messageTemplate,
+            params object[] propertyValues)
+        {
+            return Serialize(LogEvent(messageTemplate, propertyValues));
+        }
+
         public static LogEvent LogEvent(
             Exception exception,
             string messageTemplate,
             params object[] propertyValues)
         {
             return LogEvent(LogEventLevel.Information, exception, messageTemplate, propertyValues);
+        }
+
+        public static string SerializedLogEvent(
+            Exception exception,
+            string messageTemplate,
+            params object[] propertyValues)
+        {
+            return Serialize(LogEvent(exception, messageTemplate, propertyValues));
         }
 
         public static LogEvent LogEvent(
@@ -37,9 +54,23 @@ namespace Serilog.Support
             return new LogEvent(DateTimeOffset.Now, level, exception, template, properties);
         }
 
+        public static string SerializedLogEvent(
+            LogEventLevel level,
+            Exception exception,
+            string messageTemplate,
+            params object[] propertyValues)
+        {
+            return Serialize(LogEvent(level, exception, messageTemplate, propertyValues));
+        }
+
         public static LogEvent DebugEvent()
         {
             return LogEvent(LogEventLevel.Debug, null, "Debug event");
+        }
+
+        public static string SerializedDebugEvent()
+        {
+            return Serialize(DebugEvent());
         }
 
         public static LogEvent InformationEvent()
@@ -47,9 +78,27 @@ namespace Serilog.Support
             return LogEvent(LogEventLevel.Information, null, "Information event");
         }
 
+        public static string SerializedInformationEvent()
+        {
+            return Serialize(InformationEvent());
+        }
+
         public static LogEvent ErrorEvent()
         {
             return LogEvent(LogEventLevel.Error, null, "Error event");
+        }
+
+        public static string SerializedErrorEvent()
+        {
+            return Serialize(ErrorEvent());
+        }
+
+        private static string Serialize(LogEvent logEvent)
+        {
+            var writer = new StringWriter();
+            var formatter = new NormalRenderedTextFormatter();
+            formatter.Format(logEvent, writer);
+            return writer.ToString();
         }
     }
 }
