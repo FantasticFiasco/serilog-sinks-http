@@ -2,9 +2,6 @@
 using Shouldly;
 using System.IO;
 using System.Linq;
-using Serilog.Events;
-using Serilog.Formatting;
-using Serilog.Sinks.Http.TextFormatters;
 using Serilog.Support;
 using Serilog.Support.TextFormatters;
 using Xunit;
@@ -13,18 +10,16 @@ namespace Serilog.Sinks.Http.BatchFormatters
 {
     public class ArrayBatchFormatterShould
     {
-        private readonly LogEvent[] logEvents;
-        private readonly ITextFormatter textFormatter;
+        private readonly string[] logEvents;
         private readonly StringWriter output;
 
         public ArrayBatchFormatterShould()
         {
             logEvents = new[]
             {
-                Some.LogEvent("Event {number}", 1),
-                Some.LogEvent("Event {number}", 2)
+                Some.SerializedLogEvent("Event {number}", 1),
+                Some.SerializedLogEvent("Event {number}", 2)
             };
-            textFormatter = new NormalRenderedTextFormatter();
             output = new StringWriter();
         }
 
@@ -35,31 +30,7 @@ namespace Serilog.Sinks.Http.BatchFormatters
             var batchFormatter = new ArrayBatchFormatter();
 
             // Act
-            batchFormatter.Format(logEvents, textFormatter, output);
-
-            // Assert
-            var got = JsonConvert.DeserializeObject<NormalTextLogEvent[]>(output.ToString());
-
-            got.Length.ShouldBe(2);
-            got[0].RenderedMessage.ShouldBe("Event 1");
-            got[1].RenderedMessage.ShouldBe("Event 2");
-        }
-
-        [Fact]
-        public void WriteFormattedLogEvents()
-        {
-            // Arrange
-            var batchFormatter = new ArrayBatchFormatter();
-
-            var formattedLogEvents = logEvents.Select(logEvent =>
-            {
-                var formattedLogEvent = new StringWriter();
-                textFormatter.Format(logEvent, formattedLogEvent);
-                return formattedLogEvent.ToString();
-            });
-
-            // Act
-            batchFormatter.Format(formattedLogEvents, output);
+            batchFormatter.Format(logEvents, output);
 
             // Assert
             var got = JsonConvert.DeserializeObject<NormalTextLogEvent[]>(output.ToString());
@@ -74,10 +45,10 @@ namespace Serilog.Sinks.Http.BatchFormatters
         {
             // Arrange
             var batchFormatter = new ArrayBatchFormatter();
-            var emptySequenceOfLogEvents = Enumerable.Empty<LogEvent>();
+            var emptySequenceOfLogEvents = Enumerable.Empty<string>();
 
             // Act
-            batchFormatter.Format(emptySequenceOfLogEvents, textFormatter, output);
+            batchFormatter.Format(emptySequenceOfLogEvents, output);
 
             // Assert
             var got = output.ToString();
@@ -91,7 +62,7 @@ namespace Serilog.Sinks.Http.BatchFormatters
             var batchFormatter = new ArrayBatchFormatter(1);
 
             // Act
-            batchFormatter.Format(logEvents, textFormatter, output);
+            batchFormatter.Format(logEvents, output);
 
             // Assert
             var got = JsonConvert.DeserializeObject<NormalTextLogEvent[]>(output.ToString());

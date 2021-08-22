@@ -98,7 +98,7 @@ log = new LoggerConfiguration()
 
 **Migration guide**
 
-You will have to migrate your code if you've implemented your own version of `IHttpClient`. The signature of method `IHttpClient.PostAsync` has changed from `Task<HttpResponseMessage> PostAsync(string, HttpContent)` to `Task<HttpResponseMessage> PostAsync(string, Stream)`.
+You'll have to migrate your code if you've implemented your own version of `IHttpClient`. The signature of method `IHttpClient.PostAsync` has changed from `Task<HttpResponseMessage> PostAsync(string, HttpContent)` to `Task<HttpResponseMessage> PostAsync(string, Stream)`.
 
 ```csharp
 // Before migration
@@ -137,7 +137,7 @@ public class MyHttpClient : IHttpClient
 
 **Migration guide**
 
-You will have to migrate your code if you're using `DurableHttpUsingTimeRolledBuffers`, i.e. use the durable HTTP sink with a rolling behavior defined by a time interval. The parameter `bufferPathFormat` has been renamed to `bufferBaseFileName`, and the parameter `bufferRollingInterval` has been added.
+You'll have to migrate your code if you're using `DurableHttpUsingTimeRolledBuffers`, i.e. use the durable HTTP sink with a rolling behavior defined by a time interval. The parameter `bufferPathFormat` has been renamed to `bufferBaseFileName`, and the parameter `bufferRollingInterval` has been added.
 
 Given you are configuring the sink in code you should do the following changes.
 
@@ -243,6 +243,37 @@ Given you are configuring the sink in application configuration you should do th
         }
       }
     ]
+  }
+}
+```
+
+- [#196](https://github.com/FantasticFiasco/serilog-sinks-http/issues/196) [BREAKING CHANGE] Overloaded method `IBatchFormatter.Format(IEnumerable<LogEvent>, ITextFormatter, TextWriter)` has been removed in favour of keeping `IBatchFormatter.Format(IEnumerable<string>, TextWriter output)`
+
+ **Migration guide**
+
+You'll have to migrate your code if you've implemented your own version of `IBatchFormatter`.
+
+```csharp
+// Before migration
+public class MyBatchFormatter : IBatchFormatter
+{
+  public void Format(IEnumerable<LogEvent> logEvents, ITextFormatter formatter, TextWriter output)
+  {
+    // Your implementation accepting a sequence of log events
+  }
+
+  public void Format(IEnumerable<string> logEvents, TextWriter output)
+  {
+    // Your implementation accepting a sequence of serialized log events
+  }
+}
+
+// After migration
+public class MyBatchFormatter : IBatchFormatter
+{
+  public void Format(IEnumerable<string> logEvents, TextWriter output)
+  {
+    // Your implementation accepting a sequence of serialized log events
   }
 }
 ```

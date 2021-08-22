@@ -12,12 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using Serilog.Events;
-using Serilog.Formatting;
 using Serilog.Debugging;
 
 namespace Serilog.Sinks.Http.BatchFormatters
@@ -39,34 +35,6 @@ namespace Serilog.Sinks.Http.BatchFormatters
         protected BatchFormatter(long? eventBodyLimitBytes)
         {
             this.eventBodyLimitBytes = eventBodyLimitBytes;
-        }
-
-        /// <summary>
-        /// Format the log events into a payload.
-        /// </summary>
-        /// <param name="logEvents">
-        /// The events to format.
-        /// </param>
-        /// <param name="formatter">
-        /// The formatter turning the log events into a textual representation.
-        /// </param>
-        /// <param name="output">
-        /// The payload to send over the network.
-        /// </param>
-        public void Format(IEnumerable<LogEvent> logEvents, ITextFormatter formatter, TextWriter output)
-        {
-            if (logEvents == null) throw new ArgumentNullException(nameof(logEvents));
-            if (formatter == null) throw new ArgumentNullException(nameof(formatter));
-
-            IEnumerable<string> formattedLogEvents = logEvents.Select(
-                logEvent =>
-                {
-                    var writer = new StringWriter();
-                    formatter.Format(logEvent, writer);
-                    return writer.ToString();
-                });
-
-            Format(formattedLogEvents, output);
         }
 
         /// <summary>
