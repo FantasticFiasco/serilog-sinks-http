@@ -24,6 +24,41 @@ using Serilog.Sinks.Http.Private.Durable;
 using Serilog.Sinks.Http.Private.NonDurable;
 using Serilog.Sinks.Http.TextFormatters;
 
+// <param name="eventBodyLimitBytes">
+// The maximum size, in bytes, that the JSON representation of an event may take before it
+// is dropped rather than being sent to the server. Specify null for no limit.
+// </param>
+
+// long? eventBodyLimitBytes
+
+// <summary>
+// Checks the size of the log event body.
+// </summary>
+// <returns>true if body size is within acceptable range; otherwise false.</returns>
+//protected bool CheckEventBodySize(string json)
+//{
+//    if (eventBodyLimitBytes.HasValue
+//         && ByteSize.From(json) > eventBodyLimitBytes.Value)
+//     {
+//         SelfLog.WriteLine(
+//             "Event JSON representation exceeds the size limit of {0} bytes set for this sink and will be dropped; data: {1}",
+//             eventBodyLimitBytes,
+//             json);
+//
+//         return false;
+//     }
+//
+//     return true;
+// }
+
+// <param name="eventBodyLimitBytes">
+// The maximum size, in bytes, that the JSON representation of an event may take before it
+// is dropped rather than being sent to the server. Specify null for no limit. Default
+// value is 256 KB.
+// </param>
+
+// long? eventBodyLimitBytes = 256 * ByteSize.KB
+
 namespace Serilog
 {
     /// <summary>

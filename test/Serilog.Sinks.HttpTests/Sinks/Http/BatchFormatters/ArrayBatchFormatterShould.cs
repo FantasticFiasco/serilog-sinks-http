@@ -55,18 +55,18 @@ namespace Serilog.Sinks.Http.BatchFormatters
             got.ShouldBeEmpty();
         }
 
-        [Fact]
-        public void DropLogEventsGivenSizeExceedsMaximum()
-        {
-            // Arrange
-            var batchFormatter = new ArrayBatchFormatter(1);
-
-            // Act
-            batchFormatter.Format(logEvents, output);
-
-            // Assert
-            var got = JsonConvert.DeserializeObject<NormalTextLogEvent[]>(output.ToString());
-            got.ShouldBeEmpty();
-        }
+        // [Fact]
+        // public void DropLogEventsGivenSizeExceedsMaximum()
+        // {
+        //     // Arrange
+        //     var batchFormatter = new ArrayBatchFormatter(1);
+        //
+        //     // Act
+        //     batchFormatter.Format(logEvents, output);
+        //
+        //     // Assert
+        //     var got = JsonConvert.DeserializeObject<NormalTextLogEvent[]>(output.ToString());
+        //     got.ShouldBeEmpty();
+        // }
     }
 }
