@@ -90,7 +90,7 @@ namespace Serilog.Sinks.Http.TextFormatters
             if (tokensWithFormat.Any())
             {
                 output.Write(",\"@r\":[");
-                var delim = "";
+                var delim = string.Empty;
                 foreach (var r in tokensWithFormat)
                 {
                     output.Write(delim);

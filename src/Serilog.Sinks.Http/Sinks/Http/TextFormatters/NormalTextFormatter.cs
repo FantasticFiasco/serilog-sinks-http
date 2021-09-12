@@ -117,7 +117,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         {
             output.Write(",\"Properties\":{");
 
-            var precedingDelimiter = "";
+            var precedingDelimiter = string.Empty;
 
             foreach (var property in properties)
             {
@@ -139,7 +139,7 @@ namespace Serilog.Sinks.Http.TextFormatters
         {
             output.Write(",\"Renderings\":{");
 
-            var rdelim = "";
+            var rdelim = string.Empty;
             foreach (var ptoken in tokensWithFormat)
             {
                 output.Write(rdelim);
@@ -148,7 +148,7 @@ namespace Serilog.Sinks.Http.TextFormatters
                 JsonValueFormatter.WriteQuotedJsonString(ptoken.Key, output);
                 output.Write(":[");
 
-                var fdelim = "";
+                var fdelim = string.Empty;
                 foreach (var format in ptoken)
                 {
                     output.Write(fdelim);
