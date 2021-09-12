@@ -19,18 +19,17 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 {
     public class LogEventQueue
     {
-        private readonly int? queueLimit;
         private readonly Queue<string> queue;
+        private readonly int? queueLimit;
         private readonly object syncRoot = new();
 
-        public LogEventQueue(int? queueLimit)
+        public LogEventQueue(int? queueLimit = null)
         {
             if (queueLimit < 1)
                 throw new ArgumentException("queueLimit must be either null or greater than 0", nameof(queueLimit));
 
-            this.queueLimit = queueLimit;
-
             queue = new Queue<string>();
+            this.queueLimit = queueLimit;
         }
 
         public void Enqueue(string logEvent)
@@ -38,7 +37,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             var result = TryEnqueue(logEvent);
             if (result != EnqueueResult.Ok)
             {
-                throw new Exception("Queue has reached its limit");
+                throw new Exception($"Enqueue log event failed: {result}");
             }
         }
 
@@ -46,7 +45,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         {
             lock (syncRoot)
             {
-                if (queueLimit.HasValue && queueLimit.Value == queue.Count)
+                if (queueLimit == queue.Count)
                 {
                     return EnqueueResult.QueueFull;
                 }
@@ -56,7 +55,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             }
         }
 
-        public DequeueResult TryDequeue(long maxSize, out string logEvent)
+        public DequeueResult TryDequeue(long? logEventMaxSize, out string logEvent)
         {
             lock (syncRoot)
             {
@@ -68,7 +67,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
                 logEvent = queue.Peek();
 
-                if (ByteSize.From(logEvent) > maxSize)
+                if (ByteSize.From(logEvent) > logEventMaxSize)
                 {
                     logEvent = string.Empty;
                     return DequeueResult.MaxSizeViolation;
