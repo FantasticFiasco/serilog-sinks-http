@@ -27,8 +27,9 @@ namespace Serilog.Sinks.Http.Private.NonDurable
     public class HttpSink : ILogEventSink, IDisposable
     {
         private readonly string requestUri;
-        private readonly int batchPostingLimit;
-        private readonly long batchSizeLimitBytes;
+        private readonly long? logEventLimitBytes;
+        private readonly int? batchPostingLimit;
+        private readonly long? batchSizeLimitBytes;
         private readonly ITextFormatter textFormatter;
         private readonly IBatchFormatter batchFormatter;
         private readonly IHttpClient httpClient;
@@ -42,8 +43,9 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
         public HttpSink(
             string requestUri,
-            int batchPostingLimit,
-            long batchSizeLimitBytes,
+            long? logEventLimitBytes,
+            int? batchPostingLimit,
+            long? batchSizeLimitBytes,
             int? queueLimit,
             TimeSpan period,
             ITextFormatter textFormatter,
@@ -51,6 +53,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             IHttpClient httpClient)
         {
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
+            this.logEventLimitBytes = logEventLimitBytes;
             this.batchPostingLimit = batchPostingLimit;
             this.batchSizeLimitBytes = batchSizeLimitBytes;
             this.textFormatter = textFormatter ?? throw new ArgumentNullException(nameof(textFormatter));
@@ -61,7 +64,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             timer = new PortableTimer(OnTick);
             queue = new LogEventQueue(queueLimit);
 
-            SetTimer(); 
+            SetTimer();
         }
 
         public void Emit(LogEvent logEvent)
@@ -71,6 +74,15 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             var writer = new StringWriter();
             textFormatter.Format(logEvent, writer);
             var formattedLogEvent = writer.ToString();
+
+            if (ByteSize.From(formattedLogEvent) > logEventLimitBytes)
+            {
+                SelfLog.WriteLine(
+                    "Log event exceeds the size limit of {0} bytes set for this sink and will be dropped; data: {1}",
+                    logEventLimitBytes,
+                    formattedLogEvent);
+                return;
+            }
 
             var result = queue.TryEnqueue(formattedLogEvent);
             if (result == LogEventQueue.EnqueueResult.QueueFull)
@@ -141,22 +153,18 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                             connectionSchedule.MarkFailure();
                             unsentBatch = batch;
 
-                            SelfLog.WriteLine(
-                                "Received failed HTTP shipping result {0}: {1}",
-                                response.StatusCode,
-                                await response.Content.ReadAsStringAsync().ConfigureAwait(false));
-
+                            var statusCode = response.StatusCode;
+                            var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            SelfLog.WriteLine("Received failed HTTP shipping result {0}: {1}", statusCode, body);
                             break;
                         }
                     }
                     else
                     {
-                        // For whatever reason, there's nothing waiting to send. This means we should try connecting
+                        // For whatever reason, there's nothing waiting to be sent. This means we should try connecting
                         // again at the regular interval, so mark the attempt as successful.
                         connectionSchedule.MarkSuccess();
                     }
-
-
                 } while (batch.HasReachedLimit);
             }
             catch (Exception e)

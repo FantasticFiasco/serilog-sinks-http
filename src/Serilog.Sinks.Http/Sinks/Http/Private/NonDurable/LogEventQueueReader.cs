@@ -18,7 +18,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 {
     public static class LogEventQueueReader
     {
-        public static Batch Read(LogEventQueue queue, int batchPostingLimit, long batchSizeLimitBytes)
+        public static Batch Read(LogEventQueue queue, int? batchPostingLimit, long? batchSizeLimitBytes)
         {
             var batch = new Batch();
             var remainingBatchSizeBytes = batchSizeLimitBytes;
@@ -55,7 +55,6 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                         batch.HasReachedLimit = true;
                         break;
                     }
-                    
                 }
                 else if (result == LogEventQueue.DequeueResult.QueueEmpty)
                 {

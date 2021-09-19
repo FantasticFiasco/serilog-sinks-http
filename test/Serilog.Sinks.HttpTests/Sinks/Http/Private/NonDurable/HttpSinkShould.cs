@@ -19,10 +19,11 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
             using (new HttpSink(
                 "https://www.mylogs.com",
-                1,
-                ByteSize.MB,
                 null,
-                TimeSpan.FromMilliseconds(1),         // 1 ms period
+                null,
+                null,
+                null,
+                TimeSpan.FromMilliseconds(1),    // 1 ms period
                 new NormalTextFormatter(),
                 new ArrayBatchFormatter(),
                 httpClient))
@@ -34,6 +35,33 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 httpClient.BatchCount.ShouldBe(0);
                 httpClient.LogEvents.ShouldBeEmpty();
             }
+        }
+
+        [Fact]
+        public async Task RespectLogEventLimitBytes()
+        {
+            // Arrange
+            var httpClient = new HttpClientMock();
+
+            using var sink = new HttpSink(
+                "https://www.mylogs.com",
+                1,    // Is lower than emitted log event
+                null,
+                null,
+                null,
+                TimeSpan.FromMilliseconds(1), // 1 ms period
+                new NormalTextFormatter(),
+                new ArrayBatchFormatter(),
+                httpClient);
+
+            // Act
+            sink.Emit(Some.InformationEvent());
+
+            await Task.Delay(TimeSpan.FromMilliseconds(10));    // Sleep 10x the period
+
+            // Assert
+            httpClient.BatchCount.ShouldBe(0);
+            httpClient.LogEvents.ShouldBeEmpty();
         }
 
         [Fact]
@@ -50,10 +78,11 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
             using var sink = new HttpSink(
                 "https://www.mylogs.com",
-                1,
-                ByteSize.MB,
-                1,                                   // Queue only holds 1 event
-                TimeSpan.FromMilliseconds(1),        // 1 ms period
+                null,
+                null,
+                null,
+                1,                            // Queue only holds 1 event
+                TimeSpan.FromMilliseconds(1),    // 1 ms period
                 new NormalTextFormatter(),
                 new ArrayBatchFormatter(),
                 httpClient);

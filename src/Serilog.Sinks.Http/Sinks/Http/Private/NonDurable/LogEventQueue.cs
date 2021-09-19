@@ -45,7 +45,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         {
             lock (syncRoot)
             {
-                if (queueLimit == queue.Count)
+                if (queue.Count == queueLimit)
                 {
                     return EnqueueResult.QueueFull;
                 }
