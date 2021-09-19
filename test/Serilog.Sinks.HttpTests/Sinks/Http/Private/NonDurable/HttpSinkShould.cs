@@ -18,18 +18,18 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             var httpClient = new HttpClientMock();
 
             using (new HttpSink(
-                "https://www.mylogs.com",
-                null,
-                null,
-                null,
-                null,
-                TimeSpan.FromMilliseconds(1),    // 1 ms period
-                new NormalTextFormatter(),
-                new ArrayBatchFormatter(),
-                httpClient))
+                requestUri: "https://www.mylogs.com",
+                logEventLimitBytes: null,
+                batchPostingLimit: null,
+                batchSizeLimitBytes: null,
+                queueLimit: null,
+                period: TimeSpan.FromMilliseconds(1), // 1 ms period
+                textFormatter: new NormalTextFormatter(),
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient: httpClient))
             {
                 // Act
-                await Task.Delay(TimeSpan.FromMilliseconds(10));    // Sleep 10x the period
+                await Task.Delay(TimeSpan.FromMilliseconds(10)); // Sleep 10x the period
 
                 // Assert
                 httpClient.BatchCount.ShouldBe(0);
@@ -44,20 +44,20 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             var httpClient = new HttpClientMock();
 
             using var sink = new HttpSink(
-                "https://www.mylogs.com",
-                1,    // Is lower than emitted log event
-                null,
-                null,
-                null,
-                TimeSpan.FromMilliseconds(1), // 1 ms period
-                new NormalTextFormatter(),
-                new ArrayBatchFormatter(),
-                httpClient);
+                requestUri: "https://www.mylogs.com",
+                logEventLimitBytes: 1, // Is lower than emitted log event
+                batchPostingLimit: null,
+                batchSizeLimitBytes: null,
+                queueLimit: null,
+                period: TimeSpan.FromMilliseconds(1), // 1 ms period
+                textFormatter: new NormalTextFormatter(),
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient: httpClient);
 
             // Act
             sink.Emit(Some.InformationEvent());
 
-            await Task.Delay(TimeSpan.FromMilliseconds(10));    // Sleep 10x the period
+            await Task.Delay(TimeSpan.FromMilliseconds(10)); // Sleep 10x the period
 
             // Assert
             httpClient.BatchCount.ShouldBe(0);
@@ -77,15 +77,15 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 .ToArray();
 
             using var sink = new HttpSink(
-                "https://www.mylogs.com",
-                null,
-                null,
-                null,
-                1,                            // Queue only holds 1 event
-                TimeSpan.FromMilliseconds(1),    // 1 ms period
-                new NormalTextFormatter(),
-                new ArrayBatchFormatter(),
-                httpClient);
+                requestUri: "https://www.mylogs.com",
+                logEventLimitBytes: null,
+                batchPostingLimit: null,
+                batchSizeLimitBytes: null,
+                queueLimit: 1, // Queue only holds 1 event
+                period: TimeSpan.FromMilliseconds(1), // 1 ms period
+                textFormatter: new NormalTextFormatter(),
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient: httpClient);
 
             // Act
             foreach (var logEvent in logEvents)
@@ -93,10 +93,10 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 sink.Emit(logEvent);
             }
 
-            await Task.Delay(TimeSpan.FromMilliseconds(10));    // Sleep 10x the period
+            await Task.Delay(TimeSpan.FromMilliseconds(10)); // Sleep 10x the period
 
             // Assert
-            httpClient.LogEvents.Length.ShouldBeLessThan(logEvents.Length);    // Some log events will have been dropped
+            httpClient.LogEvents.Length.ShouldBeLessThan(logEvents.Length); // Some log events will have been dropped
         }
     }
 }
