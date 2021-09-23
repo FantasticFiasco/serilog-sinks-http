@@ -20,7 +20,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             using (new HttpSink(
                 requestUri: "https://www.mylogs.com",
                 logEventLimitBytes: null,
-                batchPostingLimit: null,
+                logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
                 queueLimit: null,
                 period: TimeSpan.FromMilliseconds(1), // 1 ms period
@@ -46,7 +46,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             using var sink = new HttpSink(
                 requestUri: "https://www.mylogs.com",
                 logEventLimitBytes: 1, // Is lower than emitted log event
-                batchPostingLimit: null,
+                logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
                 queueLimit: null,
                 period: TimeSpan.FromMilliseconds(1), // 1 ms period
@@ -79,7 +79,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             using var sink = new HttpSink(
                 requestUri: "https://www.mylogs.com",
                 logEventLimitBytes: null,
-                batchPostingLimit: null,
+                logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
                 queueLimit: 1, // Queue only holds 1 event
                 period: TimeSpan.FromMilliseconds(1), // 1 ms period

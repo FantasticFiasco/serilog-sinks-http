@@ -91,7 +91,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         }
 
         [Fact]
-        public void RespectBatchPostingLimit()
+        public void RespectlogEventsInBatchLimit()
         {
             // Arrange
             using var stream = new MemoryStream();
@@ -101,10 +101,10 @@ namespace Serilog.Sinks.Http.Private.Durable
             writer.Write(BarLogEvent + Environment.NewLine);
             writer.Flush();
 
-            const int batchPostingLimit = 1;
+            const int logEventsInBatchLimit = 1;
 
             // Act
-            var got = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, batchPostingLimit, long.MaxValue);
+            var got = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, logEventsInBatchLimit, long.MaxValue);
 
             // Assert
             got.LogEvents.ShouldBe(new[] { FooLogEvent });

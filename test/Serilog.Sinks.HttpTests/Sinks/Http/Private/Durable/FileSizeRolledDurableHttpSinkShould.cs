@@ -25,8 +25,9 @@ namespace Serilog.Sinks.Http.Private.Durable
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: false,
                 retainedBufferFileCountLimit: 31,
-                batchPostingLimit: 1000,
-                batchSizeLimitBytes: ByteSize.MB,
+                logEventLimitBytes: null,
+                logEventsInBatchLimit: 1000,
+                batchSizeLimitBytes: null,
                 period: TimeSpan.FromSeconds(2),
                 textFormatter: new NormalTextFormatter(),
                 batchFormatter: new ArrayBatchFormatter(),
@@ -51,8 +52,9 @@ namespace Serilog.Sinks.Http.Private.Durable
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: false,
                 retainedBufferFileCountLimit: 31,
-                batchPostingLimit: 1000,
-                batchSizeLimitBytes: ByteSize.MB,
+                logEventLimitBytes: null,
+                logEventsInBatchLimit: 1000,
+                batchSizeLimitBytes: null,
                 period: TimeSpan.FromSeconds(2),
                 textFormatter: new NormalTextFormatter(),
                 batchFormatter: new ArrayBatchFormatter(),
@@ -74,20 +76,52 @@ namespace Serilog.Sinks.Http.Private.Durable
                 bufferFileSizeLimitBytes: null,
                 bufferFileShared: false,
                 retainedBufferFileCountLimit: null,
-                batchPostingLimit: 1,
-                batchSizeLimitBytes: ByteSize.MB,
-                period: TimeSpan.FromMilliseconds(1),         // 1 ms period
+                logEventLimitBytes: null,
+                logEventsInBatchLimit: 1000,
+                batchSizeLimitBytes: null,
+                period: TimeSpan.FromMilliseconds(1), // 1 ms period
                 textFormatter: new NormalTextFormatter(),
                 batchFormatter: new ArrayBatchFormatter(),
                 httpClient: httpClient))
             {
                 // Act
-                await Task.Delay(TimeSpan.FromMilliseconds(10));    // Sleep 10x the period
+                await Task.Delay(TimeSpan.FromMilliseconds(10)); // Sleep 10x the period
 
                 // Assert
                 httpClient.BatchCount.ShouldBe(0);
                 httpClient.LogEvents.ShouldBeEmpty();
             }
+        }
+
+        // TODO: This test ought to fail
+        [Fact]
+        public async Task RespectLogEventLimitBytes()
+        {
+            // Arrange
+            var httpClient = new HttpClientMock();
+
+            using var sink = new FileSizeRolledDurableHttpSink(
+                requestUri: "https://www.mylogs.com",
+                bufferBaseFileName: "SomeBuffer",
+                bufferFileSizeLimitBytes: null,
+                bufferFileShared: false,
+                retainedBufferFileCountLimit: null,
+                logEventLimitBytes: 1, // Is lower than emitted log event
+                logEventsInBatchLimit: 1000,
+                batchSizeLimitBytes: null,
+                period: TimeSpan.FromMilliseconds(1), // 1 ms period
+                textFormatter: new NormalTextFormatter(),
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient: httpClient);
+
+            // Act
+            sink.Emit(Some.InformationEvent());
+
+            await Task.Delay(TimeSpan.FromMilliseconds(10)); // Sleep 10x the period
+
+            // Assert
+            httpClient.BatchCount.ShouldBe(0);
+            httpClient.LogEvents.ShouldBeEmpty();
         }
     }
 }

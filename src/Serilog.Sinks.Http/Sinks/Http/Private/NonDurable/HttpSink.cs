@@ -28,7 +28,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
     {
         private readonly string requestUri;
         private readonly long? logEventLimitBytes;
-        private readonly int? batchPostingLimit;
+        private readonly int? logEventsInBatchLimit;
         private readonly long? batchSizeLimitBytes;
         private readonly ITextFormatter textFormatter;
         private readonly IBatchFormatter batchFormatter;
@@ -44,7 +44,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         public HttpSink(
             string requestUri,
             long? logEventLimitBytes,
-            int? batchPostingLimit,
+            int? logEventsInBatchLimit,
             long? batchSizeLimitBytes,
             int? queueLimit,
             TimeSpan period,
@@ -54,7 +54,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         {
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
             this.logEventLimitBytes = logEventLimitBytes;
-            this.batchPostingLimit = batchPostingLimit;
+            this.logEventsInBatchLimit = logEventsInBatchLimit;
             this.batchSizeLimitBytes = batchSizeLimitBytes;
             this.textFormatter = textFormatter ?? throw new ArgumentNullException(nameof(textFormatter));
             this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
@@ -121,7 +121,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
                 do
                 {
-                    batch = unsentBatch ?? LogEventQueueReader.Read(queue, batchPostingLimit, batchSizeLimitBytes);
+                    batch = unsentBatch ?? LogEventQueueReader.Read(queue, logEventsInBatchLimit, batchSizeLimitBytes);
 
                     if (batch.LogEvents.Count > 0)
                     {

@@ -30,8 +30,8 @@ namespace Serilog.Sinks.Http.Private.Durable
     {
         private readonly IHttpClient httpClient;
         private readonly string requestUri;
-        private readonly int batchPostingLimit;
-        private readonly long batchSizeLimitBytes;
+        private readonly int? logEventsInBatchLimit;
+        private readonly long? batchSizeLimitBytes;
         private readonly IBufferFiles bufferFiles;
         private readonly ExponentialBackoffConnectionSchedule connectionSchedule;
         private readonly PortableTimer timer;
@@ -44,17 +44,17 @@ namespace Serilog.Sinks.Http.Private.Durable
             IHttpClient httpClient,
             string requestUri,
             IBufferFiles bufferFiles,
-            int batchPostingLimit,
-            long batchSizeLimitBytes,
+            int? logEventsInBatchLimit,
+            long? batchSizeLimitBytes,
             TimeSpan period,
             IBatchFormatter batchFormatter)
         {
-            if (batchPostingLimit <= 0) throw new ArgumentException("batchPostingLimit must be 1 or greater", nameof(batchPostingLimit));
+            if (logEventsInBatchLimit <= 0) throw new ArgumentException("logEventsInBatchLimit must be 1 or greater", nameof(logEventsInBatchLimit));
 
             this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
             this.bufferFiles = bufferFiles ?? throw new ArgumentNullException(nameof(bufferFiles));
-            this.batchPostingLimit = batchPostingLimit;
+            this.logEventsInBatchLimit = logEventsInBatchLimit;
             this.batchSizeLimitBytes = batchSizeLimitBytes;
             this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
 
@@ -68,7 +68,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         {
             lock (syncRoot)
             {
-                if (disposed) 
+                if (disposed)
                     return;
 
                 disposed = true;
@@ -111,7 +111,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                     batch = BufferFileReader.Read(
                         currentFile,
                         ref nextLineBeginsAtOffset,
-                        batchPostingLimit,
+                        logEventsInBatchLimit,
                         batchSizeLimitBytes);
 
                     if (batch.LogEvents.Count > 0)

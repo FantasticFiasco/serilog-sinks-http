@@ -18,7 +18,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 {
     public static class LogEventQueueReader
     {
-        public static Batch Read(LogEventQueue queue, int? batchPostingLimit, long? batchSizeLimitBytes)
+        public static Batch Read(LogEventQueue queue, int? logEventsInBatchLimit, long? batchSizeLimitBytes)
         {
             var batch = new Batch();
             var remainingBatchSizeBytes = batchSizeLimitBytes;
@@ -32,7 +32,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                     remainingBatchSizeBytes -= ByteSize.From(logEvent);
 
                     // Respect batch posting limit
-                    if (batch.LogEvents.Count == batchPostingLimit)
+                    if (batch.LogEvents.Count == logEventsInBatchLimit)
                     {
                         batch.HasReachedLimit = true;
                         break;

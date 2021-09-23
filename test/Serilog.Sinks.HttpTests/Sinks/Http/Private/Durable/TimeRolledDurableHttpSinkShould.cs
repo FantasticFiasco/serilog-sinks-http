@@ -26,12 +26,13 @@ namespace Serilog.Sinks.Http.Private.Durable
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: false,
                 retainedBufferFileCountLimit: 31,
-                batchPostingLimit: 1000,
-                batchSizeLimitBytes: ByteSize.MB,
+                logEventLimitBytes: null,
+                logEventsInBatchLimit: 1000,
+                batchSizeLimitBytes: null,
                 period: TimeSpan.FromSeconds(2),
                 textFormatter: new NormalTextFormatter(),
                 batchFormatter: new ArrayBatchFormatter(),
-                httpClient:new HttpClientMock());
+                httpClient: new HttpClientMock());
 
             // Act & Assert
             got.ShouldNotThrow();
@@ -53,8 +54,9 @@ namespace Serilog.Sinks.Http.Private.Durable
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: false,
                 retainedBufferFileCountLimit: 31,
-                batchPostingLimit: 1000,
-                batchSizeLimitBytes: ByteSize.MB,
+                logEventLimitBytes: null,
+                logEventsInBatchLimit: 1000,
+                batchSizeLimitBytes: null,
                 period: TimeSpan.FromSeconds(2),
                 textFormatter: new NormalTextFormatter(),
                 batchFormatter: new ArrayBatchFormatter(),
@@ -70,9 +72,6 @@ namespace Serilog.Sinks.Http.Private.Durable
             // Arrange
             var httpClient = new HttpClientMock();
 
-            // 1 ms period
-            var period = TimeSpan.FromMilliseconds(1);
-
             using (new TimeRolledDurableHttpSink(
                 requestUri: "https://www.mylogs.com",
                 bufferBaseFileName: "SomeBuffer",
@@ -80,20 +79,53 @@ namespace Serilog.Sinks.Http.Private.Durable
                 bufferFileSizeLimitBytes: null,
                 bufferFileShared: false,
                 retainedBufferFileCountLimit: null,
-                batchPostingLimit: 1,
-                batchSizeLimitBytes: ByteSize.MB,
-                period: period,
+                logEventLimitBytes: null,
+                logEventsInBatchLimit: 1000,
+                batchSizeLimitBytes: null,
+                period: TimeSpan.FromMilliseconds(1), // 1 ms period
                 textFormatter: new NormalTextFormatter(),
                 batchFormatter: new ArrayBatchFormatter(),
                 httpClient: httpClient))
             {
                 // Act
-                await Task.Delay(10 * period);    // Sleep 10x the period
+                await Task.Delay(TimeSpan.FromMilliseconds(10)); // Sleep 10x the period
 
                 // Assert
                 httpClient.BatchCount.ShouldBe(0);
                 httpClient.LogEvents.ShouldBeEmpty();
             }
+        }
+
+        // TODO: This test ought to fail
+        [Fact]
+        public async Task RespectLogEventLimitBytes()
+        {
+            // Arrange
+            var httpClient = new HttpClientMock();
+
+            using var sink = new TimeRolledDurableHttpSink(
+                requestUri: "https://www.mylogs.com",
+                bufferBaseFileName: "SomeBuffer",
+                bufferRollingInterval: BufferRollingInterval.Day,
+                bufferFileSizeLimitBytes: null,
+                bufferFileShared: false,
+                retainedBufferFileCountLimit: null,
+                logEventLimitBytes: 1, // Is lower than emitted log event
+                logEventsInBatchLimit: 1000,
+                batchSizeLimitBytes: null,
+                period: TimeSpan.FromMilliseconds(1), // 1 ms period
+                textFormatter: new NormalTextFormatter(),
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient: httpClient);
+
+            // Act
+            sink.Emit(Some.InformationEvent());
+
+            await Task.Delay(TimeSpan.FromMilliseconds(10)); // Sleep 10x the period
+
+            // Assert
+            httpClient.BatchCount.ShouldBe(0);
+            httpClient.LogEvents.ShouldBeEmpty();
         }
     }
 }

@@ -40,17 +40,17 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         }
 
         [Fact]
-        public void RespectBatchPostingLimit()
+        public void RespectlogEventsInBatchLimit()
         {
             // Arrange
             var queue = new LogEventQueue();
             queue.Enqueue(FooLogEvent);
             queue.Enqueue(BarLogEvent);
 
-            const int batchPostingLimit = 1;
+            const int logEventsInBatchLimit = 1;
 
             // Act
-            var got = LogEventQueueReader.Read(queue, batchPostingLimit, null);
+            var got = LogEventQueueReader.Read(queue, logEventsInBatchLimit, null);
 
             // Assert
             got.LogEvents.ShouldBe(new[] { FooLogEvent });

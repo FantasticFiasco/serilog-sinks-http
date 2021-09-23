@@ -47,8 +47,9 @@ namespace Serilog
         /// The maximum size, in bytes, for a serialized representation of a log event. Log events
         /// exceeding this size will be dropped. Specify null for no limit. Default value is null.
         /// </param>
-        /// <param name="batchPostingLimit">
-        /// The maximum number of events to post in a single batch. Default value is 1000.
+        /// <param name="logEventsInBatchLimit">
+        /// The maximum number of log events posted as a single batch over the network. Default
+        /// value is 1000.
         /// </param>
         /// <param name="batchSizeLimitBytes">
         /// The approximate maximum size, in bytes, for a single batch. The value is an
@@ -100,7 +101,7 @@ namespace Serilog
             this LoggerSinkConfiguration sinkConfiguration,
             string requestUri,
             long? logEventLimitBytes = null,
-            int? batchPostingLimit = 1000,
+            int? logEventsInBatchLimit = 1000,
             long? batchSizeLimitBytes = null,
             int? queueLimit = null,
             TimeSpan? period = null,
@@ -127,7 +128,7 @@ namespace Serilog
             var sink = new HttpSink(
                 requestUri: requestUri,
                 logEventLimitBytes: logEventLimitBytes,
-                batchPostingLimit: batchPostingLimit,
+                logEventsInBatchLimit: logEventsInBatchLimit,
                 batchSizeLimitBytes: batchSizeLimitBytes,
                 queueLimit: queueLimit,
                 period: period.Value,
@@ -174,8 +175,13 @@ namespace Serilog
         /// <paramref name="retainedBufferFileCountLimit"/> will be kept on the file system. For
         /// unlimited retention, pass null. Default value is 31.
         /// </param>
-        /// <param name="batchPostingLimit">
-        /// The maximum number of events to post in a single batch. Default value is 1000.
+        /// <param name="logEventLimitBytes">
+        /// The maximum size, in bytes, for a serialized representation of a log event. Log events
+        /// exceeding this size will be dropped. Specify null for no limit. Default value is null.
+        /// </param>
+        /// <param name="logEventsInBatchLimit">
+        /// The maximum number of log events posted as a single batch over the network. Default
+        /// value is 1000.
         /// </param>
         /// <param name="batchSizeLimitBytes">
         /// The approximate maximum size, in bytes, for a single batch. The value is an
@@ -191,7 +197,7 @@ namespace Serilog
         /// significantly smaller depending on the compression algorithm and the repetitiveness of
         /// the log events.
         /// <para/>
-        /// Default value is long.MaxValue.
+        /// Default value is null.
         /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
@@ -226,8 +232,9 @@ namespace Serilog
             long? bufferFileSizeLimitBytes = ByteSize.GB,
             bool bufferFileShared = false,
             int? retainedBufferFileCountLimit = 31,
-            int batchPostingLimit = 1000,
-            long batchSizeLimitBytes = long.MaxValue,
+            long? logEventLimitBytes = null,
+            int? logEventsInBatchLimit = 1000,
+            long? batchSizeLimitBytes = null,
             TimeSpan? period = null,
             ITextFormatter? textFormatter = null,
             IBatchFormatter? batchFormatter = null,
@@ -254,7 +261,8 @@ namespace Serilog
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: bufferFileShared,
                 retainedBufferFileCountLimit: retainedBufferFileCountLimit,
-                batchPostingLimit: batchPostingLimit,
+                logEventLimitBytes: logEventLimitBytes,
+                logEventsInBatchLimit: logEventsInBatchLimit,
                 batchSizeLimitBytes: batchSizeLimitBytes,
                 period: period.Value,
                 textFormatter: textFormatter,
@@ -301,8 +309,13 @@ namespace Serilog
         /// <paramref name="retainedBufferFileCountLimit"/> will be kept on the file system. For
         /// unlimited retention, pass null. Default value is 31.
         /// </param>
-        /// <param name="batchPostingLimit">
-        /// The maximum number of events to post in a single batch. Default value is 1000.
+        /// <param name="logEventLimitBytes">
+        /// The maximum size, in bytes, for a serialized representation of a log event. Log events
+        /// exceeding this size will be dropped. Specify null for no limit. Default value is null.
+        /// </param>
+        /// <param name="logEventsInBatchLimit">
+        /// The maximum number of log events posted as a single batch over the network. Default
+        /// value is 1000.
         /// </param>
         /// <param name="batchSizeLimitBytes">
         /// The approximate maximum size, in bytes, for a single batch. The value is an
@@ -318,7 +331,7 @@ namespace Serilog
         /// significantly smaller depending on the compression algorithm and the repetitiveness of
         /// the log events.
         /// <para/>
-        /// Default value is long.MaxValue.
+        /// Default value is null.
         /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
@@ -354,8 +367,9 @@ namespace Serilog
             long? bufferFileSizeLimitBytes = null,
             bool bufferFileShared = false,
             int? retainedBufferFileCountLimit = 31,
-            int batchPostingLimit = 1000,
-            long batchSizeLimitBytes = long.MaxValue,
+            long? logEventLimitBytes = null,
+            int? logEventsInBatchLimit = 1000,
+            long? batchSizeLimitBytes = null,
             TimeSpan? period = null,
             ITextFormatter? textFormatter = null,
             IBatchFormatter? batchFormatter = null,
@@ -383,7 +397,8 @@ namespace Serilog
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: bufferFileShared,
                 retainedBufferFileCountLimit: retainedBufferFileCountLimit,
-                batchPostingLimit: batchPostingLimit,
+                logEventLimitBytes: logEventLimitBytes,
+                logEventsInBatchLimit: logEventsInBatchLimit,
                 batchSizeLimitBytes: batchSizeLimitBytes,
                 period: period.Value,
                 textFormatter: textFormatter,

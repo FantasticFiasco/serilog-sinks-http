@@ -29,18 +29,18 @@ namespace Serilog.Sinks.Http.Private.Durable
         public static Batch Read(
             string fileName,
             ref long nextLineBeginsAtOffset,
-            int batchPostingLimit,
-            long batchSizeLimitBytes)
+            int? logEventsInBatchLimit,
+            long? batchSizeLimitBytes)
         {
             using var stream = System.IO.File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            return Read(stream, ref nextLineBeginsAtOffset, batchPostingLimit, batchSizeLimitBytes);
+            return Read(stream, ref nextLineBeginsAtOffset, logEventsInBatchLimit, batchSizeLimitBytes);
         }
 
         public static Batch Read(
             Stream stream,
             ref long nextLineBeginsAtOffset,
-            int batchPostingLimit,
-            long batchSizeLimitBytes)
+            int? logEventsInBatchLimit,
+            long? batchSizeLimitBytes)
         {
             var batch = new Batch();
             long batchSizeBytes = 0;
@@ -94,7 +94,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 }
 
                 // Respect batch posting limit
-                if (batch.LogEvents.Count == batchPostingLimit)
+                if (batch.LogEvents.Count == logEventsInBatchLimit)
                 {
                     batch.HasReachedLimit = true;
                     break;
