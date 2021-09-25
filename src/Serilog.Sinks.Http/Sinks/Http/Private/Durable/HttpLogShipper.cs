@@ -30,6 +30,7 @@ namespace Serilog.Sinks.Http.Private.Durable
     {
         private readonly IHttpClient httpClient;
         private readonly string requestUri;
+        private readonly long? logEventLimitBytes;
         private readonly int? logEventsInBatchLimit;
         private readonly long? batchSizeLimitBytes;
         private readonly IBufferFiles bufferFiles;
@@ -44,6 +45,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             IHttpClient httpClient,
             string requestUri,
             IBufferFiles bufferFiles,
+            long? logEventLimitBytes,
             int? logEventsInBatchLimit,
             long? batchSizeLimitBytes,
             TimeSpan period,
@@ -54,6 +56,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
             this.bufferFiles = bufferFiles ?? throw new ArgumentNullException(nameof(bufferFiles));
+            this.logEventLimitBytes = logEventLimitBytes;
             this.logEventsInBatchLimit = logEventsInBatchLimit;
             this.batchSizeLimitBytes = batchSizeLimitBytes;
             this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
@@ -111,6 +114,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                     batch = BufferFileReader.Read(
                         currentFile,
                         ref nextLineBeginsAtOffset,
+                        logEventLimitBytes,
                         logEventsInBatchLimit,
                         batchSizeLimitBytes);
 

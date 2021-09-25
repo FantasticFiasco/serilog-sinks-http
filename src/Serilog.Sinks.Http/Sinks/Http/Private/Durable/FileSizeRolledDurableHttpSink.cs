@@ -43,6 +43,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 httpClient,
                 requestUri,
                 new FileSizeRolledBufferFiles(new DirectoryService(), bufferBaseFileName),
+                logEventLimitBytes,
                 logEventsInBatchLimit,
                 batchSizeLimitBytes,
                 period,

@@ -23,7 +23,12 @@ namespace Serilog.Sinks.Http.Private.Durable
             writer.Flush();
 
             // Act
-            var got = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, int.MaxValue, long.MaxValue);
+            var got = BufferFileReader.Read(
+                stream,
+                ref nextLineBeginsAtOffset,
+                null,
+                null,
+                null);
 
             // Assert
             got.LogEvents.ShouldBe(new[] { FooLogEvent });
@@ -43,7 +48,12 @@ namespace Serilog.Sinks.Http.Private.Durable
             writer.Flush();
 
             // Act
-            var got = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, int.MaxValue, long.MaxValue);
+            var got = BufferFileReader.Read(
+                stream,
+                ref nextLineBeginsAtOffset,
+                null,
+                null,
+                null);
 
             // Assert
             got.LogEvents.ShouldBe(new[] { FooLogEvent, BarLogEvent });
@@ -62,7 +72,12 @@ namespace Serilog.Sinks.Http.Private.Durable
             writer.Flush();
 
             // Act
-            var got = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, int.MaxValue, long.MaxValue);
+            var got = BufferFileReader.Read(
+                stream,
+                ref nextLineBeginsAtOffset,
+                null,
+                null,
+                null);
 
             // Assert
             got.LogEvents.ShouldBeEmpty();
@@ -82,7 +97,12 @@ namespace Serilog.Sinks.Http.Private.Durable
             writer.Flush();
 
             // Act
-            var got = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, int.MaxValue, long.MaxValue);
+            var got = BufferFileReader.Read(
+                stream,
+                ref nextLineBeginsAtOffset,
+                null,
+                null,
+                null);
 
             // Assert
             got.LogEvents.ShouldBe(new[] { FooLogEvent });
@@ -91,7 +111,33 @@ namespace Serilog.Sinks.Http.Private.Durable
         }
 
         [Fact]
-        public void RespectlogEventsInBatchLimit()
+        public void RespectLogEventLimitBytes()
+        {
+            // Arrange
+            using var stream = new MemoryStream();
+
+            using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
+            writer.Write(FooLogEvent + Environment.NewLine);
+            writer.Flush();
+
+            var logEventLimitBytes = ByteSize.From(FooLogEvent) - 1;
+
+            // Act
+            var got = BufferFileReader.Read(
+                stream,
+                ref nextLineBeginsAtOffset,
+                logEventLimitBytes,
+                null,
+                null);
+
+            // Assert
+            got.LogEvents.ShouldBeEmpty();
+            got.HasReachedLimit.ShouldBeFalse();
+            nextLineBeginsAtOffset.ShouldBe(stream.Length);
+        }
+
+        [Fact]
+        public void RespectLogEventsInBatchLimit()
         {
             // Arrange
             using var stream = new MemoryStream();
@@ -104,7 +150,12 @@ namespace Serilog.Sinks.Http.Private.Durable
             const int logEventsInBatchLimit = 1;
 
             // Act
-            var got = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, logEventsInBatchLimit, long.MaxValue);
+            var got = BufferFileReader.Read(
+                stream,
+                ref nextLineBeginsAtOffset,
+                null,
+                logEventsInBatchLimit,
+                null);
 
             // Assert
             got.LogEvents.ShouldBe(new[] { FooLogEvent });
@@ -126,7 +177,12 @@ namespace Serilog.Sinks.Http.Private.Durable
             var batchSizeLimit = stream.Length * 2 / 3;
 
             // Act
-            var got = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, int.MaxValue, batchSizeLimit);
+            var got = BufferFileReader.Read(
+                stream,
+                ref nextLineBeginsAtOffset,
+                null,
+                null,
+                batchSizeLimit);
 
             // Assert
             got.LogEvents.ShouldBe(new[] { FooLogEvent });
@@ -150,7 +206,12 @@ namespace Serilog.Sinks.Http.Private.Durable
             var batchSizeLimit = ByteSize.From(logEventExceedingBatchSizeLimit) - 1;
 
             // Act
-            var got = BufferFileReader.Read(stream, ref nextLineBeginsAtOffset, int.MaxValue, batchSizeLimit);
+            var got = BufferFileReader.Read(
+                stream,
+                ref nextLineBeginsAtOffset,
+                null,
+                null,
+                batchSizeLimit);
 
             // Assert
             got.LogEvents.ShouldBe(new[] { BarLogEvent });
