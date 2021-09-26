@@ -25,11 +25,11 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 queueLimit: null,
                 period: TimeSpan.FromMilliseconds(1), // 1 ms period
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new ArrayBatchFormatter(),
+                batchFormatter: new DefaultBatchFormatter(),
                 httpClient: httpClient))
             {
                 // Act
-                await Task.Delay(TimeSpan.FromMilliseconds(10)); // Sleep 10x the period
+                await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 10000x the period
 
                 // Assert
                 httpClient.BatchCount.ShouldBe(0);
@@ -51,13 +51,13 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 queueLimit: null,
                 period: TimeSpan.FromMilliseconds(1), // 1 ms period
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new ArrayBatchFormatter(),
+                batchFormatter: new DefaultBatchFormatter(),
                 httpClient: httpClient);
 
             // Act
             sink.Emit(Some.InformationEvent());
 
-            await Task.Delay(TimeSpan.FromMilliseconds(10)); // Sleep 10x the period
+            await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 10000x the period
 
             // Assert
             httpClient.BatchCount.ShouldBe(0);
@@ -84,7 +84,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 queueLimit: 1, // Queue only holds 1 event
                 period: TimeSpan.FromMilliseconds(1), // 1 ms period
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new ArrayBatchFormatter(),
+                batchFormatter: new DefaultBatchFormatter(),
                 httpClient: httpClient);
 
             // Act
@@ -93,7 +93,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 sink.Emit(logEvent);
             }
 
-            await Task.Delay(TimeSpan.FromMilliseconds(10)); // Sleep 10x the period
+            await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 10000x the period
 
             // Assert
             httpClient.LogEvents.Length.ShouldBeLessThan(logEvents.Length); // Some log events will have been dropped

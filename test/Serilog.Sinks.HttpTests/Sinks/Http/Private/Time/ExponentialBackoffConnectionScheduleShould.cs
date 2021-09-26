@@ -179,7 +179,7 @@ namespace Serilog.Sinks.Http.Private.Time
                     return new ExponentialBackoff(nextInterval);
                 }
 
-                throw new Exception("todo 1");
+                throw new Exception();
             }
         }
 

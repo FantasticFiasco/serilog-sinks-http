@@ -10,6 +10,11 @@ namespace Serilog.Sinks.Http.Private.Durable
 {
     public class FileSizeRolledDurableHttpSinkShould
     {
+        public FileSizeRolledDurableHttpSinkShould()
+        {
+            BufferFiles.Delete();
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData(1)]
@@ -30,7 +35,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 batchSizeLimitBytes: null,
                 period: TimeSpan.FromSeconds(2),
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new ArrayBatchFormatter(),
+                batchFormatter: new DefaultBatchFormatter(),
                 httpClient: new HttpClientMock());
 
             // Act & Assert
@@ -57,7 +62,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 batchSizeLimitBytes: null,
                 period: TimeSpan.FromSeconds(2),
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new ArrayBatchFormatter(),
+                batchFormatter: new DefaultBatchFormatter(),
                 httpClient: new HttpClientMock());
 
             // Act & Assert
@@ -81,11 +86,11 @@ namespace Serilog.Sinks.Http.Private.Durable
                 batchSizeLimitBytes: null,
                 period: TimeSpan.FromMilliseconds(1), // 1 ms period
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new ArrayBatchFormatter(),
+                batchFormatter: new DefaultBatchFormatter(),
                 httpClient: httpClient))
             {
                 // Act
-                await Task.Delay(TimeSpan.FromMilliseconds(10)); // Sleep 10x the period
+                await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 10000x the period
 
                 // Assert
                 httpClient.BatchCount.ShouldBe(0);
@@ -93,7 +98,6 @@ namespace Serilog.Sinks.Http.Private.Durable
             }
         }
 
-        // TODO: This test ought to fail
         [Fact]
         public async Task RespectLogEventLimitBytes()
         {
@@ -111,13 +115,13 @@ namespace Serilog.Sinks.Http.Private.Durable
                 batchSizeLimitBytes: null,
                 period: TimeSpan.FromMilliseconds(1), // 1 ms period
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new ArrayBatchFormatter(),
+                batchFormatter: new DefaultBatchFormatter(),
                 httpClient: httpClient);
 
             // Act
             sink.Emit(Some.InformationEvent());
 
-            await Task.Delay(TimeSpan.FromMilliseconds(10)); // Sleep 10x the period
+            await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 10000x the period
 
             // Assert
             httpClient.BatchCount.ShouldBe(0);

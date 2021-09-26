@@ -44,7 +44,7 @@ namespace Serilog.Sinks.Http.BatchFormatters
         public void HandleEmptySequenceOfLogEvents()
         {
             // Arrange
-            var batchFormatter = new ArrayBatchFormatter();
+            var batchFormatter = new DefaultBatchFormatter();
             var emptySequenceOfLogEvents = Enumerable.Empty<string>();
 
             // Act
