@@ -21,7 +21,7 @@ namespace Serilog
                     requestUri: "https://www.mylogs.com",
                     bufferBaseFileName: "SomeBuffer",
                     bufferRollingInterval: BufferRollingInterval.Hour,
-                    batchPostingLimit: 100,
+                    logEventsInBatchLimit: 100,
                     batchSizeLimitBytes: ByteSize.MB,
                     period: TimeSpan.FromMilliseconds(1),
                     textFormatter: new NormalRenderedTextFormatter(),

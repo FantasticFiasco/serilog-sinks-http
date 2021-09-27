@@ -19,7 +19,7 @@ namespace Serilog
                 .WriteTo
                 .Http(
                     requestUri: "https://www.mylogs.com",
-                    batchPostingLimit: 100,
+                    logEventsInBatchLimit: 100,
                     batchSizeLimitBytes: ByteSize.MB,
                     queueLimit: 10000,
                     period: TimeSpan.FromMilliseconds(1),

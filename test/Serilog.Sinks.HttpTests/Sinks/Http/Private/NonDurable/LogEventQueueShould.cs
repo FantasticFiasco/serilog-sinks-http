@@ -1,4 +1,5 @@
-﻿using Shouldly;
+﻿using System;
+using Shouldly;
 using Xunit;
 
 namespace Serilog.Sinks.Http.Private.NonDurable
@@ -9,16 +10,16 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         public void UseFifo()
         {
             // Arrange
-            var queue = new LogEventQueue(null);
+            var queue = new LogEventQueue();
             queue.Enqueue("1");
             queue.Enqueue("2");
             queue.Enqueue("3");
 
             // Act
-            var dequeueResult1 = queue.TryDequeue(long.MaxValue, out var got1);
-            var dequeueResult2 = queue.TryDequeue(long.MaxValue, out var got2);
-            var dequeueResult3 = queue.TryDequeue(long.MaxValue, out var got3);
-            var dequeueResult4 = queue.TryDequeue(long.MaxValue, out var got4);
+            var dequeueResult1 = queue.TryDequeue(null, out var got1);
+            var dequeueResult2 = queue.TryDequeue(null, out var got2);
+            var dequeueResult3 = queue.TryDequeue(null, out var got3);
+            var dequeueResult4 = queue.TryDequeue(null, out var got4);
 
             // Assert
             dequeueResult1.ShouldBe(LogEventQueue.DequeueResult.Ok);
@@ -30,6 +31,22 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             got2.ShouldBe("2");
             got3.ShouldBe("3");
             got4.ShouldBe("");
+        }
+
+        [Fact]
+        public void ThrowExceptionGivenFullQueue()
+        {
+            // Arrange
+            var queue = new LogEventQueue(3);
+            queue.Enqueue("1");
+            queue.Enqueue("2");
+            queue.Enqueue("3");
+
+            // Act
+            Action got = () => queue.Enqueue("4");
+
+            // Assert
+            got.ShouldThrow<Exception>();
         }
 
         [Fact]
@@ -52,11 +69,11 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         public void Dequeue()
         {
             // Arrange
-            var queue = new LogEventQueue(null);
+            var queue = new LogEventQueue();
             queue.Enqueue("1");
 
             // Act
-            var result = queue.TryDequeue(long.MaxValue, out var got);
+            var result = queue.TryDequeue(null, out var got);
 
             // Assert
             result.ShouldBe(LogEventQueue.DequeueResult.Ok);
@@ -67,32 +84,33 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         public void NotDequeueGivenEmptyQueue()
         {
             // Arrange
-            var queue = new LogEventQueue(null);
+            var queue = new LogEventQueue();
 
             // Act
-            var result = queue.TryDequeue(long.MaxValue, out var got);
+            var result = queue.TryDequeue(null, out var got);
 
             // Assert
             result.ShouldBe(LogEventQueue.DequeueResult.QueueEmpty);
-            got.ShouldBe("");
+            got.ShouldBe(string.Empty);
         }
 
         [Theory]
+        [InlineData("0123456789", 8, LogEventQueue.DequeueResult.MaxSizeViolation)]
         [InlineData("0123456789", 9, LogEventQueue.DequeueResult.MaxSizeViolation)]
         [InlineData("0123456789", 10, LogEventQueue.DequeueResult.Ok)]
         [InlineData("0123456789", 11, LogEventQueue.DequeueResult.Ok)]
-        public void DequeueGivenMaxSize(string logEvent, int maxSize, LogEventQueue.DequeueResult want)
+        public void DequeueGivenMaxSize(string logEvent, int logEventMaxSize, LogEventQueue.DequeueResult want)
         {
             // Arrange
-            var queue = new LogEventQueue(null);
+            var queue = new LogEventQueue();
             queue.Enqueue(logEvent);
 
             // Act
-            var got = queue.TryDequeue(maxSize, out var dequeuedLogEvent);
+            var got = queue.TryDequeue(logEventMaxSize, out var dequeuedLogEvent);
 
             // Assert
             got.ShouldBe(want);
-            dequeuedLogEvent.ShouldBe(want == LogEventQueue.DequeueResult.Ok ? logEvent : "");
+            dequeuedLogEvent.ShouldBe(want == LogEventQueue.DequeueResult.Ok ? logEvent : string.Empty);
         }
     }
 }

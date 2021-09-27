@@ -12,18 +12,14 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         public void ReadLogEvent()
         {
             // Arrange
-            var queue = new LogEventQueue(null);
+            var queue = new LogEventQueue();
             queue.Enqueue(FooLogEvent);
 
             // Act
-            var got = LogEventQueueReader.Read(queue, int.MaxValue, long.MaxValue);
+            var got = LogEventQueueReader.Read(queue, null, null);
 
             // Assert
-            got.LogEvents.ShouldBe(
-                new[]
-                {
-                    FooLogEvent
-                });
+            got.LogEvents.ShouldBe(new[] { FooLogEvent });
             got.HasReachedLimit.ShouldBeFalse();
         }
 
@@ -31,41 +27,33 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         public void ReadLogEvents()
         {
             // Arrange
-            var queue = new LogEventQueue(null);
+            var queue = new LogEventQueue();
             queue.Enqueue(FooLogEvent);
             queue.Enqueue(BarLogEvent);
 
             // Act
-            var got = LogEventQueueReader.Read(queue, int.MaxValue, long.MaxValue);
+            var got = LogEventQueueReader.Read(queue, null, null);
 
             // Assert
-            got.LogEvents.ShouldBe(
-                new[]
-                {
-                    FooLogEvent, BarLogEvent
-                });
+            got.LogEvents.ShouldBe(new[] { FooLogEvent, BarLogEvent });
             got.HasReachedLimit.ShouldBeFalse();
         }
 
         [Fact]
-        public void RespectBatchPostingLimit()
+        public void RespectlogEventsInBatchLimit()
         {
             // Arrange
-            var queue = new LogEventQueue(null);
+            var queue = new LogEventQueue();
             queue.Enqueue(FooLogEvent);
             queue.Enqueue(BarLogEvent);
 
-            const int batchPostingLimit = 1;
+            const int logEventsInBatchLimit = 1;
 
             // Act
-            var got = LogEventQueueReader.Read(queue, batchPostingLimit, long.MaxValue);
+            var got = LogEventQueueReader.Read(queue, logEventsInBatchLimit, null);
 
             // Assert
-            got.LogEvents.ShouldBe(
-                new[]
-                {
-                    FooLogEvent
-                });
+            got.LogEvents.ShouldBe(new[] { FooLogEvent });
             got.HasReachedLimit.ShouldBeTrue();
         }
 
@@ -73,21 +61,17 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         public void RespectBatchSizeLimit()
         {
             // Arrange
-            var queue = new LogEventQueue(null);
+            var queue = new LogEventQueue();
             queue.Enqueue(FooLogEvent);
             queue.Enqueue(BarLogEvent);
 
             var batchSizeLimit = (FooLogEvent.Length + BarLogEvent.Length) * 2 / 3;
 
             // Act
-            var got = LogEventQueueReader.Read(queue, int.MaxValue, batchSizeLimit);
+            var got = LogEventQueueReader.Read(queue, null, batchSizeLimit);
 
             // Assert
-            got.LogEvents.ShouldBe(
-                new[]
-                {
-                    FooLogEvent
-                });
+            got.LogEvents.ShouldBe(new[] { FooLogEvent });
             got.HasReachedLimit.ShouldBeTrue();
         }
 
@@ -97,14 +81,14 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             // Arrange
             const string logEventExceedingBatchSizeLimit = "{ \"foo\": \"This document exceeds the batch size limit\" }";
 
-            var queue = new LogEventQueue(null);
+            var queue = new LogEventQueue();
             queue.Enqueue(logEventExceedingBatchSizeLimit);
             queue.Enqueue(BarLogEvent);
 
             var batchSizeLimit = ByteSize.From(logEventExceedingBatchSizeLimit) - 1;
 
             // Act
-            var got = LogEventQueueReader.Read(queue, int.MaxValue, batchSizeLimit);
+            var got = LogEventQueueReader.Read(queue, null, batchSizeLimit);
 
             // Assert
             got.LogEvents.ShouldBe(new[] { BarLogEvent });

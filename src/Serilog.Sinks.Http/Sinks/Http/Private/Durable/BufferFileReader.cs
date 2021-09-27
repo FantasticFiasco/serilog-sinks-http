@@ -29,18 +29,20 @@ namespace Serilog.Sinks.Http.Private.Durable
         public static Batch Read(
             string fileName,
             ref long nextLineBeginsAtOffset,
-            int batchPostingLimit,
-            long batchSizeLimitBytes)
+            long? logEventLimitBytes,
+            int? logEventsInBatchLimit,
+            long? batchSizeLimitBytes)
         {
             using var stream = System.IO.File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            return Read(stream, ref nextLineBeginsAtOffset, batchPostingLimit, batchSizeLimitBytes);
+            return Read(stream, ref nextLineBeginsAtOffset, logEventLimitBytes, logEventsInBatchLimit, batchSizeLimitBytes);
         }
 
         public static Batch Read(
             Stream stream,
             ref long nextLineBeginsAtOffset,
-            int batchPostingLimit,
-            long batchSizeLimitBytes)
+            long? logEventLimitBytes,
+            int? logEventsInBatchLimit,
+            long? batchSizeLimitBytes)
         {
             var batch = new Batch();
             long batchSizeBytes = 0;
@@ -65,8 +67,16 @@ namespace Serilog.Sinks.Http.Private.Durable
                 var lineSizeBytes = ByteSize.From(line.Text);
                 var includeLine = true;
 
-                // Respect batch size limit
-                if (lineSizeBytes > batchSizeLimitBytes)
+                if (lineSizeBytes > logEventLimitBytes) // Respect log event size limit
+                {
+                    includeLine = false;
+
+                    SelfLog.WriteLine(
+                        "Log event exceeds the size limit of {0} bytes set for this sink and will be dropped; data: {1}",
+                        logEventLimitBytes,
+                        line.Text);
+                }
+                else if (lineSizeBytes > batchSizeLimitBytes) // Respect batch size limit
                 {
                     // This single log event exceeds the batch size limit, let's drop it
                     includeLine = false;
@@ -94,7 +104,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 }
 
                 // Respect batch posting limit
-                if (batch.LogEvents.Count == batchPostingLimit)
+                if (batch.LogEvents.Count == logEventsInBatchLimit)
                 {
                     batch.HasReachedLimit = true;
                     break;

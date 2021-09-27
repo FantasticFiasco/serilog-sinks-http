@@ -44,7 +44,7 @@ namespace Serilog.Sinks.Http.BatchFormatters
         public void HandleEmptySequenceOfLogEvents()
         {
             // Arrange
-            var batchFormatter = new ArrayBatchFormatter();
+            var batchFormatter = new DefaultBatchFormatter();
             var emptySequenceOfLogEvents = Enumerable.Empty<string>();
 
             // Act
@@ -53,20 +53,6 @@ namespace Serilog.Sinks.Http.BatchFormatters
             // Assert
             var got = output.ToString();
             got.ShouldBeEmpty();
-        }
-
-        [Fact]
-        public void DropLogEventsGivenSizeExceedsMaximum()
-        {
-            // Arrange
-            var batchFormatter = new DefaultBatchFormatter(1);
-
-            // Act
-            batchFormatter.Format(logEvents, output);
-
-            // Assert
-            var got = JsonConvert.DeserializeObject<DefaultBatch>(output.ToString());
-            got.Events.ShouldBeEmpty();
         }
     }
 }

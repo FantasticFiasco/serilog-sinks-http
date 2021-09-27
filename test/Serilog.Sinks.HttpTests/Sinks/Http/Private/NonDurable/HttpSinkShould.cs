@@ -18,22 +18,50 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             var httpClient = new HttpClientMock();
 
             using (new HttpSink(
-                "https://www.mylogs.com",
-                1,
-                ByteSize.MB,
-                null,
-                TimeSpan.FromMilliseconds(1),         // 1 ms period
-                new NormalTextFormatter(),
-                new ArrayBatchFormatter(),
-                httpClient))
+                requestUri: "https://www.mylogs.com",
+                logEventLimitBytes: null,
+                logEventsInBatchLimit: null,
+                batchSizeLimitBytes: null,
+                queueLimit: null,
+                period: TimeSpan.FromMilliseconds(1), // 1 ms period
+                textFormatter: new NormalTextFormatter(),
+                batchFormatter: new DefaultBatchFormatter(),
+                httpClient: httpClient))
             {
                 // Act
-                await Task.Delay(TimeSpan.FromMilliseconds(10));    // Sleep 10x the period
+                await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 10000x the period
 
                 // Assert
                 httpClient.BatchCount.ShouldBe(0);
                 httpClient.LogEvents.ShouldBeEmpty();
             }
+        }
+
+        [Fact]
+        public async Task RespectLogEventLimitBytes()
+        {
+            // Arrange
+            var httpClient = new HttpClientMock();
+
+            using var sink = new HttpSink(
+                requestUri: "https://www.mylogs.com",
+                logEventLimitBytes: 1, // Is lower than emitted log event
+                logEventsInBatchLimit: null,
+                batchSizeLimitBytes: null,
+                queueLimit: null,
+                period: TimeSpan.FromMilliseconds(1), // 1 ms period
+                textFormatter: new NormalTextFormatter(),
+                batchFormatter: new DefaultBatchFormatter(),
+                httpClient: httpClient);
+
+            // Act
+            sink.Emit(Some.InformationEvent());
+
+            await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 10000x the period
+
+            // Assert
+            httpClient.BatchCount.ShouldBe(0);
+            httpClient.LogEvents.ShouldBeEmpty();
         }
 
         [Fact]
@@ -49,14 +77,15 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 .ToArray();
 
             using var sink = new HttpSink(
-                "https://www.mylogs.com",
-                1,
-                ByteSize.MB,
-                1,                                   // Queue only holds 1 event
-                TimeSpan.FromMilliseconds(1),        // 1 ms period
-                new NormalTextFormatter(),
-                new ArrayBatchFormatter(),
-                httpClient);
+                requestUri: "https://www.mylogs.com",
+                logEventLimitBytes: null,
+                logEventsInBatchLimit: null,
+                batchSizeLimitBytes: null,
+                queueLimit: 1, // Queue only holds 1 event
+                period: TimeSpan.FromMilliseconds(1), // 1 ms period
+                textFormatter: new NormalTextFormatter(),
+                batchFormatter: new DefaultBatchFormatter(),
+                httpClient: httpClient);
 
             // Act
             foreach (var logEvent in logEvents)
@@ -64,10 +93,10 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 sink.Emit(logEvent);
             }
 
-            await Task.Delay(TimeSpan.FromMilliseconds(10));    // Sleep 10x the period
+            await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 10000x the period
 
             // Assert
-            httpClient.LogEvents.Length.ShouldBeLessThan(logEvents.Length);    // Some log events will have been dropped
+            httpClient.LogEvents.Length.ShouldBeLessThan(logEvents.Length); // Some log events will have been dropped
         }
     }
 }

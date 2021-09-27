@@ -30,31 +30,10 @@ namespace Serilog.Sinks.Http.BatchFormatters
     ///   ]
     /// }
     /// </summary>
-    public class DefaultBatchFormatter : BatchFormatter
+    public class DefaultBatchFormatter : IBatchFormatter
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DefaultBatchFormatter"/> class.
-        /// </summary>
-        /// <param name="eventBodyLimitBytes">
-        /// The maximum size, in bytes, that the JSON representation of an event may take before it
-        /// is dropped rather than being sent to the server. Specify null for no limit. Default
-        /// value is 256 KB.
-        /// </param>
-        public DefaultBatchFormatter(long? eventBodyLimitBytes = 256 * ByteSize.KB)
-            : base(eventBodyLimitBytes)
-        {
-        }
-
-        /// <summary>
-        /// Format the log events into a payload.
-        /// </summary>
-        /// <param name="logEvents">
-        /// The events to format.
-        /// </param>
-        /// <param name="output">
-        /// The payload to send over the network.
-        /// </param>
-        public override void Format(IEnumerable<string> logEvents, TextWriter output)
+        /// <inheritdoc />
+        public void Format(IEnumerable<string> logEvents, TextWriter output)
         {
             if (logEvents == null) throw new ArgumentNullException(nameof(logEvents));
             if (output == null) throw new ArgumentNullException(nameof(output));
@@ -76,12 +55,9 @@ namespace Serilog.Sinks.Http.BatchFormatters
                     continue;
                 }
 
-                if (CheckEventBodySize(logEvent))
-                {
-                    output.Write(delimStart);
-                    output.Write(logEvent);
-                    delimStart = ",";
-                }
+                output.Write(delimStart);
+                output.Write(logEvent);
+                delimStart = ",";
             }
 
             output.Write("]}");

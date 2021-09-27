@@ -10,6 +10,11 @@ namespace Serilog.Sinks.Http.Private.Durable
 {
     public class FileSizeRolledDurableHttpSinkShould
     {
+        public FileSizeRolledDurableHttpSinkShould()
+        {
+            BufferFiles.Delete();
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData(1)]
@@ -25,11 +30,12 @@ namespace Serilog.Sinks.Http.Private.Durable
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: false,
                 retainedBufferFileCountLimit: 31,
-                batchPostingLimit: 1000,
-                batchSizeLimitBytes: ByteSize.MB,
+                logEventLimitBytes: null,
+                logEventsInBatchLimit: 1000,
+                batchSizeLimitBytes: null,
                 period: TimeSpan.FromSeconds(2),
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new ArrayBatchFormatter(),
+                batchFormatter: new DefaultBatchFormatter(),
                 httpClient: new HttpClientMock());
 
             // Act & Assert
@@ -51,11 +57,12 @@ namespace Serilog.Sinks.Http.Private.Durable
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: false,
                 retainedBufferFileCountLimit: 31,
-                batchPostingLimit: 1000,
-                batchSizeLimitBytes: ByteSize.MB,
+                logEventLimitBytes: null,
+                logEventsInBatchLimit: 1000,
+                batchSizeLimitBytes: null,
                 period: TimeSpan.FromSeconds(2),
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new ArrayBatchFormatter(),
+                batchFormatter: new DefaultBatchFormatter(),
                 httpClient: new HttpClientMock());
 
             // Act & Assert
@@ -74,20 +81,51 @@ namespace Serilog.Sinks.Http.Private.Durable
                 bufferFileSizeLimitBytes: null,
                 bufferFileShared: false,
                 retainedBufferFileCountLimit: null,
-                batchPostingLimit: 1,
-                batchSizeLimitBytes: ByteSize.MB,
-                period: TimeSpan.FromMilliseconds(1),         // 1 ms period
+                logEventLimitBytes: null,
+                logEventsInBatchLimit: 1000,
+                batchSizeLimitBytes: null,
+                period: TimeSpan.FromMilliseconds(1), // 1 ms period
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new ArrayBatchFormatter(),
+                batchFormatter: new DefaultBatchFormatter(),
                 httpClient: httpClient))
             {
                 // Act
-                await Task.Delay(TimeSpan.FromMilliseconds(10));    // Sleep 10x the period
+                await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 10000x the period
 
                 // Assert
                 httpClient.BatchCount.ShouldBe(0);
                 httpClient.LogEvents.ShouldBeEmpty();
             }
+        }
+
+        [Fact]
+        public async Task RespectLogEventLimitBytes()
+        {
+            // Arrange
+            var httpClient = new HttpClientMock();
+
+            using var sink = new FileSizeRolledDurableHttpSink(
+                requestUri: "https://www.mylogs.com",
+                bufferBaseFileName: "SomeBuffer",
+                bufferFileSizeLimitBytes: null,
+                bufferFileShared: false,
+                retainedBufferFileCountLimit: null,
+                logEventLimitBytes: 1, // Is lower than emitted log event
+                logEventsInBatchLimit: 1000,
+                batchSizeLimitBytes: null,
+                period: TimeSpan.FromMilliseconds(1), // 1 ms period
+                textFormatter: new NormalTextFormatter(),
+                batchFormatter: new DefaultBatchFormatter(),
+                httpClient: httpClient);
+
+            // Act
+            sink.Emit(Some.InformationEvent());
+
+            await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 10000x the period
+
+            // Assert
+            httpClient.BatchCount.ShouldBe(0);
+            httpClient.LogEvents.ShouldBeEmpty();
         }
     }
 }
