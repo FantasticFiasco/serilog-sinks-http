@@ -20,16 +20,16 @@ namespace Serilog.Sinks.Http.Private.NonDurable
     public class LogEventQueue
     {
         private readonly Queue<string> queue;
-        private readonly int? queueLimit;
+        private readonly long? queueLimitBytes;
         private readonly object syncRoot = new();
 
-        public LogEventQueue(int? queueLimit = null)
+        public LogEventQueue(long? queueLimitBytes = null)
         {
-            if (queueLimit < 1)
-                throw new ArgumentException("queueLimit must be either null or greater than 0", nameof(queueLimit));
+            if (queueLimitBytes < 1)
+                throw new ArgumentException("queueLimitBytes must be either null or greater than 0", nameof(queueLimitBytes));
 
             queue = new Queue<string>();
-            this.queueLimit = queueLimit;
+            this.queueLimitBytes = queueLimitBytes;
         }
 
         public void Enqueue(string logEvent)
