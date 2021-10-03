@@ -5,7 +5,7 @@
   <PropertyGroup>
     <AssemblyName>Serilog.Sinks.Http</AssemblyName>
     <Description>A Serilog sink sending log events over HTTP.</Description>
-    <TargetFrameworks>net45;net461;netstandard1.3;netstandard2.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>net45;net461;netstandard2.0;netstandard2.1</TargetFrameworks>
     <RootNamespace>Serilog</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <LangVersion>latest</LangVersion>
@@ -64,7 +64,6 @@
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="1.1.2" Condition="'$(TargetFramework)' == 'net45'" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="2.0.0" Condition="'$(TargetFramework)' == 'net461'" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="1.1.2" Condition="'$(TargetFramework)' == 'netstandard1.3'" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="2.0.0" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="2.0.0" Condition="'$(TargetFramework)' == 'netstandard2.1'" />
   </ItemGroup>
