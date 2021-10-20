@@ -21,7 +21,7 @@ namespace Serilog
                     requestUri: "https://www.mylogs.com",
                     logEventsInBatchLimit: 100,
                     batchSizeLimitBytes: ByteSize.MB,
-                    queueLimit: 10000,
+                    queueLimitBytes: ByteSize.MB,
                     period: TimeSpan.FromMilliseconds(1),
                     textFormatter: new NormalRenderedTextFormatter(),
                     batchFormatter: new DefaultBatchFormatter(),

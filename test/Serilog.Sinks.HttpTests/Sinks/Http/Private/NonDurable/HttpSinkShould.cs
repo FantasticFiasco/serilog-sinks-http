@@ -22,7 +22,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 logEventLimitBytes: null,
                 logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
-                queueLimit: null,
+                queueLimitBytes: null,
                 period: TimeSpan.FromMilliseconds(1), // 1 ms period
                 textFormatter: new NormalTextFormatter(),
                 batchFormatter: new DefaultBatchFormatter(),
@@ -48,7 +48,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 logEventLimitBytes: 1, // Is lower than emitted log event
                 logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
-                queueLimit: null,
+                queueLimitBytes: null,
                 period: TimeSpan.FromMilliseconds(1), // 1 ms period
                 textFormatter: new NormalTextFormatter(),
                 batchFormatter: new DefaultBatchFormatter(),
@@ -65,7 +65,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         }
 
         [Fact]
-        public async Task RespectQueueLimit()
+        public async Task RespectQueueLimitBytes()
         {
             // Arrange
             var httpClient = new HttpClientMock();
@@ -76,12 +76,14 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 .Select(number => Some.LogEvent("Event {number}", number))
                 .ToArray();
 
+            
+            // TODO: Calculate the size of the first log event, and set the value as queueLimitBytes
             using var sink = new HttpSink(
                 requestUri: "https://www.mylogs.com",
                 logEventLimitBytes: null,
                 logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
-                queueLimit: 1, // Queue only holds 1 event
+                queueLimitBytes: 1, // Queue only holds the first event
                 period: TimeSpan.FromMilliseconds(1), // 1 ms period
                 textFormatter: new NormalTextFormatter(),
                 batchFormatter: new DefaultBatchFormatter(),

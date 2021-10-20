@@ -23,6 +23,8 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         private readonly long? queueLimitBytes;
         private readonly object syncRoot = new();
 
+        private long queueBytes;
+
         public LogEventQueue(long? queueLimitBytes = null)
         {
             if (queueLimitBytes < 1)
@@ -30,6 +32,8 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
             queue = new Queue<string>();
             this.queueLimitBytes = queueLimitBytes;
+
+            queueBytes = 0;
         }
 
         public void Enqueue(string logEvent)
@@ -45,11 +49,13 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         {
             lock (syncRoot)
             {
-                if (queue.Count == queueLimit)
+                var logEventByteSize = ByteSize.From(logEvent);
+                if (queueBytes + logEventByteSize > queueLimitBytes)
                 {
                     return EnqueueResult.QueueFull;
                 }
 
+                queueBytes += logEventByteSize;
                 queue.Enqueue(logEvent);
                 return EnqueueResult.Ok;
             }
@@ -66,13 +72,15 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 }
 
                 logEvent = queue.Peek();
+                var logEventByteSize = ByteSize.From(logEvent);
 
-                if (ByteSize.From(logEvent) > logEventMaxSize)
+                if (logEventByteSize > logEventMaxSize)
                 {
                     logEvent = string.Empty;
                     return DequeueResult.MaxSizeViolation;
                 }
 
+                queueBytes -= logEventByteSize;
                 queue.Dequeue();
                 return DequeueResult.Ok;
             }
