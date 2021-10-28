@@ -123,8 +123,8 @@ The following sample applications demonstrate the usage of this sink in various 
 
 - [Serilog and the Elastic Stack](https://github.com/FantasticFiasco/serilog-sinks-http-sample-elastic-stack) - Sample application sending log events to Elastic Stack
 - [Serilog and Fluentd](https://github.com/FantasticFiasco/serilog-sinks-http-sample-fluentd) - Sample application sending log events to Fluentd
-- [Serilog.Sinks.Http - Sample in .NET Core](https://github.com/FantasticFiasco/serilog-sinks-http-sample-dotnet-core) - Sample application producing log events in .NET Core
-- [Serilog.Sinks.Http - Sample in .NET Framework](https://github.com/FantasticFiasco/serilog-sinks-http-sample-dotnet-framework) - Sample application producing log events in .NET Framework
+- [Serilog.Sinks.Http - Sample in .NET Core](https://github.com/FantasticFiasco/serilog-sinks-http-sample-dotnet-core) - Sample application producing log events in .NET Core. This project also includes a sample log server and controller in .NET Core.
+- [Serilog.Sinks.Http - Sample in .NET Framework](https://github.com/FantasticFiasco/serilog-sinks-http-sample-dotnet-framework) - Sample application producing log events in .NET Framework. This project also includes a sample log server and controller in .NET Framework.
 
 The following sample application demonstrate how Serilog events from a Docker container end up in the Elastic Stack using [Logspout](https://github.com/gliderlabs/logspout), without using `Serilog.Sinks.Http`.
 
