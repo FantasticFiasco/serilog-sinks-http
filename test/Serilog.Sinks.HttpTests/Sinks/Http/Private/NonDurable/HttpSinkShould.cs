@@ -76,15 +76,13 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 .Select(number => Some.LogEvent("Event {number}", number))
                 .ToArray();
 
-            
-            // TODO: Calculate the size of the first log event, and set the value as queueLimitBytes
             using var sink = new HttpSink(
                 requestUri: "https://www.mylogs.com",
                 logEventLimitBytes: null,
                 logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
-                queueLimitBytes: 1, // Queue only holds the first event
-                period: TimeSpan.FromMilliseconds(1), // 1 ms period
+                queueLimitBytes: 134, // Queue only holds the first event, which allocates 134 bytes
+                period: TimeSpan.FromMilliseconds(10), // 10 ms period
                 textFormatter: new NormalTextFormatter(),
                 batchFormatter: new DefaultBatchFormatter(),
                 httpClient: httpClient);
@@ -95,9 +93,10 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 sink.Emit(logEvent);
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 10000x the period
+            await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 1000x the period
 
             // Assert
+            httpClient.LogEvents.Length.ShouldBeGreaterThan(0);
             httpClient.LogEvents.Length.ShouldBeLessThan(logEvents.Length); // Some log events will have been dropped
         }
     }
