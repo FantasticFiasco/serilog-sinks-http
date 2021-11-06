@@ -46,7 +46,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             long? logEventLimitBytes,
             int? logEventsInBatchLimit,
             long? batchSizeLimitBytes,
-            int? queueLimit,
+            long? queueLimitBytes,
             TimeSpan period,
             ITextFormatter textFormatter,
             IBatchFormatter batchFormatter,
@@ -62,7 +62,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
             connectionSchedule = new ExponentialBackoffConnectionSchedule(period);
             timer = new PortableTimer(OnTick);
-            queue = new LogEventQueue(queueLimit);
+            queue = new LogEventQueue(queueLimitBytes);
 
             SetTimer();
         }

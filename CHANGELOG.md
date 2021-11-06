@@ -194,6 +194,59 @@ Given you are configuring the sink in application configuration you should do th
 ```
 
 - [#206](https://github.com/FantasticFiasco/serilog-sinks-http/issues/206) [BREAKING CHANGE] Argument `bufferFileSizeLimitBytes` to extension methods `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers` no longer accepts `0` as value
+- [#203](https://github.com/FantasticFiasco/serilog-sinks-http/issues/203) [BREAKING CHANGE] Non-durable sink has changed from having its maximum queue size defined as number of events into number of bytes, making it far easier to reason about memory consumption.
+
+Given you are configuring the sink in code you should do the following changes.
+
+```csharp
+// Before migration
+log = new LoggerConfiguration()
+  .WriteTo.Http(
+    requestUri: "https://www.mylogs.com",
+    queueLimit: 1000)
+  .CreateLogger();
+
+// After migration
+log = new LoggerConfiguration()
+  .WriteTo.Http(
+    requestUri: "https://www.mylogs.com",
+    queueLimitBytes: 50 * ByteSize.MB)
+  .CreateLogger();
+```
+
+Given you are configuring the sink in application configuration you should do the following changes.
+
+```json
+// Before migration
+{
+  "Serilog": {
+    "WriteTo": [
+      {
+        "Name": "Http",
+        "Args": {
+          "requestUri": "https://www.mylogs.com",
+          "queueLimit": 1000
+        }
+      }
+    ]
+  }
+}
+
+// After migration
+{
+  "Serilog": {
+    "WriteTo": [
+      {
+        "Name": "Http",
+        "Args": {
+          "requestUri": "https://www.mylogs.com",
+          "queueLimitBytes": 52428800
+        }
+      }
+    ]
+  }
+}
+```
 
 ### :skull: Removed
 

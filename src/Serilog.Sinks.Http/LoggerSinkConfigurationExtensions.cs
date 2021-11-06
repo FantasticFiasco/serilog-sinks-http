@@ -48,7 +48,7 @@ namespace Serilog
         /// exceeding this size will be dropped. Specify null for no limit. Default value is null.
         /// </param>
         /// <param name="logEventsInBatchLimit">
-        /// The maximum number of log events posted as a single batch over the network. Default
+        /// The maximum number of log events sent as a single batch over the network. Default
         /// value is 1000.
         /// </param>
         /// <param name="batchSizeLimitBytes">
@@ -67,9 +67,9 @@ namespace Serilog
         /// <para/>
         /// Default value is null.
         /// </param>
-        /// <param name="queueLimit">
-        /// The maximum number of events stored in the queue in memory, waiting to be posted over
-        /// the network. Default value is infinitely.
+        /// <param name="queueLimitBytes">
+        /// The maximum size, in bytes, of events stored in memory, waiting to be sent over the
+        /// network. Specify null for no limit. Default value is null.
         /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
@@ -103,7 +103,7 @@ namespace Serilog
             long? logEventLimitBytes = null,
             int? logEventsInBatchLimit = 1000,
             long? batchSizeLimitBytes = null,
-            int? queueLimit = null,
+            long? queueLimitBytes = null,
             TimeSpan? period = null,
             ITextFormatter? textFormatter = null,
             IBatchFormatter? batchFormatter = null,
@@ -130,7 +130,7 @@ namespace Serilog
                 logEventLimitBytes: logEventLimitBytes,
                 logEventsInBatchLimit: logEventsInBatchLimit,
                 batchSizeLimitBytes: batchSizeLimitBytes,
-                queueLimit: queueLimit,
+                queueLimitBytes: queueLimitBytes,
                 period: period.Value,
                 textFormatter: textFormatter,
                 batchFormatter: batchFormatter,
@@ -180,7 +180,7 @@ namespace Serilog
         /// exceeding this size will be dropped. Specify null for no limit. Default value is null.
         /// </param>
         /// <param name="logEventsInBatchLimit">
-        /// The maximum number of log events posted as a single batch over the network. Default
+        /// The maximum number of log events sent as a single batch over the network. Default
         /// value is 1000.
         /// </param>
         /// <param name="batchSizeLimitBytes">
@@ -314,7 +314,7 @@ namespace Serilog
         /// exceeding this size will be dropped. Specify null for no limit. Default value is null.
         /// </param>
         /// <param name="logEventsInBatchLimit">
-        /// The maximum number of log events posted as a single batch over the network. Default
+        /// The maximum number of log events sent as a single batch over the network. Default
         /// value is 1000.
         /// </param>
         /// <param name="batchSizeLimitBytes">
