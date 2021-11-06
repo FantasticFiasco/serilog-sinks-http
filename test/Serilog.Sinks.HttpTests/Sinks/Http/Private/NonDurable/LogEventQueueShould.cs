@@ -6,6 +6,20 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 {
     public class LogEventQueueShould
     {
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        [InlineData(long.MinValue)]
+        public void ThrowExceptionGivenInvalidQueueLimitBytes(long queueLimitBytes)
+        {
+            // Arrange
+            // ReSharper disable once ObjectCreationAsStatement
+            var got = new Action(() => new LogEventQueue(queueLimitBytes));
+
+            // Assert
+            got.ShouldThrow<ArgumentException>();
+        }
+
         [Fact]
         public void UseFifo()
         {
