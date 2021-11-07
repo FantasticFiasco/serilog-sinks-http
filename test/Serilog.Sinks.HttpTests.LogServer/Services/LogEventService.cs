@@ -1,13 +1,24 @@
-﻿namespace Serilog.Sinks.HttpTests.LogServer.Services
+﻿using System.Collections.Concurrent;
+
+namespace Serilog.Sinks.HttpTests.LogServer.Services
 {
     public class LogEventService
     {
-        public string[] GetLogEvents()
+        private readonly BlockingCollection<string> _logEvents;
+
+        public LogEventService()
         {
-            return new[]
-            {
-                "Log events 1", "Log events 2", "Log events 3", "Log events 4", "Log events 5"
-            };
+            _logEvents = new BlockingCollection<string>();
+        }
+
+        public void Add(string logEvent)
+        {
+            _logEvents.Add(logEvent);
+        }
+
+        public string[] GetAll()
+        {
+            return _logEvents.ToArray();
         }
     }
 }

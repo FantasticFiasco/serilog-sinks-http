@@ -15,10 +15,16 @@ namespace Serilog.Sinks.HttpTests.LogServer.Controllers
             _logEventService = logEventService;
         }
 
+        [HttpPost]
+        public void Post(string logEvent)
+        {
+            _logEventService.Add(logEvent);
+        }
+
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            return _logEventService.GetLogEvents();
+            return _logEventService.GetAll();
         }
     }
 }
