@@ -337,6 +337,7 @@ public class MyBatchFormatter : IBatchFormatter
 - Durable buffer files are no longer created with an initial [BOM](https://en.wikipedia.org/wiki/Byte_order_mark)
 - [#169](https://github.com/FantasticFiasco/serilog-sinks-http/issues/169) Rename buffer files to use the file extension `.txt` instead of `.json`
 - [#208](https://github.com/FantasticFiasco/serilog-sinks-http/issues/208) Transient dependency conflict for package [Microsoft.Extensions.Configuration](https://www.nuget.org/packages/Microsoft.Extensions.Configuration) on ASP.NET Core 2.x (contribution by [@AntonSmolkov](https://github.com/AntonSmolkov))
+- [#220](https://github.com/FantasticFiasco/serilog-sinks-http/issues/220) - Text formatters `NamespacedTextFormatter`, `NormalRenderedTextFormatter` and `NormalTextFormatter` should write the timestamp in UTC
 
 ## [7.2.0] - 2020-10-19
 
