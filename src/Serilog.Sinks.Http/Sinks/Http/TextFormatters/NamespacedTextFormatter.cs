@@ -92,7 +92,7 @@ namespace Serilog.Sinks.Http.TextFormatters
             if (output == null) throw new ArgumentNullException(nameof(output));
 
             output.Write("{\"Timestamp\":\"");
-            output.Write(logEvent.Timestamp.ToString("o"));
+            output.Write(logEvent.Timestamp.UtcDateTime.ToString("o"));
 
             output.Write("\",\"Level\":\"");
             output.Write(logEvent.Level);
