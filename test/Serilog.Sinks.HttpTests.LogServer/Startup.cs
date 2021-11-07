@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog.Sinks.HttpTests.LogServer.Services;
 
 namespace Serilog.Sinks.HttpTests.LogServer
 {
@@ -17,6 +18,7 @@ namespace Serilog.Sinks.HttpTests.LogServer
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<LogEventService>();
             services.AddControllers();
         }
 
