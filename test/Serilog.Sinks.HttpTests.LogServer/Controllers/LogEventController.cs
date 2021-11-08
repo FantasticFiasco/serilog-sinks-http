@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+using System.Linq;
 using Serilog.Sinks.HttpTests.LogServer.Services;
 
 namespace Serilog.Sinks.HttpTests.LogServer.Controllers
@@ -8,23 +8,26 @@ namespace Serilog.Sinks.HttpTests.LogServer.Controllers
     [Route("logs")]
     public class LogEventController : ControllerBase
     {
-        private readonly LogEventService _logEventService;
+        private readonly LogEventService logEventService;
 
         public LogEventController(LogEventService logEventService)
         {
-            _logEventService = logEventService;
+            this.logEventService = logEventService;
         }
 
         [HttpPost]
-        public void Post(string logEvent)
+        public void Post(LogEventDto logEvent)
         {
-            _logEventService.Add(logEvent);
+            logEventService.Add(logEvent.ToLogEvent());
         }
 
         [HttpGet]
-        public IEnumerable<string> Get()
+        public LogEventDto[] Get()
         {
-            return _logEventService.GetAll();
+            return logEventService
+                .GetAll()
+                .Select(LogEventDto.From)
+                .ToArray();
         }
     }
 }

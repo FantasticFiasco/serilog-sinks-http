@@ -4,21 +4,21 @@ namespace Serilog.Sinks.HttpTests.LogServer.Services
 {
     public class LogEventService
     {
-        private readonly BlockingCollection<string> _logEvents;
+        private readonly BlockingCollection<LogEvent> logEvents;
 
         public LogEventService()
         {
-            _logEvents = new BlockingCollection<string>();
+            logEvents = new BlockingCollection<LogEvent>();
         }
 
-        public void Add(string logEvent)
+        public void Add(LogEvent logEvent)
         {
-            _logEvents.Add(logEvent);
+            logEvents.Add(logEvent);
         }
 
-        public string[] GetAll()
+        public LogEvent[] GetAll()
         {
-            return _logEvents.ToArray();
+            return logEvents.ToArray();
         }
     }
 }
