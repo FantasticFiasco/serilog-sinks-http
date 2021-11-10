@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28803.202
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{DB19D3CD-BF05-45EA-97D8-FC9F64BF0B7B}"
 EndProject
@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.Http", "src\S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.HttpTests", "test\Serilog.Sinks.HttpTests\Serilog.Sinks.HttpTests.csproj", "{C61C3037-87DB-4756-BAE5-282944FC931C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.HttpTests.LogServer", "test\Serilog.Sinks.HttpTests.LogServer\Serilog.Sinks.HttpTests.LogServer.csproj", "{9E87A1F3-AF01-48B4-B681-301AF002B665}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serilog.Sinks.HttpTests.LogServer", "test\Serilog.Sinks.HttpTests.LogServer\Serilog.Sinks.HttpTests.LogServer.csproj", "{85C26BFC-6563-4330-8B29-CAA5C4EF5393}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,10 +27,10 @@ Global
 		{C61C3037-87DB-4756-BAE5-282944FC931C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C61C3037-87DB-4756-BAE5-282944FC931C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C61C3037-87DB-4756-BAE5-282944FC931C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9E87A1F3-AF01-48B4-B681-301AF002B665}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9E87A1F3-AF01-48B4-B681-301AF002B665}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9E87A1F3-AF01-48B4-B681-301AF002B665}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9E87A1F3-AF01-48B4-B681-301AF002B665}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85C26BFC-6563-4330-8B29-CAA5C4EF5393}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85C26BFC-6563-4330-8B29-CAA5C4EF5393}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85C26BFC-6563-4330-8B29-CAA5C4EF5393}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85C26BFC-6563-4330-8B29-CAA5C4EF5393}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -38,7 +38,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{5E451D5E-FA01-47F0-9D6F-45C8D98D9D19} = {DB19D3CD-BF05-45EA-97D8-FC9F64BF0B7B}
 		{C61C3037-87DB-4756-BAE5-282944FC931C} = {9C45525E-C6CE-43B4-95A6-11198A27F4BE}
-		{9E87A1F3-AF01-48B4-B681-301AF002B665} = {9C45525E-C6CE-43B4-95A6-11198A27F4BE}
+		{85C26BFC-6563-4330-8B29-CAA5C4EF5393} = {9C45525E-C6CE-43B4-95A6-11198A27F4BE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F8A6D01E-9C56-4B8F-93B5-8A1D7F693340}

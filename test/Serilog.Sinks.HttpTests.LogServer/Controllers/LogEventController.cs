@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 using Serilog.Sinks.HttpTests.LogServer.Services;
 
 namespace Serilog.Sinks.HttpTests.LogServer.Controllers
@@ -26,7 +25,12 @@ namespace Serilog.Sinks.HttpTests.LogServer.Controllers
         {
             return logEventService
                 .GetAll()
-                .Select(LogEventDto.From)
+                .Select(logEvent => new LogEventDto(
+                    logEvent.Timestamp,
+                    logEvent.Level,
+                    logEvent.MessageTemplate,
+                    logEvent.RenderedMessage,
+                    logEvent.Properties))
                 .ToArray();
         }
     }

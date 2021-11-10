@@ -1,32 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Serilog.Sinks.HttpTests.LogServer.Services
+﻿namespace Serilog.Sinks.HttpTests.LogServer.Services
 {
-    public class LogEvent
+    public record LogEvent(
+        DateTime Timestamp,
+        string Level,
+        string? MessageTemplate,
+        string? RenderedMessage,
+        Dictionary<string, object>? Properties)
     {
-        public LogEvent(
-            DateTime timestamp,
-            string level,
-            string? messageTemplate,
-            string? renderedMessage,
-            Dictionary<string, object>? properties)
-        {
-            Timestamp = timestamp;
-            Level = level;
-            MessageTemplate = messageTemplate;
-            RenderedMessage = renderedMessage;
-            Properties = properties;
-        }
-
-        public DateTime Timestamp { get; }
-
-        public string Level { get; }
-
-        public string? MessageTemplate { get; }
-
-        public string? RenderedMessage { get; }
-
-        public Dictionary<string, object>? Properties { get; }
     }
 }
