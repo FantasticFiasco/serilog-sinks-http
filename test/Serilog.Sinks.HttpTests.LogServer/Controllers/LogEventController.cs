@@ -25,12 +25,7 @@ public class LogEventController : ControllerBase
     {
         return logEventService
             .GetAll()
-            .Select(logEvent => new LogEventDto(
-                logEvent.Timestamp,
-                logEvent.Level,
-                logEvent.MessageTemplate,
-                logEvent.RenderedMessage,
-                logEvent.Properties))
+            .Select(LogEventDto.From)
             .ToArray();
     }
 }
