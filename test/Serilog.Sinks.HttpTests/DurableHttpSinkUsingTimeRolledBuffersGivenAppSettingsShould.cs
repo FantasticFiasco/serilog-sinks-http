@@ -1,11 +1,15 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Serilog.Core;
+using Serilog.Support.Fixtures;
+using Xunit;
 
 namespace Serilog
 {
-    public class DurableHttpSinkUsingTimeRolledBuffersGivenAppSettingsShould : SinkFixture
+    public class DurableHttpSinkUsingTimeRolledBuffersGivenAppSettingsShould
+        : SinkFixture, IClassFixture<WebServerFixture>
     {
-        public DurableHttpSinkUsingTimeRolledBuffersGivenAppSettingsShould()
+        public DurableHttpSinkUsingTimeRolledBuffersGivenAppSettingsShould(WebServerFixture webServerFixture)
+            : base(webServerFixture)
         {
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings_durable_http_using_time_rolled_buffers.json")
@@ -14,12 +18,8 @@ namespace Serilog
             Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
                 .CreateLogger();
-
-            Configuration = configuration;
         }
 
         protected override Logger Logger { get; }
-
-        protected override IConfiguration Configuration { get; }
     }
 }

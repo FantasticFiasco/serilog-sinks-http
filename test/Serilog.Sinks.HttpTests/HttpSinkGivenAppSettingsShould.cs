@@ -1,11 +1,14 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Serilog.Core;
+using Serilog.Support.Fixtures;
+using Xunit;
 
 namespace Serilog
 {
-    public class HttpSinkGivenAppSettingsShould : SinkFixture
+    public class HttpSinkGivenAppSettingsShould : SinkFixture, IClassFixture<WebServerFixture>
     {
-        public HttpSinkGivenAppSettingsShould()
+        public HttpSinkGivenAppSettingsShould(WebServerFixture webServerFixture)
+            : base(webServerFixture)
         {
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings_http.json")
@@ -14,12 +17,8 @@ namespace Serilog
             Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
                 .CreateLogger();
-
-            Configuration = configuration;
         }
 
         protected override Logger Logger { get; }
-
-        protected override IConfiguration Configuration { get; }
     }
 }

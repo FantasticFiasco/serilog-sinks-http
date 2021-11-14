@@ -1,39 +1,34 @@
 ﻿using System;
-using Microsoft.Extensions.Configuration;
 using Serilog.Core;
 using Serilog.Sinks.Http;
 using Serilog.Sinks.Http.BatchFormatters;
+using Serilog.Sinks.Http.HttpClients;
 using Serilog.Sinks.Http.TextFormatters;
-using Serilog.Support;
+using Serilog.Support.Fixtures;
+using Xunit;
 
 namespace Serilog
 {
-    public class HttpSinkGivenCodeConfigurationShould : SinkFixture
+    public class HttpSinkGivenCodeConfigurationShould : SinkFixture, IClassFixture<WebServerFixture>
     {
-        public HttpSinkGivenCodeConfigurationShould()
+        public HttpSinkGivenCodeConfigurationShould(WebServerFixture webServerFixture)
+            : base(webServerFixture)
         {
-            var configuration = new ConfigurationBuilder().Build();
-
             Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .WriteTo
                 .Http(
-                    requestUri: "https://www.mylogs.com",
+                    requestUri: WebServerFixture.RequestUri(),
                     logEventsInBatchLimit: 100,
                     batchSizeLimitBytes: ByteSize.MB,
                     queueLimitBytes: ByteSize.MB,
                     period: TimeSpan.FromMilliseconds(1),
                     textFormatter: new NormalRenderedTextFormatter(),
                     batchFormatter: new ArrayBatchFormatter(),
-                    httpClient: new HttpClientMock(),
-                    configuration: configuration)
+                    httpClient: new JsonHttpClient(WebServerFixture.CreateClient()))
                 .CreateLogger();
-
-            Configuration = configuration;
         }
 
         protected override Logger Logger { get; }
-
-        protected override IConfiguration Configuration { get; }
     }
 }

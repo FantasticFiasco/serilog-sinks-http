@@ -1,30 +1,27 @@
 ﻿using System;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Support;
+using Serilog.Support.Fixtures;
 using Shouldly;
 using Xunit;
 
 namespace Serilog
 {
+    // TODO: Add test that congiguration is passed to HTTP client
+
     public abstract class SinkFixture : IDisposable
     {
-        protected SinkFixture()
+        protected SinkFixture(WebServerFixture webServerFixture)
         {
+            WebServerFixture = webServerFixture ?? throw new ArgumentNullException(nameof(webServerFixture));
+
             BufferFiles.Delete();
         }
 
         protected abstract Logger Logger { get; }
-        protected abstract IConfiguration Configuration { get; }
 
-        [Fact]
-        public void ConfigureHttpClient()
-        {
-            // Assert
-            HttpClientMock.Instance.Configuration.ShouldBe(Configuration);
-        }
+        protected WebServerFixture WebServerFixture { get; private set; }
 
         [Theory]
         [InlineData(LogEventLevel.Verbose)]
@@ -33,22 +30,22 @@ namespace Serilog
         [InlineData(LogEventLevel.Warning)]
         [InlineData(LogEventLevel.Error)]
         [InlineData(LogEventLevel.Fatal)]
-        public async Task WriteLogEvent(LogEventLevel level)
+        public void WriteLogEvent(LogEventLevel level)
         {
             // Act
             Logger.Write(level, "Some message");
 
             // Assert
-            await HttpClientMock.Instance.WaitAsync(1);
+            WebServerFixture.GetAllEvents().Length.ShouldBe(1);
         }
 
         [Theory]
         [InlineData(1)]         // 1 batch assuming batch size is 100
         [InlineData(10)]        // 1 batch assuming batch size is 100
         [InlineData(100)]       // ~1 batch assuming batch size is 100
-        [InlineData(1000)]      // ~10 batches assuming batch size is 100
-        [InlineData(10000)]     // ~100 batches assuming batch size is 100
-        public async Task WriteBatches(int numberOfEvents)
+        [InlineData(1_000)]      // ~10 batches assuming batch size is 100
+        [InlineData(10_000)]     // ~100 batches assuming batch size is 100
+        public void WriteBatches(int numberOfEvents)
         {
             // Act
             for (int i = 0; i < numberOfEvents; i++)
@@ -57,29 +54,31 @@ namespace Serilog
             }
 
             // Assert
-            await HttpClientMock.Instance.WaitAsync(numberOfEvents);
+            WebServerFixture.GetAllEvents().Length.ShouldBe(numberOfEvents);
         }
 
         [Fact]
-        public async Task OvercomeNetworkFailure()
+        public void OvercomeNetworkFailure()
         {
-            // Arrange
-            HttpClientMock.Instance.SimulateNetworkFailure();
+            // TODO: Fix text
+            throw new Exception("Fix me!");
 
-            // Act
-            Logger.Write(LogEventLevel.Information, "Some message");
+            //// Arrange
+            //HttpClientMock.Instance.SimulateNetworkFailure();
 
-            // Assert
-            await HttpClientMock.Instance.WaitAsync(1);
+            //// Act
+            //Logger.Write(LogEventLevel.Information, "Some message");
 
-            HttpClientMock.Instance.BatchCount.ShouldBe(1);
-            HttpClientMock.Instance.LogEvents.Length.ShouldBe(1);
+            //// Assert
+            //await HttpClientMock.Instance.WaitAsync(1);
+
+            //HttpClientMock.Instance.BatchCount.ShouldBe(1);
+            //HttpClientMock.Instance.LogEvents.Length.ShouldBe(1);
         }
 
         public void Dispose()
         {
             Logger.Dispose();
-            HttpClientMock.Instance.Dispose();
         }
     }
 }
