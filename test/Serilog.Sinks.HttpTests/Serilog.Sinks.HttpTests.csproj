@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Serilog.Sinks.Http\Serilog.Sinks.Http.csproj" />
+    <ProjectReference Include="..\Serilog.Sinks.HttpTests.LogServer\Serilog.Sinks.HttpTests.LogServer.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,26 +4,25 @@ namespace Serilog.Sinks.HttpTests.LogServer.Services;
 
 public class LogEventService
 {
-    private readonly BlockingCollection<LogEvent> logEvents;
-    private int numberOfBatches;
+    private readonly BlockingCollection<LogEvent[]> logEventBatches;
 
     public LogEventService()
     {
-        logEvents = new BlockingCollection<LogEvent>();
+        logEventBatches = new BlockingCollection<LogEvent[]>();
     }
 
     public void AddBatch(IEnumerable<LogEvent> logEvents)
     {
-        Interlocked.Increment(ref numberOfBatches);
-
-        foreach (var logEvent in logEvents)
-        {
-            this.logEvents.Add(logEvent);
-        }
+        logEventBatches.Add(logEvents.ToArray());
     }
 
-    public LogEvent[] GetAll()
+    public LogEvent[][] GetAllBatches()
     {
-        return logEvents.ToArray();
+        return logEventBatches.ToArray();
+    }
+
+    public LogEvent[] GetAllEvents()
+    {
+        return GetAllBatches().SelectMany(batch => batch).ToArray();
     }
 }
