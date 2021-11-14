@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
+﻿using System.Net;
+using System.Runtime.CompilerServices;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Serilog.Sinks.HttpTests.LogServer;
 using Serilog.Sinks.HttpTests.LogServer.Services;
 
@@ -6,19 +8,19 @@ namespace Serilog.Support.Fixtures
 {
     public class WebServerFixture : WebApplicationFactory<Startup>
     {
-        public string Route(string path)
+        public string RequestUri([CallerMemberName] string testName = "")
         {
-            return Server.BaseAddress + path;
+            return Server.BaseAddress + "logs/" + WebUtility.UrlEncode(testName);
         }
 
-        public LogEvent[][] GetAllBatches()
+        public LogEvent[][] GetAllBatches([CallerMemberName] string testName = "")
         {
-            return GetLogEventService().GetAllBatches();
+            return GetLogEventService().GetAllBatches(testName);
         }
 
-        public LogEvent[] GetAllEvents()
+        public LogEvent[] GetAllEvents([CallerMemberName] string testName = "")
         {
-            return GetLogEventService().GetAllEvents();
+            return GetLogEventService().GetAllEvents(testName);
         }
 
         private LogEventService GetLogEventService()

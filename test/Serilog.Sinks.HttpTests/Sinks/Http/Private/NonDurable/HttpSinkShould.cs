@@ -27,7 +27,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             var period = TimeSpan.FromMilliseconds(1);
 
             using (new HttpSink(
-                requestUri: webServerFixture.Route("batches"),
+                requestUri: webServerFixture.RequestUri(),
                 logEventLimitBytes: null,
                 logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
@@ -53,7 +53,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             var period = TimeSpan.FromMilliseconds(1);
 
             using var sink = new HttpSink(
-                requestUri: webServerFixture.Route("batches"),
+                requestUri: webServerFixture.RequestUri(),
                 logEventLimitBytes: 1, // Is lower than emitted log event
                 logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
@@ -86,7 +86,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             var period = TimeSpan.FromMilliseconds(10);
 
             using var sink = new HttpSink(
-                requestUri: webServerFixture.Route("batches"),
+                requestUri: webServerFixture.RequestUri(),
                 logEventLimitBytes: null,
                 logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
