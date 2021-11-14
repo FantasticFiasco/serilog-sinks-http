@@ -1,15 +1,11 @@
-using Serilog.Sinks.HttpTests.LogServer.Services;
+using Serilog.Sinks.HttpTests.LogServer;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = Host
+    .CreateDefaultBuilder(args)
+    .ConfigureWebHostDefaults(webBuilder =>
+    {
+        webBuilder.UseStartup<Startup>();
+    });
 
-// Add services to the container.
-builder.Services.AddControllers();
-builder.Services.AddSingleton<LogEventService>();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-app.UseAuthorization();
-app.MapControllers();
-
+using var app = builder.Build();
 app.Run();
