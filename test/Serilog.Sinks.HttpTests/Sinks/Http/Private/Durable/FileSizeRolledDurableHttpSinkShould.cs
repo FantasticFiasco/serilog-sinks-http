@@ -34,7 +34,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 logEventsInBatchLimit: 1000,
                 batchSizeLimitBytes: null,
                 period: TimeSpan.FromSeconds(2),
-                textFormatter: new NormalTextFormatter(),
+                textFormatter: new ArrayBatchFormatter(),
                 batchFormatter: new DefaultBatchFormatter(),
                 httpClient: new HttpClientMock());
 
@@ -62,7 +62,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 batchSizeLimitBytes: null,
                 period: TimeSpan.FromSeconds(2),
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new DefaultBatchFormatter(),
+                batchFormatter: new ArrayBatchFormatter(),
                 httpClient: new HttpClientMock());
 
             // Act & Assert
@@ -73,7 +73,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         public async Task StayIdleGivenNoLogEvents()
         {
             // Arrange
-            var httpClient = new HttpClientMock();
+            var period = TimeSpan.FromMilliseconds(1);
 
             using (new FileSizeRolledDurableHttpSink(
                 requestUri: "https://www.mylogs.com",
@@ -84,13 +84,13 @@ namespace Serilog.Sinks.Http.Private.Durable
                 logEventLimitBytes: null,
                 logEventsInBatchLimit: 1000,
                 batchSizeLimitBytes: null,
-                period: TimeSpan.FromMilliseconds(1), // 1 ms period
+                period: period,
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new DefaultBatchFormatter(),
+                batchFormatter: new ArrayBatchFormatter(),
                 httpClient: httpClient))
             {
                 // Act
-                await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 10000x the period
+                await Task.Delay(10_000 * period);
 
                 // Assert
                 httpClient.BatchCount.ShouldBe(0);
@@ -102,7 +102,7 @@ namespace Serilog.Sinks.Http.Private.Durable
         public async Task RespectLogEventLimitBytes()
         {
             // Arrange
-            var httpClient = new HttpClientMock();
+            var period = TimeSpan.FromMilliseconds(1);
 
             using var sink = new FileSizeRolledDurableHttpSink(
                 requestUri: "https://www.mylogs.com",
@@ -113,15 +113,15 @@ namespace Serilog.Sinks.Http.Private.Durable
                 logEventLimitBytes: 1, // Is lower than emitted log event
                 logEventsInBatchLimit: 1000,
                 batchSizeLimitBytes: null,
-                period: TimeSpan.FromMilliseconds(1), // 1 ms period
+                period: period,
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new DefaultBatchFormatter(),
+                batchFormatter: new ArrayBatchFormatter(),
                 httpClient: httpClient);
 
             // Act
             sink.Emit(Some.InformationEvent());
 
-            await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 10000x the period
+            await Task.Delay(10_000 * period);
 
             // Assert
             httpClient.BatchCount.ShouldBe(0);

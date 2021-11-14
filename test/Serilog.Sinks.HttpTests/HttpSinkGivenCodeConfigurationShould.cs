@@ -24,7 +24,7 @@ namespace Serilog
                     queueLimitBytes: ByteSize.MB,
                     period: TimeSpan.FromMilliseconds(1),
                     textFormatter: new NormalRenderedTextFormatter(),
-                    batchFormatter: new DefaultBatchFormatter(),
+                    batchFormatter: new ArrayBatchFormatter(),
                     httpClient: new HttpClientMock(),
                     configuration: configuration)
                 .CreateLogger();

@@ -3,29 +3,35 @@ using Microsoft.Extensions.Configuration;
 using Serilog.Core;
 using Serilog.Sinks.Http;
 using Serilog.Sinks.Http.BatchFormatters;
+using Serilog.Sinks.Http.HttpClients;
 using Serilog.Sinks.Http.TextFormatters;
-using Serilog.Support;
+using Serilog.Support.Fixtures;
+using Xunit;
 
 namespace Serilog
 {
-    public class DurableHttpSinkUsingFileSizeRolledBuffersGivenCodeConfigurationShould : SinkFixture
+    public class DurableHttpSinkUsingFileSizeRolledBuffersGivenCodeConfigurationShould : SinkFixture, IClassFixture<WebServerFixture>
     {
-        public DurableHttpSinkUsingFileSizeRolledBuffersGivenCodeConfigurationShould()
+        private readonly WebServerFixture webServerFixture;
+
+        public DurableHttpSinkUsingFileSizeRolledBuffersGivenCodeConfigurationShould(WebServerFixture webServerFixture)
         {
+            this.webServerFixture = webServerFixture;
+
             var configuration = new ConfigurationBuilder().Build();
 
             Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
                 .WriteTo
                 .DurableHttpUsingFileSizeRolledBuffers(
-                    requestUri: "https://www.mylogs.com",
+                    requestUri: webServerFixture.RequestUri(),
                     bufferBaseFileName: "SomeBuffer",
                     logEventsInBatchLimit: 100,
                     batchSizeLimitBytes: ByteSize.MB,
                     period: TimeSpan.FromMilliseconds(1),
                     textFormatter: new NormalRenderedTextFormatter(),
-                    batchFormatter: new DefaultBatchFormatter(),
-                    httpClient: new HttpClientMock(),
+                    batchFormatter: new ArrayBatchFormatter(),
+                    httpClient: new JsonHttpClient(webServerFixture.CreateClient()),
                     configuration: configuration)
                 .CreateLogger();
 
