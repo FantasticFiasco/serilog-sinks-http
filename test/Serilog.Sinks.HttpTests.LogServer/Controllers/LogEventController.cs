@@ -15,9 +15,18 @@ public class LogEventController : ControllerBase
     }
 
     [HttpPost]
-    public void Post(LogEventDto logEvent)
+    [Route("default-batch")]
+    public void Post(DefaultBatchDto batch)
     {
-        logEventService.Add(logEvent.ToLogEvent());
+        Post(batch.Events);
+    }
+
+    [HttpPost]
+    [Route("array-batch")]
+    public void Post(LogEventDto[] batch)
+    {
+        var logEvents = batch.Select(logEvent => logEvent.ToLogEvent());
+        logEventService.AddBatch(logEvents);
     }
 
     [HttpGet]
