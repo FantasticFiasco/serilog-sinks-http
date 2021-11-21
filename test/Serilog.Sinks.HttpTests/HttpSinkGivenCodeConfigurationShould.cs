@@ -72,7 +72,7 @@ namespace Serilog
                     requestUri: webServerFixture.RequestUri(testId),
                     logEventsInBatchLimit: 100,
                     batchSizeLimitBytes: ByteSize.MB,
-                    queueLimitBytes: ByteSize.MB,
+                    queueLimitBytes: null,
                     period: TimeSpan.FromMilliseconds(1),
                     textFormatter: new NormalRenderedTextFormatter(),
                     batchFormatter: new ArrayBatchFormatter(),
@@ -86,7 +86,10 @@ namespace Serilog
             }
 
             // Assert
-            await webServerFixture.ExpectLogEvents(testId, numberOfEvents);
+            await webServerFixture.ExpectLogEvents(
+                testId,
+                numberOfEvents,
+                TimeSpan.FromSeconds(30));
         }
 
         [Fact]

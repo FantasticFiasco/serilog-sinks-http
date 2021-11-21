@@ -88,7 +88,10 @@ namespace Serilog
             }
 
             // Assert
-            await webServerFixture.ExpectLogEvents(testId, numberOfEvents);
+            await webServerFixture.ExpectLogEvents(
+                testId,
+                numberOfEvents,
+                TimeSpan.FromSeconds(30));
         }
 
         [Fact]
