@@ -24,10 +24,11 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         public async Task StayIdleGivenNoLogEvents()
         {
             // Arrange
+            var testId = $"StayIdleGivenNoLogEvents_{Guid.NewGuid()}";
             var period = TimeSpan.FromMilliseconds(1);
 
             using (new HttpSink(
-                requestUri: webServerFixture.RequestUri(),
+                requestUri: webServerFixture.RequestUri(testId),
                 logEventLimitBytes: null,
                 logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
@@ -41,8 +42,8 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 await Task.Delay(10_000 * period);
 
                 // Assert
-                webServerFixture.GetAllBatches().ShouldBeEmpty();
-                webServerFixture.GetAllEvents().ShouldBeEmpty();
+                webServerFixture.GetAllBatches(testId).ShouldBeEmpty();
+                webServerFixture.GetAllEvents(testId).ShouldBeEmpty();
             }
         }
 
@@ -50,10 +51,11 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         public async Task RespectLogEventLimitBytes()
         {
             // Arrange
+            var testId = $"RespectLogEventLimitBytes_{Guid.NewGuid()}";
             var period = TimeSpan.FromMilliseconds(1);
 
             using var sink = new HttpSink(
-                requestUri: webServerFixture.RequestUri(),
+                requestUri: webServerFixture.RequestUri(testId),
                 logEventLimitBytes: 1, // Is lower than emitted log event
                 logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
@@ -69,14 +71,16 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             await Task.Delay(10_000 * period);
 
             // Assert
-            webServerFixture.GetAllBatches().ShouldBeEmpty();
-            webServerFixture.GetAllEvents().ShouldBeEmpty();
+            webServerFixture.GetAllBatches(testId).ShouldBeEmpty();
+            webServerFixture.GetAllEvents(testId).ShouldBeEmpty();
         }
 
         [Fact]
         public async Task RespectQueueLimitBytes()
         {
             // Arrange
+            var testId = $"RespectQueueLimitBytes_{Guid.NewGuid()}";
+
             // Create 10 log events
             var logEvents = Enumerable
                 .Range(1, 10)
@@ -86,12 +90,12 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             var period = TimeSpan.FromMilliseconds(10);
 
             using var sink = new HttpSink(
-                requestUri: webServerFixture.RequestUri(),
+                requestUri: webServerFixture.RequestUri(testId),
                 logEventLimitBytes: null,
                 logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
                 queueLimitBytes: 134, // Queue only holds the first event, which allocates 134 bytes
-                period: period, 
+                period: period,
                 textFormatter: new NormalTextFormatter(),
                 batchFormatter: new ArrayBatchFormatter(),
                 httpClient: new JsonHttpClient(webServerFixture.CreateClient()));
@@ -102,11 +106,14 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 sink.Emit(logEvent);
             }
 
-            await Task.Delay(1_000 * period);
+            await Task.Delay(10_000 * period);
 
             // Assert
-            webServerFixture.GetAllEvents().Length.ShouldBeGreaterThan(0);
-            webServerFixture.GetAllEvents().Length.ShouldBeLessThan(logEvents.Length); // Some log events will have been dropped
+            // At least the first log events should be sent
+            webServerFixture.GetAllEvents(testId).Length.ShouldBeGreaterThan(0);
+
+            // Some log events will have been dropped
+            webServerFixture.GetAllEvents(testId).Length.ShouldBeLessThan(logEvents.Length);
         }
     }
 }
