@@ -10,6 +10,8 @@ using Xunit;
 
 namespace Serilog
 {
+    // TODO: Add test that congiguration is passed to HTTP client
+
     public class HttpSinkGivenCodeConfigurationShould : IClassFixture<WebServerFixture>
     {
         private readonly WebServerFixture webServerFixture;
