@@ -17,8 +17,6 @@ namespace Serilog.Sinks.Http.Private.Durable
         public FileSizeRolledDurableHttpSinkShould(WebServerFixture webServerFixture)
         {
             this.webServerFixture = webServerFixture;
-
-            BufferFiles.Delete();
         }
 
         [Theory]
@@ -30,9 +28,11 @@ namespace Serilog.Sinks.Http.Private.Durable
         public void ReturnSinkGivenValidBufferFileSizeLimitBytes(int? bufferFileSizeLimitBytes)
         {
             // Arrange
+            var testId = $"ReturnSinkGivenValidBufferFileSizeLimitBytes_{Guid.NewGuid()}";
+
             Func<FileSizeRolledDurableHttpSink> got = () => new FileSizeRolledDurableHttpSink(
-                requestUri: webServerFixture.RequestUri(),
-                bufferBaseFileName: "SomeBuffer",
+                requestUri: webServerFixture.RequestUri(testId),
+                bufferBaseFileName: testId,
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: false,
                 retainedBufferFileCountLimit: 31,
@@ -57,9 +57,11 @@ namespace Serilog.Sinks.Http.Private.Durable
         public void ThrowExceptionGivenInvalidBufferFileSizeLimitBytes(int? bufferFileSizeLimitBytes)
         {
             // Arrange
+            var testId = $"ThrowExceptionGivenInvalidBufferFileSizeLimitBytes_{Guid.NewGuid()}";
+
             Func<FileSizeRolledDurableHttpSink> got = () => new FileSizeRolledDurableHttpSink(
-                requestUri: webServerFixture.RequestUri(),
-                bufferBaseFileName: "SomeBuffer",
+                requestUri: webServerFixture.RequestUri(testId),
+                bufferBaseFileName: testId,
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: false,
                 retainedBufferFileCountLimit: 31,
@@ -79,11 +81,12 @@ namespace Serilog.Sinks.Http.Private.Durable
         public async Task StayIdleGivenNoLogEvents()
         {
             // Arrange
+            var testId = $"StayIdleGivenNoLogEvents_{Guid.NewGuid()}";
             var period = TimeSpan.FromMilliseconds(1);
 
             using (new FileSizeRolledDurableHttpSink(
-                requestUri: webServerFixture.RequestUri(),
-                bufferBaseFileName: "SomeBuffer",
+                requestUri: webServerFixture.RequestUri(testId),
+                bufferBaseFileName: testId,
                 bufferFileSizeLimitBytes: null,
                 bufferFileShared: false,
                 retainedBufferFileCountLimit: null,
@@ -99,8 +102,8 @@ namespace Serilog.Sinks.Http.Private.Durable
                 await Task.Delay(10_000 * period);
 
                 // Assert
-                webServerFixture.GetAllBatches().ShouldBeEmpty();
-                webServerFixture.GetAllEvents().ShouldBeEmpty();
+                webServerFixture.GetAllBatches(testId).ShouldBeEmpty();
+                webServerFixture.GetAllEvents(testId).ShouldBeEmpty();
             }
         }
 
@@ -108,11 +111,12 @@ namespace Serilog.Sinks.Http.Private.Durable
         public async Task RespectLogEventLimitBytes()
         {
             // Arrange
+            var testId = $"RespectLogEventLimitBytes_{Guid.NewGuid()}";
             var period = TimeSpan.FromMilliseconds(1);
 
             using var sink = new FileSizeRolledDurableHttpSink(
-                requestUri: webServerFixture.RequestUri(),
-                bufferBaseFileName: "SomeBuffer",
+                requestUri: webServerFixture.RequestUri(testId),
+                bufferBaseFileName: testId,
                 bufferFileSizeLimitBytes: null,
                 bufferFileShared: false,
                 retainedBufferFileCountLimit: null,
@@ -130,8 +134,8 @@ namespace Serilog.Sinks.Http.Private.Durable
             await Task.Delay(10_000 * period);
 
             // Assert
-            webServerFixture.GetAllBatches().ShouldBeEmpty();
-            webServerFixture.GetAllEvents().ShouldBeEmpty();
+            webServerFixture.GetAllBatches(testId).ShouldBeEmpty();
+            webServerFixture.GetAllEvents(testId).ShouldBeEmpty();
         }
     }
 }
