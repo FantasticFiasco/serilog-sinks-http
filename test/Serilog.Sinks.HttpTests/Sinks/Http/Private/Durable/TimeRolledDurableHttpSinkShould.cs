@@ -17,8 +17,6 @@ namespace Serilog.Sinks.Http.Private.Durable
         public TimeRolledDurableHttpSinkShould(WebServerFixture webServerFixture)
         {
             this.webServerFixture = webServerFixture;
-
-            BufferFiles.Delete();
         }
 
         [Theory]
@@ -30,9 +28,11 @@ namespace Serilog.Sinks.Http.Private.Durable
         public void ReturnSinkGivenValidBufferFileSizeLimitBytes(long? bufferFileSizeLimitBytes)
         {
             // Arrange
+            var testId = $"ReturnSinkGivenValidBufferFileSizeLimitBytes_{Guid.NewGuid()}";
+
             Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
-                requestUri: webServerFixture.RequestUri(),
-                bufferBaseFileName: "SomeBuffer",
+                requestUri: webServerFixture.RequestUri(testId),
+                bufferBaseFileName: testId,
                 bufferRollingInterval: BufferRollingInterval.Day,
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: false,
@@ -58,9 +58,11 @@ namespace Serilog.Sinks.Http.Private.Durable
         public void ThrowExceptionGivenInvalidBufferFileSizeLimitBytes(long? bufferFileSizeLimitBytes)
         {
             // Arrange
+            var testId = $"ThrowExceptionGivenInvalidBufferFileSizeLimitBytes_{Guid.NewGuid()}";
+
             Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
-                requestUri: webServerFixture.RequestUri(),
-                bufferBaseFileName: "SomeBuffer",
+                requestUri: webServerFixture.RequestUri(testId),
+                bufferBaseFileName: testId,
                 bufferRollingInterval: BufferRollingInterval.Day,
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: false,
@@ -81,11 +83,12 @@ namespace Serilog.Sinks.Http.Private.Durable
         public async Task StayIdleGivenNoLogEvents()
         {
             // Arrange
+            var testId = $"StayIdleGivenNoLogEvents_{Guid.NewGuid()}";
             var period = TimeSpan.FromMilliseconds(1);
 
             using (new TimeRolledDurableHttpSink(
-                requestUri: webServerFixture.RequestUri(),
-                bufferBaseFileName: "SomeBuffer",
+                requestUri: webServerFixture.RequestUri(testId),
+                bufferBaseFileName: testId,
                 bufferRollingInterval: BufferRollingInterval.Day,
                 bufferFileSizeLimitBytes: null,
                 bufferFileShared: false,
@@ -102,8 +105,8 @@ namespace Serilog.Sinks.Http.Private.Durable
                 await Task.Delay(10_000 * period);
 
                 // Assert
-                webServerFixture.GetAllBatches().ShouldBeEmpty();
-                webServerFixture.GetAllEvents().ShouldBeEmpty();
+                webServerFixture.GetAllBatches(testId).ShouldBeEmpty();
+                webServerFixture.GetAllEvents(testId).ShouldBeEmpty();
             }
         }
 
@@ -111,11 +114,12 @@ namespace Serilog.Sinks.Http.Private.Durable
         public async Task RespectLogEventLimitBytes()
         {
             // Arrange
+            var testId = $"RespectLogEventLimitBytes_{Guid.NewGuid()}";
             var period = TimeSpan.FromMilliseconds(1);
 
             using var sink = new TimeRolledDurableHttpSink(
-                requestUri: webServerFixture.RequestUri(),
-                bufferBaseFileName: "SomeBuffer",
+                requestUri: webServerFixture.RequestUri(testId),
+                bufferBaseFileName: testId,
                 bufferRollingInterval: BufferRollingInterval.Day,
                 bufferFileSizeLimitBytes: null,
                 bufferFileShared: false,
@@ -134,8 +138,8 @@ namespace Serilog.Sinks.Http.Private.Durable
             await Task.Delay(10_000 * period);
 
             // Assert
-            webServerFixture.GetAllBatches().ShouldBeEmpty();
-            webServerFixture.GetAllEvents().ShouldBeEmpty();
+            webServerFixture.GetAllBatches(testId).ShouldBeEmpty();
+            webServerFixture.GetAllEvents(testId).ShouldBeEmpty();
         }
     }
 }
