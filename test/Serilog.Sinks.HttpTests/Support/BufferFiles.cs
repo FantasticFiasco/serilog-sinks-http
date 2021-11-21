@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 namespace Serilog.Support
@@ -6,18 +7,25 @@ namespace Serilog.Support
     {
         public static void Delete()
         {
-            var files = Directory.GetFiles(Directory.GetCurrentDirectory());
+            var filePaths = Directory.GetFiles(Directory.GetCurrentDirectory());
 
-            foreach (var file in files)
+            foreach (var filePath in filePaths)
             {
-                var fileName = Path.GetFileName(file);
+                var fileName = Path.GetFileName(filePath);
 
                 var delete = fileName.EndsWith(".bookmark")
                              || (fileName.Contains("Buffer") && fileName.EndsWith(".txt"));
 
                 if (delete)
                 {
-                    File.Delete(file);
+                    try
+                    {
+                        File.Delete(filePath);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception($"Unable to delete file {fileName}.", e);
+                    }
                 }
             }
         }

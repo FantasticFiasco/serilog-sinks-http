@@ -15,7 +15,7 @@ namespace Serilog.Sinks.HttpTests.LogServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddHealthChecks();
+            services.AddSingleton<HealthService>();
             services.AddSingleton<LogEventService>();
         }
 
@@ -31,7 +31,6 @@ namespace Serilog.Sinks.HttpTests.LogServer
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHealthChecks("/health");
             });
         }
     }

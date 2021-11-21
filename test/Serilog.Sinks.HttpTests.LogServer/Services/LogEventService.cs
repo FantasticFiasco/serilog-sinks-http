@@ -11,25 +11,25 @@ public class LogEventService
         batchesByTest = new BlockingCollection<BatchByTest>();
     }
 
-    public void AddBatch(string testName, IEnumerable<LogEvent> logEvents)
+    public void AddBatch(string testId, IEnumerable<LogEvent> logEvents)
     {
-        batchesByTest.Add(new BatchByTest(testName, logEvents.ToArray()));
+        batchesByTest.Add(new BatchByTest(testId, logEvents.ToArray()));
     }
 
-    public LogEvent[][] GetAllBatches(string testName)
+    public LogEvent[][] GetAllBatches(string testId)
     {
         return batchesByTest
-            .Where(batchByTest => batchByTest.testName == testName)
-            .Select(batchByTest => batchByTest.logEvents)
+            .Where(batchByTest => batchByTest.TestId == testId)
+            .Select(batchByTest => batchByTest.LogEvents)
             .ToArray();
     }
 
-    public LogEvent[] GetAllEvents(string testName)
+    public LogEvent[] GetAllEvents(string testId)
     {
-        return GetAllBatches(testName)
+        return GetAllBatches(testId)
             .SelectMany(logEvents => logEvents)
             .ToArray();
     }
 
-    private record BatchByTest(string testName, LogEvent[] logEvents);
+    private record BatchByTest(string TestId, LogEvent[] LogEvents);
 }
