@@ -3,8 +3,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.Http.HttpClients;
-using Serilog.Support;
+using Serilog.Sinks.Http.Private.Durable;
 using Serilog.Support.Fixtures;
+using Serilog.Support.Reflection;
 using Xunit;
 
 namespace Serilog
@@ -41,8 +42,7 @@ namespace Serilog
 
             var testId = $"WriteLogEvent_{Guid.NewGuid()}";
 
-            SerilogReflection
-                .GetTimeRolledDurableHttpSink(logger)
+            new TimeRolledDurableHttpSinkReflection(logger.GetSink<TimeRolledDurableHttpSink>())
                 .SetRequestUri(webServerFixture.RequestUri(testId))
                 .SetBufferBaseFileName(testId)
                 .SetHttpClient(new JsonHttpClient(webServerFixture.CreateClient()));
@@ -73,8 +73,7 @@ namespace Serilog
 
             var testId = $"WriteBatches_{Guid.NewGuid()}";
 
-            SerilogReflection
-                .GetTimeRolledDurableHttpSink(logger)
+            new TimeRolledDurableHttpSinkReflection(logger.GetSink<TimeRolledDurableHttpSink>())
                 .SetRequestUri(webServerFixture.RequestUri(testId))
                 .SetBufferBaseFileName(testId)
                 .SetHttpClient(new JsonHttpClient(webServerFixture.CreateClient()));
@@ -106,8 +105,7 @@ namespace Serilog
 
             var testId = $"OvercomeNetworkFailure_{Guid.NewGuid()}";
 
-            SerilogReflection
-                .GetTimeRolledDurableHttpSink(logger)
+            new TimeRolledDurableHttpSinkReflection(logger.GetSink<TimeRolledDurableHttpSink>())
                 .SetRequestUri(webServerFixture.RequestUri(testId))
                 .SetBufferBaseFileName(testId)
                 .SetHttpClient(new JsonHttpClient(webServerFixture.CreateClient()));

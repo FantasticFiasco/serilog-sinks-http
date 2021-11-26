@@ -3,8 +3,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.Http.HttpClients;
-using Serilog.Support;
+using Serilog.Sinks.Http.Private.NonDurable;
 using Serilog.Support.Fixtures;
+using Serilog.Support.Reflection;
 using Xunit;
 
 namespace Serilog
@@ -40,8 +41,7 @@ namespace Serilog
 
             var testId = $"WriteLogEvent_{Guid.NewGuid()}";
 
-            SerilogReflection
-                .GetHttpSink(logger)
+            new HttpSinkReflection(logger.GetSink<HttpSink>())
                 .SetRequestUri(webServerFixture.RequestUri(testId))
                 .SetHttpClient(new JsonHttpClient(webServerFixture.CreateClient()));
 
@@ -71,8 +71,7 @@ namespace Serilog
 
             var testId = $"WriteLogEvent_{Guid.NewGuid()}";
 
-            SerilogReflection
-                .GetHttpSink(logger)
+            new HttpSinkReflection(logger.GetSink<HttpSink>())
                 .SetRequestUri(webServerFixture.RequestUri(testId))
                 .SetHttpClient(new JsonHttpClient(webServerFixture.CreateClient()));
 
@@ -103,8 +102,7 @@ namespace Serilog
 
             var testId = $"WriteLogEvent_{Guid.NewGuid()}";
 
-            SerilogReflection
-                .GetHttpSink(logger)
+            new HttpSinkReflection(logger.GetSink<HttpSink>())
                 .SetRequestUri(webServerFixture.RequestUri(testId))
                 .SetHttpClient(new JsonHttpClient(webServerFixture.CreateClient()));
 
