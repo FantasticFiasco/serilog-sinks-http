@@ -1,7 +1,9 @@
 ﻿using System;
-using System.Reflection;
 using Serilog.Core;
+using Serilog.Formatting;
 using Serilog.Sinks.Http;
+using Serilog.Sinks.Http.Private.Durable;
+using Serilog.Sinks.Http.Private.IO;
 using Serilog.Sinks.Http.Private.NonDurable;
 
 namespace Serilog.Support
@@ -10,65 +12,124 @@ namespace Serilog.Support
     {
         public static HttpSinkReflection GetHttpSink(Logger logger)
         {
-            var _sink = logger
-                .GetType()
-                .GetField("_sink", BindingFlags.Instance | BindingFlags.NonPublic)
-                .GetValue(logger);
+            var sink = GetSink<HttpSink>(logger);
+            return new HttpSinkReflection(sink);
+        }
 
-            if (_sink == null)
+        public static TimeRolledDurableHttpSinkReflection GetTimeRolledDurableHttpSink(Logger logger)
+        {
+            var sink = GetSink<TimeRolledDurableHttpSink>(logger);
+            return new TimeRolledDurableHttpSinkReflection(sink);
+        }
+
+        private static T GetSink<T>(Logger logger) where T : ILogEventSink
+        {
+            var sinks = logger
+                .GetNonPublicInstanceField<object>("_sink")
+                .GetNonPublicInstanceField<ILogEventSink[]>("_sinks");
+
+            foreach (var sink in sinks)
             {
-                throw new Exception("Instance of type 'Logger' has no field called '_sink'.");
+                if (sink is T t)
+                {
+                    return t;
+                }
             }
 
-            var _sinks = _sink
-                .GetType()
-                .GetField("_sinks", BindingFlags.Instance | BindingFlags.NonPublic)
-                .GetValue(_sink) as ILogEventSink[];
+            throw new Exception($"Logger does not contain a sink of type {typeof(T)}.");
+        }
 
-            if (_sinks == null)
+        private static object GetSink(Logger logger)
+        {
+            var sinks = logger
+                .GetNonPublicInstanceField<object>("_sink")
+                .GetNonPublicInstanceField<ILogEventSink[]>("_sinks");
+
+            if (sinks.Length != 1)
             {
-                throw new Exception("Instance of type 'SafeAggregateSink' has no field called '_sinks'.");
+                throw new Exception("Logger contains more than one sink.");
             }
 
-            if (_sinks.Length != 1)
-            {
-                throw new Exception("Instance of type 'SafeAggregateSink' contains more than one sink.");
-            }
-
-            var httpSink = _sinks[0] as HttpSink;
-            if (httpSink == null)
-            {
-                throw new Exception("Instance of type 'SafeAggregateSink' does not contain HttpSink.");
-            }
-
-            return new HttpSinkReflection(httpSink);
+            return sinks[0];
         }
 
         public class HttpSinkReflection
         {
-            private readonly HttpSink httpSink;
+            private readonly HttpSink sink;
 
-            public HttpSinkReflection(HttpSink httpSink)
+            public HttpSinkReflection(HttpSink sink)
             {
-                this.httpSink = httpSink ?? throw new ArgumentNullException(nameof(httpSink));
+                this.sink = sink ?? throw new ArgumentNullException(nameof(sink));
             }
 
             public HttpSinkReflection SetRequestUri(string requestUri)
             {
-                httpSink
-                    .GetType()
-                    .GetField("requestUri", BindingFlags.Instance | BindingFlags.NonPublic)
-                    .SetValue(httpSink, requestUri);
-
+                sink.SetNonPublicInstanceField("requestUri", requestUri);
                 return this;
             }
 
             public HttpSinkReflection SetHttpClient(IHttpClient httpClient)
             {
-                httpSink
-                    .GetType()
-                    .GetField("httpClient", BindingFlags.Instance | BindingFlags.NonPublic)
-                    .SetValue(httpSink, httpClient);
+                sink.SetNonPublicInstanceField("httpClient", httpClient);
+                return this;
+            }
+        }
+
+        public class TimeRolledDurableHttpSinkReflection
+        {
+            private readonly TimeRolledDurableHttpSink sink;
+
+            public TimeRolledDurableHttpSinkReflection(TimeRolledDurableHttpSink sink)
+            {
+                this.sink = sink ?? throw new ArgumentNullException(nameof(sink));
+            }
+
+            public TimeRolledDurableHttpSinkReflection SetRequestUri(string requestUri)
+            {
+                sink
+                    .GetNonPublicInstanceField<HttpLogShipper>("shipper")
+                    .SetNonPublicInstanceField("requestUri", requestUri);
+
+                return this;
+            }
+
+            public TimeRolledDurableHttpSinkReflection SetBufferBaseFileName(string bufferBaseFileName)
+            {
+                // Update shipper
+                var shipper = this.sink.GetNonPublicInstanceField<HttpLogShipper>("shipper");
+                var timeRolledBufferFiles = new TimeRolledBufferFiles(new DirectoryService(), bufferBaseFileName);
+                shipper.SetNonPublicInstanceField("bufferFiles", timeRolledBufferFiles);
+
+                // Update file sink
+                var sink = this.sink.GetNonPublicInstanceField<Logger>("sink");
+                var rollingFileSink = GetSink(sink);
+                var roller = rollingFileSink.GetNonPublicInstanceField<object>("_roller");
+
+                var bufferRollingInterval = roller.GetNonPublicInstanceField<RollingInterval>("_interval");
+                var bufferFileSizeLimitBytes = rollingFileSink.GetNonPublicInstanceField<long?>("_fileSizeLimitBytes");
+                var bufferFileShared = rollingFileSink.GetNonPublicInstanceField<bool>("_shared");
+                var retainedBufferFileCountLimit = rollingFileSink.GetNonPublicInstanceField<int?>("_retainedFileCountLimit");
+                var textFormatter = rollingFileSink.GetNonPublicInstanceField<ITextFormatter>("_textFormatter");
+
+                rollingFileSink = this.sink.InvokeNonPublicStaticMethod<ILogEventSink>(
+                    "CreateFileSink",
+                    bufferBaseFileName,
+                    bufferRollingInterval,
+                    bufferFileSizeLimitBytes,
+                    bufferFileShared,
+                    retainedBufferFileCountLimit,
+                    textFormatter);
+
+                this.sink.SetNonPublicInstanceField("sink", rollingFileSink);
+
+                return this;
+            }
+
+            public TimeRolledDurableHttpSinkReflection SetHttpClient(IHttpClient httpClient)
+            {
+                sink
+                    .GetNonPublicInstanceField<HttpLogShipper>("shipper")
+                    .SetNonPublicInstanceField("httpClient", httpClient);
 
                 return this;
             }
