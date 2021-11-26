@@ -1,30 +1,29 @@
-﻿namespace Serilog.Sinks.HttpTests.LogServer.Services
+﻿namespace Serilog.Sinks.HttpTests.LogServer.Services;
+
+public class HealthService
 {
-    public class HealthService
+    private readonly object syncRoot = new();
+
+    private bool isHealthy;
+
+    public HealthService()
     {
-        private readonly object syncRoot = new();
+        isHealthy = true;
+    }
 
-        private bool isHealthy;
-
-        public HealthService()
+    public bool GetIsHealthy()
+    {
+        lock (syncRoot)
         {
-            isHealthy = true;
+            return isHealthy;
         }
+    }
 
-        public bool GetIsHealthy()
+    public void SetIsHealthy(bool isHealthy)
+    {
+        lock (syncRoot)
         {
-            lock (syncRoot)
-            {
-                return isHealthy;
-            }
-        }
-
-        public void SetIsHealthy(bool isHealthy)
-        {
-            lock (syncRoot)
-            {
-                this.isHealthy = isHealthy;
-            }
+            this.isHealthy = isHealthy;
         }
     }
 }

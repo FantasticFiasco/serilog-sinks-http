@@ -1,37 +1,35 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Serilog.Sinks.HttpTests.LogServer.Services;
+﻿using Serilog.Sinks.HttpTests.LogServer.Services;
 
-namespace Serilog.Sinks.HttpTests.LogServer
+namespace Serilog.Sinks.HttpTests.LogServer;
+
+public class Startup
 {
-    public class Startup
+    public Startup(IConfiguration configuration)
     {
-        public Startup(IConfiguration configuration)
+        Configuration = configuration;
+    }
+
+    public IConfiguration Configuration { get; }
+
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddControllers();
+        services.AddSingleton<HealthService>();
+        services.AddSingleton<LogEventService>();
+    }
+
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        if (env.IsDevelopment())
         {
-            Configuration = configuration;
+            app.UseDeveloperExceptionPage();
         }
 
-        public IConfiguration Configuration { get; }
+        app.UseRouting();
 
-        public void ConfigureServices(IServiceCollection services)
+        app.UseEndpoints(endpoints =>
         {
-            services.AddControllers();
-            services.AddSingleton<HealthService>();
-            services.AddSingleton<LogEventService>();
-        }
-
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
-            app.UseRouting();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
-        }
+            endpoints.MapControllers();
+        });
     }
 }
