@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.Http;
 using Serilog.Sinks.Http.BatchFormatters;
 using Serilog.Sinks.Http.HttpClients;
 using Serilog.Sinks.Http.TextFormatters;
+using Serilog.Support;
 using Serilog.Support.Fixtures;
+using Shouldly;
 using Xunit;
 
 namespace Serilog
 {
-    // TODO: Add test that congiguration is passed to HTTP client
-
     public class DurableHttpSinkUsingFileSizeRolledBuffersGivenCodeConfigurationShould
         : IClassFixture<WebServerFixture>
     {
@@ -121,6 +122,27 @@ namespace Serilog
             // Assert
             await webServerFixture.ExpectBatches(testId, 1, TimeSpan.FromSeconds(30));
             await webServerFixture.ExpectLogEvents(testId, 1, TimeSpan.FromSeconds(30));
+        }
+
+        [Fact]
+        public void ConfigureHttpClient()
+        {
+            // Arrange
+            var httpClient = new HttpClientMock();
+            var configuration = new ConfigurationBuilder().Build();
+
+            // Act
+            new LoggerConfiguration()
+                .MinimumLevel.Verbose()
+                .WriteTo
+                .DurableHttpUsingFileSizeRolledBuffers(
+                    requestUri: "https://www.mylogs.com",
+                    httpClient: httpClient,
+                    configuration: configuration)
+                .CreateLogger();
+
+            // Assert
+            httpClient.Configuration.ShouldBe(configuration);
         }
     }
 }

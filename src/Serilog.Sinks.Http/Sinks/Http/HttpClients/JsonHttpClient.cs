@@ -45,7 +45,6 @@ namespace Serilog.Sinks.Http.HttpClients
         /// </summary>
         public JsonHttpClient(HttpClient httpClient)
         {
-            // TODO: Add this new feature to the changelog
             this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 

@@ -61,7 +61,6 @@ namespace Serilog.Sinks.Http.HttpClients
         /// </summary>
         public JsonGzipHttpClient(HttpClient httpClient, CompressionLevel compressionLevel)
         {
-            // TODO: Add this new feature to the changelog
             this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             CompressionLevel = compressionLevel;
         }
