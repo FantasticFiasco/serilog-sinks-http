@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Serilog.Sinks.Http.BatchFormatters;
 using Serilog.Sinks.Http.HttpClients;
@@ -32,7 +33,7 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             Func<FileSizeRolledDurableHttpSink> got = () => new FileSizeRolledDurableHttpSink(
                 requestUri: webServerFixture.RequestUri(testId),
-                bufferBaseFileName: testId,
+                bufferBaseFileName: Path.Combine("logs", testId),
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: false,
                 retainedBufferFileCountLimit: 31,
@@ -61,7 +62,7 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             Func<FileSizeRolledDurableHttpSink> got = () => new FileSizeRolledDurableHttpSink(
                 requestUri: webServerFixture.RequestUri(testId),
-                bufferBaseFileName: testId,
+                bufferBaseFileName: Path.Combine("logs", testId),
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: false,
                 retainedBufferFileCountLimit: 31,
@@ -86,7 +87,7 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             using (new FileSizeRolledDurableHttpSink(
                 requestUri: webServerFixture.RequestUri(testId),
-                bufferBaseFileName: testId,
+                bufferBaseFileName: Path.Combine("logs", testId),
                 bufferFileSizeLimitBytes: null,
                 bufferFileShared: false,
                 retainedBufferFileCountLimit: null,
@@ -116,7 +117,7 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             using var sink = new FileSizeRolledDurableHttpSink(
                 requestUri: webServerFixture.RequestUri(testId),
-                bufferBaseFileName: testId,
+                bufferBaseFileName: Path.Combine("logs", testId),
                 bufferFileSizeLimitBytes: null,
                 bufferFileShared: false,
                 retainedBufferFileCountLimit: null,

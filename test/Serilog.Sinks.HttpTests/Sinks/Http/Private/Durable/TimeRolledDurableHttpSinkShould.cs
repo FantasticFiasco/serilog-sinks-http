@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Serilog.Sinks.Http.BatchFormatters;
 using Serilog.Sinks.Http.HttpClients;
@@ -32,7 +33,7 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
                 requestUri: webServerFixture.RequestUri(testId),
-                bufferBaseFileName: testId,
+                bufferBaseFileName: Path.Combine("logs", testId),
                 bufferRollingInterval: BufferRollingInterval.Day,
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: false,
@@ -62,7 +63,7 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
                 requestUri: webServerFixture.RequestUri(testId),
-                bufferBaseFileName: testId,
+                bufferBaseFileName: Path.Combine("logs", testId),
                 bufferRollingInterval: BufferRollingInterval.Day,
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: false,
@@ -88,7 +89,7 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             using (new TimeRolledDurableHttpSink(
                 requestUri: webServerFixture.RequestUri(testId),
-                bufferBaseFileName: testId,
+                bufferBaseFileName: Path.Combine("logs", testId),
                 bufferRollingInterval: BufferRollingInterval.Day,
                 bufferFileSizeLimitBytes: null,
                 bufferFileShared: false,
@@ -119,7 +120,7 @@ namespace Serilog.Sinks.Http.Private.Durable
 
             using var sink = new TimeRolledDurableHttpSink(
                 requestUri: webServerFixture.RequestUri(testId),
-                bufferBaseFileName: testId,
+                bufferBaseFileName: Path.Combine("logs", testId),
                 bufferRollingInterval: BufferRollingInterval.Day,
                 bufferFileSizeLimitBytes: null,
                 bufferFileShared: false,

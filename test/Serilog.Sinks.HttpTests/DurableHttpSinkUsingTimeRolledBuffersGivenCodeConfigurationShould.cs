@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Serilog.Events;
@@ -40,7 +41,7 @@ namespace Serilog
                 .WriteTo
                 .DurableHttpUsingTimeRolledBuffers(
                     requestUri: webServerFixture.RequestUri(testId),
-                    bufferBaseFileName: testId,
+                    bufferBaseFileName: Path.Combine("logs", testId),
                     bufferRollingInterval: BufferRollingInterval.Hour,
                     logEventsInBatchLimit: 100,
                     batchSizeLimitBytes: ByteSize.MB,
@@ -73,7 +74,7 @@ namespace Serilog
                 .WriteTo
                 .DurableHttpUsingTimeRolledBuffers(
                     requestUri: webServerFixture.RequestUri(testId),
-                    bufferBaseFileName: testId,
+                    bufferBaseFileName: Path.Combine("logs", testId),
                     logEventsInBatchLimit: 100,
                     batchSizeLimitBytes: ByteSize.MB,
                     period: TimeSpan.FromMilliseconds(1),
@@ -106,7 +107,7 @@ namespace Serilog
                 .WriteTo
                 .DurableHttpUsingTimeRolledBuffers(
                     requestUri: webServerFixture.RequestUri(testId),
-                    bufferBaseFileName: testId,
+                    bufferBaseFileName: Path.Combine("logs", testId),
                     logEventsInBatchLimit: 100,
                     batchSizeLimitBytes: ByteSize.MB,
                     period: TimeSpan.FromMilliseconds(1),

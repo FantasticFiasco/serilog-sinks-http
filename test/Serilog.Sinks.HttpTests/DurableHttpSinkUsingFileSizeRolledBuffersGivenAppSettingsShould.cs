@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Serilog.Events;
@@ -42,7 +43,7 @@ namespace Serilog
 
             new FileSizeRolledDurableHttpSinkReflection(logger)
                 .SetRequestUri(webServerFixture.RequestUri(testId))
-                .SetBufferBaseFileName(testId)
+                .SetBufferBaseFileName(Path.Combine("logs", testId))
                 .SetHttpClient(new JsonHttpClient(webServerFixture.CreateClient()));
 
             // Act
@@ -73,7 +74,7 @@ namespace Serilog
 
             new FileSizeRolledDurableHttpSinkReflection(logger)
                 .SetRequestUri(webServerFixture.RequestUri(testId))
-                .SetBufferBaseFileName(testId)
+                .SetBufferBaseFileName(Path.Combine("logs", testId))
                 .SetHttpClient(new JsonHttpClient(webServerFixture.CreateClient()));
 
             // Act
@@ -105,7 +106,7 @@ namespace Serilog
 
             new FileSizeRolledDurableHttpSinkReflection(logger)
                 .SetRequestUri(webServerFixture.RequestUri(testId))
-                .SetBufferBaseFileName(testId)
+                .SetBufferBaseFileName(Path.Combine("logs", testId))
                 .SetHttpClient(new JsonHttpClient(webServerFixture.CreateClient()));
 
             webServerFixture.SimulateNetworkFailure(TimeSpan.FromSeconds(5));
