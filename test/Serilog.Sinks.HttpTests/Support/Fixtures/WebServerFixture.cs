@@ -72,13 +72,11 @@ namespace Serilog.Support.Fixtures
             throw new Exception($"Timed out while expecting {numberOfLogEvents} log event(s)");
         }
 
-        // TODO: I think we should refactor this method to wait until the expected number of batches have arrived
         public LogEvent[][] GetAllBatches(string testId)
         {
             return GetLogEventService().GetAllBatches(testId);
         }
 
-        // TODO: I think we should refactor this method to wait until the expected number of events, or even batches, have arrived
         public LogEvent[] GetAllEvents(string testId)
         {
             return GetLogEventService().GetAllEvents(testId);
