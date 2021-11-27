@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Serilog.Core;
 using Serilog.Sinks.Http;
 using Serilog.Sinks.Http.Private.NonDurable;
 
@@ -8,9 +8,9 @@ namespace Serilog.Support.Reflection
     {
         private readonly HttpSink sink;
 
-        public HttpSinkReflection(HttpSink sink)
+        public HttpSinkReflection(Logger logger)
         {
-            this.sink = sink ?? throw new ArgumentNullException(nameof(sink));
+            sink = logger.GetSink<HttpSink>();
         }
 
         public HttpSinkReflection SetRequestUri(string requestUri)

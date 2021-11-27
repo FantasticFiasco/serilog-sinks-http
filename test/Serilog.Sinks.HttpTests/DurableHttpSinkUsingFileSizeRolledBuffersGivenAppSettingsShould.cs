@@ -40,7 +40,7 @@ namespace Serilog
 
             var testId = $"WriteLogEvent_{Guid.NewGuid()}";
 
-            new FileSizeRolledDurableHttpSinkReflection(logger.GetSink<FileSizeRolledDurableHttpSink>())
+            new FileSizeRolledDurableHttpSinkReflection(logger)
                 .SetRequestUri(webServerFixture.RequestUri(testId))
                 .SetBufferBaseFileName(testId)
                 .SetHttpClient(new JsonHttpClient(webServerFixture.CreateClient()));
@@ -71,7 +71,7 @@ namespace Serilog
 
             var testId = $"WriteBatches_{Guid.NewGuid()}";
 
-            new FileSizeRolledDurableHttpSinkReflection(logger.GetSink<FileSizeRolledDurableHttpSink>())
+            new FileSizeRolledDurableHttpSinkReflection(logger)
                 .SetRequestUri(webServerFixture.RequestUri(testId))
                 .SetBufferBaseFileName(testId)
                 .SetHttpClient(new JsonHttpClient(webServerFixture.CreateClient()));
@@ -103,7 +103,7 @@ namespace Serilog
 
             var testId = $"OvercomeNetworkFailure_{Guid.NewGuid()}";
 
-            new FileSizeRolledDurableHttpSinkReflection(logger.GetSink<FileSizeRolledDurableHttpSink>())
+            new FileSizeRolledDurableHttpSinkReflection(logger)
                 .SetRequestUri(webServerFixture.RequestUri(testId))
                 .SetBufferBaseFileName(testId)
                 .SetHttpClient(new JsonHttpClient(webServerFixture.CreateClient()));

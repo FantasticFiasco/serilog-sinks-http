@@ -1,5 +1,4 @@
-﻿using System;
-using Serilog.Core;
+﻿using Serilog.Core;
 using Serilog.Formatting;
 using Serilog.Sinks.Http;
 using Serilog.Sinks.Http.Private.Durable;
@@ -11,9 +10,9 @@ namespace Serilog.Support.Reflection
     {
         private readonly FileSizeRolledDurableHttpSink sink;
 
-        public FileSizeRolledDurableHttpSinkReflection(FileSizeRolledDurableHttpSink sink)
+        public FileSizeRolledDurableHttpSinkReflection(Logger logger)
         {
-            this.sink = sink ?? throw new ArgumentNullException(nameof(sink));
+            sink = logger.GetSink<FileSizeRolledDurableHttpSink>();
         }
 
         public FileSizeRolledDurableHttpSinkReflection SetRequestUri(string requestUri)
