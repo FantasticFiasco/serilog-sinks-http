@@ -3,8 +3,8 @@ using Shouldly;
 using System.IO;
 using System.Linq;
 using Serilog.Support;
-using Serilog.Support.BatchFormatters;
 using Xunit;
+using Serilog.Support.TextFormatters;
 
 namespace Serilog.Sinks.Http.BatchFormatters
 {
@@ -53,6 +53,12 @@ namespace Serilog.Sinks.Http.BatchFormatters
             // Assert
             var got = output.ToString();
             got.ShouldBeEmpty();
+        }
+
+        public class DefaultBatch
+        {
+            [JsonProperty("events")]
+            public NormalTextLogEvent[] Events { get; set; }
         }
     }
 }
