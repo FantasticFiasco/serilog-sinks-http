@@ -76,7 +76,7 @@ if ($is_tagged_build) {
 # -------------------------------------------------------------------------------------------------
 Print "test" "test started"
 
-dotnet test -c Release --no-build --collect:"XPlat Code Coverage"
+dotnet test -c Release --no-build --collect:"XPlat Code Coverage" --settings coverlet.runsettings
 AssertLastExitCode
 
 If ($is_pull_request -eq $false) {

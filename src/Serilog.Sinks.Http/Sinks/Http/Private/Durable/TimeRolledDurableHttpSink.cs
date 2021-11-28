@@ -50,16 +50,13 @@ namespace Serilog.Sinks.Http.Private.Durable
                 period,
                 batchFormatter);
 
-            sink = new LoggerConfiguration()
-                .WriteTo.File(
-                    formatter: textFormatter,
-                    path: $"{bufferBaseFileName}-.txt",
-                    fileSizeLimitBytes: bufferFileSizeLimitBytes,
-                    shared: bufferFileShared,
-                    rollingInterval: bufferRollingInterval.ToRollingInterval(),
-                    rollOnFileSizeLimit: false,
-                    retainedFileCountLimit: retainedBufferFileCountLimit)
-                .CreateLogger();
+            sink = CreateFileSink(
+                bufferBaseFileName,
+                bufferRollingInterval,
+                bufferFileSizeLimitBytes,
+                bufferFileShared,
+                retainedBufferFileCountLimit,
+                textFormatter);
         }
 
         public void Emit(LogEvent logEvent)
@@ -71,6 +68,26 @@ namespace Serilog.Sinks.Http.Private.Durable
         {
             (sink as IDisposable)?.Dispose();
             shipper.Dispose();
+        }
+
+        private static ILogEventSink CreateFileSink(
+            string bufferBaseFileName,
+            BufferRollingInterval bufferRollingInterval,
+            long? bufferFileSizeLimitBytes,
+            bool bufferFileShared,
+            int? retainedBufferFileCountLimit,
+            ITextFormatter textFormatter)
+        {
+            return new LoggerConfiguration()
+                .WriteTo.File(
+                    path: $"{bufferBaseFileName}-.txt",
+                    rollingInterval: bufferRollingInterval.ToRollingInterval(),
+                    fileSizeLimitBytes: bufferFileSizeLimitBytes,
+                    shared: bufferFileShared,
+                    retainedFileCountLimit: retainedBufferFileCountLimit,
+                    formatter: textFormatter,
+                    rollOnFileSizeLimit: false)
+                .CreateLogger();
         }
     }
 }

@@ -1,18 +1,23 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Serilog.Sinks.Http.BatchFormatters;
+using Serilog.Sinks.Http.HttpClients;
 using Serilog.Sinks.Http.TextFormatters;
 using Serilog.Support;
+using Serilog.Support.Fixtures;
 using Shouldly;
 using Xunit;
 
 namespace Serilog.Sinks.Http.Private.Durable
 {
-    public class TimeRolledDurableHttpSinkShould
+    public class TimeRolledDurableHttpSinkShould : IClassFixture<WebServerFixture>
     {
-        public TimeRolledDurableHttpSinkShould()
+        private readonly WebServerFixture webServerFixture;
+
+        public TimeRolledDurableHttpSinkShould(WebServerFixture webServerFixture)
         {
-            BufferFiles.Delete();
+            this.webServerFixture = webServerFixture;
         }
 
         [Theory]
@@ -24,9 +29,11 @@ namespace Serilog.Sinks.Http.Private.Durable
         public void ReturnSinkGivenValidBufferFileSizeLimitBytes(long? bufferFileSizeLimitBytes)
         {
             // Arrange
+            var testId = $"ReturnSinkGivenValidBufferFileSizeLimitBytes_{Guid.NewGuid()}";
+
             Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
-                requestUri: "https://www.mylogs.com",
-                bufferBaseFileName: "SomeBuffer",
+                requestUri: webServerFixture.RequestUri(testId),
+                bufferBaseFileName: Path.Combine("logs", testId),
                 bufferRollingInterval: BufferRollingInterval.Day,
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: false,
@@ -36,8 +43,8 @@ namespace Serilog.Sinks.Http.Private.Durable
                 batchSizeLimitBytes: null,
                 period: TimeSpan.FromSeconds(2),
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new DefaultBatchFormatter(),
-                httpClient: new HttpClientMock());
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient: new JsonHttpClient(webServerFixture.CreateClient()));
 
             // Act & Assert
             got.ShouldNotThrow();
@@ -52,9 +59,11 @@ namespace Serilog.Sinks.Http.Private.Durable
         public void ThrowExceptionGivenInvalidBufferFileSizeLimitBytes(long? bufferFileSizeLimitBytes)
         {
             // Arrange
+            var testId = $"ThrowExceptionGivenInvalidBufferFileSizeLimitBytes_{Guid.NewGuid()}";
+
             Func<TimeRolledDurableHttpSink> got = () => new TimeRolledDurableHttpSink(
-                requestUri: "https://www.mylogs.com",
-                bufferBaseFileName: "SomeBuffer",
+                requestUri: webServerFixture.RequestUri(testId),
+                bufferBaseFileName: Path.Combine("logs", testId),
                 bufferRollingInterval: BufferRollingInterval.Day,
                 bufferFileSizeLimitBytes: bufferFileSizeLimitBytes,
                 bufferFileShared: false,
@@ -64,8 +73,8 @@ namespace Serilog.Sinks.Http.Private.Durable
                 batchSizeLimitBytes: null,
                 period: TimeSpan.FromSeconds(2),
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new DefaultBatchFormatter(),
-                httpClient: new HttpClientMock());
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient: new JsonHttpClient(webServerFixture.CreateClient()));
 
             // Act & Assert
             got.ShouldThrow<ArgumentException>();
@@ -75,11 +84,12 @@ namespace Serilog.Sinks.Http.Private.Durable
         public async Task StayIdleGivenNoLogEvents()
         {
             // Arrange
-            var httpClient = new HttpClientMock();
+            var testId = $"StayIdleGivenNoLogEvents_{Guid.NewGuid()}";
+            var period = TimeSpan.FromMilliseconds(1);
 
             using (new TimeRolledDurableHttpSink(
-                requestUri: "https://www.mylogs.com",
-                bufferBaseFileName: "SomeBuffer",
+                requestUri: webServerFixture.RequestUri(testId),
+                bufferBaseFileName: Path.Combine("logs", testId),
                 bufferRollingInterval: BufferRollingInterval.Day,
                 bufferFileSizeLimitBytes: null,
                 bufferFileShared: false,
@@ -87,17 +97,17 @@ namespace Serilog.Sinks.Http.Private.Durable
                 logEventLimitBytes: null,
                 logEventsInBatchLimit: 1000,
                 batchSizeLimitBytes: null,
-                period: TimeSpan.FromMilliseconds(1), // 1 ms period
+                period: period,
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new DefaultBatchFormatter(),
-                httpClient: httpClient))
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient: new JsonHttpClient(webServerFixture.CreateClient())))
             {
                 // Act
-                await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 10000x the period
+                await Task.Delay(10_000 * period);
 
                 // Assert
-                httpClient.BatchCount.ShouldBe(0);
-                httpClient.LogEvents.ShouldBeEmpty();
+                webServerFixture.GetAllBatches(testId).ShouldBeEmpty();
+                webServerFixture.GetAllEvents(testId).ShouldBeEmpty();
             }
         }
 
@@ -105,11 +115,12 @@ namespace Serilog.Sinks.Http.Private.Durable
         public async Task RespectLogEventLimitBytes()
         {
             // Arrange
-            var httpClient = new HttpClientMock();
+            var testId = $"RespectLogEventLimitBytes_{Guid.NewGuid()}";
+            var period = TimeSpan.FromMilliseconds(1);
 
             using var sink = new TimeRolledDurableHttpSink(
-                requestUri: "https://www.mylogs.com",
-                bufferBaseFileName: "SomeBuffer",
+                requestUri: webServerFixture.RequestUri(testId),
+                bufferBaseFileName: Path.Combine("logs", testId),
                 bufferRollingInterval: BufferRollingInterval.Day,
                 bufferFileSizeLimitBytes: null,
                 bufferFileShared: false,
@@ -117,19 +128,19 @@ namespace Serilog.Sinks.Http.Private.Durable
                 logEventLimitBytes: 1, // Is lower than emitted log event
                 logEventsInBatchLimit: 1000,
                 batchSizeLimitBytes: null,
-                period: TimeSpan.FromMilliseconds(1), // 1 ms period
+                period: period,
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new DefaultBatchFormatter(),
-                httpClient: httpClient);
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient: new JsonHttpClient(webServerFixture.CreateClient()));
 
             // Act
             sink.Emit(Some.InformationEvent());
 
-            await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 10000x the period
+            await Task.Delay(10_000 * period);
 
             // Assert
-            httpClient.BatchCount.ShouldBe(0);
-            httpClient.LogEvents.ShouldBeEmpty();
+            webServerFixture.GetAllBatches(testId).ShouldBeEmpty();
+            webServerFixture.GetAllEvents(testId).ShouldBeEmpty();
         }
     }
 }

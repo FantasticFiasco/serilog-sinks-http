@@ -2,38 +2,48 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Serilog.Sinks.Http.BatchFormatters;
+using Serilog.Sinks.Http.HttpClients;
 using Serilog.Sinks.Http.TextFormatters;
 using Serilog.Support;
+using Serilog.Support.Fixtures;
 using Shouldly;
 using Xunit;
 
 namespace Serilog.Sinks.Http.Private.NonDurable
 {
-    public class HttpSinkShould
+    public class HttpSinkShould : IClassFixture<WebServerFixture>
     {
+        private readonly WebServerFixture webServerFixture;
+
+        public HttpSinkShould(WebServerFixture webServerFixture)
+        {
+            this.webServerFixture = webServerFixture;
+        }
+
         [Fact]
         public async Task StayIdleGivenNoLogEvents()
         {
             // Arrange
-            var httpClient = new HttpClientMock();
+            var testId = $"StayIdleGivenNoLogEvents_{Guid.NewGuid()}";
+            var period = TimeSpan.FromMilliseconds(1);
 
             using (new HttpSink(
-                requestUri: "https://www.mylogs.com",
+                requestUri: webServerFixture.RequestUri(testId),
                 logEventLimitBytes: null,
                 logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
                 queueLimitBytes: null,
-                period: TimeSpan.FromMilliseconds(1), // 1 ms period
+                period: period,
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new DefaultBatchFormatter(),
-                httpClient: httpClient))
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient: new JsonHttpClient(webServerFixture.CreateClient())))
             {
                 // Act
-                await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 10000x the period
+                await Task.Delay(10_000 * period);
 
                 // Assert
-                httpClient.BatchCount.ShouldBe(0);
-                httpClient.LogEvents.ShouldBeEmpty();
+                webServerFixture.GetAllBatches(testId).ShouldBeEmpty();
+                webServerFixture.GetAllEvents(testId).ShouldBeEmpty();
             }
         }
 
@@ -41,34 +51,35 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         public async Task RespectLogEventLimitBytes()
         {
             // Arrange
-            var httpClient = new HttpClientMock();
+            var testId = $"RespectLogEventLimitBytes_{Guid.NewGuid()}";
+            var period = TimeSpan.FromMilliseconds(1);
 
             using var sink = new HttpSink(
-                requestUri: "https://www.mylogs.com",
+                requestUri: webServerFixture.RequestUri(testId),
                 logEventLimitBytes: 1, // Is lower than emitted log event
                 logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
                 queueLimitBytes: null,
-                period: TimeSpan.FromMilliseconds(1), // 1 ms period
+                period: period,
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new DefaultBatchFormatter(),
-                httpClient: httpClient);
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient: new JsonHttpClient(webServerFixture.CreateClient()));
 
             // Act
             sink.Emit(Some.InformationEvent());
 
-            await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 10000x the period
+            await Task.Delay(10_000 * period);
 
             // Assert
-            httpClient.BatchCount.ShouldBe(0);
-            httpClient.LogEvents.ShouldBeEmpty();
+            webServerFixture.GetAllBatches(testId).ShouldBeEmpty();
+            webServerFixture.GetAllEvents(testId).ShouldBeEmpty();
         }
 
         [Fact]
         public async Task RespectQueueLimitBytes()
         {
             // Arrange
-            var httpClient = new HttpClientMock();
+            var testId = $"RespectQueueLimitBytes_{Guid.NewGuid()}";
 
             // Create 10 log events
             var logEvents = Enumerable
@@ -76,16 +87,18 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 .Select(number => Some.LogEvent("Event {number}", number))
                 .ToArray();
 
+            var period = TimeSpan.FromMilliseconds(10);
+
             using var sink = new HttpSink(
-                requestUri: "https://www.mylogs.com",
+                requestUri: webServerFixture.RequestUri(testId),
                 logEventLimitBytes: null,
                 logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
                 queueLimitBytes: 134, // Queue only holds the first event, which allocates 134 bytes
-                period: TimeSpan.FromMilliseconds(10), // 10 ms period
+                period: period,
                 textFormatter: new NormalTextFormatter(),
-                batchFormatter: new DefaultBatchFormatter(),
-                httpClient: httpClient);
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient: new JsonHttpClient(webServerFixture.CreateClient()));
 
             // Act
             foreach (var logEvent in logEvents)
@@ -93,11 +106,14 @@ namespace Serilog.Sinks.Http.Private.NonDurable
                 sink.Emit(logEvent);
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(10)); // Sleep 1000x the period
+            await Task.Delay(10_000 * period);
 
             // Assert
-            httpClient.LogEvents.Length.ShouldBeGreaterThan(0);
-            httpClient.LogEvents.Length.ShouldBeLessThan(logEvents.Length); // Some log events will have been dropped
+            // At least the first log events should be sent
+            webServerFixture.GetAllEvents(testId).Length.ShouldBeGreaterThan(0);
+
+            // Some log events will have been dropped
+            webServerFixture.GetAllEvents(testId).Length.ShouldBeLessThan(logEvents.Length);
         }
     }
 }

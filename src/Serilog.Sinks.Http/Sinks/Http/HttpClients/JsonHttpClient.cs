@@ -35,8 +35,17 @@ namespace Serilog.Sinks.Http.HttpClients
         /// Initializes a new instance of the <see cref="JsonHttpClient"/> class.
         /// </summary>
         public JsonHttpClient()
+            : this(new HttpClient())
         {
-            httpClient = new HttpClient();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonHttpClient"/> class with
+        /// specified HTTP client.
+        /// </summary>
+        public JsonHttpClient(HttpClient httpClient)
+        {
+            this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
         ~JsonHttpClient()
