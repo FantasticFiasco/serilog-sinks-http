@@ -140,7 +140,7 @@ public class MyHttpClient : IHttpClient
 
 You'll have to migrate your code if you're using `DurableHttpUsingTimeRolledBuffers`, i.e. use the durable HTTP sink with a rolling behavior defined by a time interval. The parameter `bufferPathFormat` has been renamed to `bufferBaseFileName`, and the parameter `bufferRollingInterval` has been added.
 
-Given you are configuring the sink in code you should do the following changes.
+Given you are configuring the sink in code you should apply the following changes.
 
 ```csharp
 // Before migration
@@ -159,7 +159,7 @@ log = new LoggerConfiguration()
   .CreateLogger();
 ```
 
-Given you are configuring the sink in application configuration you should do the following changes.
+Given you are configuring the sink in application configuration you should apply the following changes.
 
 ```json
 // Before migration
@@ -249,6 +249,91 @@ Given you are configuring the sink in application configuration you should do th
 }
 ```
 
+- [#171](https://github.com/FantasticFiasco/serilog-sinks-http/issues/171) [BREAKING CHANGE] Move maximum log event size configuration from batch formatter to sink configuration, and change it's default value from 256 kB to `null`
+
+**Migration guide**
+
+Given that you're depending on the default maximum log event size configuration in `DefaultBatchFormatter` or `ArrayBatchFormatter`, or have defined your own limit when instantiating these classes, you should apply the following changes.
+
+```csharp
+// Before migration
+log = new LoggerConfiguration()
+  // Changes are also applicable to DurableHttpUsingFileSizeRolledBuffers
+  // and DurableHttpUsingTimeRolledBuffers
+  .WriteTo.Http(
+    requestUri: "https://www.mylogs.com",
+    batchFormatter: new ArrayBatchFormatter(ByteSize.MB))
+  .CreateLogger();
+
+// After migration
+log = new LoggerConfiguration()
+  .WriteTo.Http(
+    requestUri: "https://www.mylogs.com",
+    logEventLimitBytes: ByteSize.MB,
+    batchFormatter: new ArrayBatchFormatter())
+  .CreateLogger();
+```
+
+- [#171](https://github.com/FantasticFiasco/serilog-sinks-http/issues/171) [BREAKING CHANGE] Rename sink configuration argument `batchPostingLimit` to `logEventsInBatchLimit`
+
+**Migration guide**
+
+Given tha you're defining the maximum number of log events in a single batch, you should apply the following changes.
+
+```csharp
+// Before migration
+log = new LoggerConfiguration()
+  // Changes are also applicable to DurableHttpUsingFileSizeRolledBuffers
+  // and DurableHttpUsingTimeRolledBuffers
+  .WriteTo.Http(
+    requestUri: "https://www.mylogs.com",
+    batchPostingLimit: 100,
+  .CreateLogger();
+
+// After migration
+log = new LoggerConfiguration()
+  .WriteTo.Http(
+    requestUri: "https://www.mylogs.com",
+    logEventsInBatchLimit: 100,
+  .CreateLogger();
+```
+
+Given you are configuring the sink in application configuration you should apply the following changes.
+
+```json
+// Before migration
+// Changes are also applicable to DurableHttpUsingFileSizeRolledBuffers
+// and DurableHttpUsingTimeRolledBuffers
+{
+  "Serilog": {
+    "WriteTo": [
+      {
+        "Name": "Http",
+        "Args": {
+          "requestUri": "https://www.mylogs.com",
+          "batchPostingLimit": 100
+        }
+      }
+    ]
+  }
+}
+
+// After migration
+{
+  "Serilog": {
+    "WriteTo": [
+      {
+        "Name": "Http",
+        "Args": {
+          "requestUri": "https://www.mylogs.com",
+          "logEventsInBatchLimit": 100
+        }
+      }
+    ]
+  }
+}
+```
+
 ### :skull: Removed
 
 - [#182](https://github.com/FantasticFiasco/serilog-sinks-http/issues/182) [BREAKING CHANGE] Extension method `DurableHttp` which was marked as deprecated in v5.2.0
@@ -256,7 +341,7 @@ Given you are configuring the sink in application configuration you should do th
 
 **Migration guide**
 
-Given you are configuring the sink in code you should do the following changes.
+Given you are configuring the sink in code you should apply the following changes.
 
 ```csharp
 // Before migration
@@ -270,7 +355,7 @@ log = new LoggerConfiguration()
   .CreateLogger();
 ```
 
-Given you are configuring the sink in application configuration you should do the following changes.
+Given you are configuring the sink in application configuration you should apply the following changes.
 
 ```json
 // Before migration
