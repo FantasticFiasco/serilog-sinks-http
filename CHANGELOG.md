@@ -418,6 +418,16 @@ public class MyBatchFormatter : IBatchFormatter
 }
 ```
 
+- [#178](https://github.com/FantasticFiasco/serilog-sinks-http/issues/196) [BREAKING CHANGE] Batch formatter `DefaultBatchFormatter` was removed when `ArrayBatchFormatter` was promoted to default batch formatter.
+
+**Migration guide**
+
+You'll have to migrate your code if you used `DefaultBatchFormatter`, either implicitly by not specifying a batch formatter, or explicitly by specifying `DefaultBatchFormatter` as the batch formatter.
+
+Given that you wish to continue using `DefaultBatchFormatter` as your batch formatter, you should copy its implementation from [the wiki](https://github.com/FantasticFiasco/serilog-sinks-http/wiki/Batch-formatters) into your own codebase.
+
+If you decide to migrate into using `ArrayBatchFormatter` instead, you should verify that your log server is capable of receiving the new JSON payload format.
+
 ### :syringe: Fixed
 
 - Durable buffer files are no longer created with an initial [BOM](https://en.wikipedia.org/wiki/Byte_order_mark)
