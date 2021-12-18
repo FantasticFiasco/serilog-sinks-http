@@ -80,7 +80,7 @@ namespace Serilog
         /// </param>
         /// <param name="batchFormatter">
         /// The formatter batching multiple log events into a payload that can be sent over the
-        /// network. Default value is <see cref="DefaultBatchFormatter"/>.
+        /// network. Default value is <see cref="ArrayBatchFormatter"/>.
         /// </param>
         /// <param name="restrictedToMinimumLevel">
         /// The minimum level for events passed through the sink. Default value is
@@ -117,7 +117,7 @@ namespace Serilog
             // Default values
             period ??= TimeSpan.FromSeconds(2);
             textFormatter ??= new NormalRenderedTextFormatter();
-            batchFormatter ??= new DefaultBatchFormatter();
+            batchFormatter ??= new ArrayBatchFormatter();
             httpClient ??= new JsonHttpClient();
 
             if (configuration != null)
@@ -208,7 +208,7 @@ namespace Serilog
         /// </param>
         /// <param name="batchFormatter">
         /// The formatter batching multiple log events into a payload that can be sent over the
-        /// network. Default value is <see cref="DefaultBatchFormatter"/>.
+        /// network. Default value is <see cref="ArrayBatchFormatter"/>.
         /// </param>
         /// <param name="restrictedToMinimumLevel">
         /// The minimum level for events passed through the sink. Default value is
@@ -247,7 +247,7 @@ namespace Serilog
             // Default values
             period ??= TimeSpan.FromSeconds(2);
             textFormatter ??= new NormalRenderedTextFormatter();
-            batchFormatter ??= new DefaultBatchFormatter();
+            batchFormatter ??= new ArrayBatchFormatter();
             httpClient ??= new JsonHttpClient();
 
             if (configuration != null)
@@ -342,7 +342,7 @@ namespace Serilog
         /// </param>
         /// <param name="batchFormatter">
         /// The formatter batching multiple log events into a payload that can be sent over the
-        /// network. Default value is <see cref="DefaultBatchFormatter"/>.
+        /// network. Default value is <see cref="ArrayBatchFormatter"/>.
         /// </param>
         /// <param name="restrictedToMinimumLevel">
         /// The minimum level for events passed through the sink. Default value is
@@ -382,7 +382,7 @@ namespace Serilog
             // Default values
             period ??= TimeSpan.FromSeconds(2);
             textFormatter ??= new NormalRenderedTextFormatter();
-            batchFormatter ??= new DefaultBatchFormatter();
+            batchFormatter ??= new ArrayBatchFormatter();
             httpClient ??= new JsonHttpClient();
 
             if (configuration != null)
