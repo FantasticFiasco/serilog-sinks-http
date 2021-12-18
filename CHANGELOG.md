@@ -422,11 +422,11 @@ public class MyBatchFormatter : IBatchFormatter
 
 **Migration guide**
 
-You'll have to migrate your code if you used `DefaultBatchFormatter`, either implicitly by not specifying a batch formatter, or explicitly by specifying `DefaultBatchFormatter` as the batch formatter.
+You'll have to migrate your code if you used `DefaultBatchFormatter`, either implicitly by not specifying a batch formatter, or explicitly by specifying `DefaultBatchFormatter` when configuring the sink.
 
-Given that you wish to continue using `DefaultBatchFormatter` as your batch formatter, you should copy its implementation from [the wiki](https://github.com/FantasticFiasco/serilog-sinks-http/wiki/Batch-formatters) into your own codebase.
+Given that you wish to continue using `DefaultBatchFormatter` as your batch formatter you should copy its implementation from [the wiki](https://github.com/FantasticFiasco/serilog-sinks-http/wiki/Batch-formatters) into your own codebase.
 
-If you instead decide to migrate into using `ArrayBatchFormatter`, you should verify that your log server is capable of receiving the new JSON payload format.
+Given that you decide to migrate into using `ArrayBatchFormatter` instead of `DefaultBatchFormatter`, you should verify that your log server is capable of receiving the new JSON payload format.
 
 ### :syringe: Fixed
 
