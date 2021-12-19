@@ -12,10 +12,12 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - uses: FantasticFiasco/action-update-license-year@v2
+      - name: Update license file
+        uses: FantasticFiasco/action-update-license-year@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: FantasticFiasco/action-update-license-year@v2
+      - name: Update source files
+        uses: FantasticFiasco/action-update-license-year@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           path: src/**/*.cs
