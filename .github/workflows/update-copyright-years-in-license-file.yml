@@ -6,18 +6,21 @@ on:
     - cron: "0 3 1 1 *"
 
 jobs:
-  run:
+  license:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Update license file
-        uses: FantasticFiasco/action-update-license-year@v2
+      - uses: FantasticFiasco/action-update-license-year@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Update source files
-        uses: FantasticFiasco/action-update-license-year@v2
+
+  source:
+    needs: license
+    runs-on: ubuntu-latest
+    steps:
+      - uses: FantasticFiasco/action-update-license-year@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           path: src/**/*.cs
