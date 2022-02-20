@@ -14,7 +14,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 The parameter `batchSizeLimitBytes` has been introduced to the methods `Http`, `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers`. Please verify that the arguments pass by you to these methods still align with your intentions.
 
-To automatically mitigate this kind of *new parameter isseu* in the future would be to stop use positional arguments and instead use named arguments.
+To automatically mitigate this kind of *new parameter issue* in the future would be to move from using positional arguments to use named arguments.
 
 - [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) Support for content encoding [Gzip](https://en.wikipedia.org/wiki/Gzip) using HTTP client `JsonGzipHttpClient` (contribution by [@vaibhavepatel](https://github.com/vaibhavepatel), [@KalininAndreyVictorovich](https://github.com/KalininAndreyVictorovich) and [@AntonSmolkov](https://github.com/AntonSmolkov))
 - [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) Support for specifying `HttpClient` when creating `JsonHttpClient` and `JsonGzipHttpClient`
