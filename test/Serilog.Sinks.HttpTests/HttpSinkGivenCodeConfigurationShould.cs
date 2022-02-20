@@ -136,6 +136,7 @@ namespace Serilog
                 .WriteTo
                 .Http(
                     requestUri: "https://www.mylogs.com",
+                    queueLimitBytes: null,
                     httpClient: httpClient,
                     configuration: configuration)
                 .CreateLogger();
