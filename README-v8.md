@@ -43,7 +43,7 @@ In the following example, the sink will POST log events to `http://www.mylogs.co
 ```csharp
 ILogger log = new LoggerConfiguration()
   .MinimumLevel.Verbose()
-  .WriteTo.Http(requestUri: "https://www.mylogs.com")
+  .WriteTo.Http(requestUri: "https://www.mylogs.com", queueLimitBytes: null)
   .CreateLogger();
 
 log.Information("Logging {@Heartbeat} from {Computer}", heartbeat, computer);
@@ -59,7 +59,8 @@ Used in conjunction with [Serilog.Settings.Configuration](https://github.com/ser
       {
         "Name": "Http",
         "Args": {
-          "requestUri": "https://www.mylogs.com"
+          "requestUri": "https://www.mylogs.com",
+          "queueLimitBytes": null
         }
       }
     ]

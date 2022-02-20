@@ -12,83 +12,9 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 **Migration guide**
 
-By far the easiest way to migrate your code is to stop using positional arguments and instead use named arguments.
+The parameter `batchSizeLimitBytes` has been introduced to the methods `Http`, `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers`. Please verify that the arguments pass by you to these methods still align with your intentions.
 
-If you use the non-durable sink please make the following changes to your code.
-
-```csharp
-// Before migration
-log = new LoggerConfiguration()
-  .WriteTo.Http("https://www.mylogs.com", 500, 500)
-  .CreateLogger();
-
-// After migration
-log = new LoggerConfiguration()
-  .WriteTo.Http(
-    requestUri: "https://www.mylogs.com",
-    batchPostingLimit: 500,
-    // the new argument batchSizeLimitBytes is positioned here
-    queueLimit: 500)
-  .CreateLogger();
-```
-
-If you use the durable file size rolled sink please make the following changes to your code.
-
-```csharp
-// Before migration
-log = new LoggerConfiguration()
-  .WriteTo.DurableHttpUsingFileSizeRolledBuffers(
-      "https://www.mylogs.com",
-      "MyBuffer",
-      ByteSize.GB,
-      false,
-      10,
-      500,
-      TimeSpan.FromSeconds(10))
-  .CreateLogger();
-
-// After migration
-log = new LoggerConfiguration()
-  .WriteTo.DurableHttpUsingFileSizeRolledBuffers(
-      requestUri: "https://www.mylogs.com",
-      bufferBaseFileName: "MyBuffer",
-      bufferFileSizeLimitBytes: ByteSize.GB,
-      bufferFileShared: false,
-      retainedBufferFileCountLimit: 10,
-      batchPostingLimit: 500,
-      // the new argument batchSizeLimitBytes is positioned here
-      period: TimeSpan.FromSeconds(10))
-  .CreateLogger();
-```
-
-If you use the durable time rolled sink please make the following changes to your code.
-
-```csharp
-// Before migration
-log = new LoggerConfiguration()
-  .WriteTo.DurableHttpUsingTimeRolledBuffers(
-      "https://www.mylogs.com",
-      "MyBuffer-{Date}.json",
-      ByteSize.GB,
-      false,
-      10,
-      500,
-      TimeSpan.FromSeconds(10))
-  .CreateLogger();
-
-// After migration
-log = new LoggerConfiguration()
-  .WriteTo.DurableHttpUsingTimeRolledBuffers(
-      requestUri: "https://www.mylogs.com",
-      bufferPathFormat: "MyBuffer-{Date}.json",
-      bufferFileSizeLimitBytes: ByteSize.GB,
-      bufferFileShared: false,
-      retainedBufferFileCountLimit: 10,
-      batchPostingLimit: 500,
-      // the new argument batchSizeLimitBytes is positioned here
-      period: TimeSpan.FromSeconds(10))
-  .CreateLogger();
-```
+To automatically mitigate this kind of *new parameter issue* in the future would be to move from using positional arguments to use named arguments.
 
 - [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) Support for content encoding [Gzip](https://en.wikipedia.org/wiki/Gzip) using HTTP client `JsonGzipHttpClient` (contribution by [@vaibhavepatel](https://github.com/vaibhavepatel), [@KalininAndreyVictorovich](https://github.com/KalininAndreyVictorovich) and [@AntonSmolkov](https://github.com/AntonSmolkov))
 - [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) Support for specifying `HttpClient` when creating `JsonHttpClient` and `JsonGzipHttpClient`
@@ -195,7 +121,7 @@ Given you are configuring the sink in application configuration you should apply
 ```
 
 - [#206](https://github.com/FantasticFiasco/serilog-sinks-http/issues/206) [BREAKING CHANGE] Argument `bufferFileSizeLimitBytes` to extension methods `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers` no longer accepts `0` as value
-- [#203](https://github.com/FantasticFiasco/serilog-sinks-http/issues/203) [BREAKING CHANGE] Non-durable sink has changed from having its maximum queue size defined as number of events into number of bytes, making it far easier to reason about memory consumption.
+- [#203](https://github.com/FantasticFiasco/serilog-sinks-http/issues/203), [#245](https://github.com/FantasticFiasco/serilog-sinks-http/issues/245) [BREAKING CHANGE] Non-durable sink has changed from having its maximum queue size defined as number of events into number of bytes, making it far easier to reason about memory consumption. It's importance to the behavior of the sink was also the reasoning for promoting it from being optional to being mandatory. (proposed by [@seruminar](https://github.com/seruminar))
 
 Given you are configuring the sink in code you should do the following changes.
 

@@ -43,10 +43,10 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
         public HttpSink(
             string requestUri,
+            long? queueLimitBytes,
             long? logEventLimitBytes,
             int? logEventsInBatchLimit,
             long? batchSizeLimitBytes,
-            long? queueLimitBytes,
             TimeSpan period,
             ITextFormatter textFormatter,
             IBatchFormatter batchFormatter,

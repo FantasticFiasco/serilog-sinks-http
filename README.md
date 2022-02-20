@@ -166,6 +166,7 @@ The following users have made significant contributions to this project. Thank y
     <td align="center"><a href="https://github.com/tipasergio"><img src="https://avatars.githubusercontent.com/u/6435956?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Sergios</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/issues?q=author%3Atipasergio" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/AntonSmolkov"><img src="https://avatars.githubusercontent.com/u/5318028?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Anton Smolkov</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/commits?author=AntonSmolkov" title="Code">💻</a> <a href="https://github.com/FantasticFiasco/serilog-sinks-http/issues?q=author%3AAntonSmolkov" title="Bug reports">🐛</a></td>
     <td align="center"><a href="https://github.com/Siphonophora"><img src="https://avatars.githubusercontent.com/u/32316111?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Michael J Conrad</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/commits?author=Siphonophora" title="Documentation">📖</a></td>
+    <td align="center"><a href="https://github.com/seruminar"><img src="https://avatars.githubusercontent.com/u/35008875?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Yuriy Sountsov</b></sub></a><br /><a href="#ideas-seruminar" title="Ideas, Planning, & Feedback">🤔</a></td>
   </tr>
 </table>
 

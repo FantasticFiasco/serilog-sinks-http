@@ -43,6 +43,10 @@ namespace Serilog
         /// </summary>
         /// <param name="sinkConfiguration">The logger configuration.</param>
         /// <param name="requestUri">The URI the request is sent to.</param>
+        /// <param name="queueLimitBytes">
+        /// The maximum size, in bytes, of events stored in memory, waiting to be sent over the
+        /// network. Specify null for no limit.
+        /// </param>
         /// <param name="logEventLimitBytes">
         /// The maximum size, in bytes, for a serialized representation of a log event. Log events
         /// exceeding this size will be dropped. Specify null for no limit. Default value is null.
@@ -66,10 +70,6 @@ namespace Serilog
         /// the log events.
         /// <para/>
         /// Default value is null.
-        /// </param>
-        /// <param name="queueLimitBytes">
-        /// The maximum size, in bytes, of events stored in memory, waiting to be sent over the
-        /// network. Specify null for no limit. Default value is null.
         /// </param>
         /// <param name="period">
         /// The time to wait between checking for event batches. Default value is 2 seconds.
@@ -100,10 +100,10 @@ namespace Serilog
         public static LoggerConfiguration Http(
             this LoggerSinkConfiguration sinkConfiguration,
             string requestUri,
+            long? queueLimitBytes,
             long? logEventLimitBytes = null,
             int? logEventsInBatchLimit = 1000,
             long? batchSizeLimitBytes = null,
-            long? queueLimitBytes = null,
             TimeSpan? period = null,
             ITextFormatter? textFormatter = null,
             IBatchFormatter? batchFormatter = null,
@@ -127,10 +127,10 @@ namespace Serilog
 
             var sink = new HttpSink(
                 requestUri: requestUri,
+                queueLimitBytes: queueLimitBytes,
                 logEventLimitBytes: logEventLimitBytes,
                 logEventsInBatchLimit: logEventsInBatchLimit,
                 batchSizeLimitBytes: batchSizeLimitBytes,
-                queueLimitBytes: queueLimitBytes,
                 period: period.Value,
                 textFormatter: textFormatter,
                 batchFormatter: batchFormatter,

@@ -39,9 +39,9 @@ namespace Serilog
                 .WriteTo
                 .Http(
                     requestUri: webServerFixture.RequestUri(testId),
+                    queueLimitBytes: ByteSize.MB,
                     logEventsInBatchLimit: 100,
                     batchSizeLimitBytes: ByteSize.MB,
-                    queueLimitBytes: ByteSize.MB,
                     period: TimeSpan.FromMilliseconds(1),
                     textFormatter: new NormalRenderedTextFormatter(),
                     batchFormatter: new ArrayBatchFormatter(),
@@ -71,9 +71,9 @@ namespace Serilog
                 .WriteTo
                 .Http(
                     requestUri: webServerFixture.RequestUri(testId),
+                    queueLimitBytes: null,
                     logEventsInBatchLimit: 100,
                     batchSizeLimitBytes: ByteSize.MB,
-                    queueLimitBytes: null,
                     period: TimeSpan.FromMilliseconds(1),
                     textFormatter: new NormalRenderedTextFormatter(),
                     batchFormatter: new ArrayBatchFormatter(),
@@ -104,9 +104,9 @@ namespace Serilog
                 .WriteTo
                 .Http(
                     requestUri: webServerFixture.RequestUri(testId),
+                    queueLimitBytes: ByteSize.MB,
                     logEventsInBatchLimit: 100,
                     batchSizeLimitBytes: ByteSize.MB,
-                    queueLimitBytes: ByteSize.MB,
                     period: TimeSpan.FromMilliseconds(1),
                     textFormatter: new NormalRenderedTextFormatter(),
                     batchFormatter: new ArrayBatchFormatter(),
@@ -136,6 +136,7 @@ namespace Serilog
                 .WriteTo
                 .Http(
                     requestUri: "https://www.mylogs.com",
+                    queueLimitBytes: null,
                     httpClient: httpClient,
                     configuration: configuration)
                 .CreateLogger();
