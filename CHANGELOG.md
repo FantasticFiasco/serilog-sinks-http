@@ -12,7 +12,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 **Migration guide**
 
-The parameter `batchSizeLimitBytes` has been introduced to the methods `Http`, `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers`. Please verify that the arguments you pass these methods still align with your intentions.
+The parameter `batchSizeLimitBytes` has been introduced to the methods `Http`, `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers`. Please verify that the arguments pass by you to these methods still align with your intentions.
 
 To automatically mitigate this kind of *new parameter isseu* in the future would be to stop use positional arguments and instead use named arguments.
 
