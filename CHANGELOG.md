@@ -19,16 +19,16 @@ If you use the non-durable sink please make the following changes to your code.
 ```csharp
 // Before migration
 log = new LoggerConfiguration()
-  .WriteTo.Http("https://www.mylogs.com", 500, 500)
+  .WriteTo.Http("https://www.mylogs.com", /* batchPostingLimit */ 500, /* queueLimit */ 500)
   .CreateLogger();
 
 // After migration
 log = new LoggerConfiguration()
   .WriteTo.Http(
     requestUri: "https://www.mylogs.com",
-    batchPostingLimit: 500,
-    // the new argument batchSizeLimitBytes is positioned here
-    queueLimit: 500)
+    queueLimitBytes: 50 * ByteSize.MB, // See #245 for changes to parameter 'queueLimit'
+    logEventsInBatchLimit: 500,
+    // the new argument batchSizeLimitBytes is positioned here)
   .CreateLogger();
 ```
 
@@ -195,7 +195,7 @@ Given you are configuring the sink in application configuration you should apply
 ```
 
 - [#206](https://github.com/FantasticFiasco/serilog-sinks-http/issues/206) [BREAKING CHANGE] Argument `bufferFileSizeLimitBytes` to extension methods `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers` no longer accepts `0` as value
-- [#203](https://github.com/FantasticFiasco/serilog-sinks-http/issues/203) [BREAKING CHANGE] Non-durable sink has changed from having its maximum queue size defined as number of events into number of bytes, making it far easier to reason about memory consumption.
+- [#203](https://github.com/FantasticFiasco/serilog-sinks-http/issues/203), [#245](https://github.com/FantasticFiasco/serilog-sinks-http/issues/245) [BREAKING CHANGE] Non-durable sink has changed from having its maximum queue size defined as number of events into number of bytes, making it far easier to reason about memory consumption. It's importance to the behavior of the sink was also the reasoning for promoting it from being optional to being mandatory. (proposed by [@seruminar](https://github.com/seruminar))
 
 Given you are configuring the sink in code you should do the following changes.
 

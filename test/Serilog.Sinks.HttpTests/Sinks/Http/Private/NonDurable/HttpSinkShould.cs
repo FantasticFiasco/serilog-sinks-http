@@ -29,10 +29,10 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
             using (new HttpSink(
                 requestUri: webServerFixture.RequestUri(testId),
+                queueLimitBytes: null,
                 logEventLimitBytes: null,
                 logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
-                queueLimitBytes: null,
                 period: period,
                 textFormatter: new NormalTextFormatter(),
                 batchFormatter: new ArrayBatchFormatter(),
@@ -56,10 +56,10 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
             using var sink = new HttpSink(
                 requestUri: webServerFixture.RequestUri(testId),
+                queueLimitBytes: null,
                 logEventLimitBytes: 1, // Is lower than emitted log event
                 logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
-                queueLimitBytes: null,
                 period: period,
                 textFormatter: new NormalTextFormatter(),
                 batchFormatter: new ArrayBatchFormatter(),
@@ -91,10 +91,10 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
             using var sink = new HttpSink(
                 requestUri: webServerFixture.RequestUri(testId),
+                queueLimitBytes: 134, // Queue only holds the first event, which allocates 134 bytes
                 logEventLimitBytes: null,
                 logEventsInBatchLimit: null,
                 batchSizeLimitBytes: null,
-                queueLimitBytes: 134, // Queue only holds the first event, which allocates 134 bytes
                 period: period,
                 textFormatter: new NormalTextFormatter(),
                 batchFormatter: new ArrayBatchFormatter(),
