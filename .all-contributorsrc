@@ -141,6 +141,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "seruminar",
+      "name": "Yuriy Sountsov",
+      "avatar_url": "https://avatars.githubusercontent.com/u/35008875?v=4",
+      "profile": "https://github.com/seruminar",
+      "contributions": [
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7
