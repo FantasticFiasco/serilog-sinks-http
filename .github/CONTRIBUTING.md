@@ -73,12 +73,19 @@ or in the case of multiple issues:
 Closes #123, #245, #992
 ```
 
-## Publishing a release
+## Creating a release
 
-1. Create a new chapter in `CHANGELOG.md`
-1. Update the version in `Directory.Build.props`
-1. Create a git commit using the message format `release <major.minor.patch>`
-1. Create an annotated tag using the command `git tag -a v<major.minor.patch>`, and use the commit message `v<major.minor.patch>`
-1. Push the commit and tag using the command `git push --follow-tags`
-1. The NuGet package and its symbols will be pushed by CD
-1. Update the GitHub release with the information found in `CHANGELOG.md`
+Update the following files:
+
+- `CHANGELOG.md`
+- `Directory.Build.props`
+
+Commit the files with a git commit message saying `release v<major>.<minor>.<patch>`, and then run the following commands:
+
+```
+git tag -a v<major>.<minor>.<patch> -m v<major>.<minor>.<patch> -s
+git push --follow-tags
+```
+
+- The NuGet package and its symbols will be pushed by CD
+- Update the GitHub release with the information found in `CHANGELOG.md`
