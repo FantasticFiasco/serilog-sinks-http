@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <VersionPrefix>8.0.0</VersionPrefix>
-    <VersionSuffix>beta.11</VersionSuffix>
+    <VersionSuffix></VersionSuffix>
     <Authors>Mattias Kindborg</Authors>
-    <Copyright>Copyright 2015-2021 Serilog Contributors</Copyright>
+    <Copyright>Copyright 2015-2022 Serilog Contributors</Copyright>
     <Company />
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <NoWarn>1591;NU5105</NoWarn>

@@ -9,7 +9,7 @@
 [![Join the chat at https://gitter.im/serilog/serilog](https://img.shields.io/gitter/room/serilog/serilog.svg)](https://gitter.im/serilog/serilog)
 [![Help](https://img.shields.io/badge/stackoverflow-serilog-orange.svg)](http://stackoverflow.com/questions/tagged/serilog)
 
-**Package** - [Serilog.Sinks.Http](https://www.nuget.org/packages/serilog.sinks.http) | **Platforms** - .NET 4.5/4.6.1, .NET Standard 1.3/2.0/2.1
+**Package** - [Serilog.Sinks.Http](https://www.nuget.org/packages/serilog.sinks.http) | **Platforms** - .NET 4.5/4.6.1, .NET Standard 2.0/2.1
 
 ## Table of contents <!-- omit in toc -->
 
@@ -40,7 +40,7 @@ In the following example, the sink will POST log events to `http://www.mylogs.co
 ```csharp
 ILogger log = new LoggerConfiguration()
   .MinimumLevel.Verbose()
-  .WriteTo.Http(requestUri: "https://www.mylogs.com")
+  .WriteTo.Http(requestUri: "https://www.mylogs.com", queueLimitBytes: null)
   .CreateLogger();
 
 log.Information("Logging {@Heartbeat} from {Computer}", heartbeat, computer);
@@ -56,7 +56,8 @@ Used in conjunction with [Serilog.Settings.Configuration](https://github.com/ser
       {
         "Name": "Http",
         "Args": {
-          "requestUri": "https://www.mylogs.com"
+          "requestUri": "https://www.mylogs.com",
+          "queueLimitBytes": null
         }
       }
     ]
@@ -69,36 +70,34 @@ The sink can also be configured to be durable, i.e. log events are persisted on 
 The sink is batching multiple log events into a single request, and the following hypothetical payload is sent over the network as JSON.
 
 ```json
-{
-  "events": [
-    {
-      "Timestamp": "2016-11-03T00:09:11.4899425+01:00",
-      "Level": "Information",
-      "MessageTemplate": "Logging {@Heartbeat} from {Computer}",
-      "RenderedMessage": "Logging { UserName: \"Mike\", UserDomainName: \"Home\" } from \"Workstation\"",
-      "Properties": {
-        "Heartbeat": {
-          "UserName": "Mike",
-          "UserDomainName": "Home"
-        },
-        "Computer": "Workstation"
-      }
-    },
-    {
-      "Timestamp": "2016-11-03T00:09:12.4905685+01:00",
-      "Level": "Information",
-      "MessageTemplate": "Logging {@Heartbeat} from {Computer}",
-      "RenderedMessage": "Logging { UserName: \"Mike\", UserDomainName: \"Home\" } from \"Workstation\"",
-      "Properties": {
-        "Heartbeat": {
-          "UserName": "Mike",
-          "UserDomainName": "Home"
-        },
-        "Computer": "Workstation"
-      }
+[
+  {
+    "Timestamp": "2016-11-03T00:09:11.4899425+01:00",
+    "Level": "Information",
+    "MessageTemplate": "Logging {@Heartbeat} from {Computer}",
+    "RenderedMessage": "Logging { UserName: \"Mike\", UserDomainName: \"Home\" } from \"Workstation\"",
+    "Properties": {
+      "Heartbeat": {
+        "UserName": "Mike",
+        "UserDomainName": "Home"
+      },
+      "Computer": "Workstation"
     }
-  ]
-}
+  },
+  {
+    "Timestamp": "2016-11-03T00:09:12.4905685+01:00",
+    "Level": "Information",
+    "MessageTemplate": "Logging {@Heartbeat} from {Computer}",
+    "RenderedMessage": "Logging { UserName: \"Mike\", UserDomainName: \"Home\" } from \"Workstation\"",
+    "Properties": {
+      "Heartbeat": {
+        "UserName": "Mike",
+        "UserDomainName": "Home"
+      },
+      "Computer": "Workstation"
+    }
+  }
+]
 ```
 
 ## Typical use cases
