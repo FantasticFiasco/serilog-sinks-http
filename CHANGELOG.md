@@ -12,11 +12,11 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 - [#116](https://github.com/FantasticFiasco/serilog-sinks-http/issues/116) [BREAKING CHANGE] Support specifying `batchSizeLimitBytes` when creating the sink, thus limiting the size of the payloads sent to the log server (proposed by [@michaeltdaniels](https://github.com/michaeltdaniels))
 
-**Migration guide**
+  **Migration guide**
 
-The parameter `batchSizeLimitBytes` has been introduced to the methods `Http`, `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers`. Please verify that the arguments pass by you to these methods still align with your intentions.
+  The parameter `batchSizeLimitBytes` has been introduced to the methods `Http`, `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers`. Please verify that the arguments pass by you to these methods still align with your intentions.
 
-To automatically mitigate this kind of *new parameter issue* in the future would be to move from using positional arguments to use named arguments.
+  To automatically mitigate this kind of *new parameter issue* in the future would be to move from using positional arguments to use named arguments.
 
 - [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) Support for content encoding [Gzip](https://en.wikipedia.org/wiki/Gzip) using HTTP client `JsonGzipHttpClient` (contribution by [@vaibhavepatel](https://github.com/vaibhavepatel), [@KalininAndreyVictorovich](https://github.com/KalininAndreyVictorovich) and [@AntonSmolkov](https://github.com/AntonSmolkov))
 - [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) Support for specifying `HttpClient` when creating `JsonHttpClient` and `JsonGzipHttpClient`
@@ -25,336 +25,336 @@ To automatically mitigate this kind of *new parameter issue* in the future would
 
 - [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) [BREAKING CHANGE] Interface `IHttpClient` has changed to accommodate for different HTTP content types
 
-**Migration guide**
+  **Migration guide**
 
-You'll have to migrate your code if you've implemented your own version of `IHttpClient`. The signature of method `IHttpClient.PostAsync` has changed from `Task<HttpResponseMessage> PostAsync(string, HttpContent)` to `Task<HttpResponseMessage> PostAsync(string, Stream)`.
+  You'll have to migrate your code if you've implemented your own version of `IHttpClient`. The signature of method `IHttpClient.PostAsync` has changed from `Task<HttpResponseMessage> PostAsync(string, HttpContent)` to `Task<HttpResponseMessage> PostAsync(string, Stream)`.
 
-```csharp
-// Before migration
-public class MyHttpClient : IHttpClient
-{
-  // Code removed for brevity...
-
-  public async Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content)
+  ```csharp
+  // Before migration
+  public class MyHttpClient : IHttpClient
   {
-    // Here you probably have some code updating the content,
-    // and then you send the request
-    return await httpClient.PostAsync(requestUri, content)
-  }
-}
+    // Code removed for brevity...
 
-// After migration
-public class MyHttpClient : IHttpClient
-{
-  // Code removed for brevity...
-
-  public async Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream)
-  {
-    using (var content = new StreamContent(contentStream))
+    public async Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content)
     {
-      content.Headers.Add("Content-Type", "application/json");
-
       // Here you probably have some code updating the content,
       // and then you send the request
       return await httpClient.PostAsync(requestUri, content)
     }
   }
-}
-```
+
+  // After migration
+  public class MyHttpClient : IHttpClient
+  {
+    // Code removed for brevity...
+
+    public async Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream)
+    {
+      using (var content = new StreamContent(contentStream))
+      {
+        content.Headers.Add("Content-Type", "application/json");
+
+        // Here you probably have some code updating the content,
+        // and then you send the request
+        return await httpClient.PostAsync(requestUri, content)
+      }
+    }
+  }
+  ```
 
 - [#162](https://github.com/FantasticFiasco/serilog-sinks-http/issues/162) [BREAKING CHANGE] Deprecated dependency [Serilog.Sinks.RollingFile](https://www.nuget.org/packages/serilog.sinks.rollingfile) has been removed (discovered by [@tipasergio](https://github.com/tipasergio))
 
-**Migration guide**
+  **Migration guide**
 
-You'll have to migrate your code if you're using `DurableHttpUsingTimeRolledBuffers`, i.e. use the durable HTTP sink with a rolling behavior defined by a time interval. The parameter `bufferPathFormat` has been renamed to `bufferBaseFileName`, and the parameter `bufferRollingInterval` has been added.
+  You'll have to migrate your code if you're using `DurableHttpUsingTimeRolledBuffers`, i.e. use the durable HTTP sink with a rolling behavior defined by a time interval. The parameter `bufferPathFormat` has been renamed to `bufferBaseFileName`, and the parameter `bufferRollingInterval` has been added.
 
-Given you are configuring the sink in code you should apply the following changes.
+  Given you are configuring the sink in code you should apply the following changes.
 
-```csharp
-// Before migration
-log = new LoggerConfiguration()
-  .WriteTo.DurableHttpUsingTimeRolledBuffers(
-    requestUri: "https://www.mylogs.com",
-    bufferPathFormat: "MyBuffer-{Hour}.json")
-  .CreateLogger();
+  ```csharp
+  // Before migration
+  log = new LoggerConfiguration()
+    .WriteTo.DurableHttpUsingTimeRolledBuffers(
+      requestUri: "https://www.mylogs.com",
+      bufferPathFormat: "MyBuffer-{Hour}.json")
+    .CreateLogger();
 
-// After migration
-log = new LoggerConfiguration()
-  .WriteTo.DurableHttpUsingTimeRolledBuffers(
-    requestUri: "https://www.mylogs.com",
-    bufferBaseFileName: "MyBuffer",
-    bufferRollingInterval: BufferRollingInterval.Hour)
-  .CreateLogger();
-```
+  // After migration
+  log = new LoggerConfiguration()
+    .WriteTo.DurableHttpUsingTimeRolledBuffers(
+      requestUri: "https://www.mylogs.com",
+      bufferBaseFileName: "MyBuffer",
+      bufferRollingInterval: BufferRollingInterval.Hour)
+    .CreateLogger();
+  ```
 
-Given you are configuring the sink in application configuration you should apply the following changes.
+  Given you are configuring the sink in application configuration you should apply the following changes.
 
-```json
-// Before migration
-{
-  "Serilog": {
-    "WriteTo": [
-      {
-        "Name": "DurableHttpUsingTimeRolledBuffers",
-        "Args": {
-          "requestUri": "https://www.mylogs.com",
-          "bufferPathFormat": "MyBuffer-{Hour}.json"
+  ```json
+  // Before migration
+  {
+    "Serilog": {
+      "WriteTo": [
+        {
+          "Name": "DurableHttpUsingTimeRolledBuffers",
+          "Args": {
+            "requestUri": "https://www.mylogs.com",
+            "bufferPathFormat": "MyBuffer-{Hour}.json"
+          }
         }
-      }
-    ]
+      ]
+    }
   }
-}
 
-// After migration
-{
-  "Serilog": {
-    "WriteTo": [
-      {
-        "Name": "DurableHttpUsingTimeRolledBuffers",
-        "Args": {
-          "requestUri": "https://www.mylogs.com",
-          "bufferBaseFileName": "MyBuffer",
-          "bufferRollingInterval": "Hour"
+  // After migration
+  {
+    "Serilog": {
+      "WriteTo": [
+        {
+          "Name": "DurableHttpUsingTimeRolledBuffers",
+          "Args": {
+            "requestUri": "https://www.mylogs.com",
+            "bufferBaseFileName": "MyBuffer",
+            "bufferRollingInterval": "Hour"
+          }
         }
-      }
-    ]
+      ]
+    }
   }
-}
-```
+  ```
 
 - [#206](https://github.com/FantasticFiasco/serilog-sinks-http/issues/206) [BREAKING CHANGE] Argument `bufferFileSizeLimitBytes` to extension methods `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers` no longer accepts `0` as value
 - [#203](https://github.com/FantasticFiasco/serilog-sinks-http/issues/203), [#245](https://github.com/FantasticFiasco/serilog-sinks-http/issues/245) [BREAKING CHANGE] Non-durable sink has changed from having its maximum queue size defined as number of events into number of bytes, making it far easier to reason about memory consumption. It's importance to the behavior of the sink was also the reasoning for promoting it from being optional to being mandatory. (proposed by [@seruminar](https://github.com/seruminar))
 
-Given you are configuring the sink in code you should do the following changes.
+  Given you are configuring the sink in code you should do the following changes.
 
-```csharp
-// Before migration
-log = new LoggerConfiguration()
-  .WriteTo.Http(
-    requestUri: "https://www.mylogs.com",
-    queueLimit: 1000)
-  .CreateLogger();
+  ```csharp
+  // Before migration
+  log = new LoggerConfiguration()
+    .WriteTo.Http(
+      requestUri: "https://www.mylogs.com",
+      queueLimit: 1000)
+    .CreateLogger();
 
-// After migration
-log = new LoggerConfiguration()
-  .WriteTo.Http(
-    requestUri: "https://www.mylogs.com",
-    queueLimitBytes: 50 * ByteSize.MB)
-  .CreateLogger();
-```
+  // After migration
+  log = new LoggerConfiguration()
+    .WriteTo.Http(
+      requestUri: "https://www.mylogs.com",
+      queueLimitBytes: 50 * ByteSize.MB)
+    .CreateLogger();
+  ```
 
-Given you are configuring the sink in application configuration you should do the following changes.
+  Given you are configuring the sink in application configuration you should do the following changes.
 
-```json
-// Before migration
-{
-  "Serilog": {
-    "WriteTo": [
-      {
-        "Name": "Http",
-        "Args": {
-          "requestUri": "https://www.mylogs.com",
-          "queueLimit": 1000
+  ```json
+  // Before migration
+  {
+    "Serilog": {
+      "WriteTo": [
+        {
+          "Name": "Http",
+          "Args": {
+            "requestUri": "https://www.mylogs.com",
+            "queueLimit": 1000
+          }
         }
-      }
-    ]
+      ]
+    }
   }
-}
 
-// After migration
-{
-  "Serilog": {
-    "WriteTo": [
-      {
-        "Name": "Http",
-        "Args": {
-          "requestUri": "https://www.mylogs.com",
-          "queueLimitBytes": 52428800
+  // After migration
+  {
+    "Serilog": {
+      "WriteTo": [
+        {
+          "Name": "Http",
+          "Args": {
+            "requestUri": "https://www.mylogs.com",
+            "queueLimitBytes": 52428800
+          }
         }
-      }
-    ]
+      ]
+    }
   }
-}
-```
+  ```
 
 - [#171](https://github.com/FantasticFiasco/serilog-sinks-http/issues/171) [BREAKING CHANGE] Move maximum log event size configuration from batch formatter to sink configuration, and change it's default value from 256 kB to `null`
 
-**Migration guide**
+  **Migration guide**
 
-Given that you're depending on the default maximum log event size configuration in `DefaultBatchFormatter` or `ArrayBatchFormatter`, or have defined your own limit when instantiating these classes, you should apply the following changes.
+  Given that you're depending on the default maximum log event size configuration in `DefaultBatchFormatter` or `ArrayBatchFormatter`, or have defined your own limit when instantiating these classes, you should apply the following changes.
 
-```csharp
-// Before migration
-log = new LoggerConfiguration()
-  // Changes are also applicable to DurableHttpUsingFileSizeRolledBuffers
-  // and DurableHttpUsingTimeRolledBuffers
-  .WriteTo.Http(
-    requestUri: "https://www.mylogs.com",
-    batchFormatter: new ArrayBatchFormatter(ByteSize.MB))
-  .CreateLogger();
+  ```csharp
+  // Before migration
+  log = new LoggerConfiguration()
+    // Changes are also applicable to DurableHttpUsingFileSizeRolledBuffers
+    // and DurableHttpUsingTimeRolledBuffers
+    .WriteTo.Http(
+      requestUri: "https://www.mylogs.com",
+      batchFormatter: new ArrayBatchFormatter(ByteSize.MB))
+    .CreateLogger();
 
-// After migration
-log = new LoggerConfiguration()
-  .WriteTo.Http(
-    requestUri: "https://www.mylogs.com",
-    logEventLimitBytes: ByteSize.MB,
-    batchFormatter: new ArrayBatchFormatter())
-  .CreateLogger();
-```
+  // After migration
+  log = new LoggerConfiguration()
+    .WriteTo.Http(
+      requestUri: "https://www.mylogs.com",
+      logEventLimitBytes: ByteSize.MB,
+      batchFormatter: new ArrayBatchFormatter())
+    .CreateLogger();
+  ```
 
 - [#171](https://github.com/FantasticFiasco/serilog-sinks-http/issues/171) [BREAKING CHANGE] Rename sink configuration argument `batchPostingLimit` to `logEventsInBatchLimit`
 
-**Migration guide**
+  **Migration guide**
 
-Given tha you're defining the maximum number of log events in a single batch, you should apply the following changes.
+  Given tha you're defining the maximum number of log events in a single batch, you should apply the following changes.
 
-```csharp
-// Before migration
-log = new LoggerConfiguration()
+  ```csharp
+  // Before migration
+  log = new LoggerConfiguration()
+    // Changes are also applicable to DurableHttpUsingFileSizeRolledBuffers
+    // and DurableHttpUsingTimeRolledBuffers
+    .WriteTo.Http(
+      requestUri: "https://www.mylogs.com",
+      batchPostingLimit: 100,
+    .CreateLogger();
+
+  // After migration
+  log = new LoggerConfiguration()
+    .WriteTo.Http(
+      requestUri: "https://www.mylogs.com",
+      logEventsInBatchLimit: 100,
+    .CreateLogger();
+  ```
+
+  Given you are configuring the sink in application configuration you should apply the following changes.
+
+  ```json
+  // Before migration
   // Changes are also applicable to DurableHttpUsingFileSizeRolledBuffers
   // and DurableHttpUsingTimeRolledBuffers
-  .WriteTo.Http(
-    requestUri: "https://www.mylogs.com",
-    batchPostingLimit: 100,
-  .CreateLogger();
-
-// After migration
-log = new LoggerConfiguration()
-  .WriteTo.Http(
-    requestUri: "https://www.mylogs.com",
-    logEventsInBatchLimit: 100,
-  .CreateLogger();
-```
-
-Given you are configuring the sink in application configuration you should apply the following changes.
-
-```json
-// Before migration
-// Changes are also applicable to DurableHttpUsingFileSizeRolledBuffers
-// and DurableHttpUsingTimeRolledBuffers
-{
-  "Serilog": {
-    "WriteTo": [
-      {
-        "Name": "Http",
-        "Args": {
-          "requestUri": "https://www.mylogs.com",
-          "batchPostingLimit": 100
+  {
+    "Serilog": {
+      "WriteTo": [
+        {
+          "Name": "Http",
+          "Args": {
+            "requestUri": "https://www.mylogs.com",
+            "batchPostingLimit": 100
+          }
         }
-      }
-    ]
+      ]
+    }
   }
-}
 
-// After migration
-{
-  "Serilog": {
-    "WriteTo": [
-      {
-        "Name": "Http",
-        "Args": {
-          "requestUri": "https://www.mylogs.com",
-          "logEventsInBatchLimit": 100
+  // After migration
+  {
+    "Serilog": {
+      "WriteTo": [
+        {
+          "Name": "Http",
+          "Args": {
+            "requestUri": "https://www.mylogs.com",
+            "logEventsInBatchLimit": 100
+          }
         }
-      }
-    ]
+      ]
+    }
   }
-}
-```
+  ```
 
 ### :skull: Removed
 
 - [#182](https://github.com/FantasticFiasco/serilog-sinks-http/issues/182) [BREAKING CHANGE] Extension method `DurableHttp` which was marked as deprecated in v5.2.0
 - [#215](https://github.com/FantasticFiasco/serilog-sinks-http/issues/215) [BREAKING CHANGE] Remove support for .NET Standard 1.3, aligning with the [cross-platform targeting library guidance](https://docs.microsoft.com/en-us/dotnet/standard/library-guidance/cross-platform-targeting)
 
-**Migration guide**
+  **Migration guide**
 
-Given you are configuring the sink in code you should apply the following changes.
+  Given you are configuring the sink in code you should apply the following changes.
 
-```csharp
-// Before migration
-log = new LoggerConfiguration()
-  .WriteTo.DurableHttp(requestUri: "https://www.mylogs.com")
-  .CreateLogger();
+  ```csharp
+  // Before migration
+  log = new LoggerConfiguration()
+    .WriteTo.DurableHttp(requestUri: "https://www.mylogs.com")
+    .CreateLogger();
 
-// After migration
-log = new LoggerConfiguration()
-  .WriteTo.DurableHttpUsingTimeRolledBuffers(requestUri: "https://www.mylogs.com")
-  .CreateLogger();
-```
+  // After migration
+  log = new LoggerConfiguration()
+    .WriteTo.DurableHttpUsingTimeRolledBuffers(requestUri: "https://www.mylogs.com")
+    .CreateLogger();
+  ```
 
-Given you are configuring the sink in application configuration you should apply the following changes.
+  Given you are configuring the sink in application configuration you should apply the following changes.
 
-```json
-// Before migration
-{
-  "Serilog": {
-    "WriteTo": [
-      {
-        "Name": "DurableHttp",
-        "Args": {
-          "requestUri": "https://www.mylogs.com"
+  ```json
+  // Before migration
+  {
+    "Serilog": {
+      "WriteTo": [
+        {
+          "Name": "DurableHttp",
+          "Args": {
+            "requestUri": "https://www.mylogs.com"
+          }
         }
-      }
-    ]
+      ]
+    }
   }
-}
 
-// After migration
-{
-  "Serilog": {
-    "WriteTo": [
-      {
-        "Name": "DurableHttpUsingTimeRolledBuffers",
-        "Args": {
-          "requestUri": "https://www.mylogs.com"
+  // After migration
+  {
+    "Serilog": {
+      "WriteTo": [
+        {
+          "Name": "DurableHttpUsingTimeRolledBuffers",
+          "Args": {
+            "requestUri": "https://www.mylogs.com"
+          }
         }
-      }
-    ]
+      ]
+    }
   }
-}
-```
+  ```
 
 - [#196](https://github.com/FantasticFiasco/serilog-sinks-http/issues/196) [BREAKING CHANGE] Overloaded method `IBatchFormatter.Format(IEnumerable<LogEvent>, ITextFormatter, TextWriter)` has been removed in favour of keeping `IBatchFormatter.Format(IEnumerable<string>, TextWriter output)`
 
- **Migration guide**
+  **Migration guide**
 
-You'll have to migrate your code if you've implemented your own version of `IBatchFormatter`.
+  You'll have to migrate your code if you've implemented your own version of `IBatchFormatter`.
 
-```csharp
-// Before migration
-public class MyBatchFormatter : IBatchFormatter
-{
-  public void Format(IEnumerable<LogEvent> logEvents, ITextFormatter formatter, TextWriter output)
+  ```csharp
+  // Before migration
+  public class MyBatchFormatter : IBatchFormatter
   {
-    // Your implementation accepting a sequence of log events
+    public void Format(IEnumerable<LogEvent> logEvents, ITextFormatter formatter, TextWriter output)
+    {
+      // Your implementation accepting a sequence of log events
+    }
+
+    public void Format(IEnumerable<string> logEvents, TextWriter output)
+    {
+      // Your implementation accepting a sequence of serialized log events
+    }
   }
 
-  public void Format(IEnumerable<string> logEvents, TextWriter output)
+  // After migration
+  public class MyBatchFormatter : IBatchFormatter
   {
-    // Your implementation accepting a sequence of serialized log events
+    public void Format(IEnumerable<string> logEvents, TextWriter output)
+    {
+      // Your implementation accepting a sequence of serialized log events
+    }
   }
-}
-
-// After migration
-public class MyBatchFormatter : IBatchFormatter
-{
-  public void Format(IEnumerable<string> logEvents, TextWriter output)
-  {
-    // Your implementation accepting a sequence of serialized log events
-  }
-}
-```
+  ```
 
 - [#178](https://github.com/FantasticFiasco/serilog-sinks-http/issues/196) [BREAKING CHANGE] Batch formatter `DefaultBatchFormatter` was removed when `ArrayBatchFormatter` was promoted to default batch formatter.
 
-**Migration guide**
+  **Migration guide**
 
-You'll have to migrate your code if you used `DefaultBatchFormatter`, either implicitly by not specifying a batch formatter, or explicitly by specifying `DefaultBatchFormatter` when configuring the sink.
+  You'll have to migrate your code if you used `DefaultBatchFormatter`, either implicitly by not specifying a batch formatter, or explicitly by specifying `DefaultBatchFormatter` when configuring the sink.
 
-Given that you wish to continue using `DefaultBatchFormatter` as your batch formatter you should copy its implementation from [the wiki](https://github.com/FantasticFiasco/serilog-sinks-http/wiki/Batch-formatters) into your own codebase.
+  Given that you wish to continue using `DefaultBatchFormatter` as your batch formatter you should copy its implementation from [the wiki](https://github.com/FantasticFiasco/serilog-sinks-http/wiki/Batch-formatters) into your own codebase.
 
-Given that you decide to migrate into using `ArrayBatchFormatter` instead of `DefaultBatchFormatter`, you should verify that your log server is capable of receiving the new JSON payload format.
+  Given that you decide to migrate into using `ArrayBatchFormatter` instead of `DefaultBatchFormatter`, you should verify that your log server is capable of receiving the new JSON payload format.
 
 ### :syringe: Fixed
 
