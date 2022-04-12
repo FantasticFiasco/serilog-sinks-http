@@ -35,10 +35,10 @@ namespace Serilog
         /// <summary>
         /// Adds a non-durable sink that sends log events using HTTP POST over the network. The log
         /// events are stored in memory in the case that the log server cannot be reached.
-        /// <para/>
+        /// <para />
         /// The maximum number of log events stored in memory is configurable, and given that we
         /// reach this limit the sink will drop new log events in favor of keeping the old.
-        /// <para/>
+        /// <para />
         /// A non-durable sink will lose data after a system or process restart.
         /// </summary>
         /// <param name="sinkConfiguration">The logger configuration.</param>
@@ -61,14 +61,14 @@ namespace Serilog
         /// characters added by the batch formatter, where the sequence of serialized log events
         /// are transformed into a payload, are not considered. Please make sure to accommodate for
         /// those.
-        /// <para/>
+        /// <para />
         /// Another thing to mention is that although the sink does its best to optimize for this
         /// limit, if you decide to use an implementation of <seealso cref="IHttpClient"/> that is
         /// compressing the payload, e.g. <seealso cref="JsonGzipHttpClient"/>, this parameter
         /// describes the uncompressed size of the log events. The compressed size might be
         /// significantly smaller depending on the compression algorithm and the repetitiveness of
         /// the log events.
-        /// <para/>
+        /// <para />
         /// Default value is null.
         /// </param>
         /// <param name="period">
@@ -142,13 +142,13 @@ namespace Serilog
         /// <summary>
         /// Adds a durable sink that sends log events using HTTP POST over the network. The log
         /// events are always stored on disk in the case that the log server cannot be reached.
-        /// <para/>
+        /// <para />
         /// The buffer files will use a rolling behavior defined by the file size specified in
         /// <paramref name="bufferFileSizeLimitBytes"/>, i.e. a new buffer file is created when the
         /// current buffer file has reached its limit. The maximum number of retained files is
         /// defined by <paramref name="retainedBufferFileCountLimit"/>, and when that limit is
         /// reached the oldest file is dropped to make room for a new.
-        /// <para/>
+        /// <para />
         /// A durable sink will protect you against data loss after a system or process restart.
         /// </summary>
         /// <param name="sinkConfiguration">The logger configuration.</param>
@@ -189,14 +189,14 @@ namespace Serilog
         /// characters added by the batch formatter, where the sequence of serialized log events
         /// are transformed into a payload, are not considered. Please make sure to accommodate for
         /// those.
-        /// <para/>
+        /// <para />
         /// Another thing to mention is that although the sink does its best to optimize for this
         /// limit, if you decide to use an implementation of <seealso cref="IHttpClient"/> that is
         /// compressing the payload, e.g. <seealso cref="JsonGzipHttpClient"/>, this parameter
         /// describes the uncompressed size of the log events. The compressed size might be
         /// significantly smaller depending on the compression algorithm and the repetitiveness of
         /// the log events.
-        /// <para/>
+        /// <para />
         /// Default value is null.
         /// </param>
         /// <param name="period">
@@ -275,13 +275,13 @@ namespace Serilog
         /// <summary>
         /// Adds a durable sink that sends log events using HTTP POST over the network. The log
         /// events are always stored on disk in the case that the log server cannot be reached.
-        /// <para/>
+        /// <para />
         /// The buffer files will use a rolling behavior defined by the time interval specified in
         /// <paramref name="bufferRollingInterval"/>, i.e. a new buffer file is created every time
         /// a new interval is started. The maximum size of a buffer file is defined by
         /// <paramref name="bufferFileSizeLimitBytes"/>, and when that limit is reached all new log
         /// events will be dropped until a new interval is started.
-        /// <para/>
+        /// <para />
         /// A durable sink will protect you against data loss after a system or process restart.
         /// </summary>
         /// <param name="sinkConfiguration">The logger configuration.</param>
@@ -323,14 +323,14 @@ namespace Serilog
         /// characters added by the batch formatter, where the sequence of serialized log events
         /// are transformed into a payload, are not considered. Please make sure to accommodate for
         /// those.
-        /// <para/>
+        /// <para />
         /// Another thing to mention is that although the sink does its best to optimize for this
         /// limit, if you decide to use an implementation of <seealso cref="IHttpClient"/> that is
         /// compressing the payload, e.g. <seealso cref="JsonGzipHttpClient"/>, this parameter
         /// describes the uncompressed size of the log events. The compressed size might be
         /// significantly smaller depending on the compression algorithm and the repetitiveness of
         /// the log events.
-        /// <para/>
+        /// <para />
         /// Default value is null.
         /// </param>
         /// <param name="period">

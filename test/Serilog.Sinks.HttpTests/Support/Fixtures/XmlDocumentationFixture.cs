@@ -12,6 +12,7 @@ namespace Serilog.Support.Fixtures
         private readonly Regex seeClassRegex;
         private readonly Regex seeEnumRegex;
         private readonly Regex seeHrefRegex;
+        private readonly Regex seeAlsoRegex;
         private readonly Regex paramRefRegex;
 
         public XmlDocumentationFixture()
@@ -20,6 +21,7 @@ namespace Serilog.Support.Fixtures
             seeClassRegex = new Regex(@"<see cref=""T:(?<fullName>[\w.]+)""\s*/>");
             seeEnumRegex = new Regex(@"<see cref=""F:(?<fullName>[\w.]+)""\s*/>");
             seeHrefRegex = new Regex(@"<see href=""(?<url>[\w.:/]+)""\s*>(?<link>[\w\s.]+)</see>");
+            seeAlsoRegex = new Regex(@"<seealso cref=""T:(?<fullName>[\w.]+)""\s*/>");
             paramRefRegex = new Regex(@"<paramref name=""(?<parameterName>\w+)""\s*/>");
         }
 
@@ -35,12 +37,15 @@ namespace Serilog.Support.Fixtures
 
             var description = GetValue(parameter)
                 .Split("\n")
-                .Select(row => row.Trim())
-                .Where(row => row.Length > 0)
                 .Select(RemoveSeeClassLinks)
                 .Select(RemoveSeeEnumLinks)
                 .Select(RemoveSeeHrefLinks)
-                .Select(RemoveParamRefLinks);
+                .Select(RemoveSeeAlsoLinks)
+                .Select(RemoveParamRefLinks)
+                .Select(RemovePara)
+                .Select(RemoveQuotationMarks)
+                .Select(row => row.Trim())
+                .Where(row => row.Length > 0);
 
             return string.Join(" ", description);
         }
@@ -106,6 +111,22 @@ namespace Serilog.Support.Fixtures
             return description;
         }
 
+        private string RemoveSeeAlsoLinks(string description)
+        {
+            var matches = seeAlsoRegex.Matches(description);
+
+            foreach (Match match in matches)
+            {
+                var type = ProbeType(match.Groups["fullName"].Value);
+
+                description = description.Replace(
+                    match.Groups[0].Value,
+                    type.Name);
+            }
+
+            return description;
+        }
+
         private string RemoveParamRefLinks(string description)
         {
             var matches = paramRefRegex.Matches(description);
@@ -118,6 +139,16 @@ namespace Serilog.Support.Fixtures
             }
 
             return description;
+        }
+
+        private static string RemovePara(string description)
+        {
+            return description.Replace("<para />", string.Empty);
+        }
+
+        private static string RemoveQuotationMarks(string description)
+        {
+            return description.Replace("\"", string.Empty);
         }
 
         private static string GetValue(XNode node)

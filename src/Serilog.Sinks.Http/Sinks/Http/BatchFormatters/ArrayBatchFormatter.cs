@@ -21,7 +21,7 @@ namespace Serilog.Sinks.Http.BatchFormatters
 {
     /// <summary>
     /// Formatter serializing batches of log events into a JSON array.
-    /// <para/>
+    /// <para />
     /// Example:
     /// [
     ///   { event n },

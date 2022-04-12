@@ -44,7 +44,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             got1.ShouldBe("1");
             got2.ShouldBe("2");
             got3.ShouldBe("3");
-            got4.ShouldBe("");
+            got4.ShouldBe(string.Empty);
         }
 
         [Fact]
