@@ -262,6 +262,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
   }
   ```
 
+- [BREAKING CHANGE] Method `IHttpClient.Configure` on a custom HTTP client implementation is no longer called unless sink is provided an instance of `IConfiguration`
+
 ### :skull: Removed
 
 - [#182](https://github.com/FantasticFiasco/serilog-sinks-http/issues/182) [BREAKING CHANGE] Extension method `DurableHttp` which was marked as deprecated in v5.2.0
