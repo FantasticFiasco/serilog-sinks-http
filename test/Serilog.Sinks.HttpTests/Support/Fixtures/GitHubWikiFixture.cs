@@ -62,7 +62,7 @@ namespace Serilog.Support.Fixtures
                     continue;
                 }
 
-                if (argumentNameInline.Content.ToString() != argumentName)
+                if (argumentNameInline.Content != argumentName)
                 {
                     continue;
                 }

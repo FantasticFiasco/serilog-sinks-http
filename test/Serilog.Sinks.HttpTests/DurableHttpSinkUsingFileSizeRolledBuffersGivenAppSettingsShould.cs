@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Serilog.Events;
 using Serilog.Sinks.Http.HttpClients;
-using Serilog.Sinks.Http.Private.Durable;
 using Serilog.Support.Fixtures;
 using Serilog.Support.Reflection;
 using Xunit;
