@@ -125,7 +125,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 - [#206](https://github.com/FantasticFiasco/serilog-sinks-http/issues/206) [BREAKING CHANGE] Argument `bufferFileSizeLimitBytes` to extension methods `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers` no longer accepts `0` as value
 - [#203](https://github.com/FantasticFiasco/serilog-sinks-http/issues/203), [#245](https://github.com/FantasticFiasco/serilog-sinks-http/issues/245) [BREAKING CHANGE] Non-durable sink has changed from having its maximum queue size defined as number of events into number of bytes, making it far easier to reason about memory consumption. It's importance to the behavior of the sink was also the reasoning for promoting it from being optional to being mandatory. (proposed by [@seruminar](https://github.com/seruminar))
 
-  Given you are configuring the sink in code you should do the following changes.
+  Given you are limiting the queue in code you should do the following changes.
 
   ```csharp
   // Before migration
@@ -143,7 +143,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
     .CreateLogger();
   ```
 
-  Given you are configuring the sink in application configuration you should do the following changes.
+  Given you are limiting the queue in application configuration you should do the following changes.
 
   ```json
   // Before migration
@@ -177,6 +177,55 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
   }
   ```
 
+  Given you aren't limiting the queue in code you should do the following changes.
+
+  ```csharp
+  // Before migration
+  log = new LoggerConfiguration()
+    .WriteTo.Http(requestUri: "https://www.mylogs.com")
+    .CreateLogger();
+
+  // After migration
+  log = new LoggerConfiguration()
+    .WriteTo.Http(
+      requestUri: "https://www.mylogs.com",
+      queueLimitBytes: null)
+    .CreateLogger();
+  ```
+
+  Given you aren't limiting the queue in application configuration you should do the following changes.
+
+  ```json
+  // Before migration
+  {
+    "Serilog": {
+      "WriteTo": [
+        {
+          "Name": "Http",
+          "Args": {
+            "requestUri": "https://www.mylogs.com"
+          }
+        }
+      ]
+    }
+  }
+
+  // After migration
+  {
+    "Serilog": {
+      "WriteTo": [
+        {
+          "Name": "Http",
+          "Args": {
+            "requestUri": "https://www.mylogs.com",
+            "queueLimitBytes": null
+          }
+        }
+      ]
+    }
+  }
+  ```
+
 - [#171](https://github.com/FantasticFiasco/serilog-sinks-http/issues/171) [BREAKING CHANGE] Move maximum log event size configuration from batch formatter to sink configuration, and change it's default value from 256 kB to `null`
 
   **Migration guide**
@@ -186,16 +235,15 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
   ```csharp
   // Before migration
   log = new LoggerConfiguration()
-    // Changes are also applicable to DurableHttpUsingFileSizeRolledBuffers
-    // and DurableHttpUsingTimeRolledBuffers
-    .WriteTo.Http(
+    // Changes are also applicable to Http and DurableHttpUsingTimeRolledBuffers
+    .WriteTo.DurableHttpUsingFileSizeRolledBuffers(
       requestUri: "https://www.mylogs.com",
       batchFormatter: new ArrayBatchFormatter(ByteSize.MB))
     .CreateLogger();
 
   // After migration
   log = new LoggerConfiguration()
-    .WriteTo.Http(
+    .WriteTo.DurableHttpUsingFileSizeRolledBuffers(
       requestUri: "https://www.mylogs.com",
       logEventLimitBytes: ByteSize.MB,
       batchFormatter: new ArrayBatchFormatter())
