@@ -1,6 +1,9 @@
 name: Greetings
 
-on: [issues]
+permissions: read-all
+
+on:
+  - issues
 
 jobs:
   greeting:
