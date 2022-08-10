@@ -22,10 +22,10 @@ namespace Serilog.Sinks.Http.Private.Durable
 
         [Theory]
         [InlineData(null)]
-        [InlineData(1)]
-        [InlineData(10)]
-        [InlineData(100)]
-        [InlineData(int.MaxValue)]
+        [InlineData(1L)]
+        [InlineData(10L)]
+        [InlineData(100L)]
+        [InlineData(long.MaxValue)]
         public void ReturnSinkGivenValidBufferFileSizeLimitBytes(long? bufferFileSizeLimitBytes)
         {
             // Arrange
@@ -51,11 +51,11 @@ namespace Serilog.Sinks.Http.Private.Durable
         }
 
         [Theory]
-        [InlineData(0)]
-        [InlineData(-1)]
-        [InlineData(-10)]
-        [InlineData(-100)]
-        [InlineData(int.MinValue)]
+        [InlineData(0L)]
+        [InlineData(-1L)]
+        [InlineData(-10L)]
+        [InlineData(-100L)]
+        [InlineData(long.MinValue)]
         public void ThrowExceptionGivenInvalidBufferFileSizeLimitBytes(long? bufferFileSizeLimitBytes)
         {
             // Arrange
