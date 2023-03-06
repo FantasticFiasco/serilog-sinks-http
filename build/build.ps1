@@ -29,7 +29,7 @@ Print -Message $logo
 # -------------------------------------------------------------------------------------------------
 # VARIABLES
 # -------------------------------------------------------------------------------------------------
-$git_sha = "$env:APPVEYOR_REPO_COMMIT".substring(0, 7)
+$git_sha = "$env:APPVEYOR_REPO_COMMIT".TrimStart("0").substring(0, 7)
 $is_tagged_build = If ("$env:APPVEYOR_REPO_TAG" -eq "true") { $true } Else { $false }
 $is_pull_request = If ("$env:APPVEYOR_PULL_REQUEST_NUMBER" -eq "") { $false } Else { $true }
 Print "info" "git sha: $git_sha"
@@ -54,8 +54,11 @@ if ($is_tagged_build) {
     AssertLastExitCode
 
     Print "build" "pack"
-    dotnet pack -c Release -o .\artifacts --no-build
+    New-Item -ItemType Directory -Path .\artifacts
+    dotnet pack -c Release --no-build
     AssertLastExitCode
+    Move-Item -Path .\src\bin\Release\*.nupkg -Destination .\artifacts
+    Move-Item -Path .\src\bin\Release\*.snupkg -Destination .\artifacts
 } else {
     # Use git tag if version suffix isn't specified
     if ($version_suffix -eq "") {
@@ -67,8 +70,11 @@ if ($is_tagged_build) {
     AssertLastExitCode
 
     Print "build" "pack"
-    dotnet pack -c Release -o .\artifacts --version-suffix=$version_suffix --no-build
+    New-Item -ItemType Directory -Path .\artifacts
+    dotnet pack -c Release --version-suffix=$version_suffix --no-build
     AssertLastExitCode
+    Move-Item -Path .\src\bin\Release\*.nupkg -Destination .\artifacts
+    Move-Item -Path .\src\bin\Release\*.snupkg -Destination .\artifacts
 }
 
 # -------------------------------------------------------------------------------------------------
