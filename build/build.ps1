@@ -57,8 +57,8 @@ if ($is_tagged_build) {
     New-Item -ItemType Directory -Path .\artifacts
     dotnet pack -c Release --no-build
     AssertLastExitCode
-    Move-Item -Path .\src\bin\Release\*.nupkg -Destination .\artifacts
-    Move-Item -Path .\src\bin\Release\*.snupkg -Destination .\artifacts
+    Move-Item -Path .\src\Serilog.Sinks.Http\bin\Release\*.nupkg -Destination .\artifacts
+    Move-Item -Path .\src\Serilog.Sinks.Http\bin\Release\*.snupkg -Destination .\artifacts
 } else {
     # Use git tag if version suffix isn't specified
     if ($version_suffix -eq "") {
@@ -73,8 +73,8 @@ if ($is_tagged_build) {
     New-Item -ItemType Directory -Path .\artifacts
     dotnet pack -c Release --version-suffix=$version_suffix --no-build
     AssertLastExitCode
-    Move-Item -Path .\src\bin\Release\*.nupkg -Destination .\artifacts
-    Move-Item -Path .\src\bin\Release\*.snupkg -Destination .\artifacts
+    Move-Item -Path .\src\Serilog.Sinks.Http\bin\Release\*.nupkg -Destination .\artifacts
+    Move-Item -Path .\src\Serilog.Sinks.Http\bin\Release\*.snupkg -Destination .\artifacts
 }
 
 # -------------------------------------------------------------------------------------------------
