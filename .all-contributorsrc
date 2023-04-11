@@ -150,6 +150,16 @@
       "contributions": [
         "ideas"
       ]
+    },
+    {
+      "login": "yuriy-millen",
+      "name": "Yuriy Millen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/90191982?v=4",
+      "profile": "https://github.com/yuriy-millen",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7
