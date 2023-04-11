@@ -84,11 +84,12 @@ namespace Serilog
         /// network. Default value is <see cref="ArrayBatchFormatter"/>.
         /// </param>
         /// <param name="restrictedToMinimumLevel">
-        /// The minimum level for events passed through the sink. Default value is
+        /// The minimum level for events passed through the sink. Ignored when
+        /// <paramref name="levelSwitch"/> is specified. Default value is
         /// <see cref="LevelAlias.Minimum"/>.
         /// </param>
-        /// <param name="levelSwitch">A switch allowing the pass-through minimum level
-        /// to be changed at runtime.
+        /// <param name="levelSwitch">
+        /// A switch allowing the pass-through minimum level to be changed at runtime.
         /// </param>
         /// <param name="httpClient">
         /// A custom <see cref="IHttpClient"/> implementation. Default value is
@@ -216,11 +217,12 @@ namespace Serilog
         /// network. Default value is <see cref="ArrayBatchFormatter"/>.
         /// </param>
         /// <param name="restrictedToMinimumLevel">
-        /// The minimum level for events passed through the sink. Default value is
+        /// The minimum level for events passed through the sink. Ignored when
+        /// <paramref name="levelSwitch"/> is specified. Default value is
         /// <see cref="LevelAlias.Minimum"/>.
         /// </param>
-        /// <param name="levelSwitch">A switch allowing the pass-through minimum level
-        /// to be changed at runtime.
+        /// <param name="levelSwitch">
+        /// A switch allowing the pass-through minimum level to be changed at runtime.
         /// </param>
         /// <param name="httpClient">
         /// A custom <see cref="IHttpClient"/> implementation. Default value is
@@ -354,11 +356,12 @@ namespace Serilog
         /// network. Default value is <see cref="ArrayBatchFormatter"/>.
         /// </param>
         /// <param name="restrictedToMinimumLevel">
-        /// The minimum level for events passed through the sink. Default value is
+        /// The minimum level for events passed through the sink. Ignored when
+        /// <paramref name="levelSwitch"/> is specified. Default value is
         /// <see cref="LevelAlias.Minimum"/>.
         /// </param>
-        /// <param name="levelSwitch">A switch allowing the pass-through minimum level
-        /// to be changed at runtime.
+        /// <param name="levelSwitch">
+        /// A switch allowing the pass-through minimum level to be changed at runtime.
         /// </param>
         /// <param name="httpClient">
         /// A custom <see cref="IHttpClient"/> implementation. Default value is
