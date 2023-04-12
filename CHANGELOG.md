@@ -6,6 +6,16 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+### :zap: Added
+
+- [#311](https://github.com/FantasticFiasco/serilog-sinks-http/issues/311) [BREAKING CHANGE] Support specifying `levelSwitch` when creating the sink, thus adding the support to [dynamically change the log level at runtime](https://nblumhardt.com/2014/10/dynamically-changing-the-serilog-level/) (contribution by [@yuriy-millen](https://github.com/yuriy-millen))
+
+  **Migration guide**
+
+  The parameter `levelSwitch` has been introduced to the methods `Http`, `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers`. Please verify that the arguments pass by you to these methods still align with your intentions.
+
+  To automatically mitigate this kind of *new parameter issue* in the future, move from using positional arguments to named arguments instead.
+
 ## [8.0.0] - 2022-04-10
 
 ### :zap: Added
@@ -16,7 +26,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
   The parameter `batchSizeLimitBytes` has been introduced to the methods `Http`, `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers`. Please verify that the arguments pass by you to these methods still align with your intentions.
 
-  To automatically mitigate this kind of *new parameter issue* in the future would be to move from using positional arguments to use named arguments.
+  To automatically mitigate this kind of *new parameter issue* in the future, move from using positional arguments to named arguments instead.
 
 - [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) Support for content encoding [Gzip](https://en.wikipedia.org/wiki/Gzip) using HTTP client `JsonGzipHttpClient` (contribution by [@vaibhavepatel](https://github.com/vaibhavepatel), [@KalininAndreyVictorovich](https://github.com/KalininAndreyVictorovich) and [@AntonSmolkov](https://github.com/AntonSmolkov))
 - [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) Support for specifying `HttpClient` when creating `JsonHttpClient` and `JsonGzipHttpClient`

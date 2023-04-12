@@ -15,6 +15,7 @@
 using System;
 using Microsoft.Extensions.Configuration;
 using Serilog.Configuration;
+using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.Http;
@@ -83,8 +84,12 @@ namespace Serilog
         /// network. Default value is <see cref="ArrayBatchFormatter"/>.
         /// </param>
         /// <param name="restrictedToMinimumLevel">
-        /// The minimum level for events passed through the sink. Default value is
+        /// The minimum level for events passed through the sink. Ignored when
+        /// <paramref name="levelSwitch"/> is specified. Default value is
         /// <see cref="LevelAlias.Minimum"/>.
+        /// </param>
+        /// <param name="levelSwitch">
+        /// A switch allowing the pass-through minimum level to be changed at runtime.
         /// </param>
         /// <param name="httpClient">
         /// A custom <see cref="IHttpClient"/> implementation. Default value is
@@ -108,6 +113,7 @@ namespace Serilog
             ITextFormatter? textFormatter = null,
             IBatchFormatter? batchFormatter = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            LoggingLevelSwitch? levelSwitch = null,
             IHttpClient? httpClient = null,
             IConfiguration? configuration = null)
         {
@@ -136,7 +142,7 @@ namespace Serilog
                 batchFormatter: batchFormatter,
                 httpClient: httpClient);
 
-            return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
+            return sinkConfiguration.Sink(sink, restrictedToMinimumLevel, levelSwitch);
         }
 
         /// <summary>
@@ -211,8 +217,12 @@ namespace Serilog
         /// network. Default value is <see cref="ArrayBatchFormatter"/>.
         /// </param>
         /// <param name="restrictedToMinimumLevel">
-        /// The minimum level for events passed through the sink. Default value is
+        /// The minimum level for events passed through the sink. Ignored when
+        /// <paramref name="levelSwitch"/> is specified. Default value is
         /// <see cref="LevelAlias.Minimum"/>.
+        /// </param>
+        /// <param name="levelSwitch">
+        /// A switch allowing the pass-through minimum level to be changed at runtime.
         /// </param>
         /// <param name="httpClient">
         /// A custom <see cref="IHttpClient"/> implementation. Default value is
@@ -239,6 +249,7 @@ namespace Serilog
             ITextFormatter? textFormatter = null,
             IBatchFormatter? batchFormatter = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            LoggingLevelSwitch? levelSwitch = null,
             IHttpClient? httpClient = null,
             IConfiguration? configuration = null)
         {
@@ -269,7 +280,7 @@ namespace Serilog
                 batchFormatter: batchFormatter,
                 httpClient: httpClient);
 
-            return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
+            return sinkConfiguration.Sink(sink, restrictedToMinimumLevel, levelSwitch);
         }
 
         /// <summary>
@@ -345,8 +356,12 @@ namespace Serilog
         /// network. Default value is <see cref="ArrayBatchFormatter"/>.
         /// </param>
         /// <param name="restrictedToMinimumLevel">
-        /// The minimum level for events passed through the sink. Default value is
+        /// The minimum level for events passed through the sink. Ignored when
+        /// <paramref name="levelSwitch"/> is specified. Default value is
         /// <see cref="LevelAlias.Minimum"/>.
+        /// </param>
+        /// <param name="levelSwitch">
+        /// A switch allowing the pass-through minimum level to be changed at runtime.
         /// </param>
         /// <param name="httpClient">
         /// A custom <see cref="IHttpClient"/> implementation. Default value is
@@ -374,6 +389,7 @@ namespace Serilog
             ITextFormatter? textFormatter = null,
             IBatchFormatter? batchFormatter = null,
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
+            LoggingLevelSwitch? levelSwitch = null,
             IHttpClient? httpClient = null,
             IConfiguration? configuration = null)
         {
@@ -405,7 +421,7 @@ namespace Serilog
                 batchFormatter: batchFormatter,
                 httpClient: httpClient);
 
-            return sinkConfiguration.Sink(sink, restrictedToMinimumLevel);
+            return sinkConfiguration.Sink(sink, restrictedToMinimumLevel, levelSwitch);
         }
     }
 }
