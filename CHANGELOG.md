@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+## [9.0.0-beta.1] - 2023-04-12
+
 ### :zap: Added
 
 - [#311](https://github.com/FantasticFiasco/serilog-sinks-http/issues/311) [BREAKING CHANGE] Support specifying `levelSwitch` when creating the sink, thus adding the support to [dynamically change the log level at runtime](https://nblumhardt.com/2014/10/dynamically-changing-the-serilog-level/) (contribution by [@yuriy-millen](https://github.com/yuriy-millen))
