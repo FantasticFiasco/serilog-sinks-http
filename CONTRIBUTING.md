@@ -130,6 +130,8 @@ And finally when you are satisfied with your changes, open a new PR.
 
 ## Creating a release
 
+Before making an official release, please search for the term `Skip = "Beta has been released"` and make sure to exercise these tests.
+
 Update the following files:
 
 - `CHANGELOG.md`

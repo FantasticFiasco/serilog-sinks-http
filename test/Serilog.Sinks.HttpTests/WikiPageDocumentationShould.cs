@@ -19,7 +19,7 @@ namespace Serilog
             this.xmlDocumentationFixture = xmlDocumentationFixture;
         }
 
-        [TheoryOnMasterBranch]
+        [TheoryOnMasterBranch(Skip = "Beta has been released")]
         [InlineData("HTTP-sink.md", "Http")]
         [InlineData("Durable-file-size-rolled-HTTP-sink.md", "DurableHttpUsingFileSizeRolledBuffers")]
         [InlineData("Durable-time-rolled-HTTP-sink.md", "DurableHttpUsingTimeRolledBuffers")]
@@ -39,7 +39,7 @@ namespace Serilog
                 // Act
                 var got = gitHubWikiFixture.GetDescription(parameterName);
                 var want = xmlDocumentationFixture.GetDescription(extensionName, parameterName);
-                
+
                 // Assert
                 got.ShouldBe(want);
             }
