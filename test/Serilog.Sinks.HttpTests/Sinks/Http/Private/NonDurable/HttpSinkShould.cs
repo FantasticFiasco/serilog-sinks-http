@@ -132,6 +132,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
             using var sink = new HttpSink(
                 requestUri: webServerFixture.RequestUri(testId),
+                queueLimitBytes: null,
                 queueSizeLimit: 1,
                 logEventLimitBytes: null,
                 logEventsInBatchLimit: null,
