@@ -44,6 +44,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         public HttpSink(
             string requestUri,
             long? queueLimitBytes,
+            long? queueSizeLimit,
             long? logEventLimitBytes,
             int? logEventsInBatchLimit,
             long? batchSizeLimitBytes,
@@ -62,7 +63,7 @@ namespace Serilog.Sinks.Http.Private.NonDurable
 
             connectionSchedule = new ExponentialBackoffConnectionSchedule(period);
             timer = new PortableTimer(OnTick);
-            queue = new LogEventQueue(queueLimitBytes);
+            queue = new LogEventQueue(queueLimitBytes, queueSizeLimit);
 
             SetTimer();
         }

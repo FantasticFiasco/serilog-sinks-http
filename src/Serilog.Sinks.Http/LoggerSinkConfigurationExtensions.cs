@@ -48,6 +48,8 @@ namespace Serilog
         /// The maximum size, in bytes, of events stored in memory, waiting to be sent over the
         /// network. Specify null for no limit.
         /// </param>
+        /// <param name="queueSizeLimit">The maximum number of events that will be held in-memory while waiting to be sent over the network.
+        /// Beyond this limit, events will be dropped. Specify null for no limit. Default value is null.</param>
         /// <param name="logEventLimitBytes">
         /// The maximum size, in bytes, for a serialized representation of a log event. Log events
         /// exceeding this size will be dropped. Specify null for no limit. Default value is null.
@@ -62,14 +64,14 @@ namespace Serilog
         /// characters added by the batch formatter, where the sequence of serialized log events
         /// are transformed into a payload, are not considered. Please make sure to accommodate for
         /// those.
-        /// <para />
+        /// <param />
         /// Another thing to mention is that although the sink does its best to optimize for this
         /// limit, if you decide to use an implementation of <seealso cref="IHttpClient"/> that is
         /// compressing the payload, e.g. <seealso cref="JsonGzipHttpClient"/>, this parameter
         /// describes the uncompressed size of the log events. The compressed size might be
         /// significantly smaller depending on the compression algorithm and the repetitiveness of
         /// the log events.
-        /// <para />
+        /// <param />
         /// Default value is null.
         /// </param>
         /// <param name="period">
@@ -106,6 +108,7 @@ namespace Serilog
             this LoggerSinkConfiguration sinkConfiguration,
             string requestUri,
             long? queueLimitBytes,
+            long? queueSizeLimit = null,
             long? logEventLimitBytes = null,
             int? logEventsInBatchLimit = 1000,
             long? batchSizeLimitBytes = null,
@@ -134,6 +137,7 @@ namespace Serilog
             var sink = new HttpSink(
                 requestUri: requestUri,
                 queueLimitBytes: queueLimitBytes,
+                queueSizeLimit: queueSizeLimit,
                 logEventLimitBytes: logEventLimitBytes,
                 logEventsInBatchLimit: logEventsInBatchLimit,
                 batchSizeLimitBytes: batchSizeLimitBytes,

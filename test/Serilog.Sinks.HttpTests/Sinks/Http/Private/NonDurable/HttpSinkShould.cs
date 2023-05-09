@@ -115,5 +115,46 @@ namespace Serilog.Sinks.Http.Private.NonDurable
             // Some log events will have been dropped
             webServerFixture.GetAllEvents(testId).Length.ShouldBeLessThan(logEvents.Length);
         }
+
+        [Fact]
+        public async Task RespectQueueSizeLimit()
+        {
+            // Arrange
+            var testId = $"RespectQueueSizeBytes_{Guid.NewGuid()}";
+
+            // Create 10 log events
+            var logEvents = Enumerable
+                .Range(1, 10)
+                .Select(number => Some.LogEvent("Event {number}", number))
+                .ToArray();
+
+            var period = TimeSpan.FromMilliseconds(10);
+
+            using var sink = new HttpSink(
+                requestUri: webServerFixture.RequestUri(testId),
+                queueSizeLimit: 1,
+                logEventLimitBytes: null,
+                logEventsInBatchLimit: null,
+                batchSizeLimitBytes: null,
+                period: period,
+                textFormatter: new NormalTextFormatter(),
+                batchFormatter: new ArrayBatchFormatter(),
+                httpClient: new JsonHttpClient(webServerFixture.CreateClient()));
+
+            // Act
+            foreach (var logEvent in logEvents)
+            {
+                sink.Emit(logEvent);
+            }
+
+            await Task.Delay(10_000 * period);
+
+            // Assert
+            // At least the first log events should be sent
+            webServerFixture.GetAllEvents(testId).Length.ShouldBeGreaterThan(0);
+
+            // Some log events will have been dropped
+            webServerFixture.GetAllEvents(testId).Length.ShouldBeLessThan(logEvents.Length);
+        }
     }
 }
