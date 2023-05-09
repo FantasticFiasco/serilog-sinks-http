@@ -44,14 +44,14 @@ namespace Serilog.Sinks.Http.Private.NonDurable
         public HttpSink(
             string requestUri,
             long? queueLimitBytes,
-            long? queueSizeLimit,
             long? logEventLimitBytes,
             int? logEventsInBatchLimit,
             long? batchSizeLimitBytes,
             TimeSpan period,
             ITextFormatter textFormatter,
             IBatchFormatter batchFormatter,
-            IHttpClient httpClient)
+            IHttpClient httpClient,
+            long? queueSizeLimit = null)
         {
             this.requestUri = requestUri ?? throw new ArgumentNullException(nameof(requestUri));
             this.logEventLimitBytes = logEventLimitBytes;
