@@ -64,14 +64,14 @@ namespace Serilog
         /// characters added by the batch formatter, where the sequence of serialized log events
         /// are transformed into a payload, are not considered. Please make sure to accommodate for
         /// those.
-        /// <param />
+        /// <para />
         /// Another thing to mention is that although the sink does its best to optimize for this
         /// limit, if you decide to use an implementation of <seealso cref="IHttpClient"/> that is
         /// compressing the payload, e.g. <seealso cref="JsonGzipHttpClient"/>, this parameter
         /// describes the uncompressed size of the log events. The compressed size might be
         /// significantly smaller depending on the compression algorithm and the repetitiveness of
         /// the log events.
-        /// <param />
+        /// <para />
         /// Default value is null.
         /// </param>
         /// <param name="period">
