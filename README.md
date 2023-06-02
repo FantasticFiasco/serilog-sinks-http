@@ -1,7 +1,7 @@
 # Serilog.Sinks.Http - A Serilog sink sending log events over HTTP <!-- omit in toc -->
 
-[![Build status](https://ci.appveyor.com/api/projects/status/ayvak8yo23k962sg/branch/master?svg=true)](https://ci.appveyor.com/project/FantasticFiasco/serilog-sinks-http)
-[![codecov](https://codecov.io/gh/FantasticFiasco/serilog-sinks-http/branch/master/graph/badge.svg?token=cw6OYeQmdH)](https://codecov.io/gh/FantasticFiasco/serilog-sinks-http)
+[![Build status](https://ci.appveyor.com/api/projects/status/ayvak8yo23k962sg/branch/main?svg=true)](https://ci.appveyor.com/project/FantasticFiasco/serilog-sinks-http)
+[![codecov](https://codecov.io/gh/FantasticFiasco/serilog-sinks-http/branch/main/graph/badge.svg?token=cw6OYeQmdH)](https://codecov.io/gh/FantasticFiasco/serilog-sinks-http)
 [![NuGet Version](http://img.shields.io/nuget/v/Serilog.Sinks.Http.svg?style=flat)](https://www.nuget.org/packages/Serilog.Sinks.Http/)
 [![SemVer compatible](https://img.shields.io/badge/%E2%9C%85-SemVer%20compatible-blue)](https://semver.org/)
 [![NuGet](https://img.shields.io/nuget/dt/Serilog.Sinks.Http.svg)](https://www.nuget.org/packages/Serilog.Sinks.Http/)

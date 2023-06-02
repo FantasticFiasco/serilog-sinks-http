@@ -19,7 +19,7 @@ namespace Serilog
             this.xmlDocumentationFixture = xmlDocumentationFixture;
         }
 
-        [TheoryOnMasterBranch(Skip = "Beta has been released")]
+        [TheoryOnMainBranch(Skip = "Beta has been released")]
         [InlineData("HTTP-sink.md", "Http")]
         [InlineData("Durable-file-size-rolled-HTTP-sink.md", "DurableHttpUsingFileSizeRolledBuffers")]
         [InlineData("Durable-time-rolled-HTTP-sink.md", "DurableHttpUsingTimeRolledBuffers")]

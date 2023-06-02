@@ -23,7 +23,7 @@ function AssertLastExitCode {
 # -------------------------------------------------------------------------------------------------
 # LOGO
 # -------------------------------------------------------------------------------------------------
-$logo = (Invoke-WebRequest "https://raw.githubusercontent.com/FantasticFiasco/logo/master/logo.raw").toString();
+$logo = (Invoke-WebRequest "https://raw.githubusercontent.com/FantasticFiasco/logo/main/logo.raw").toString();
 Print -Message $logo
 
 # -------------------------------------------------------------------------------------------------
