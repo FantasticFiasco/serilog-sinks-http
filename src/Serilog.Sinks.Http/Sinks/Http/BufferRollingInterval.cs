@@ -12,36 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Serilog.Sinks.Http
+namespace Serilog.Sinks.Http;
+
+/// <summary>
+/// Specifies the frequency at which the buffer files should roll.
+/// </summary>
+public enum BufferRollingInterval
 {
     /// <summary>
-    /// Specifies the frequency at which the buffer files should roll.
+    /// Buffer files roll every year.
     /// </summary>
-    public enum BufferRollingInterval
-    {
-        /// <summary>
-        /// Buffer files roll every year.
-        /// </summary>
-        Year,
+    Year,
 
-        /// <summary>
-        /// Buffer files roll every month.
-        /// </summary>
-        Month,
+    /// <summary>
+    /// Buffer files roll every month.
+    /// </summary>
+    Month,
 
-        /// <summary>
-        /// Buffer files roll every day.
-        /// </summary>
-        Day,
+    /// <summary>
+    /// Buffer files roll every day.
+    /// </summary>
+    Day,
 
-        /// <summary>
-        /// Buffer files roll every hour.
-        /// </summary>
-        Hour,
+    /// <summary>
+    /// Buffer files roll every hour.
+    /// </summary>
+    Hour,
 
-        /// <summary>
-        /// Buffer files roll every minute.
-        /// </summary>
-        Minute
-    }
+    /// <summary>
+    /// Buffer files roll every minute.
+    /// </summary>
+    Minute
 }

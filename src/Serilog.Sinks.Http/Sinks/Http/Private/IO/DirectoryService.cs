@@ -14,31 +14,29 @@
 
 using System.IO;
 
-namespace Serilog.Sinks.Http.Private.IO
+namespace Serilog.Sinks.Http.Private.IO;
+
+public class DirectoryService
 {
-    public class DirectoryService
+    /// <summary>
+    /// Returns the names of files (including their paths) that match the specified search
+    /// pattern in the specified directory.
+    /// </summary>
+    /// <param name="path">
+    /// The relative or absolute path to the directory to search. This string is not
+    /// case-sensitive.
+    /// </param>
+    /// <param name="searchPattern">
+    /// The search string to match against the names of files in <paramref name="path" />. This
+    /// parameter can contain a combination of valid literal path and wildcard (* and ?)
+    /// characters, but doesn't support regular expressions.
+    /// </param>
+    /// <returns>
+    /// An array of the full names (including paths) for the files in the specified directory
+    /// that match the specified search pattern, or an empty array if no files are found.
+    /// </returns>
+    public virtual string[] GetFiles(string path, string searchPattern)
     {
-        /// <summary>
-        /// Returns the names of files (including their paths) that match the specified search
-        /// pattern in the specified directory.
-        /// </summary>
-        /// <param name="path">
-        /// The relative or absolute path to the directory to search. This string is not
-        /// case-sensitive.
-        /// </param>
-        /// <param name="searchPattern">
-        /// The search string to match against the names of files in <paramref name="path" />. This
-        /// parameter can contain a combination of valid literal path and wildcard (* and ?)
-        /// characters, but doesn't support regular expressions.
-        /// </param>
-        /// <returns>
-        /// An array of the full names (including paths) for the files in the specified directory
-        /// that match the specified search pattern, or an empty array if no files are found.
-        /// </returns>
-        public virtual string[] GetFiles(string path, string searchPattern)
-        {
-            return Directory.GetFiles(path, searchPattern);
-        }
+        return Directory.GetFiles(path, searchPattern);
     }
 }
-

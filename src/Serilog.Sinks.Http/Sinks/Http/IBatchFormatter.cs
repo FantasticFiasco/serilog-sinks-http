@@ -15,22 +15,21 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Serilog.Sinks.Http
+namespace Serilog.Sinks.Http;
+
+/// <summary>
+/// Formats batches of log events into payloads that can be sent over the network.
+/// </summary>
+public interface IBatchFormatter
 {
     /// <summary>
-    /// Formats batches of log events into payloads that can be sent over the network.
+    /// Format the log events into a payload.
     /// </summary>
-    public interface IBatchFormatter
-    {
-        /// <summary>
-        /// Format the log events into a payload.
-        /// </summary>
-        /// <param name="logEvents">
-        /// The events to format.
-        /// </param>
-        /// <param name="output">
-        /// The payload to send over the network.
-        /// </param>
-        void Format(IEnumerable<string> logEvents, TextWriter output);
-    }
+    /// <param name="logEvents">
+    /// The events to format.
+    /// </param>
+    /// <param name="output">
+    /// The payload to send over the network.
+    /// </param>
+    void Format(IEnumerable<string> logEvents, TextWriter output);
 }

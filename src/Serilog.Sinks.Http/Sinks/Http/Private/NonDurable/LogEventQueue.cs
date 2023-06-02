@@ -15,88 +15,87 @@
 using System;
 using System.Collections.Generic;
 
-namespace Serilog.Sinks.Http.Private.NonDurable
+namespace Serilog.Sinks.Http.Private.NonDurable;
+
+public class LogEventQueue
 {
-    public class LogEventQueue
+    private readonly Queue<string> queue;
+    private readonly long? queueLimitBytes;
+    private readonly object syncRoot = new();
+
+    private long queueBytes;
+
+    public LogEventQueue(long? queueLimitBytes = null)
     {
-        private readonly Queue<string> queue;
-        private readonly long? queueLimitBytes;
-        private readonly object syncRoot = new();
+        if (queueLimitBytes < 1)
+            throw new ArgumentException("queueLimitBytes must be either null or greater than 0", nameof(queueLimitBytes));
 
-        private long queueBytes;
+        queue = new Queue<string>();
+        this.queueLimitBytes = queueLimitBytes;
 
-        public LogEventQueue(long? queueLimitBytes = null)
+        queueBytes = 0;
+    }
+
+    public void Enqueue(string logEvent)
+    {
+        var result = TryEnqueue(logEvent);
+        if (result != EnqueueResult.Ok)
         {
-            if (queueLimitBytes < 1)
-                throw new ArgumentException("queueLimitBytes must be either null or greater than 0", nameof(queueLimitBytes));
-
-            queue = new Queue<string>();
-            this.queueLimitBytes = queueLimitBytes;
-
-            queueBytes = 0;
+            throw new Exception($"Enqueue log event failed: {result}");
         }
+    }
 
-        public void Enqueue(string logEvent)
+    public EnqueueResult TryEnqueue(string logEvent)
+    {
+        lock (syncRoot)
         {
-            var result = TryEnqueue(logEvent);
-            if (result != EnqueueResult.Ok)
+            var logEventByteSize = ByteSize.From(logEvent);
+            if (queueBytes + logEventByteSize > queueLimitBytes)
             {
-                throw new Exception($"Enqueue log event failed: {result}");
+                return EnqueueResult.QueueFull;
             }
-        }
 
-        public EnqueueResult TryEnqueue(string logEvent)
+            queueBytes += logEventByteSize;
+            queue.Enqueue(logEvent);
+            return EnqueueResult.Ok;
+        }
+    }
+
+    public DequeueResult TryDequeue(long? logEventMaxSize, out string logEvent)
+    {
+        lock (syncRoot)
         {
-            lock (syncRoot)
+            if (queue.Count == 0)
             {
-                var logEventByteSize = ByteSize.From(logEvent);
-                if (queueBytes + logEventByteSize > queueLimitBytes)
-                {
-                    return EnqueueResult.QueueFull;
-                }
-
-                queueBytes += logEventByteSize;
-                queue.Enqueue(logEvent);
-                return EnqueueResult.Ok;
+                logEvent = string.Empty;
+                return DequeueResult.QueueEmpty;
             }
-        }
 
-        public DequeueResult TryDequeue(long? logEventMaxSize, out string logEvent)
-        {
-            lock (syncRoot)
+            logEvent = queue.Peek();
+            var logEventByteSize = ByteSize.From(logEvent);
+
+            if (logEventByteSize > logEventMaxSize)
             {
-                if (queue.Count == 0)
-                {
-                    logEvent = string.Empty;
-                    return DequeueResult.QueueEmpty;
-                }
-
-                logEvent = queue.Peek();
-                var logEventByteSize = ByteSize.From(logEvent);
-
-                if (logEventByteSize > logEventMaxSize)
-                {
-                    logEvent = string.Empty;
-                    return DequeueResult.MaxSizeViolation;
-                }
-
-                queueBytes -= logEventByteSize;
-                queue.Dequeue();
-                return DequeueResult.Ok;
+                logEvent = string.Empty;
+                return DequeueResult.MaxSizeViolation;
             }
-        }
 
-        public enum EnqueueResult
-        {
-            Ok,
-            QueueFull
+            queueBytes -= logEventByteSize;
+            queue.Dequeue();
+            return DequeueResult.Ok;
         }
+    }
 
-        public enum DequeueResult
-        {
-            Ok,
-            QueueEmpty,
-            MaxSizeViolation
-        }
+    public enum EnqueueResult
+    {
+        Ok,
+        QueueFull
+    }
+
+    public enum DequeueResult
+    {
+        Ok,
+        QueueEmpty,
+        MaxSizeViolation
     }
 }

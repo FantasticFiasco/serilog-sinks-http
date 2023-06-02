@@ -5,44 +5,43 @@ using Serilog.Support.Fixtures;
 using Shouldly;
 using Xunit;
 
-namespace Serilog
+namespace Serilog;
+
+public class WikiPageDocumentationShould
+    : IClassFixture<XmlDocumentationFixture>, IClassFixture<GitHubWikiFixture>
 {
-    public class WikiPageDocumentationShould
-        : IClassFixture<XmlDocumentationFixture>, IClassFixture<GitHubWikiFixture>
+    private readonly GitHubWikiFixture gitHubWikiFixture;
+    private readonly XmlDocumentationFixture xmlDocumentationFixture;
+
+    public WikiPageDocumentationShould(GitHubWikiFixture gitHubWikiFixture, XmlDocumentationFixture xmlDocumentationFixture)
     {
-        private readonly GitHubWikiFixture gitHubWikiFixture;
-        private readonly XmlDocumentationFixture xmlDocumentationFixture;
+        this.gitHubWikiFixture = gitHubWikiFixture;
+        this.xmlDocumentationFixture = xmlDocumentationFixture;
+    }
 
-        public WikiPageDocumentationShould(GitHubWikiFixture gitHubWikiFixture, XmlDocumentationFixture xmlDocumentationFixture)
+    [TheoryOnMainBranch(Skip = "Beta has been released")]
+    [InlineData("HTTP-sink.md", "Http")]
+    [InlineData("Durable-file-size-rolled-HTTP-sink.md", "DurableHttpUsingFileSizeRolledBuffers")]
+    [InlineData("Durable-time-rolled-HTTP-sink.md", "DurableHttpUsingTimeRolledBuffers")]
+    public async Task MatchCode(string wikiPage, string extensionName)
+    {
+        // Arrange
+        await gitHubWikiFixture.LoadAsync(wikiPage);
+
+        var parameterNames = typeof(LoggerSinkConfigurationExtensions)
+            .GetMethod(extensionName)
+            .GetParameters()
+            .Where(parameter => parameter.ParameterType != typeof(LoggerSinkConfiguration))
+            .Select(parameter => parameter.Name);
+
+        foreach (var parameterName in parameterNames)
         {
-            this.gitHubWikiFixture = gitHubWikiFixture;
-            this.xmlDocumentationFixture = xmlDocumentationFixture;
-        }
+            // Act
+            var got = gitHubWikiFixture.GetDescription(parameterName);
+            var want = xmlDocumentationFixture.GetDescription(extensionName, parameterName);
 
-        [TheoryOnMainBranch(Skip = "Beta has been released")]
-        [InlineData("HTTP-sink.md", "Http")]
-        [InlineData("Durable-file-size-rolled-HTTP-sink.md", "DurableHttpUsingFileSizeRolledBuffers")]
-        [InlineData("Durable-time-rolled-HTTP-sink.md", "DurableHttpUsingTimeRolledBuffers")]
-        public async Task MatchCode(string wikiPage, string extensionName)
-        {
-            // Arrange
-            await gitHubWikiFixture.LoadAsync(wikiPage);
-
-            var parameterNames = typeof(LoggerSinkConfigurationExtensions)
-                .GetMethod(extensionName)
-                .GetParameters()
-                .Where(parameter => parameter.ParameterType != typeof(LoggerSinkConfiguration))
-                .Select(parameter => parameter.Name);
-
-            foreach (var parameterName in parameterNames)
-            {
-                // Act
-                var got = gitHubWikiFixture.GetDescription(parameterName);
-                var want = xmlDocumentationFixture.GetDescription(extensionName, parameterName);
-
-                // Assert
-                got.ShouldBe(want);
-            }
+            // Assert
+            got.ShouldBe(want);
         }
     }
 }

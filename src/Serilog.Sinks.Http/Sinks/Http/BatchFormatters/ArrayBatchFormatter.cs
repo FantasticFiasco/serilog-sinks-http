@@ -17,48 +17,47 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Serilog.Sinks.Http.BatchFormatters
+namespace Serilog.Sinks.Http.BatchFormatters;
+
+/// <summary>
+/// Formatter serializing batches of log events into a JSON array.
+/// <para />
+/// Example:
+/// [
+///   { event n },
+///   { event n+1 }
+/// ]
+/// </summary>
+public class ArrayBatchFormatter : IBatchFormatter
 {
-    /// <summary>
-    /// Formatter serializing batches of log events into a JSON array.
-    /// <para />
-    /// Example:
-    /// [
-    ///   { event n },
-    ///   { event n+1 }
-    /// ]
-    /// </summary>
-    public class ArrayBatchFormatter : IBatchFormatter
+    /// <inheritdoc />
+    public void Format(IEnumerable<string> logEvents, TextWriter output)
     {
-        /// <inheritdoc />
-        public void Format(IEnumerable<string> logEvents, TextWriter output)
+        if (logEvents == null) throw new ArgumentNullException(nameof(logEvents));
+        if (output == null) throw new ArgumentNullException(nameof(output));
+
+        // Abort if sequence of log events is empty
+        if (!logEvents.Any())
         {
-            if (logEvents == null) throw new ArgumentNullException(nameof(logEvents));
-            if (output == null) throw new ArgumentNullException(nameof(output));
-
-            // Abort if sequence of log events is empty
-            if (!logEvents.Any())
-            {
-                return;
-            }
-
-            output.Write("[");
-
-            var delimStart = string.Empty;
-
-            foreach (var logEvent in logEvents)
-            {
-                if (string.IsNullOrWhiteSpace(logEvent))
-                {
-                    continue;
-                }
-
-                output.Write(delimStart);
-                output.Write(logEvent);
-                delimStart = ",";
-            }
-
-            output.Write("]");
+            return;
         }
+
+        output.Write("[");
+
+        var delimStart = string.Empty;
+
+        foreach (var logEvent in logEvents)
+        {
+            if (string.IsNullOrWhiteSpace(logEvent))
+            {
+                continue;
+            }
+
+            output.Write(delimStart);
+            output.Write(logEvent);
+            delimStart = ",";
+        }
+
+        output.Write("]");
     }
 }

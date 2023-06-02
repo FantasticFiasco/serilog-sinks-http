@@ -1,14 +1,13 @@
-﻿namespace System.Threading.Tasks
+﻿namespace System.Threading.Tasks;
+
+public static class TaskFactoryExtensions
 {
-    public static class TaskFactoryExtensions
+    public static void StartNewAfterDelay(this TaskFactory self, TimeSpan duration, Action action)
     {
-        public static void StartNewAfterDelay(this TaskFactory self, TimeSpan duration, Action action)
+        self.StartNew(() =>
         {
-            self.StartNew(() =>
-            {
-                Thread.Sleep(duration);
-                action();
-            });
-        }
+            Thread.Sleep(duration);
+            action();
+        });
     }
 }

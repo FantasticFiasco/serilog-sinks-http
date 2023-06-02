@@ -1,7 +1,6 @@
-﻿namespace Serilog.Support.TextFormatters
+﻿namespace Serilog.Support.TextFormatters;
+
+public class NormalTextLogEvent
 {
-    public class NormalTextLogEvent
-    {
-        public string RenderedMessage { get; set; }
-    }
+    public string RenderedMessage { get; set; }
 }

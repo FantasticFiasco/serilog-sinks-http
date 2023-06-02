@@ -6,256 +6,255 @@ using Serilog.Support;
 using Shouldly;
 using Xunit;
 
-namespace Serilog.Sinks.Http.Private.Durable
+namespace Serilog.Sinks.Http.Private.Durable;
+
+public class FileSizeRolledBufferFilesShould
 {
-    public class FileSizeRolledBufferFilesShould
+    private readonly DirectoryServiceMock directoryService;
+
+    public FileSizeRolledBufferFilesShould()
     {
-        private readonly DirectoryServiceMock directoryService;
+        directoryService = new DirectoryServiceMock();
+    }
 
-        public FileSizeRolledBufferFilesShould()
+    [Theory]
+    [InlineData("SomeBuffer", @"{CurrentDirectory}\SomeBuffer.bookmark")]
+    [InlineData(@".\SomeBuffer", @"{CurrentDirectory}\SomeBuffer.bookmark")]
+    [InlineData(@"Folder\SomeBuffer", @"{CurrentDirectory}\Folder\SomeBuffer.bookmark")]
+    [InlineData(@".\Folder\SomeBuffer", @"{CurrentDirectory}\Folder\SomeBuffer.bookmark")]
+    [InlineData(@"..\Folder\SomeBuffer", @"{CurrentDirectory}\..\Folder\SomeBuffer.bookmark")]
+    [InlineData(@".\..\Folder\SomeBuffer", @"{CurrentDirectory}\..\Folder\SomeBuffer.bookmark")]
+    [InlineData(@"C:\SomeBuffer", @"C:\SomeBuffer.bookmark")]
+    [InlineData(@"C:\Folder\SomeBuffer", @"C:\Folder\SomeBuffer.bookmark")]
+    public void HaveBookmarkFileName(string bufferBaseFilePath, string want)
+    {
+        // Arrange
+        var bufferFiles = new FileSizeRolledBufferFiles(directoryService, bufferBaseFilePath);
+
+        want = want.Replace("{CurrentDirectory}", Environment.CurrentDirectory);
+        want = Path.GetFullPath(want);
+
+        // Act
+        var got = bufferFiles.BookmarkFileName;
+
+        // Assert
+        got.ShouldBe(want);
+    }
+
+    [Fact]
+    public void GetOnlyBufferFiles()
+    {
+        // Arrange
+        var bufferFiles = new FileSizeRolledBufferFiles(directoryService, "SomeBuffer");
+
+        var want = new[]
         {
-            directoryService = new DirectoryServiceMock();
-        }
+            "SomeBuffer-20001020.txt",
+            "SomeBuffer-20001020_001.txt",
+            "SomeBuffer-20001020_010.txt",
+            "SomeBuffer-20001020_100.txt",
+            "SomeBuffer-20001020_1000.txt",
+            "SomeBuffer-20001020_10000.txt"
+        };
 
-        [Theory]
-        [InlineData("SomeBuffer", @"{CurrentDirectory}\SomeBuffer.bookmark")]
-        [InlineData(@".\SomeBuffer", @"{CurrentDirectory}\SomeBuffer.bookmark")]
-        [InlineData(@"Folder\SomeBuffer", @"{CurrentDirectory}\Folder\SomeBuffer.bookmark")]
-        [InlineData(@".\Folder\SomeBuffer", @"{CurrentDirectory}\Folder\SomeBuffer.bookmark")]
-        [InlineData(@"..\Folder\SomeBuffer", @"{CurrentDirectory}\..\Folder\SomeBuffer.bookmark")]
-        [InlineData(@".\..\Folder\SomeBuffer", @"{CurrentDirectory}\..\Folder\SomeBuffer.bookmark")]
-        [InlineData(@"C:\SomeBuffer", @"C:\SomeBuffer.bookmark")]
-        [InlineData(@"C:\Folder\SomeBuffer", @"C:\Folder\SomeBuffer.bookmark")]
-        public void HaveBookmarkFileName(string bufferBaseFilePath, string want)
-        {
-            // Arrange
-            var bufferFiles = new FileSizeRolledBufferFiles(directoryService, bufferBaseFilePath);
-
-            want = want.Replace("{CurrentDirectory}", Environment.CurrentDirectory);
-            want = Path.GetFullPath(want);
-
-            // Act
-            var got = bufferFiles.BookmarkFileName;
-
-            // Assert
-            got.ShouldBe(want);
-        }
-
-        [Fact]
-        public void GetOnlyBufferFiles()
-        {
-            // Arrange
-            var bufferFiles = new FileSizeRolledBufferFiles(directoryService, "SomeBuffer");
-
-            var want = new[]
+        directoryService.Files = Randomize.Values(
+            want.Concat(new[]
             {
-                "SomeBuffer-20001020.txt",
-                "SomeBuffer-20001020_001.txt",
-                "SomeBuffer-20001020_010.txt",
-                "SomeBuffer-20001020_100.txt",
-                "SomeBuffer-20001020_1000.txt",
-                "SomeBuffer-20001020_10000.txt"
-            };
+                // Wrong extension
+                "SomeBuffer-20001020.config",
+                "SomeBuffer-20001020.dll",
+                "SomeBuffer-20001020.exe",
+                "SomeBuffer-20001020.xml",
+                // Wrong file name format
+                "SomeBuffer.txt",
+                "SomeBuffer.json",
+                "XSomeBuffer-20001020.txt",
+                "XSomeBuffer-20001020.json",
+                "SomeBufferX-20001020.txt",
+                "SomeBufferX-20001020.json",
+                "SomeBuffer-X20001020.txt",
+                "SomeBuffer-X20001020.json",
+                "SomeBuffer-20001020X.txt",
+                "SomeBuffer-20001020X.json",
+                "SomeBuffer-20001020.Xtxt",
+                "SomeBuffer-20001020.Xjson"
+            }));
 
-            directoryService.Files = Randomize.Values(
-                want.Concat(new[]
-                {
-                    // Wrong extension
-                    "SomeBuffer-20001020.config",
-                    "SomeBuffer-20001020.dll",
-                    "SomeBuffer-20001020.exe",
-                    "SomeBuffer-20001020.xml",
-                    // Wrong file name format
-                    "SomeBuffer.txt",
-                    "SomeBuffer.json",
-                    "XSomeBuffer-20001020.txt",
-                    "XSomeBuffer-20001020.json",
-                    "SomeBufferX-20001020.txt",
-                    "SomeBufferX-20001020.json",
-                    "SomeBuffer-X20001020.txt",
-                    "SomeBuffer-X20001020.json",
-                    "SomeBuffer-20001020X.txt",
-                    "SomeBuffer-20001020X.json",
-                    "SomeBuffer-20001020.Xtxt",
-                    "SomeBuffer-20001020.Xjson"
-                }));
+        // Act
+        var got = bufferFiles.Get();
 
-            // Act
-            var got = bufferFiles.Get();
+        // Assert
+        got.ShouldBe(want);
+    }
 
-            // Assert
-            got.ShouldBe(want);
-        }
+    [Fact]
+    public void HandleThreeDigitSequenceNumbers()
+    {
+        // Arrange
+        var bufferFiles = new FileSizeRolledBufferFiles(directoryService, "SomeBuffer");
 
-        [Fact]
-        public void HandleThreeDigitSequenceNumbers()
+        var want = new[]
         {
-            // Arrange
-            var bufferFiles = new FileSizeRolledBufferFiles(directoryService, "SomeBuffer");
+            "SomeBuffer-20001020.txt",
+            "SomeBuffer-20001020_001.txt",
+            "SomeBuffer-20001020_002.txt",
+            "SomeBuffer-20001020_003.txt",
+            "SomeBuffer-20001020_004.txt",
+            "SomeBuffer-20001020_005.txt",
+            "SomeBuffer-20001020_006.txt",
+            "SomeBuffer-20001020_007.txt",
+            "SomeBuffer-20001020_008.txt",
+            "SomeBuffer-20001020_009.txt",
+            "SomeBuffer-20001020_010.txt"
+        };
 
-            var want = new[]
-            {
-                "SomeBuffer-20001020.txt",
-                "SomeBuffer-20001020_001.txt",
-                "SomeBuffer-20001020_002.txt",
-                "SomeBuffer-20001020_003.txt",
-                "SomeBuffer-20001020_004.txt",
-                "SomeBuffer-20001020_005.txt",
-                "SomeBuffer-20001020_006.txt",
-                "SomeBuffer-20001020_007.txt",
-                "SomeBuffer-20001020_008.txt",
-                "SomeBuffer-20001020_009.txt",
-                "SomeBuffer-20001020_010.txt"
-            };
+        directoryService.Files = Randomize.Values(want);
 
-            directoryService.Files = Randomize.Values(want);
+        // Act
+        var got = bufferFiles.Get();
 
-            // Act
-            var got = bufferFiles.Get();
+        // Assert
+        got.ShouldBe(want);
+    }
 
-            // Assert
-            got.ShouldBe(want);
-        }
+    [Fact]
+    public void HandleThreeDigitSequenceNumbersDuringV8Migration()
+    {
+        // Arrange
+        var bufferFiles = new FileSizeRolledBufferFiles(directoryService, "SomeBuffer");
 
-        [Fact]
-        public void HandleThreeDigitSequenceNumbersDuringV8Migration()
+        var want = new[]
         {
-            // Arrange
-            var bufferFiles = new FileSizeRolledBufferFiles(directoryService, "SomeBuffer");
+            // "json" extension was used < v8
+            "SomeBuffer-20001020.json",
+            "SomeBuffer-20001020_001.json",
+            "SomeBuffer-20001020_002.json",
+            "SomeBuffer-20001020_003.json",
+            "SomeBuffer-20001020_004.json",
+            "SomeBuffer-20001020_005.json",
+            "SomeBuffer-20001020_006.json",
+            "SomeBuffer-20001020_007.json",
+            "SomeBuffer-20001020_008.json",
+            "SomeBuffer-20001020_009.json",
+            "SomeBuffer-20001020_010.json",
+            // "txt" is used from >= v8
+            "SomeBuffer-20001020.txt",
+            "SomeBuffer-20001020_001.txt",
+            "SomeBuffer-20001020_002.txt",
+            "SomeBuffer-20001020_003.txt",
+            "SomeBuffer-20001020_004.txt",
+            "SomeBuffer-20001020_005.txt",
+            "SomeBuffer-20001020_006.txt",
+            "SomeBuffer-20001020_007.txt",
+            "SomeBuffer-20001020_008.txt",
+            "SomeBuffer-20001020_009.txt",
+            "SomeBuffer-20001020_010.txt"
+        };
 
-            var want = new[]
-            {
-                // "json" extension was used < v8
-                "SomeBuffer-20001020.json",
-                "SomeBuffer-20001020_001.json",
-                "SomeBuffer-20001020_002.json",
-                "SomeBuffer-20001020_003.json",
-                "SomeBuffer-20001020_004.json",
-                "SomeBuffer-20001020_005.json",
-                "SomeBuffer-20001020_006.json",
-                "SomeBuffer-20001020_007.json",
-                "SomeBuffer-20001020_008.json",
-                "SomeBuffer-20001020_009.json",
-                "SomeBuffer-20001020_010.json",
-                // "txt" is used from >= v8
-                "SomeBuffer-20001020.txt",
-                "SomeBuffer-20001020_001.txt",
-                "SomeBuffer-20001020_002.txt",
-                "SomeBuffer-20001020_003.txt",
-                "SomeBuffer-20001020_004.txt",
-                "SomeBuffer-20001020_005.txt",
-                "SomeBuffer-20001020_006.txt",
-                "SomeBuffer-20001020_007.txt",
-                "SomeBuffer-20001020_008.txt",
-                "SomeBuffer-20001020_009.txt",
-                "SomeBuffer-20001020_010.txt"
-            };
+        directoryService.Files = Randomize.Values(want);
 
-            directoryService.Files = Randomize.Values(want);
+        // Act
+        var got = bufferFiles.Get();
 
-            // Act
-            var got = bufferFiles.Get();
+        // Assert
+        got.ShouldBe(want);
+    }
 
-            // Assert
-            got.ShouldBe(want);
-        }
+    [Fact]
+    public void HandleFourDigitSequenceNumbers()
+    {
+        // Arrange
+        var bufferFiles = new FileSizeRolledBufferFiles(directoryService, "SomeBuffer");
 
-        [Fact]
-        public void HandleFourDigitSequenceNumbers()
+        var want = new[]
         {
-            // Arrange
-            var bufferFiles = new FileSizeRolledBufferFiles(directoryService, "SomeBuffer");
+            "SomeBuffer-20001020_999.txt",
+            "SomeBuffer-20001020_1000.txt",
+            "SomeBuffer-20001020_1001.txt"
+        };
 
-            var want = new[]
-            {
-                "SomeBuffer-20001020_999.txt",
-                "SomeBuffer-20001020_1000.txt",
-                "SomeBuffer-20001020_1001.txt"
-            };
+        directoryService.Files = Randomize.Values(want);
 
-            directoryService.Files = Randomize.Values(want);
+        // Act
+        var got = bufferFiles.Get();
 
-            // Act
-            var got = bufferFiles.Get();
+        // Assert
+        got.ShouldBe(want);
+    }
 
-            // Assert
-            got.ShouldBe(want);
-        }
+    [Fact]
+    public void HandleFourDigitSequenceNumbersDuringV8Migration()
+    {
+        // Arrange
+        var bufferFiles = new FileSizeRolledBufferFiles(directoryService, "SomeBuffer");
 
-        [Fact]
-        public void HandleFourDigitSequenceNumbersDuringV8Migration()
+        var want = new[]
         {
-            // Arrange
-            var bufferFiles = new FileSizeRolledBufferFiles(directoryService, "SomeBuffer");
+            // "json" extension was used < v8
+            "SomeBuffer-20001020_999.json",
+            "SomeBuffer-20001020_1000.json",
+            "SomeBuffer-20001020_1001.json",
+            // "txt" is used from >= v8
+            "SomeBuffer-20001020.txt",
+            "SomeBuffer-20001020_001.txt",
+            "SomeBuffer-20001020_002.txt"
+        };
 
-            var want = new[]
-            {
-                // "json" extension was used < v8
-                "SomeBuffer-20001020_999.json",
-                "SomeBuffer-20001020_1000.json",
-                "SomeBuffer-20001020_1001.json",
-                // "txt" is used from >= v8
-                "SomeBuffer-20001020.txt",
-                "SomeBuffer-20001020_001.txt",
-                "SomeBuffer-20001020_002.txt"
-            };
+        directoryService.Files = Randomize.Values(want);
 
-            directoryService.Files = Randomize.Values(want);
+        // Act
+        var got = bufferFiles.Get();
 
-            // Act
-            var got = bufferFiles.Get();
+        // Assert
+        got.ShouldBe(want);
+    }
 
-            // Assert
-            got.ShouldBe(want);
-        }
+    [Fact]
+    public void HandleFiveDigitSequenceNumbers()
+    {
+        // Arrange
+        var bufferFiles = new FileSizeRolledBufferFiles(directoryService, "SomeBuffer");
 
-        [Fact]
-        public void HandleFiveDigitSequenceNumbers()
+        var want = new[]
         {
-            // Arrange
-            var bufferFiles = new FileSizeRolledBufferFiles(directoryService, "SomeBuffer");
+            "SomeBuffer-20001020_9999.txt",
+            "SomeBuffer-20001020_10000.txt",
+            "SomeBuffer-20001020_10001.txt"
+        };
 
-            var want = new[]
-            {
-                "SomeBuffer-20001020_9999.txt",
-                "SomeBuffer-20001020_10000.txt",
-                "SomeBuffer-20001020_10001.txt"
-            };
+        directoryService.Files = Randomize.Values(want);
 
-            directoryService.Files = Randomize.Values(want);
+        // Act
+        var got = bufferFiles.Get();
 
-            // Act
-            var got = bufferFiles.Get();
+        // Assert
+        got.ShouldBe(want);
+    }
 
-            // Assert
-            got.ShouldBe(want);
-        }
+    [Fact]
+    public void HandleFiveDigitsDuringV8Migration()
+    {
+        // Arrange
+        var bufferFiles = new FileSizeRolledBufferFiles(directoryService, "SomeBuffer");
 
-        [Fact]
-        public void HandleFiveDigitsDuringV8Migration()
+        var want = new[]
         {
-            // Arrange
-            var bufferFiles = new FileSizeRolledBufferFiles(directoryService, "SomeBuffer");
+            // "json" extension was used < v8
+            "SomeBuffer-20001020_9999.json",
+            "SomeBuffer-20001020_10000.json",
+            "SomeBuffer-20001020_10001.json",
+            // "txt" is used from >= v8
+            "SomeBuffer-20001020_001.txt",
+            "SomeBuffer-20001020_002.txt",
+            "SomeBuffer-20001020_003.txt"
+        };
 
-            var want = new[]
-            {
-                // "json" extension was used < v8
-                "SomeBuffer-20001020_9999.json",
-                "SomeBuffer-20001020_10000.json",
-                "SomeBuffer-20001020_10001.json",
-                // "txt" is used from >= v8
-                "SomeBuffer-20001020_001.txt",
-                "SomeBuffer-20001020_002.txt",
-                "SomeBuffer-20001020_003.txt"
-            };
+        directoryService.Files = Randomize.Values(want);
 
-            directoryService.Files = Randomize.Values(want);
+        // Act
+        var got = bufferFiles.Get();
 
-            // Act
-            var got = bufferFiles.Get();
-
-            // Assert
-            got.ShouldBe(want);
-        }
+        // Assert
+        got.ShouldBe(want);
     }
 }

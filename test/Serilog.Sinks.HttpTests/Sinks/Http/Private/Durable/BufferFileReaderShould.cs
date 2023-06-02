@@ -3,220 +3,219 @@ using System.IO;
 using Shouldly;
 using Xunit;
 
-namespace Serilog.Sinks.Http.Private.Durable
+namespace Serilog.Sinks.Http.Private.Durable;
+
+public class BufferFileReaderShould
 {
-    public class BufferFileReaderShould
+    private const string FooLogEvent = "{ \"foo\": 1 }";
+    private const string BarLogEvent = "{ \"bar\": 2 }";
+
+    private long nextLineBeginsAtOffset;
+
+    [Fact]
+    public void ReadLogEvent()
     {
-        private const string FooLogEvent = "{ \"foo\": 1 }";
-        private const string BarLogEvent = "{ \"bar\": 2 }";
+        // Arrange
+        using var stream = new MemoryStream();
 
-        private long nextLineBeginsAtOffset;
+        using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
+        writer.Write(FooLogEvent + Environment.NewLine);
+        writer.Flush();
 
-        [Fact]
-        public void ReadLogEvent()
-        {
-            // Arrange
-            using var stream = new MemoryStream();
+        // Act
+        var got = BufferFileReader.Read(
+            stream,
+            ref nextLineBeginsAtOffset,
+            null,
+            null,
+            null);
 
-            using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
-            writer.Write(FooLogEvent + Environment.NewLine);
-            writer.Flush();
+        // Assert
+        got.LogEvents.ShouldBe(new[] { FooLogEvent });
+        got.HasReachedLimit.ShouldBeFalse();
+        nextLineBeginsAtOffset.ShouldBe(stream.Length);
+    }
 
-            // Act
-            var got = BufferFileReader.Read(
-                stream,
-                ref nextLineBeginsAtOffset,
-                null,
-                null,
-                null);
+    [Fact]
+    public void ReadLogEvents()
+    {
+        // Arrange
+        using var stream = new MemoryStream();
 
-            // Assert
-            got.LogEvents.ShouldBe(new[] { FooLogEvent });
-            got.HasReachedLimit.ShouldBeFalse();
-            nextLineBeginsAtOffset.ShouldBe(stream.Length);
-        }
+        using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
+        writer.Write(FooLogEvent + Environment.NewLine);
+        writer.Write(BarLogEvent + Environment.NewLine);
+        writer.Flush();
 
-        [Fact]
-        public void ReadLogEvents()
-        {
-            // Arrange
-            using var stream = new MemoryStream();
+        // Act
+        var got = BufferFileReader.Read(
+            stream,
+            ref nextLineBeginsAtOffset,
+            null,
+            null,
+            null);
 
-            using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
-            writer.Write(FooLogEvent + Environment.NewLine);
-            writer.Write(BarLogEvent + Environment.NewLine);
-            writer.Flush();
+        // Assert
+        got.LogEvents.ShouldBe(new[] { FooLogEvent, BarLogEvent });
+        got.HasReachedLimit.ShouldBeFalse();
+        nextLineBeginsAtOffset.ShouldBe(stream.Length);
+    }
 
-            // Act
-            var got = BufferFileReader.Read(
-                stream,
-                ref nextLineBeginsAtOffset,
-                null,
-                null,
-                null);
+    [Fact]
+    public void NotReadFirstLogEventGivenPartiallyWritten()
+    {
+        // Arrange
+        using var stream = new MemoryStream();
 
-            // Assert
-            got.LogEvents.ShouldBe(new[] { FooLogEvent, BarLogEvent });
-            got.HasReachedLimit.ShouldBeFalse();
-            nextLineBeginsAtOffset.ShouldBe(stream.Length);
-        }
+        using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
+        writer.Write(FooLogEvent);  // The partially written log event is missing new line
+        writer.Flush();
 
-        [Fact]
-        public void NotReadFirstLogEventGivenPartiallyWritten()
-        {
-            // Arrange
-            using var stream = new MemoryStream();
+        // Act
+        var got = BufferFileReader.Read(
+            stream,
+            ref nextLineBeginsAtOffset,
+            null,
+            null,
+            null);
 
-            using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
-            writer.Write(FooLogEvent);  // The partially written log event is missing new line
-            writer.Flush();
+        // Assert
+        got.LogEvents.ShouldBeEmpty();
+        got.HasReachedLimit.ShouldBeFalse();
+        nextLineBeginsAtOffset.ShouldBe(0);
+    }
 
-            // Act
-            var got = BufferFileReader.Read(
-                stream,
-                ref nextLineBeginsAtOffset,
-                null,
-                null,
-                null);
+    [Fact]
+    public void NotReadSecondLogEventGivenPartiallyWritten()
+    {
+        // Arrange
+        using var stream = new MemoryStream();
 
-            // Assert
-            got.LogEvents.ShouldBeEmpty();
-            got.HasReachedLimit.ShouldBeFalse();
-            nextLineBeginsAtOffset.ShouldBe(0);
-        }
+        using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
+        writer.Write(FooLogEvent + Environment.NewLine);
+        writer.Write(BarLogEvent);  // The partially written log event is missing new line
+        writer.Flush();
 
-        [Fact]
-        public void NotReadSecondLogEventGivenPartiallyWritten()
-        {
-            // Arrange
-            using var stream = new MemoryStream();
+        // Act
+        var got = BufferFileReader.Read(
+            stream,
+            ref nextLineBeginsAtOffset,
+            null,
+            null,
+            null);
 
-            using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
-            writer.Write(FooLogEvent + Environment.NewLine);
-            writer.Write(BarLogEvent);  // The partially written log event is missing new line
-            writer.Flush();
+        // Assert
+        got.LogEvents.ShouldBe(new[] { FooLogEvent });
+        got.HasReachedLimit.ShouldBeFalse();
+        nextLineBeginsAtOffset.ShouldBe(FooLogEvent.Length + Environment.NewLine.Length);
+    }
 
-            // Act
-            var got = BufferFileReader.Read(
-                stream,
-                ref nextLineBeginsAtOffset,
-                null,
-                null,
-                null);
+    [Fact]
+    public void RespectLogEventLimitBytes()
+    {
+        // Arrange
+        using var stream = new MemoryStream();
 
-            // Assert
-            got.LogEvents.ShouldBe(new[] { FooLogEvent });
-            got.HasReachedLimit.ShouldBeFalse();
-            nextLineBeginsAtOffset.ShouldBe(FooLogEvent.Length + Environment.NewLine.Length);
-        }
+        using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
+        writer.Write(FooLogEvent + Environment.NewLine);
+        writer.Flush();
 
-        [Fact]
-        public void RespectLogEventLimitBytes()
-        {
-            // Arrange
-            using var stream = new MemoryStream();
+        var logEventLimitBytes = ByteSize.From(FooLogEvent) - 1;
 
-            using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
-            writer.Write(FooLogEvent + Environment.NewLine);
-            writer.Flush();
+        // Act
+        var got = BufferFileReader.Read(
+            stream,
+            ref nextLineBeginsAtOffset,
+            logEventLimitBytes,
+            null,
+            null);
 
-            var logEventLimitBytes = ByteSize.From(FooLogEvent) - 1;
+        // Assert
+        got.LogEvents.ShouldBeEmpty();
+        got.HasReachedLimit.ShouldBeFalse();
+        nextLineBeginsAtOffset.ShouldBe(stream.Length);
+    }
 
-            // Act
-            var got = BufferFileReader.Read(
-                stream,
-                ref nextLineBeginsAtOffset,
-                logEventLimitBytes,
-                null,
-                null);
+    [Fact]
+    public void RespectLogEventsInBatchLimit()
+    {
+        // Arrange
+        using var stream = new MemoryStream();
 
-            // Assert
-            got.LogEvents.ShouldBeEmpty();
-            got.HasReachedLimit.ShouldBeFalse();
-            nextLineBeginsAtOffset.ShouldBe(stream.Length);
-        }
+        using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
+        writer.Write(FooLogEvent + Environment.NewLine);
+        writer.Write(BarLogEvent + Environment.NewLine);
+        writer.Flush();
 
-        [Fact]
-        public void RespectLogEventsInBatchLimit()
-        {
-            // Arrange
-            using var stream = new MemoryStream();
+        const int logEventsInBatchLimit = 1;
 
-            using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
-            writer.Write(FooLogEvent + Environment.NewLine);
-            writer.Write(BarLogEvent + Environment.NewLine);
-            writer.Flush();
+        // Act
+        var got = BufferFileReader.Read(
+            stream,
+            ref nextLineBeginsAtOffset,
+            null,
+            logEventsInBatchLimit,
+            null);
 
-            const int logEventsInBatchLimit = 1;
+        // Assert
+        got.LogEvents.ShouldBe(new[] { FooLogEvent });
+        got.HasReachedLimit.ShouldBeTrue();
+        nextLineBeginsAtOffset.ShouldBe(FooLogEvent.Length + Environment.NewLine.Length);
+    }
 
-            // Act
-            var got = BufferFileReader.Read(
-                stream,
-                ref nextLineBeginsAtOffset,
-                null,
-                logEventsInBatchLimit,
-                null);
+    [Fact]
+    public void RespectBatchSizeLimit()
+    {
+        // Arrange
+        using var stream = new MemoryStream();
 
-            // Assert
-            got.LogEvents.ShouldBe(new[] { FooLogEvent });
-            got.HasReachedLimit.ShouldBeTrue();
-            nextLineBeginsAtOffset.ShouldBe(FooLogEvent.Length + Environment.NewLine.Length);
-        }
+        using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
+        writer.Write(FooLogEvent + Environment.NewLine);
+        writer.Write(BarLogEvent + Environment.NewLine);
+        writer.Flush();
 
-        [Fact]
-        public void RespectBatchSizeLimit()
-        {
-            // Arrange
-            using var stream = new MemoryStream();
+        var batchSizeLimit = stream.Length * 2 / 3;
 
-            using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
-            writer.Write(FooLogEvent + Environment.NewLine);
-            writer.Write(BarLogEvent + Environment.NewLine);
-            writer.Flush();
+        // Act
+        var got = BufferFileReader.Read(
+            stream,
+            ref nextLineBeginsAtOffset,
+            null,
+            null,
+            batchSizeLimit);
 
-            var batchSizeLimit = stream.Length * 2 / 3;
+        // Assert
+        got.LogEvents.ShouldBe(new[] { FooLogEvent });
+        got.HasReachedLimit.ShouldBeTrue();
+        nextLineBeginsAtOffset.ShouldBe(FooLogEvent.Length + Environment.NewLine.Length);
+    }
 
-            // Act
-            var got = BufferFileReader.Read(
-                stream,
-                ref nextLineBeginsAtOffset,
-                null,
-                null,
-                batchSizeLimit);
+    [Fact]
+    public void SkipLogEventGivenItExceedsBatchSizeLimit()
+    {
+        // Arrange
+        using var stream = new MemoryStream();
 
-            // Assert
-            got.LogEvents.ShouldBe(new[] { FooLogEvent });
-            got.HasReachedLimit.ShouldBeTrue();
-            nextLineBeginsAtOffset.ShouldBe(FooLogEvent.Length + Environment.NewLine.Length);
-        }
+        const string logEventExceedingBatchSizeLimit = "{ \"foo\": \"This document exceeds the batch size limit\" }";
 
-        [Fact]
-        public void SkipLogEventGivenItExceedsBatchSizeLimit()
-        {
-            // Arrange
-            using var stream = new MemoryStream();
+        using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
+        writer.Write(logEventExceedingBatchSizeLimit + Environment.NewLine);
+        writer.Write(BarLogEvent + Environment.NewLine);
+        writer.Flush();
 
-            const string logEventExceedingBatchSizeLimit = "{ \"foo\": \"This document exceeds the batch size limit\" }";
+        var batchSizeLimit = ByteSize.From(logEventExceedingBatchSizeLimit) - 1;
 
-            using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
-            writer.Write(logEventExceedingBatchSizeLimit + Environment.NewLine);
-            writer.Write(BarLogEvent + Environment.NewLine);
-            writer.Flush();
+        // Act
+        var got = BufferFileReader.Read(
+            stream,
+            ref nextLineBeginsAtOffset,
+            null,
+            null,
+            batchSizeLimit);
 
-            var batchSizeLimit = ByteSize.From(logEventExceedingBatchSizeLimit) - 1;
-
-            // Act
-            var got = BufferFileReader.Read(
-                stream,
-                ref nextLineBeginsAtOffset,
-                null,
-                null,
-                batchSizeLimit);
-
-            // Assert
-            got.LogEvents.ShouldBe(new[] { BarLogEvent });
-            got.HasReachedLimit.ShouldBeFalse();
-            nextLineBeginsAtOffset.ShouldBe(stream.Length);
-        }
+        // Assert
+        got.LogEvents.ShouldBe(new[] { BarLogEvent });
+        got.HasReachedLimit.ShouldBeFalse();
+        nextLineBeginsAtOffset.ShouldBe(stream.Length);
     }
 }

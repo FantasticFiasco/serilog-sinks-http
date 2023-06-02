@@ -4,65 +4,64 @@ using Serilog.Sinks.Http;
 using Serilog.Sinks.Http.Private.Durable;
 using Serilog.Sinks.Http.Private.IO;
 
-namespace Serilog.Support.Reflection
+namespace Serilog.Support.Reflection;
+
+public class TimeRolledDurableHttpSinkReflection
 {
-    public class TimeRolledDurableHttpSinkReflection
+    private readonly TimeRolledDurableHttpSink sink;
+
+    public TimeRolledDurableHttpSinkReflection(Logger logger)
     {
-        private readonly TimeRolledDurableHttpSink sink;
+        sink = logger.GetSink<TimeRolledDurableHttpSink>();
+    }
 
-        public TimeRolledDurableHttpSinkReflection(Logger logger)
-        {
-            sink = logger.GetSink<TimeRolledDurableHttpSink>();
-        }
+    public TimeRolledDurableHttpSinkReflection SetRequestUri(string requestUri)
+    {
+        sink
+            .GetNonPublicInstanceField<HttpLogShipper>("shipper")
+            .SetNonPublicInstanceField("requestUri", requestUri);
 
-        public TimeRolledDurableHttpSinkReflection SetRequestUri(string requestUri)
-        {
-            sink
-                .GetNonPublicInstanceField<HttpLogShipper>("shipper")
-                .SetNonPublicInstanceField("requestUri", requestUri);
+        return this;
+    }
 
-            return this;
-        }
+    public TimeRolledDurableHttpSinkReflection SetBufferBaseFileName(string bufferBaseFileName)
+    {
+        // Update shipper
+        var shipper = this.sink.GetNonPublicInstanceField<HttpLogShipper>("shipper");
+        var timeRolledBufferFiles = new TimeRolledBufferFiles(new DirectoryService(), bufferBaseFileName);
+        shipper.SetNonPublicInstanceField("bufferFiles", timeRolledBufferFiles);
 
-        public TimeRolledDurableHttpSinkReflection SetBufferBaseFileName(string bufferBaseFileName)
-        {
-            // Update shipper
-            var shipper = this.sink.GetNonPublicInstanceField<HttpLogShipper>("shipper");
-            var timeRolledBufferFiles = new TimeRolledBufferFiles(new DirectoryService(), bufferBaseFileName);
-            shipper.SetNonPublicInstanceField("bufferFiles", timeRolledBufferFiles);
+        // Update file sink
+        var sink = this.sink.GetNonPublicInstanceField<Logger>("sink");
+        var rollingFileSink = sink.GetSink();
+        var roller = rollingFileSink.GetNonPublicInstanceField<object>("_roller");
 
-            // Update file sink
-            var sink = this.sink.GetNonPublicInstanceField<Logger>("sink");
-            var rollingFileSink = sink.GetSink();
-            var roller = rollingFileSink.GetNonPublicInstanceField<object>("_roller");
+        var bufferRollingInterval = roller.GetNonPublicInstanceField<RollingInterval>("_interval");
+        var bufferFileSizeLimitBytes = rollingFileSink.GetNonPublicInstanceField<long?>("_fileSizeLimitBytes");
+        var bufferFileShared = rollingFileSink.GetNonPublicInstanceField<bool>("_shared");
+        var retainedBufferFileCountLimit = rollingFileSink.GetNonPublicInstanceField<int?>("_retainedFileCountLimit");
+        var textFormatter = rollingFileSink.GetNonPublicInstanceField<ITextFormatter>("_textFormatter");
 
-            var bufferRollingInterval = roller.GetNonPublicInstanceField<RollingInterval>("_interval");
-            var bufferFileSizeLimitBytes = rollingFileSink.GetNonPublicInstanceField<long?>("_fileSizeLimitBytes");
-            var bufferFileShared = rollingFileSink.GetNonPublicInstanceField<bool>("_shared");
-            var retainedBufferFileCountLimit = rollingFileSink.GetNonPublicInstanceField<int?>("_retainedFileCountLimit");
-            var textFormatter = rollingFileSink.GetNonPublicInstanceField<ITextFormatter>("_textFormatter");
+        rollingFileSink = this.sink.InvokeNonPublicStaticMethod<ILogEventSink>(
+            "CreateFileSink",
+            bufferBaseFileName,
+            bufferRollingInterval,
+            bufferFileSizeLimitBytes,
+            bufferFileShared,
+            retainedBufferFileCountLimit,
+            textFormatter);
 
-            rollingFileSink = this.sink.InvokeNonPublicStaticMethod<ILogEventSink>(
-                "CreateFileSink",
-                bufferBaseFileName,
-                bufferRollingInterval,
-                bufferFileSizeLimitBytes,
-                bufferFileShared,
-                retainedBufferFileCountLimit,
-                textFormatter);
+        this.sink.SetNonPublicInstanceField("sink", rollingFileSink);
 
-            this.sink.SetNonPublicInstanceField("sink", rollingFileSink);
+        return this;
+    }
 
-            return this;
-        }
+    public TimeRolledDurableHttpSinkReflection SetHttpClient(IHttpClient httpClient)
+    {
+        sink
+            .GetNonPublicInstanceField<HttpLogShipper>("shipper")
+            .SetNonPublicInstanceField("httpClient", httpClient);
 
-        public TimeRolledDurableHttpSinkReflection SetHttpClient(IHttpClient httpClient)
-        {
-            sink
-                .GetNonPublicInstanceField<HttpLogShipper>("shipper")
-                .SetNonPublicInstanceField("httpClient", httpClient);
-
-            return this;
-        }
+        return this;
     }
 }
