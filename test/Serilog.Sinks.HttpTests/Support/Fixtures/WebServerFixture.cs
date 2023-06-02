@@ -5,91 +5,90 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Serilog.Sinks.HttpTests.LogServer;
 using Serilog.Sinks.HttpTests.LogServer.Services;
 
-namespace Serilog.Support.Fixtures
+namespace Serilog.Support.Fixtures;
+
+public class WebServerFixture : WebApplicationFactory<Startup>
 {
-    public class WebServerFixture : WebApplicationFactory<Startup>
+    public string RequestUri(string testId)
     {
-        public string RequestUri(string testId)
+        var requestUri = Server.BaseAddress + "logs/" + WebUtility.UrlEncode(testId);
+        return requestUri;
+    }
+
+    public void SimulateNetworkFailure(TimeSpan duration)
+    {
+        var setIsHealthy = (bool isHealthy) => GetHealthService().SetIsHealthy(isHealthy);
+
+        setIsHealthy(false);
+
+        Task.Factory.StartNewAfterDelay(
+            duration,
+            () => setIsHealthy(true));
+    }
+
+    public Task ExpectBatches(string testId, int numberOfBatches)
+    {
+        return ExpectBatches(testId, numberOfBatches, TimeSpan.FromSeconds(10));
+    }
+
+    public async Task ExpectBatches(string testId, int numberOfBatches, TimeSpan timeout)
+    {
+        var deadline = DateTime.Now.Add(timeout);
+
+        while (DateTime.Now < deadline)
         {
-            var requestUri = Server.BaseAddress + "logs/" + WebUtility.UrlEncode(testId);
-            return requestUri;
+            await Task.Delay(TimeSpan.FromMilliseconds(10));
+
+            var got = GetAllBatches(testId).Length;
+
+            if (got < numberOfBatches) continue;
+            else if (got == numberOfBatches) return;
+            else throw new Exception($"Got {got} number of batches; want {numberOfBatches}");
         }
 
-        public void SimulateNetworkFailure(TimeSpan duration)
+        throw new Exception($"Timed out while expecting {numberOfBatches} batche(s)");
+    }
+
+    public Task ExpectLogEvents(string testId, int numberOfLogEvents)
+    {
+        return ExpectLogEvents(testId, numberOfLogEvents, TimeSpan.FromSeconds(10));
+    }
+
+    public async Task ExpectLogEvents(string testId, int numberOfLogEvents, TimeSpan timeout)
+    {
+        var deadline = DateTime.Now.Add(timeout);
+
+        while (DateTime.Now < deadline)
         {
-            var setIsHealthy = (bool isHealthy) => GetHealthService().SetIsHealthy(isHealthy);
+            await Task.Delay(TimeSpan.FromMilliseconds(10));
 
-            setIsHealthy(false);
+            var got = GetAllEvents(testId).Length;
 
-            Task.Factory.StartNewAfterDelay(
-                duration,
-                () => setIsHealthy(true));
+            if (got < numberOfLogEvents) continue;
+            else if (got == numberOfLogEvents) return;
+            else throw new Exception($"Got {got} number of events; want {numberOfLogEvents}");                
         }
 
-        public Task ExpectBatches(string testId, int numberOfBatches)
-        {
-            return ExpectBatches(testId, numberOfBatches, TimeSpan.FromSeconds(10));
-        }
+        throw new Exception($"Timed out while expecting {numberOfLogEvents} log event(s)");
+    }
 
-        public async Task ExpectBatches(string testId, int numberOfBatches, TimeSpan timeout)
-        {
-            var deadline = DateTime.Now.Add(timeout);
+    public LogEvent[][] GetAllBatches(string testId)
+    {
+        return GetLogEventService().GetAllBatches(testId);
+    }
 
-            while (DateTime.Now < deadline)
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(10));
+    public LogEvent[] GetAllEvents(string testId)
+    {
+        return GetLogEventService().GetAllEvents(testId);
+    }
 
-                var got = GetAllBatches(testId).Length;
+    private HealthService GetHealthService()
+    {
+        return (HealthService)Services.GetService(typeof(HealthService));
+    }
 
-                if (got < numberOfBatches) continue;
-                else if (got == numberOfBatches) return;
-                else throw new Exception($"Got {got} number of batches; want {numberOfBatches}");
-            }
-
-            throw new Exception($"Timed out while expecting {numberOfBatches} batche(s)");
-        }
-
-        public Task ExpectLogEvents(string testId, int numberOfLogEvents)
-        {
-            return ExpectLogEvents(testId, numberOfLogEvents, TimeSpan.FromSeconds(10));
-        }
-
-        public async Task ExpectLogEvents(string testId, int numberOfLogEvents, TimeSpan timeout)
-        {
-            var deadline = DateTime.Now.Add(timeout);
-
-            while (DateTime.Now < deadline)
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(10));
-
-                var got = GetAllEvents(testId).Length;
-
-                if (got < numberOfLogEvents) continue;
-                else if (got == numberOfLogEvents) return;
-                else throw new Exception($"Got {got} number of events; want {numberOfLogEvents}");                
-            }
-
-            throw new Exception($"Timed out while expecting {numberOfLogEvents} log event(s)");
-        }
-
-        public LogEvent[][] GetAllBatches(string testId)
-        {
-            return GetLogEventService().GetAllBatches(testId);
-        }
-
-        public LogEvent[] GetAllEvents(string testId)
-        {
-            return GetLogEventService().GetAllEvents(testId);
-        }
-
-        private HealthService GetHealthService()
-        {
-            return (HealthService)Services.GetService(typeof(HealthService));
-        }
-
-        private LogEventService GetLogEventService()
-        {
-            return (LogEventService)Services.GetService(typeof(LogEventService));
-        }
+    private LogEventService GetLogEventService()
+    {
+        return (LogEventService)Services.GetService(typeof(LogEventService));
     }
 }

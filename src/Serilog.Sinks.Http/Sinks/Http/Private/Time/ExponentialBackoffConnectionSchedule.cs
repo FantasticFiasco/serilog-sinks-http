@@ -14,73 +14,72 @@
 
 using System;
 
-namespace Serilog.Sinks.Http.Private.Time
+namespace Serilog.Sinks.Http.Private.Time;
+
+public class ExponentialBackoffConnectionSchedule
 {
-    public class ExponentialBackoffConnectionSchedule
+    /// <summary>
+    /// The minimum backoff period.
+    /// </summary>
+    public static readonly TimeSpan MinimumBackoffPeriod = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    /// The maximum, i.e. capped, backoff period.
+    /// </summary>
+    public static readonly TimeSpan MaximumBackoffInterval = TimeSpan.FromMinutes(10);
+
+    private readonly TimeSpan period;
+
+    private int failuresSinceSuccessfulConnection;
+
+    public ExponentialBackoffConnectionSchedule(TimeSpan period)
     {
-        /// <summary>
-        /// The minimum backoff period.
-        /// </summary>
-        public static readonly TimeSpan MinimumBackoffPeriod = TimeSpan.FromSeconds(5);
+        if (period < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(period), "The connection retry period must be a positive timespan");
 
-        /// <summary>
-        /// The maximum, i.e. capped, backoff period.
-        /// </summary>
-        public static readonly TimeSpan MaximumBackoffInterval = TimeSpan.FromMinutes(10);
+        this.period = period;
+    }
 
-        private readonly TimeSpan period;
+    public void MarkSuccess()
+    {
+        failuresSinceSuccessfulConnection = 0;
+    }
 
-        private int failuresSinceSuccessfulConnection;
+    public void MarkFailure()
+    {
+        failuresSinceSuccessfulConnection++;
+    }
 
-        public ExponentialBackoffConnectionSchedule(TimeSpan period)
+    public TimeSpan NextInterval
+    {
+        get
         {
-            if (period < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(period), "The connection retry period must be a positive timespan");
-
-            this.period = period;
-        }
-
-        public void MarkSuccess()
-        {
-            failuresSinceSuccessfulConnection = 0;
-        }
-
-        public void MarkFailure()
-        {
-            failuresSinceSuccessfulConnection++;
-        }
-
-        public TimeSpan NextInterval
-        {
-            get
+            try
             {
-                try
-                {
-                    // Available, and first failure, just try the batch interval
-                    if (failuresSinceSuccessfulConnection <= 1)
-                        return period;
+                // Available, and first failure, just try the batch interval
+                if (failuresSinceSuccessfulConnection <= 1)
+                    return period;
 
-                    // Second failure, start ramping up the interval - first 2x, then 4x, ...
-                    var backoffFactor = Math.Pow(2, failuresSinceSuccessfulConnection - 1);
+                // Second failure, start ramping up the interval - first 2x, then 4x, ...
+                var backoffFactor = Math.Pow(2, failuresSinceSuccessfulConnection - 1);
 
-                    // If the period is ridiculously short, give it a boost so we get some
-                    // visible backoff
-                    var backoffPeriod = Math.Max(period.Ticks, MinimumBackoffPeriod.Ticks);
+                // If the period is ridiculously short, give it a boost so we get some
+                // visible backoff
+                var backoffPeriod = Math.Max(period.Ticks, MinimumBackoffPeriod.Ticks);
 
-                    // The "ideal" interval
-                    var backedOff = checked((long)(backoffPeriod * backoffFactor));
+                // The "ideal" interval
+                var backedOff = checked((long)(backoffPeriod * backoffFactor));
 
-                    // Capped to the maximum interval
-                    var cappedBackoff = Math.Min(MaximumBackoffInterval.Ticks, backedOff);
+                // Capped to the maximum interval
+                var cappedBackoff = Math.Min(MaximumBackoffInterval.Ticks, backedOff);
 
-                    // Unless that's shorter than the base interval, in which case we'll just apply the period
-                    var actual = Math.Max(period.Ticks, cappedBackoff);
+                // Unless that's shorter than the base interval, in which case we'll just apply the period
+                var actual = Math.Max(period.Ticks, cappedBackoff);
 
-                    return TimeSpan.FromTicks(actual);
-                }
-                catch (OverflowException)
-                {
-                    return MaximumBackoffInterval;
-                }
+                return TimeSpan.FromTicks(actual);
+            }
+            catch (OverflowException)
+            {
+                return MaximumBackoffInterval;
             }
         }
     }

@@ -14,55 +14,54 @@
 
 using Serilog.Debugging;
 
-namespace Serilog.Sinks.Http.Private.NonDurable
+namespace Serilog.Sinks.Http.Private.NonDurable;
+
+public static class LogEventQueueReader
 {
-    public static class LogEventQueueReader
+    public static Batch Read(LogEventQueue queue, int? logEventsInBatchLimit, long? batchSizeLimitBytes)
     {
-        public static Batch Read(LogEventQueue queue, int? logEventsInBatchLimit, long? batchSizeLimitBytes)
+        var batch = new Batch();
+        var remainingBatchSizeBytes = batchSizeLimitBytes;
+
+        while (true)
         {
-            var batch = new Batch();
-            var remainingBatchSizeBytes = batchSizeLimitBytes;
-
-            while (true)
+            var result = queue.TryDequeue(remainingBatchSizeBytes, out var logEvent);
+            if (result == LogEventQueue.DequeueResult.Ok)
             {
-                var result = queue.TryDequeue(remainingBatchSizeBytes, out var logEvent);
-                if (result == LogEventQueue.DequeueResult.Ok)
-                {
-                    batch.LogEvents.Add(logEvent);
-                    remainingBatchSizeBytes -= ByteSize.From(logEvent);
+                batch.LogEvents.Add(logEvent);
+                remainingBatchSizeBytes -= ByteSize.From(logEvent);
 
-                    // Respect batch posting limit
-                    if (batch.LogEvents.Count == logEventsInBatchLimit)
-                    {
-                        batch.HasReachedLimit = true;
-                        break;
-                    }
-                }
-                else if (result == LogEventQueue.DequeueResult.MaxSizeViolation)
+                // Respect batch posting limit
+                if (batch.LogEvents.Count == logEventsInBatchLimit)
                 {
-                    if (batch.LogEvents.Count == 0)
-                    {
-                        // This single log event exceeds the batch size limit, let's drop it
-                        queue.TryDequeue(long.MaxValue, out var logEventToDrop);
-
-                        SelfLog.WriteLine(
-                            "Event exceeds the batch size limit of {0} bytes set for this sink and will be dropped; data: {1}",
-                            batchSizeLimitBytes,
-                            logEventToDrop);
-                    }
-                    else
-                    {
-                        batch.HasReachedLimit = true;
-                        break;
-                    }
-                }
-                else if (result == LogEventQueue.DequeueResult.QueueEmpty)
-                {
+                    batch.HasReachedLimit = true;
                     break;
                 }
             }
+            else if (result == LogEventQueue.DequeueResult.MaxSizeViolation)
+            {
+                if (batch.LogEvents.Count == 0)
+                {
+                    // This single log event exceeds the batch size limit, let's drop it
+                    queue.TryDequeue(long.MaxValue, out var logEventToDrop);
 
-            return batch;
+                    SelfLog.WriteLine(
+                        "Event exceeds the batch size limit of {0} bytes set for this sink and will be dropped; data: {1}",
+                        batchSizeLimitBytes,
+                        logEventToDrop);
+                }
+                else
+                {
+                    batch.HasReachedLimit = true;
+                    break;
+                }
+            }
+            else if (result == LogEventQueue.DequeueResult.QueueEmpty)
+            {
+                break;
+            }
         }
+
+        return batch;
     }
 }

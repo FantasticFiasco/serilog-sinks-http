@@ -14,26 +14,25 @@
 
 using Serilog.Formatting;
 
-namespace Serilog.Sinks.Http.TextFormatters
+namespace Serilog.Sinks.Http.TextFormatters;
+
+/// <summary>
+/// JSON formatter serializing log events into a normal format with the message template
+/// rendered into a message. This is the most verbose formatter and its network load is higher
+/// than the other formatters.
+/// </summary>
+/// <seealso cref="NormalTextFormatter" />
+/// <seealso cref="CompactTextFormatter" />
+/// <seealso cref="CompactRenderedTextFormatter" />
+/// <seealso cref="NamespacedTextFormatter" />
+/// <seealso cref="ITextFormatter" />
+public class NormalRenderedTextFormatter : NormalTextFormatter
 {
     /// <summary>
-    /// JSON formatter serializing log events into a normal format with the message template
-    /// rendered into a message. This is the most verbose formatter and its network load is higher
-    /// than the other formatters.
+    /// Initializes a new instance of the <see cref="NormalRenderedTextFormatter"/> class.
     /// </summary>
-    /// <seealso cref="NormalTextFormatter" />
-    /// <seealso cref="CompactTextFormatter" />
-    /// <seealso cref="CompactRenderedTextFormatter" />
-    /// <seealso cref="NamespacedTextFormatter" />
-    /// <seealso cref="ITextFormatter" />
-    public class NormalRenderedTextFormatter : NormalTextFormatter
+    public NormalRenderedTextFormatter()
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NormalRenderedTextFormatter"/> class.
-        /// </summary>
-        public NormalRenderedTextFormatter()
-        {
-            IsRenderingMessage = true;
-        }
+        IsRenderingMessage = true;
     }
 }

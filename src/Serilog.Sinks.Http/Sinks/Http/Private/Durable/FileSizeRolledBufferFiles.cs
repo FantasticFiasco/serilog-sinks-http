@@ -19,51 +19,50 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Serilog.Sinks.Http.Private.IO;
 
-namespace Serilog.Sinks.Http.Private.Durable
+namespace Serilog.Sinks.Http.Private.Durable;
+
+public class FileSizeRolledBufferFiles : IBufferFiles
 {
-    public class FileSizeRolledBufferFiles : IBufferFiles
+    private readonly DirectoryService directoryService;
+    private readonly string logFolder;
+    private readonly string candidateSearchPath;
+    private readonly Regex fileNameMatcher;
+
+    public FileSizeRolledBufferFiles(DirectoryService directoryService, string bufferBaseFilePath)
     {
-        private readonly DirectoryService directoryService;
-        private readonly string logFolder;
-        private readonly string candidateSearchPath;
-        private readonly Regex fileNameMatcher;
+        if (bufferBaseFilePath == null) throw new ArgumentNullException(nameof(bufferBaseFilePath));
 
-        public FileSizeRolledBufferFiles(DirectoryService directoryService, string bufferBaseFilePath)
-        {
-            if (bufferBaseFilePath == null) throw new ArgumentNullException(nameof(bufferBaseFilePath));
+        this.directoryService = directoryService ?? throw new ArgumentNullException(nameof(directoryService));
 
-            this.directoryService = directoryService ?? throw new ArgumentNullException(nameof(directoryService));
+        var bufferBaseFullPath = Path.GetFullPath(bufferBaseFilePath);
+        var bufferBaseFileName = Path.GetFileName(bufferBaseFilePath) ?? throw new Exception("Cannot get file name from buffer base file path");
 
-            var bufferBaseFullPath = Path.GetFullPath(bufferBaseFilePath);
-            var bufferBaseFileName = Path.GetFileName(bufferBaseFilePath) ?? throw new Exception("Cannot get file name from buffer base file path");
+        logFolder = Path.GetDirectoryName(bufferBaseFullPath) ?? throw new Exception("Cannot get directory of buffer base file path");
+        candidateSearchPath = $"{bufferBaseFileName}-*.*";
+        fileNameMatcher = new Regex(
+            "^" +                            // Start of string
+            Regex.Escape(bufferBaseFileName) +      // Base file name
+            "-" +
+            "(?<date>\\d{8})" +                     // Date in format YYYYMMDD
+            "(?<sequence>_[0-9]{3,}){0,1}" +        // Potential sequence number
+            "\\." +
+            "(?<extension>json|txt)" +              // File extension
+            "$");                                   // End of string
 
-            logFolder = Path.GetDirectoryName(bufferBaseFullPath) ?? throw new Exception("Cannot get directory of buffer base file path");
-            candidateSearchPath = $"{bufferBaseFileName}-*.*";
-            fileNameMatcher = new Regex(
-                "^" +                            // Start of string
-                Regex.Escape(bufferBaseFileName) +      // Base file name
-                "-" +
-                "(?<date>\\d{8})" +                     // Date in format YYYYMMDD
-                "(?<sequence>_[0-9]{3,}){0,1}" +        // Potential sequence number
-                "\\." +
-                "(?<extension>json|txt)" +              // File extension
-                "$");                                   // End of string
+        BookmarkFileName = $"{bufferBaseFullPath}.bookmark";
+    }
 
-            BookmarkFileName = $"{bufferBaseFullPath}.bookmark";
-        }
+    public string BookmarkFileName { get; }
 
-        public string BookmarkFileName { get; }
-
-        public string[] Get()
-        {
-            return directoryService.GetFiles(logFolder, candidateSearchPath)
-                .Select(filePath => new KeyValuePair<string, Match>(filePath, fileNameMatcher.Match(Path.GetFileName(filePath))))
-                .Where(pair => pair.Value.Success)
-                .OrderBy(pair => pair.Value.Groups["extension"].Value == "txt" ? 1 : 0)
-                .ThenBy(pair => pair.Value.Groups["date"].Value, StringComparer.OrdinalIgnoreCase)
-                .ThenBy(pair => int.Parse("0" + pair.Value.Groups["sequence"].Value.Replace("_", string.Empty)))
-                .Select(pair => pair.Key)
-                .ToArray();
-        }
+    public string[] Get()
+    {
+        return directoryService.GetFiles(logFolder, candidateSearchPath)
+            .Select(filePath => new KeyValuePair<string, Match>(filePath, fileNameMatcher.Match(Path.GetFileName(filePath))))
+            .Where(pair => pair.Value.Success)
+            .OrderBy(pair => pair.Value.Groups["extension"].Value == "txt" ? 1 : 0)
+            .ThenBy(pair => pair.Value.Groups["date"].Value, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(pair => int.Parse("0" + pair.Value.Groups["sequence"].Value.Replace("_", string.Empty)))
+            .Select(pair => pair.Key)
+            .ToArray();
     }
 }

@@ -18,73 +18,72 @@ using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.Http.Private.IO;
 
-namespace Serilog.Sinks.Http.Private.Durable
+namespace Serilog.Sinks.Http.Private.Durable;
+
+public class FileSizeRolledDurableHttpSink : ILogEventSink, IDisposable
 {
-    public class FileSizeRolledDurableHttpSink : ILogEventSink, IDisposable
+    private readonly HttpLogShipper shipper;
+    private readonly ILogEventSink sink;
+
+    public FileSizeRolledDurableHttpSink(
+        string requestUri,
+        string bufferBaseFileName,
+        long? bufferFileSizeLimitBytes,
+        bool bufferFileShared,
+        int? retainedBufferFileCountLimit,
+        long? logEventLimitBytes,
+        int? logEventsInBatchLimit,
+        long? batchSizeLimitBytes,
+        TimeSpan period,
+        ITextFormatter textFormatter,
+        IBatchFormatter batchFormatter,
+        IHttpClient httpClient)
     {
-        private readonly HttpLogShipper shipper;
-        private readonly ILogEventSink sink;
+        shipper = new HttpLogShipper(
+            httpClient,
+            requestUri,
+            new FileSizeRolledBufferFiles(new DirectoryService(), bufferBaseFileName),
+            logEventLimitBytes,
+            logEventsInBatchLimit,
+            batchSizeLimitBytes,
+            period,
+            batchFormatter);
 
-        public FileSizeRolledDurableHttpSink(
-            string requestUri,
-            string bufferBaseFileName,
-            long? bufferFileSizeLimitBytes,
-            bool bufferFileShared,
-            int? retainedBufferFileCountLimit,
-            long? logEventLimitBytes,
-            int? logEventsInBatchLimit,
-            long? batchSizeLimitBytes,
-            TimeSpan period,
-            ITextFormatter textFormatter,
-            IBatchFormatter batchFormatter,
-            IHttpClient httpClient)
-        {
-            shipper = new HttpLogShipper(
-                httpClient,
-                requestUri,
-                new FileSizeRolledBufferFiles(new DirectoryService(), bufferBaseFileName),
-                logEventLimitBytes,
-                logEventsInBatchLimit,
-                batchSizeLimitBytes,
-                period,
-                batchFormatter);
+        sink = CreateFileSink(
+            bufferBaseFileName,
+            bufferFileSizeLimitBytes,
+            bufferFileShared,
+            retainedBufferFileCountLimit,
+            textFormatter);
+    }
 
-            sink = CreateFileSink(
-                bufferBaseFileName,
-                bufferFileSizeLimitBytes,
-                bufferFileShared,
-                retainedBufferFileCountLimit,
-                textFormatter);
-        }
+    public void Emit(LogEvent logEvent)
+    {
+        sink.Emit(logEvent);
+    }
 
-        public void Emit(LogEvent logEvent)
-        {
-            sink.Emit(logEvent);
-        }
+    public void Dispose()
+    {
+        (sink as IDisposable)?.Dispose();
+        shipper.Dispose();
+    }
 
-        public void Dispose()
-        {
-            (sink as IDisposable)?.Dispose();
-            shipper.Dispose();
-        }
-
-        private static ILogEventSink CreateFileSink(
-            string bufferBaseFileName,
-            long? bufferFileSizeLimitBytes,
-            bool bufferFileShared,
-            int? retainedBufferFileCountLimit,
-            ITextFormatter textFormatter)
-        {
-            return new LoggerConfiguration()
-                .WriteTo.File(
-                    path: $"{bufferBaseFileName}-.txt",
-                    rollingInterval: RollingInterval.Day,
-                    fileSizeLimitBytes: bufferFileSizeLimitBytes,
-                    shared: bufferFileShared,
-                    retainedFileCountLimit: retainedBufferFileCountLimit,
-                    formatter: textFormatter,
-                    rollOnFileSizeLimit: true)
-                .CreateLogger();
-        }
+    private static ILogEventSink CreateFileSink(
+        string bufferBaseFileName,
+        long? bufferFileSizeLimitBytes,
+        bool bufferFileShared,
+        int? retainedBufferFileCountLimit,
+        ITextFormatter textFormatter)
+    {
+        return new LoggerConfiguration()
+            .WriteTo.File(
+                path: $"{bufferBaseFileName}-.txt",
+                rollingInterval: RollingInterval.Day,
+                fileSizeLimitBytes: bufferFileSizeLimitBytes,
+                shared: bufferFileShared,
+                retainedFileCountLimit: retainedBufferFileCountLimit,
+                formatter: textFormatter,
+                rollOnFileSizeLimit: true)
+            .CreateLogger();
     }
 }

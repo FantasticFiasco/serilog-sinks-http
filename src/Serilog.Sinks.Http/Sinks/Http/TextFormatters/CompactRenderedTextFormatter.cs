@@ -14,26 +14,25 @@
 
 using Serilog.Formatting;
 
-namespace Serilog.Sinks.Http.TextFormatters
+namespace Serilog.Sinks.Http.TextFormatters;
+
+/// <summary>
+/// JSON formatter serializing log events with minimizing size as a priority but still render
+/// the message template into a message. This formatter greatly reduce the network load and
+/// should be used in situations where bandwidth is of importance.
+/// </summary>
+/// <seealso cref="NormalTextFormatter" />
+/// <seealso cref="NormalRenderedTextFormatter" />
+/// <seealso cref="CompactTextFormatter" />
+/// <seealso cref="NamespacedTextFormatter" />
+/// <seealso cref="ITextFormatter" />
+public class CompactRenderedTextFormatter : CompactTextFormatter
 {
     /// <summary>
-    /// JSON formatter serializing log events with minimizing size as a priority but still render
-    /// the message template into a message. This formatter greatly reduce the network load and
-    /// should be used in situations where bandwidth is of importance.
+    /// Initializes a new instance of the <see cref="CompactRenderedTextFormatter"/> class.
     /// </summary>
-    /// <seealso cref="NormalTextFormatter" />
-    /// <seealso cref="NormalRenderedTextFormatter" />
-    /// <seealso cref="CompactTextFormatter" />
-    /// <seealso cref="NamespacedTextFormatter" />
-    /// <seealso cref="ITextFormatter" />
-    public class CompactRenderedTextFormatter : CompactTextFormatter
+    public CompactRenderedTextFormatter()
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CompactRenderedTextFormatter"/> class.
-        /// </summary>
-        public CompactRenderedTextFormatter()
-        {
-            IsRenderingMessage = true;
-        }
+        IsRenderingMessage = true;
     }
 }

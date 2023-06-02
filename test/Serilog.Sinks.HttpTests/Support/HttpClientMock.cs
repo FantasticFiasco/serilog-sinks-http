@@ -5,24 +5,23 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Serilog.Sinks.Http;
 
-namespace Serilog.Support
+namespace Serilog.Support;
+
+class HttpClientMock : IHttpClient
 {
-    class HttpClientMock : IHttpClient
+    public IConfiguration Configuration { get; private set; }
+
+    public void Configure(IConfiguration configuration)
     {
-        public IConfiguration Configuration { get; private set; }
+        Configuration = configuration;
+    }
 
-        public void Configure(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+    public void Dispose()
+    {
+    }
 
-        public void Dispose()
-        {
-        }
-
-        public Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream)
-        {
-            throw new NotImplementedException();
-        }
+    public Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream)
+    {
+        throw new NotImplementedException();
     }
 }

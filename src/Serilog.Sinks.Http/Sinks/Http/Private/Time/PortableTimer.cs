@@ -16,40 +16,62 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Serilog.Sinks.Http.Private.Time
+namespace Serilog.Sinks.Http.Private.Time;
+
+public class PortableTimer : IDisposable
 {
-    public class PortableTimer : IDisposable
+    private readonly object syncRoot = new();
+    private readonly Func<Task> onTick;
+    private readonly Timer timer;
+
+    private bool running;
+    private bool disposed;
+
+    public PortableTimer(Func<Task> onTick)
     {
-        private readonly object syncRoot = new();
-        private readonly Func<Task> onTick;
-        private readonly Timer timer;
+        this.onTick = onTick ?? throw new ArgumentNullException(nameof(onTick));
 
-        private bool running;
-        private bool disposed;
+        timer = new Timer(_ => OnTick(), null, Timeout.Infinite, Timeout.Infinite);
+    }
 
-        public PortableTimer(Func<Task> onTick)
+    public void Start(TimeSpan interval)
+    {
+        if (interval < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(interval));
+
+        lock (syncRoot)
         {
-            this.onTick = onTick ?? throw new ArgumentNullException(nameof(onTick));
-
-            timer = new Timer(_ => OnTick(), null, Timeout.Infinite, Timeout.Infinite);
-        }
-
-        public void Start(TimeSpan interval)
-        {
-            if (interval < TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(interval));
-
-            lock (syncRoot)
+            if (disposed)
             {
-                if (disposed)
-                {
-                    throw new ObjectDisposedException(nameof(PortableTimer));
-                }
-
-                timer.Change(interval, Timeout.InfiniteTimeSpan);
+                throw new ObjectDisposedException(nameof(PortableTimer));
             }
-        }
 
-        public void Dispose()
+            timer.Change(interval, Timeout.InfiniteTimeSpan);
+        }
+    }
+
+    public void Dispose()
+    {
+        lock (syncRoot)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            while (running)
+            {
+                Monitor.Wait(syncRoot);
+            }
+
+            timer.Dispose();
+
+            disposed = true;
+        }
+    }
+
+    private async void OnTick()
+    {
+        try
         {
             lock (syncRoot)
             {
@@ -58,53 +80,30 @@ namespace Serilog.Sinks.Http.Private.Time
                     return;
                 }
 
-                while (running)
+                // There's a little bit of raciness here, but it's needed to support the
+                // current API, which allows the tick handler to reenter and set the next interval.
+
+                if (running)
                 {
                     Monitor.Wait(syncRoot);
-                }
 
-                timer.Dispose();
-
-                disposed = true;
-            }
-        }
-
-        private async void OnTick()
-        {
-            try
-            {
-                lock (syncRoot)
-                {
                     if (disposed)
                     {
                         return;
                     }
-
-                    // There's a little bit of raciness here, but it's needed to support the
-                    // current API, which allows the tick handler to reenter and set the next interval.
-
-                    if (running)
-                    {
-                        Monitor.Wait(syncRoot);
-
-                        if (disposed)
-                        {
-                            return;
-                        }
-                    }
-
-                    running = true;
                 }
 
-                await onTick();
+                running = true;
             }
-            finally
+
+            await onTick();
+        }
+        finally
+        {
+            lock (syncRoot)
             {
-                lock (syncRoot)
-                {
-                    running = false;
-                    Monitor.PulseAll(syncRoot);
-                }
+                running = false;
+                Monitor.PulseAll(syncRoot);
             }
         }
     }

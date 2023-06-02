@@ -15,59 +15,58 @@
 using System;
 using System.IO;
 
-namespace Serilog.Sinks.Http.Private.Durable
+namespace Serilog.Sinks.Http.Private.Durable;
+
+public class BookmarkFile : IDisposable
 {
-    public class BookmarkFile : IDisposable
+    private readonly FileStream fileStream;
+
+    public BookmarkFile(string bookmarkFileName)
     {
-        private readonly FileStream fileStream;
+        if (bookmarkFileName == null) throw new ArgumentNullException(nameof(bookmarkFileName));
 
-        public BookmarkFile(string bookmarkFileName)
+        fileStream = System.IO.File.Open(
+            bookmarkFileName,
+            FileMode.OpenOrCreate,
+            FileAccess.ReadWrite,
+            FileShare.Read);
+    }
+
+    public void TryReadBookmark(out long nextLineBeginsAtOffset, out string? currentFile)
+    {
+        nextLineBeginsAtOffset = 0;
+        currentFile = null;
+
+        if (fileStream.Length != 0)
         {
-            if (bookmarkFileName == null) throw new ArgumentNullException(nameof(bookmarkFileName));
+            // Important not to dispose this StreamReader as the stream must remain open
+            var reader = new StreamReader(fileStream, Encoding.UTF8WithoutBom, false, 128);
+            var bookmark = reader.ReadLine();
 
-            fileStream = System.IO.File.Open(
-                bookmarkFileName,
-                FileMode.OpenOrCreate,
-                FileAccess.ReadWrite,
-                FileShare.Read);
-        }
-
-        public void TryReadBookmark(out long nextLineBeginsAtOffset, out string? currentFile)
-        {
-            nextLineBeginsAtOffset = 0;
-            currentFile = null;
-
-            if (fileStream.Length != 0)
+            if (bookmark != null)
             {
-                // Important not to dispose this StreamReader as the stream must remain open
-                var reader = new StreamReader(fileStream, Encoding.UTF8WithoutBom, false, 128);
-                var bookmark = reader.ReadLine();
+                fileStream.Position = 0;
+                var parts = bookmark.Split(
+                    new[] { ":::" },
+                    StringSplitOptions.RemoveEmptyEntries);
 
-                if (bookmark != null)
+                if (parts.Length == 2)
                 {
-                    fileStream.Position = 0;
-                    var parts = bookmark.Split(
-                        new[] { ":::" },
-                        StringSplitOptions.RemoveEmptyEntries);
-
-                    if (parts.Length == 2)
-                    {
-                        nextLineBeginsAtOffset = long.Parse(parts[0]);
-                        currentFile = parts[1];
-                    }
+                    nextLineBeginsAtOffset = long.Parse(parts[0]);
+                    currentFile = parts[1];
                 }
             }
         }
+    }
 
-        public void WriteBookmark(long nextLineBeginsAtOffset, string currentFile)
-        {
-            using var writer = new StreamWriter(fileStream, Encoding.UTF8WithoutBom);
-            writer.WriteLine("{0}:::{1}", nextLineBeginsAtOffset, currentFile);
-        }
+    public void WriteBookmark(long nextLineBeginsAtOffset, string currentFile)
+    {
+        using var writer = new StreamWriter(fileStream, Encoding.UTF8WithoutBom);
+        writer.WriteLine("{0}:::{1}", nextLineBeginsAtOffset, currentFile);
+    }
 
-        public void Dispose()
-        {
-            fileStream.Dispose();
-        }
+    public void Dispose()
+    {
+        fileStream.Dispose();
     }
 }

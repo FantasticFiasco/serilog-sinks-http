@@ -18,72 +18,71 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
-namespace Serilog.Sinks.Http.HttpClients
+namespace Serilog.Sinks.Http.HttpClients;
+
+/// <summary>
+/// HTTP client sending JSON over the network.
+/// </summary>
+/// <seealso cref="JsonGzipHttpClient"/>
+/// <seealso cref="IHttpClient"/>
+public class JsonHttpClient : IHttpClient
 {
+    private const string JsonContentType = "application/json";
+
+    private readonly HttpClient httpClient;
+
     /// <summary>
-    /// HTTP client sending JSON over the network.
+    /// Initializes a new instance of the <see cref="JsonHttpClient"/> class.
     /// </summary>
-    /// <seealso cref="JsonGzipHttpClient"/>
-    /// <seealso cref="IHttpClient"/>
-    public class JsonHttpClient : IHttpClient
+    public JsonHttpClient()
+        : this(new HttpClient())
     {
-        private const string JsonContentType = "application/json";
+    }
 
-        private readonly HttpClient httpClient;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="JsonHttpClient"/> class with
+    /// specified HTTP client.
+    /// </summary>
+    public JsonHttpClient(HttpClient httpClient)
+    {
+        this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="JsonHttpClient"/> class.
-        /// </summary>
-        public JsonHttpClient()
-            : this(new HttpClient())
+    ~JsonHttpClient()
+    {
+        Dispose(false);
+    }
+
+    /// <inheritdoc />
+    public virtual void Configure(IConfiguration configuration)
+    {
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream)
+    {
+        using var content = new StreamContent(contentStream);
+        content.Headers.Add("Content-Type", JsonContentType);
+
+        var response = await httpClient
+            .PostAsync(requestUri, content)
+            .ConfigureAwait(false);
+
+        return response;
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
         {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="JsonHttpClient"/> class with
-        /// specified HTTP client.
-        /// </summary>
-        public JsonHttpClient(HttpClient httpClient)
-        {
-            this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-        }
-
-        ~JsonHttpClient()
-        {
-            Dispose(false);
-        }
-
-        /// <inheritdoc />
-        public virtual void Configure(IConfiguration configuration)
-        {
-        }
-
-        /// <inheritdoc />
-        public virtual async Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream)
-        {
-            using var content = new StreamContent(contentStream);
-            content.Headers.Add("Content-Type", JsonContentType);
-
-            var response = await httpClient
-                .PostAsync(requestUri, content)
-                .ConfigureAwait(false);
-
-            return response;
-        }
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                httpClient.Dispose();
-            }
+            httpClient.Dispose();
         }
     }
 }

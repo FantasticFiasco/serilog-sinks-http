@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace Serilog.Support
+namespace Serilog.Support;
+
+public class NastyException : Exception
 {
-    public class NastyException : Exception
+    public override string ToString()
     {
-        public override string ToString()
-        {
-            throw new InvalidOperationException("Can't ToString() a NastyException!");
-        }
+        throw new InvalidOperationException("Can't ToString() a NastyException!");
     }
 }

@@ -19,27 +19,26 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Serilog.Sinks.Http.HttpClients;
 
-namespace Serilog.Sinks.Http
+namespace Serilog.Sinks.Http;
+
+/// <summary>
+/// Interface responsible for posting HTTP requests.
+/// </summary>
+/// <seealso cref="JsonHttpClient"/>
+/// <seealso cref="JsonGzipHttpClient"/>
+public interface IHttpClient : IDisposable
 {
     /// <summary>
-    /// Interface responsible for posting HTTP requests.
+    /// Configures the HTTP client.
     /// </summary>
-    /// <seealso cref="JsonHttpClient"/>
-    /// <seealso cref="JsonGzipHttpClient"/>
-    public interface IHttpClient : IDisposable
-    {
-        /// <summary>
-        /// Configures the HTTP client.
-        /// </summary>
-        /// <param name="configuration">The application configuration properties.</param>
-        void Configure(IConfiguration configuration);
+    /// <param name="configuration">The application configuration properties.</param>
+    void Configure(IConfiguration configuration);
 
-        /// <summary>
-        /// Sends a POST request to the specified Uri as an asynchronous operation.
-        /// </summary>
-        /// <param name="requestUri">The Uri the request is sent to.</param>
-        /// <param name="contentStream">The stream containing the content of the request.</param>
-        /// <returns>The task object representing the asynchronous operation.</returns>
-        Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream);
-    }
+    /// <summary>
+    /// Sends a POST request to the specified Uri as an asynchronous operation.
+    /// </summary>
+    /// <param name="requestUri">The Uri the request is sent to.</param>
+    /// <param name="contentStream">The stream containing the content of the request.</param>
+    /// <returns>The task object representing the asynchronous operation.</returns>
+    Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream);
 }
