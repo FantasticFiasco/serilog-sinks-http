@@ -6,6 +6,15 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+### :zap: Added
+
+- Support for .NET Framework 4.6.2
+
+### :skull: Removed
+
+- [BREAKING CHANGE] Remove support for .NET Framework 4.5, aligning with the [.NET Framework support policy](https://learn.microsoft.com/lifecycle/products/microsoft-net-framework)
+- [BREAKING CHANGE] Remove support for .NET Framework 4.6.1, aligning with the [.NET Framework support policy](https://learn.microsoft.com/lifecycle/products/microsoft-net-framework)
+
 ## [9.0.0-beta.1] - 2023-04-12
 
 ### :zap: Added
