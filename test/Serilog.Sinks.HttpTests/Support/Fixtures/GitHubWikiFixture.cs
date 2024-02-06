@@ -62,7 +62,7 @@ public class GitHubWikiFixture
                 continue;
             }
 
-            if (argumentNameInline.Content.ToString() != argumentName)
+            if (argumentNameInline.Content != argumentName)
             {
                 continue;
             }
