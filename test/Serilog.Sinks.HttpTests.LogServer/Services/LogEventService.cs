@@ -13,6 +13,11 @@ public class LogEventService
 
     public void AddBatch(string testId, IEnumerable<LogEvent> logEvents)
     {
+        foreach (var logEvent in logEvents)
+        {
+            Console.WriteLine($"Received {testId} {logEvent.RenderedMessage}");
+        }
+
         batchesByTest.Add(new BatchByTest(testId, logEvents.ToArray()));
     }
 

@@ -100,6 +100,9 @@ namespace Serilog.Sinks.Http.Private.Durable
                     using var bookmark = new BookmarkFile(bufferFiles.BookmarkFileName);
                     bookmark.TryReadBookmark(out var nextLineBeginsAtOffset, out var currentFile);
 
+                    // Simulate that this takes some time, either due to a large payload size or slow network
+                    await Task.Delay(TimeSpan.FromSeconds(10));
+
                     var fileSet = bufferFiles.Get();
 
                     if (currentFile == null || !System.IO.File.Exists(currentFile))
