@@ -219,7 +219,7 @@ public static class LoggerSinkConfigurationExtensions
     /// The time to wait between checking for event batches. Default value is 2 seconds.
     /// </param>
     /// <param name="flushOnClose">
-    /// Whether to send the log events stored in memory during the sink's disposal, thus ensuring
+    /// Whether to send the log events stored on disk during the sink's disposal, thus ensuring
     /// that all generated log event are sent to the log server before sink closes. Default value
     /// is <see langword="true"/>.
     /// </param>
@@ -367,7 +367,7 @@ public static class LoggerSinkConfigurationExtensions
     /// The time to wait between checking for event batches. Default value is 2 seconds.
     /// </param>
     /// <param name="flushOnClose">
-    /// Whether to send the log events stored in memory during the sink's disposal, thus ensuring
+    /// Whether to send the log events stored on disk during the sink's disposal, thus ensuring
     /// that all generated log event are sent to the log server before sink closes. Default value
     /// is <see langword="true"/>.
     /// </param>

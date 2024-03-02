@@ -118,4 +118,82 @@ public class HttpSinkShould : IClassFixture<WebServerFixture>
         // Some log events will have been dropped
         webServerFixture.GetAllEvents(testId).Length.ShouldBeLessThan(logEvents.Length);
     }
+
+    [Fact]
+    public void SendStoredLogEventsGivenFlushOnClose()
+    {
+        // Arrange
+        var testId = $"SendStoredLogEventsGivenFlushOnClose_{Guid.NewGuid()}";
+
+        // Create 10 log events
+        var logEvents = Enumerable
+            .Range(1, 10)
+            .Select(number => Some.LogEvent("Event {number}", number))
+            .ToArray();
+
+        var period = TimeSpan.FromSeconds(5);
+        var flushOnClose = true;
+
+        var sink = new HttpSink(
+            requestUri: webServerFixture.RequestUri(testId),
+            queueLimitBytes: null,
+            logEventLimitBytes: null,
+            logEventsInBatchLimit: null,
+            batchSizeLimitBytes: null,
+            period: period,
+            flushOnClose: flushOnClose,
+            textFormatter: new NormalTextFormatter(),
+            batchFormatter: new ArrayBatchFormatter(),
+            httpClient: new JsonHttpClient(webServerFixture.CreateClient()));
+
+        // Act
+        foreach (var logEvent in logEvents)
+        {
+            sink.Emit(logEvent);
+        }
+
+        sink.Dispose();
+
+        // Assert
+        webServerFixture.GetAllEvents(testId).Length.ShouldBe(logEvents.Length);
+    }
+
+    [Fact]
+    public void IgnoreSendingStoredLogEventsGivenNoFlushOnClose()
+    {
+        // Arrange
+        var testId = $"IgnoreSendingStoredLogEventsGivenNoFlushOnClose_{Guid.NewGuid()}";
+
+        // Create 10 log events
+        var logEvents = Enumerable
+            .Range(1, 10)
+            .Select(number => Some.LogEvent("Event {number}", number))
+            .ToArray();
+
+        var period = TimeSpan.FromSeconds(5);
+        var flushOnClose = false;
+
+        var sink = new HttpSink(
+            requestUri: webServerFixture.RequestUri(testId),
+            queueLimitBytes: null,
+            logEventLimitBytes: null,
+            logEventsInBatchLimit: null,
+            batchSizeLimitBytes: null,
+            period: period,
+            flushOnClose: flushOnClose,
+            textFormatter: new NormalTextFormatter(),
+            batchFormatter: new ArrayBatchFormatter(),
+            httpClient: new JsonHttpClient(webServerFixture.CreateClient()));
+
+        // Act
+        foreach (var logEvent in logEvents)
+        {
+            sink.Emit(logEvent);
+        }
+
+        sink.Dispose();
+
+        // Assert
+        webServerFixture.GetAllEvents(testId).Length.ShouldBe(0);
+    }
 }
