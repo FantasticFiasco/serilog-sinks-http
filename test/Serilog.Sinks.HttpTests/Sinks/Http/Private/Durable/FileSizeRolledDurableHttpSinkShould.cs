@@ -41,6 +41,7 @@ public class FileSizeRolledDurableHttpSinkShould : IClassFixture<WebServerFixtur
             logEventsInBatchLimit: 1000,
             batchSizeLimitBytes: null,
             period: TimeSpan.FromSeconds(2),
+            flushOnClose: true,
             textFormatter: new NormalTextFormatter(),
             batchFormatter: new ArrayBatchFormatter(),
             httpClient: new JsonHttpClient(webServerFixture.CreateClient()));
@@ -70,6 +71,7 @@ public class FileSizeRolledDurableHttpSinkShould : IClassFixture<WebServerFixtur
             logEventsInBatchLimit: 1000,
             batchSizeLimitBytes: null,
             period: TimeSpan.FromSeconds(2),
+            flushOnClose: true,
             textFormatter: new NormalTextFormatter(),
             batchFormatter: new ArrayBatchFormatter(),
             httpClient: new JsonHttpClient(webServerFixture.CreateClient()));
@@ -95,6 +97,7 @@ public class FileSizeRolledDurableHttpSinkShould : IClassFixture<WebServerFixtur
                    logEventsInBatchLimit: 1000,
                    batchSizeLimitBytes: null,
                    period: period,
+                   flushOnClose: true,
                    textFormatter: new NormalTextFormatter(),
                    batchFormatter: new ArrayBatchFormatter(),
                    httpClient: new JsonHttpClient(webServerFixture.CreateClient())))
@@ -125,6 +128,7 @@ public class FileSizeRolledDurableHttpSinkShould : IClassFixture<WebServerFixtur
             logEventsInBatchLimit: 1000,
             batchSizeLimitBytes: null,
             period: period,
+            flushOnClose: true,
             textFormatter: new NormalTextFormatter(),
             batchFormatter: new ArrayBatchFormatter(),
             httpClient: new JsonHttpClient(webServerFixture.CreateClient()));

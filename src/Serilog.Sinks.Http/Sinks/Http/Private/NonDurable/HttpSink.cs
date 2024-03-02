@@ -15,6 +15,7 @@
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Serilog.Core;
 using Serilog.Debugging;
@@ -141,8 +142,9 @@ public class HttpSink : ILogEventSink, IDisposable
                         if (contentStream.Length == 0)
                             continue;
 
+                        // TODO: Replace CancellationToken.None with a real cancellation token
                         response = await httpClient
-                            .PostAsync(requestUri, contentStream)
+                            .PostAsync(requestUri, contentStream, CancellationToken.None)
                             .ConfigureAwait(false);
                     }
 

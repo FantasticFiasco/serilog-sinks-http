@@ -34,6 +34,7 @@ public class HttpSinkShould : IClassFixture<WebServerFixture>
                    logEventsInBatchLimit: null,
                    batchSizeLimitBytes: null,
                    period: period,
+                   flushOnClose: true,
                    textFormatter: new NormalTextFormatter(),
                    batchFormatter: new ArrayBatchFormatter(),
                    httpClient: new JsonHttpClient(webServerFixture.CreateClient())))
@@ -61,6 +62,7 @@ public class HttpSinkShould : IClassFixture<WebServerFixture>
             logEventsInBatchLimit: null,
             batchSizeLimitBytes: null,
             period: period,
+            flushOnClose: true,
             textFormatter: new NormalTextFormatter(),
             batchFormatter: new ArrayBatchFormatter(),
             httpClient: new JsonHttpClient(webServerFixture.CreateClient()));
@@ -96,6 +98,7 @@ public class HttpSinkShould : IClassFixture<WebServerFixture>
             logEventsInBatchLimit: null,
             batchSizeLimitBytes: null,
             period: period,
+            flushOnClose: true,
             textFormatter: new NormalTextFormatter(),
             batchFormatter: new ArrayBatchFormatter(),
             httpClient: new JsonHttpClient(webServerFixture.CreateClient()));
