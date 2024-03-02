@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Serilog.Sinks.Http;
@@ -20,7 +21,7 @@ class HttpClientMock : IHttpClient
     {
     }
 
-    public Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream)
+    public Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
