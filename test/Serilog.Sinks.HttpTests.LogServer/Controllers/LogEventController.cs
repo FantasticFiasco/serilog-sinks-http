@@ -24,6 +24,9 @@ public class LogEventController : ControllerBase
             return StatusCode(StatusCodes.Status503ServiceUnavailable);
         }
 
+        // Simulate that this takes some time, either due to a large payload size or slow network
+        Thread.Sleep(TimeSpan.FromSeconds(10));
+        
         var logEvents = batch.Select(logEvent => logEvent.ToLogEvent());
         logEventService.AddBatch(testId, logEvents);
         return NoContent();
