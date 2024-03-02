@@ -30,6 +30,7 @@ public class HttpSink : ILogEventSink, IDisposable
     private readonly long? logEventLimitBytes;
     private readonly int? logEventsInBatchLimit;
     private readonly long? batchSizeLimitBytes;
+    private readonly bool flushOnClose;
     private readonly ITextFormatter textFormatter;
     private readonly IBatchFormatter batchFormatter;
     private readonly IHttpClient httpClient;
@@ -48,6 +49,7 @@ public class HttpSink : ILogEventSink, IDisposable
         int? logEventsInBatchLimit,
         long? batchSizeLimitBytes,
         TimeSpan period,
+        bool flushOnClose,
         ITextFormatter textFormatter,
         IBatchFormatter batchFormatter,
         IHttpClient httpClient)
@@ -56,6 +58,7 @@ public class HttpSink : ILogEventSink, IDisposable
         this.logEventLimitBytes = logEventLimitBytes;
         this.logEventsInBatchLimit = logEventsInBatchLimit;
         this.batchSizeLimitBytes = batchSizeLimitBytes;
+        this.flushOnClose = flushOnClose;
         this.textFormatter = textFormatter ?? throw new ArgumentNullException(nameof(textFormatter));
         this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
         this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));

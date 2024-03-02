@@ -21,7 +21,10 @@ class HttpClientMock : IHttpClient
     {
     }
 
-    public Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream, CancellationToken cancellationToken)
+    public Task<HttpResponseMessage> PostAsync(
+        string requestUri,
+        Stream contentStream,
+        CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
