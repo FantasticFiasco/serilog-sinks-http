@@ -37,11 +37,12 @@ public class HttpSink : ILogEventSink, IDisposable
     private readonly IHttpClient httpClient;
     private readonly ExponentialBackoffConnectionSchedule connectionSchedule;
     private readonly PortableTimer timer;
-    private readonly object syncRoot = new();
     private readonly LogEventQueue queue;
+    private readonly CancellationTokenSource cts = new();
+    private readonly object syncRoot = new();
 
     private Batch? unsentBatch;
-    private volatile bool disposed;
+    private bool disposed;
 
     public HttpSink(
         string requestUri,
@@ -105,10 +106,27 @@ public class HttpSink : ILogEventSink, IDisposable
             disposed = true;
         }
 
-        timer.Dispose();
+        if (flushOnClose)
+        {
+            // Dispose the timer and allow any ongoing operation to finish
+            timer.Dispose();
 
-        OnTick().GetAwaiter().GetResult();
-        httpClient.Dispose();
+            // Flush
+            OnTick().GetAwaiter().GetResult();
+
+            cts.Dispose();
+            httpClient.Dispose();
+        }
+        else
+        {
+            // Cancel any ongoing operations
+            cts.Cancel();
+
+            // Dispose
+            timer.Dispose();
+            cts.Dispose();
+            httpClient.Dispose();
+        }
     }
 
     private void SetTimer()
@@ -142,9 +160,8 @@ public class HttpSink : ILogEventSink, IDisposable
                         if (contentStream.Length == 0)
                             continue;
 
-                        // TODO: Replace CancellationToken.None with a real cancellation token
                         response = await httpClient
-                            .PostAsync(requestUri, contentStream, CancellationToken.None)
+                            .PostAsync(requestUri, contentStream, cts.Token)
                             .ConfigureAwait(false);
                     }
 
@@ -158,9 +175,8 @@ public class HttpSink : ILogEventSink, IDisposable
                         connectionSchedule.MarkFailure();
                         unsentBatch = batch;
 
-                        var statusCode = response.StatusCode;
                         var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        SelfLog.WriteLine("Received failed HTTP shipping result {0}: {1}", statusCode, body);
+                        SelfLog.WriteLine("Received failed HTTP shipping result {0}: {1}", response.StatusCode, body);
                         break;
                     }
                 }
@@ -171,6 +187,9 @@ public class HttpSink : ILogEventSink, IDisposable
                     connectionSchedule.MarkSuccess();
                 }
             } while (batch.HasReachedLimit);
+        }
+        catch (OperationCanceledException)
+        {
         }
         catch (Exception e)
         {
