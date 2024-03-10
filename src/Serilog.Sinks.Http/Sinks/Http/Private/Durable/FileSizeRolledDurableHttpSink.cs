@@ -67,17 +67,8 @@ public class FileSizeRolledDurableHttpSink : ILogEventSink, IDisposable
 
     public void Dispose()
     {
-        SelfLog.WriteLine("FileSizeRolledDurableHttpSink - Begin dispose");
-
-        SelfLog.WriteLine("FileSizeRolledDurableHttpSink::sink - Begin dispose");
         (sink as IDisposable)?.Dispose();
-        SelfLog.WriteLine("FileSizeRolledDurableHttpSink::sink - End dispose");
-
-        SelfLog.WriteLine("FileSizeRolledDurableHttpSink::shipper - Begin dispose");
         shipper.Dispose();
-        SelfLog.WriteLine("FileSizeRolledDurableHttpSink::shipper - End dispose");
-
-        SelfLog.WriteLine("FileSizeRolledDurableHttpSink - End dispose");
     }
 
     private static ILogEventSink CreateFileSink(

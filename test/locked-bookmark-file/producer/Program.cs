@@ -10,7 +10,8 @@ SelfLog.Enable((output) => Console.WriteLine($"SelfLog: {output}"));
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Verbose()
-    .WriteTo.DurableHttpUsingFileSizeRolledBuffers(requestUri: $"http://localhost:5283/logs/{id}", bufferFileShared: true)
+    //.WriteTo.Http($"http://localhost:5283/logs/{id}", null, flushOnClose: false)
+    .WriteTo.DurableHttpUsingFileSizeRolledBuffers(requestUri: $"http://localhost:5283/logs/{id}", bufferFileShared: true, flushOnClose: false)
     .CreateLogger();
 
 Task.Run(
@@ -25,7 +26,7 @@ Task.Run(
             SelfLog.WriteLine(message);
             Log.Information(message);
 
-            await Task.Delay(TimeSpan.FromSeconds(10));
+            await Task.Delay(TimeSpan.FromSeconds(5));
             i++;
         }
     });
