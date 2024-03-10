@@ -25,7 +25,7 @@ public class LogEventController : ControllerBase
         }
 
         // Simulate that this takes some time, either due to a large payload size or slow network
-        Thread.Sleep(TimeSpan.FromSeconds(10));
+        //Thread.Sleep(TimeSpan.FromSeconds(10));
         
         var logEvents = batch.Select(logEvent => logEvent.ToLogEvent());
         logEventService.AddBatch(testId, logEvents);
