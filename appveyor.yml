@@ -24,14 +24,14 @@ deploy:
     release: Release ${APPVEYOR_REPO_TAG_NAME}
     description: TODO
     auth_token:
-      secure: j02iHBdEdOPrRurPI+J8gxvi153bzB2wMx0k8N4n2M8UyYJioyYYaXHB+318iR+J
+      secure: 2vpeyFd0qviswr3A0GfM7kVn0byuTAyN2CSAy+WtnT5PRvAG5uQu9IDeG2ikOo97
     artifact: NuGet
     draft: true
     on:
       APPVEYOR_REPO_TAG: true
   - provider: NuGet
     api_key:
-      secure: 6wrGpQA9SV1Isu2qpTTmeDfclPSJSbWc7ySeFqRi96Seb0c5LI9Er+e1j+RmeGb2
+      secure: rgk0wGra4vfgFPaHVx+TZelydrrsMNXuOYjK2C1JisFFru8fVhW15XY84Pk3uyXq
     symbol_server: https://www.nuget.org
     skip_symbols: false
     on:

@@ -9,10 +9,21 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 ### :zap: Added
 
 - Support for .NET Framework 4.6.2
+- [#262](https://github.com/FantasticFiasco/serilog-sinks-http/issues/262) [BREAKING CHANGE] Support specifying `flushOnClose` when creating the sink, thus adding the support to suppress sending unsent log events to the log server before closing the sink (proposed by [@murlidakhare](https://github.com/murlidakhare), [@julichan](https://github.com/julichan), [@janichirag11](https://github.com/janichirag11) & [@prasadpaul53](https://github.com/prasadpaul53))
+
+  **Migration guide**
+
+  The parameter `flushOnClose` has been introduced to the methods `Http`, `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers`. Please verify that the arguments pass by you to these methods still align with your intentions.
+
+  To automatically mitigate this kind of *new parameter issue* in the future, move from using positional arguments to named arguments.
+
+### :dizzy: Changed
+
+- [#262](https://github.com/FantasticFiasco/serilog-sinks-http/issues/262) [BREAKING CHANGE] Method `PostAsync` of interface `IHttpClient` has changed with the introduction of the `CancellationToken` argument.
 
 ### :skull: Removed
 
-- [BREAKING CHANGE] Remove support for .NET Framework 4.5, aligning with the [.NET Framework support policy](https://learn.microsoft.com/lifecycle/products/microsoft-net-framework)
+- [#253](https://github.com/FantasticFiasco/serilog-sinks-http/issues/253) [BREAKING CHANGE] Remove support for .NET Framework 4.5, aligning with the [.NET Framework support policy](https://learn.microsoft.com/lifecycle/products/microsoft-net-framework)
 - [BREAKING CHANGE] Remove support for .NET Framework 4.6.1, aligning with the [.NET Framework support policy](https://learn.microsoft.com/lifecycle/products/microsoft-net-framework)
 
 ## [9.0.0-beta.1] - 2023-04-12
@@ -25,7 +36,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
   The parameter `levelSwitch` has been introduced to the methods `Http`, `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers`. Please verify that the arguments pass by you to these methods still align with your intentions.
 
-  To automatically mitigate this kind of *new parameter issue* in the future, move from using positional arguments to named arguments instead.
+  To automatically mitigate this kind of *new parameter issue* in the future, move from using positional arguments to named arguments.
 
 ## [8.0.0] - 2022-04-10
 
@@ -37,7 +48,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
   The parameter `batchSizeLimitBytes` has been introduced to the methods `Http`, `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers`. Please verify that the arguments pass by you to these methods still align with your intentions.
 
-  To automatically mitigate this kind of *new parameter issue* in the future, move from using positional arguments to named arguments instead.
+  To automatically mitigate this kind of *new parameter issue* in the future, move from using positional arguments to named arguments.
 
 - [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) Support for content encoding [Gzip](https://en.wikipedia.org/wiki/Gzip) using HTTP client `JsonGzipHttpClient` (contribution by [@vaibhavepatel](https://github.com/vaibhavepatel), [@KalininAndreyVictorovich](https://github.com/KalininAndreyVictorovich) and [@AntonSmolkov](https://github.com/AntonSmolkov))
 - [#166](https://github.com/FantasticFiasco/serilog-sinks-http/issues/166) Support for specifying `HttpClient` when creating `JsonHttpClient` and `JsonGzipHttpClient`
