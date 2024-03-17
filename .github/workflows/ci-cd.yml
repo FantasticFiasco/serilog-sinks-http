@@ -1,15 +1,21 @@
 name: CI/CD
 
 on:
-    push:
-    workflow_dispatch:
+  push:
+  workflow_dispatch:
 
 defaults:
-    run:
-        shell: pwsh
+  run:
+    shell: pwsh
 
 jobs:
-    build:
-        runs-on: windows-latest
-        steps:
-            - run: Write-Host "Hello world!"
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.x
+      # - run: dotnet build -c Release
+      # - run: dotnet test -c Release --no-build
+      - run: build\build2.ps1
