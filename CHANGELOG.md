@@ -19,7 +19,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ### :dizzy: Changed
 
-- [#262](https://github.com/FantasticFiasco/serilog-sinks-http/issues/262) [BREAKING CHANGE] Method `PostAsync` of interface `IHttpClient` has changed with the introduction of the `CancellationToken` argument.
+- [#262](https://github.com/FantasticFiasco/serilog-sinks-http/issues/262) [BREAKING CHANGE] A new argument of type `CancellationToken` has been added to the `PostAsync` method of interface `IHttpClient`.
 
 ### :skull: Removed
 
