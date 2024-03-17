@@ -1,0 +1,15 @@
+name: CI/CD
+
+on:
+    push:
+    workflow_dispatch:
+
+defaults:
+    run:
+        shell: pwsh
+
+jobs:
+    build:
+        runs-on: windows-latest
+        steps:
+            - run: Write-Host "Hello world!"
