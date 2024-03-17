@@ -17,3 +17,4 @@ jobs:
         with:
           dotnet-version: 8.x
       - run: dotnet build -c Release
+      - run: dotnet test -c Release --no-build
