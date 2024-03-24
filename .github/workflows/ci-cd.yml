@@ -26,10 +26,14 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
+            const tag_name = "test";
 
             github.rest.repos.createRelease({
               owner,
               repo,
-              tag_name: "test",
+              tag_name,
+              name: "Release " + tag_name,
+              body: "TODO",
+              draft: true,
             });
 
