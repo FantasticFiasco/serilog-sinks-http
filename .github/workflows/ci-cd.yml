@@ -32,7 +32,7 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const tag_name = context.ref.replace(/\/refs\/tags\//, '');
+            const tag_name = context.ref.replace(/refs\/tags\//, '');
 
             github.rest.repos.createRelease({
               owner,
