@@ -30,6 +30,6 @@ jobs:
             octokit.rest.repos.createRelease({
               owner,
               repo,
-              "test",
+              tag_name: "test",
             });
 
