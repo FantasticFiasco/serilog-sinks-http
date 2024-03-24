@@ -27,7 +27,7 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
-            octokit.rest.repos.createRelease({
+            github.rest.repos.createRelease({
               owner,
               repo,
               tag_name: "test",
