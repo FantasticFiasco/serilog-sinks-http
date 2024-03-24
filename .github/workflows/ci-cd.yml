@@ -21,3 +21,14 @@ jobs:
         with:
           name: nuget
           path: artifacts
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            console.log(owner);
+            console.log(repo);
+            # octokit.rest.repos.createRelease({
+            #   '',
+            #   repo,
+            #   tag_name,
+            # });
