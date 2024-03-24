@@ -21,6 +21,7 @@ jobs:
         with:
           name: nuget
           path: artifacts
+          if-no-files-found: 'error'
 
   release:
     needs: build
