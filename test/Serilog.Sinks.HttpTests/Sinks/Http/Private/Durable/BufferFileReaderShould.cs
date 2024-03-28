@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using Shouldly;
 using Xunit;
 
@@ -28,7 +29,8 @@ public class BufferFileReaderShould
             ref nextLineBeginsAtOffset,
             null,
             null,
-            null);
+            null,
+            CancellationToken.None);
 
         // Assert
         got.LogEvents.ShouldBe(new[] { FooLogEvent });
@@ -53,7 +55,8 @@ public class BufferFileReaderShould
             ref nextLineBeginsAtOffset,
             null,
             null,
-            null);
+            null,
+            CancellationToken.None);
 
         // Assert
         got.LogEvents.ShouldBe(new[] { FooLogEvent, BarLogEvent });
@@ -77,7 +80,8 @@ public class BufferFileReaderShould
             ref nextLineBeginsAtOffset,
             null,
             null,
-            null);
+            null,
+            CancellationToken.None);
 
         // Assert
         got.LogEvents.ShouldBeEmpty();
@@ -102,7 +106,8 @@ public class BufferFileReaderShould
             ref nextLineBeginsAtOffset,
             null,
             null,
-            null);
+            null,
+            CancellationToken.None);
 
         // Assert
         got.LogEvents.ShouldBe(new[] { FooLogEvent });
@@ -128,7 +133,8 @@ public class BufferFileReaderShould
             ref nextLineBeginsAtOffset,
             logEventLimitBytes,
             null,
-            null);
+            null,
+            CancellationToken.None);
 
         // Assert
         got.LogEvents.ShouldBeEmpty();
@@ -155,7 +161,8 @@ public class BufferFileReaderShould
             ref nextLineBeginsAtOffset,
             null,
             logEventsInBatchLimit,
-            null);
+            null,
+            CancellationToken.None);
 
         // Assert
         got.LogEvents.ShouldBe(new[] { FooLogEvent });
@@ -182,7 +189,8 @@ public class BufferFileReaderShould
             ref nextLineBeginsAtOffset,
             null,
             null,
-            batchSizeLimit);
+            batchSizeLimit,
+            CancellationToken.None);
 
         // Assert
         got.LogEvents.ShouldBe(new[] { FooLogEvent });
@@ -211,11 +219,39 @@ public class BufferFileReaderShould
             ref nextLineBeginsAtOffset,
             null,
             null,
-            batchSizeLimit);
+            batchSizeLimit,
+            CancellationToken.None);
 
         // Assert
         got.LogEvents.ShouldBe(new[] { BarLogEvent });
         got.HasReachedLimit.ShouldBeFalse();
         nextLineBeginsAtOffset.ShouldBe(stream.Length);
+    }
+
+    [Fact]
+    public void RespectCancellationToken()
+    {
+        // Arrange
+        var cancellationToken = new CancellationToken(true);
+
+        using var stream = new MemoryStream();
+
+        using var writer = new StreamWriter(stream, Encoding.UTF8WithoutBom);
+        writer.Write(FooLogEvent + Environment.NewLine);
+        writer.Flush();
+        
+        // Act
+        var got = BufferFileReader.Read(
+            stream,
+            ref nextLineBeginsAtOffset,
+            null,
+            null,
+            null,
+            cancellationToken);
+
+        // Assert
+        got.LogEvents.ShouldBeEmpty();
+        got.HasReachedLimit.ShouldBeFalse();
+        nextLineBeginsAtOffset.ShouldBe(0);
     }
 }

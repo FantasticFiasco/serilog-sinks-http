@@ -35,6 +35,7 @@ public class FileSizeRolledDurableHttpSink : ILogEventSink, IDisposable
         int? logEventsInBatchLimit,
         long? batchSizeLimitBytes,
         TimeSpan period,
+        bool flushOnClose,
         ITextFormatter textFormatter,
         IBatchFormatter batchFormatter,
         IHttpClient httpClient)
@@ -47,6 +48,7 @@ public class FileSizeRolledDurableHttpSink : ILogEventSink, IDisposable
             logEventsInBatchLimit,
             batchSizeLimitBytes,
             period,
+            flushOnClose,
             batchFormatter);
 
         sink = CreateFileSink(

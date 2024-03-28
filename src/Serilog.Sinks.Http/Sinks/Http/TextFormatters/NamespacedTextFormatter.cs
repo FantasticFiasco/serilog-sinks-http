@@ -49,9 +49,10 @@ public abstract class NamespacedTextFormatter : ITextFormatter
     /// </param>
     /// <param name="subComponent">
     /// The sub-component name, which will be serialized into a sub-property of
-    /// <paramref name="component"/> in the JSON document. If value is null it will be omitted
-    /// from the serialized JSON document, and the message properties will be serialized as
-    /// properties of <paramref name="component"/>. Default value is null.
+    /// <paramref name="component"/> in the JSON document. If value is <see langword="null"/> it
+    /// will be omitted from the serialized JSON document, and the message properties will be
+    /// serialized as properties of <paramref name="component"/>. Default value is
+    /// <see langword="null"/>.
     /// </param>
     protected NamespacedTextFormatter(string component, string? subComponent = null)
     {
@@ -61,7 +62,7 @@ public abstract class NamespacedTextFormatter : ITextFormatter
 
     /// <summary>
     /// Gets or sets a value indicating whether the message is rendered into JSON. Default
-    /// value is true.
+    /// value is <see langword="true"/>.
     /// </summary>
     protected bool IsRenderingMessage { get; set; } = true;
 

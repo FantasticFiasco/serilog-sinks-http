@@ -16,6 +16,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
@@ -81,13 +82,16 @@ public class JsonGzipHttpClient : IHttpClient
     }
 
     /// <inheritdoc />
-    public virtual async Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream)
+    public virtual async Task<HttpResponseMessage> PostAsync(
+        string requestUri,
+        Stream contentStream,
+        CancellationToken cancellationToken)
     {
         using var output = new MemoryStream();
 
         using (var gzipStream = new GZipStream(output, CompressionLevel, true)){
             await contentStream
-                .CopyToAsync(gzipStream)
+                .CopyToAsync(gzipStream, 81920, cancellationToken)
                 .ConfigureAwait(false);
         }
 
@@ -98,7 +102,7 @@ public class JsonGzipHttpClient : IHttpClient
         content.Headers.Add("Content-Encoding", GzipContentEncoding);
 
         var response = await httpClient
-            .PostAsync(requestUri, content)
+            .PostAsync(requestUri, content, cancellationToken)
             .ConfigureAwait(false);
 
         return response;

@@ -15,6 +15,7 @@
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Serilog.Sinks.Http.HttpClients;
@@ -39,6 +40,10 @@ public interface IHttpClient : IDisposable
     /// </summary>
     /// <param name="requestUri">The Uri the request is sent to.</param>
     /// <param name="contentStream">The stream containing the content of the request.</param>
+    /// <param name="cancellationToken">
+    /// A cancellation token that can be used by other objects or threads to receive notice of
+    /// cancellation.
+    /// </param>
     /// <returns>The task object representing the asynchronous operation.</returns>
-    Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream);
+    Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream, CancellationToken cancellationToken);
 }

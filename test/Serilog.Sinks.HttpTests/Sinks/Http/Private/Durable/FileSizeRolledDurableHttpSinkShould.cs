@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Serilog.Sinks.Http.BatchFormatters;
 using Serilog.Sinks.Http.HttpClients;
@@ -41,6 +42,7 @@ public class FileSizeRolledDurableHttpSinkShould : IClassFixture<WebServerFixtur
             logEventsInBatchLimit: 1000,
             batchSizeLimitBytes: null,
             period: TimeSpan.FromSeconds(2),
+            flushOnClose: true,
             textFormatter: new NormalTextFormatter(),
             batchFormatter: new ArrayBatchFormatter(),
             httpClient: new JsonHttpClient(webServerFixture.CreateClient()));
@@ -70,6 +72,7 @@ public class FileSizeRolledDurableHttpSinkShould : IClassFixture<WebServerFixtur
             logEventsInBatchLimit: 1000,
             batchSizeLimitBytes: null,
             period: TimeSpan.FromSeconds(2),
+            flushOnClose: true,
             textFormatter: new NormalTextFormatter(),
             batchFormatter: new ArrayBatchFormatter(),
             httpClient: new JsonHttpClient(webServerFixture.CreateClient()));
@@ -95,6 +98,7 @@ public class FileSizeRolledDurableHttpSinkShould : IClassFixture<WebServerFixtur
                    logEventsInBatchLimit: 1000,
                    batchSizeLimitBytes: null,
                    period: period,
+                   flushOnClose: true,
                    textFormatter: new NormalTextFormatter(),
                    batchFormatter: new ArrayBatchFormatter(),
                    httpClient: new JsonHttpClient(webServerFixture.CreateClient())))
@@ -125,6 +129,7 @@ public class FileSizeRolledDurableHttpSinkShould : IClassFixture<WebServerFixtur
             logEventsInBatchLimit: 1000,
             batchSizeLimitBytes: null,
             period: period,
+            flushOnClose: true,
             textFormatter: new NormalTextFormatter(),
             batchFormatter: new ArrayBatchFormatter(),
             httpClient: new JsonHttpClient(webServerFixture.CreateClient()));
@@ -137,5 +142,89 @@ public class FileSizeRolledDurableHttpSinkShould : IClassFixture<WebServerFixtur
         // Assert
         webServerFixture.GetAllBatches(testId).ShouldBeEmpty();
         webServerFixture.GetAllEvents(testId).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void SendStoredLogEventsGivenFlushOnClose()
+    {
+        // Arrange
+        var testId = $"SendStoredLogEventsGivenFlushOnClose_{Guid.NewGuid()}";
+
+        // Create 10 log events
+        var logEvents = Enumerable
+            .Range(1, 10)
+            .Select(number => Some.LogEvent("Event {number}", number))
+            .ToArray();
+
+        var period = TimeSpan.FromSeconds(5);
+        var flushOnClose = true;
+
+        var sink = new FileSizeRolledDurableHttpSink(
+            requestUri: webServerFixture.RequestUri(testId),
+            bufferBaseFileName: Path.Combine("logs", testId),
+            bufferFileSizeLimitBytes: null,
+            bufferFileShared: false,
+            retainedBufferFileCountLimit: null,
+            logEventLimitBytes: null,
+            logEventsInBatchLimit: 1000,
+            batchSizeLimitBytes: null,
+            period: period,
+            flushOnClose: flushOnClose,
+            textFormatter: new NormalTextFormatter(),
+            batchFormatter: new ArrayBatchFormatter(),
+            httpClient: new JsonHttpClient(webServerFixture.CreateClient()));
+
+        // Act
+        foreach (var logEvent in logEvents)
+        {
+            sink.Emit(logEvent);
+        }
+
+        sink.Dispose();
+
+        // Assert
+        webServerFixture.GetAllEvents(testId).Length.ShouldBe(logEvents.Length);
+    }
+
+    [Fact]
+    public void IgnoreSendingStoredLogEventsGivenNoFlushOnClose()
+    {
+        // Arrange
+        var testId = $"IgnoreSendingStoredLogEventsGivenNoFlushOnClose_{Guid.NewGuid()}";
+
+        // Create 10 log events
+        var logEvents = Enumerable
+            .Range(1, 10)
+            .Select(number => Some.LogEvent("Event {number}", number))
+            .ToArray();
+
+        var period = TimeSpan.FromSeconds(5);
+        var flushOnClose = false;
+
+        var sink = new FileSizeRolledDurableHttpSink(
+            requestUri: webServerFixture.RequestUri(testId),
+            bufferBaseFileName: Path.Combine("logs", testId),
+            bufferFileSizeLimitBytes: null,
+            bufferFileShared: false,
+            retainedBufferFileCountLimit: null,
+            logEventLimitBytes: null,
+            logEventsInBatchLimit: 1000,
+            batchSizeLimitBytes: null,
+            period: period,
+            flushOnClose: flushOnClose,
+            textFormatter: new NormalTextFormatter(),
+            batchFormatter: new ArrayBatchFormatter(),
+            httpClient: new JsonHttpClient(webServerFixture.CreateClient()));
+
+        // Act
+        foreach (var logEvent in logEvents)
+        {
+            sink.Emit(logEvent);
+        }
+
+        sink.Dispose();
+
+        // Assert
+        webServerFixture.GetAllEvents(testId).Length.ShouldBe(0);
     }
 }
