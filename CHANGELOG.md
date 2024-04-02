@@ -336,7 +336,6 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 ### :skull: Removed
 
 - [#182](https://github.com/FantasticFiasco/serilog-sinks-http/issues/182) [BREAKING CHANGE] Extension method `DurableHttp` which was marked as deprecated in v5.2.0
-- [#215](https://github.com/FantasticFiasco/serilog-sinks-http/issues/215) [BREAKING CHANGE] Remove support for .NET Standard 1.3, aligning with the [cross-platform targeting library guidance](https://docs.microsoft.com/en-us/dotnet/standard/library-guidance/cross-platform-targeting)
 
   **Migration guide**
 
@@ -386,6 +385,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
   }
   ```
 
+- [#215](https://github.com/FantasticFiasco/serilog-sinks-http/issues/215) [BREAKING CHANGE] Remove support for .NET Standard 1.3, aligning with the [cross-platform targeting library guidance](https://docs.microsoft.com/en-us/dotnet/standard/library-guidance/cross-platform-targeting)
 - [#196](https://github.com/FantasticFiasco/serilog-sinks-http/issues/196) [BREAKING CHANGE] Overloaded method `IBatchFormatter.Format(IEnumerable<LogEvent>, ITextFormatter, TextWriter)` has been removed in favour of keeping `IBatchFormatter.Format(IEnumerable<string>, TextWriter output)`
 
   **Migration guide**
