@@ -8,7 +8,7 @@ const createRelease = async ({github, context}) => {
   const repo = context.repo.repo;
   const tag_name = context.ref.replace(/refs\/tags\//, '');
 
-  const res = github.rest.repos.createRelease({
+  const res = await github.rest.repos.createRelease({
     owner,
     repo,
     tag_name,
