@@ -1,6 +1,5 @@
 # Serilog.Sinks.Http - A Serilog sink sending log events over HTTP <!-- omit in toc -->
 
-[![Build status](https://ci.appveyor.com/api/projects/status/ayvak8yo23k962sg/branch/main?svg=true)](https://ci.appveyor.com/project/FantasticFiasco/serilog-sinks-http)
 [![CI/CD](https://github.com/FantasticFiasco/serilog-sinks-http/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/FantasticFiasco/serilog-sinks-http/actions/workflows/ci-cd.yml)
 [![codecov](https://codecov.io/gh/FantasticFiasco/serilog-sinks-http/branch/main/graph/badge.svg?token=cw6OYeQmdH)](https://codecov.io/gh/FantasticFiasco/serilog-sinks-http)
 [![NuGet Version](http://img.shields.io/nuget/v/Serilog.Sinks.Http.svg?style=flat)](https://www.nuget.org/packages/Serilog.Sinks.Http/)
