@@ -15,6 +15,7 @@
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Serilog.Core;
 using Serilog.Debugging;
@@ -30,16 +31,18 @@ public class HttpSink : ILogEventSink, IDisposable
     private readonly long? logEventLimitBytes;
     private readonly int? logEventsInBatchLimit;
     private readonly long? batchSizeLimitBytes;
+    private readonly bool flushOnClose;
     private readonly ITextFormatter textFormatter;
     private readonly IBatchFormatter batchFormatter;
     private readonly IHttpClient httpClient;
     private readonly ExponentialBackoffConnectionSchedule connectionSchedule;
     private readonly PortableTimer timer;
-    private readonly object syncRoot = new();
     private readonly LogEventQueue queue;
+    private readonly CancellationTokenSource cts = new();
+    private readonly object syncRoot = new();
 
     private Batch? unsentBatch;
-    private volatile bool disposed;
+    private bool disposed;
 
     public HttpSink(
         string requestUri,
@@ -48,6 +51,7 @@ public class HttpSink : ILogEventSink, IDisposable
         int? logEventsInBatchLimit,
         long? batchSizeLimitBytes,
         TimeSpan period,
+        bool flushOnClose,
         ITextFormatter textFormatter,
         IBatchFormatter batchFormatter,
         IHttpClient httpClient)
@@ -56,6 +60,7 @@ public class HttpSink : ILogEventSink, IDisposable
         this.logEventLimitBytes = logEventLimitBytes;
         this.logEventsInBatchLimit = logEventsInBatchLimit;
         this.batchSizeLimitBytes = batchSizeLimitBytes;
+        this.flushOnClose = flushOnClose;
         this.textFormatter = textFormatter ?? throw new ArgumentNullException(nameof(textFormatter));
         this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
         this.httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
@@ -101,10 +106,27 @@ public class HttpSink : ILogEventSink, IDisposable
             disposed = true;
         }
 
-        timer.Dispose();
+        if (flushOnClose)
+        {
+            // Dispose the timer and allow any ongoing operation to finish
+            timer.Dispose();
 
-        OnTick().GetAwaiter().GetResult();
-        httpClient.Dispose();
+            // Flush
+            OnTick().GetAwaiter().GetResult();
+
+            cts.Dispose();
+            httpClient.Dispose();
+        }
+        else
+        {
+            // Cancel any ongoing operations
+            cts.Cancel();
+
+            // Dispose
+            timer.Dispose();
+            cts.Dispose();
+            httpClient.Dispose();
+        }
     }
 
     private void SetTimer()
@@ -139,7 +161,7 @@ public class HttpSink : ILogEventSink, IDisposable
                             continue;
 
                         response = await httpClient
-                            .PostAsync(requestUri, contentStream)
+                            .PostAsync(requestUri, contentStream, cts.Token)
                             .ConfigureAwait(false);
                     }
 
@@ -153,9 +175,8 @@ public class HttpSink : ILogEventSink, IDisposable
                         connectionSchedule.MarkFailure();
                         unsentBatch = batch;
 
-                        var statusCode = response.StatusCode;
                         var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        SelfLog.WriteLine("Received failed HTTP shipping result {0}: {1}", statusCode, body);
+                        SelfLog.WriteLine("Received failed HTTP shipping result {0}: {1}", response.StatusCode, body);
                         break;
                     }
                 }
@@ -166,6 +187,9 @@ public class HttpSink : ILogEventSink, IDisposable
                     connectionSchedule.MarkSuccess();
                 }
             } while (batch.HasReachedLimit);
+        }
+        catch (OperationCanceledException)
+        {
         }
         catch (Exception e)
         {

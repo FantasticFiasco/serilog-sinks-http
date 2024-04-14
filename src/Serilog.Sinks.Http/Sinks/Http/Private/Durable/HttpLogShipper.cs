@@ -16,11 +16,12 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Serilog.Debugging;
 using Serilog.Sinks.Http.Private.Time;
 
-#if HRESULTS
+#if NET462
 using System.Runtime.InteropServices;
 #endif
 
@@ -30,16 +31,18 @@ namespace Serilog.Sinks.Http.Private.Durable
     {
         private readonly IHttpClient httpClient;
         private readonly string requestUri;
+        private readonly IBufferFiles bufferFiles;
         private readonly long? logEventLimitBytes;
         private readonly int? logEventsInBatchLimit;
         private readonly long? batchSizeLimitBytes;
-        private readonly IBufferFiles bufferFiles;
-        private readonly ExponentialBackoffConnectionSchedule connectionSchedule;
-        private readonly PortableTimer timer;
-        private readonly object syncRoot = new();
         private readonly IBatchFormatter batchFormatter;
+        private readonly ExponentialBackoffConnectionSchedule connectionSchedule;
+        private readonly bool flushOnClose;
+        private readonly PortableTimer timer;
+        private readonly CancellationTokenSource cts = new();
+        private readonly object syncRoot = new();
 
-        private volatile bool disposed;
+        private bool disposed;
 
         public HttpLogShipper(
             IHttpClient httpClient,
@@ -49,6 +52,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             int? logEventsInBatchLimit,
             long? batchSizeLimitBytes,
             TimeSpan period,
+            bool flushOnClose,
             IBatchFormatter batchFormatter)
         {
             if (logEventsInBatchLimit <= 0) throw new ArgumentException("logEventsInBatchLimit must be 1 or greater", nameof(logEventsInBatchLimit));
@@ -60,6 +64,7 @@ namespace Serilog.Sinks.Http.Private.Durable
             this.logEventsInBatchLimit = logEventsInBatchLimit;
             this.batchSizeLimitBytes = batchSizeLimitBytes;
             this.batchFormatter = batchFormatter ?? throw new ArgumentNullException(nameof(batchFormatter));
+            this.flushOnClose = flushOnClose;
 
             connectionSchedule = new ExponentialBackoffConnectionSchedule(period);
             timer = new PortableTimer(OnTick);
@@ -77,10 +82,27 @@ namespace Serilog.Sinks.Http.Private.Durable
                 disposed = true;
             }
 
-            timer.Dispose();
+            if (flushOnClose)
+            {
+                // Dispose the timer and allow any ongoing operation to finish
+                timer.Dispose();
 
-            OnTick().GetAwaiter().GetResult();
-            httpClient.Dispose();
+                // Flush
+                OnTick().GetAwaiter().GetResult();
+
+                cts.Dispose();
+                httpClient.Dispose();
+            }
+            else
+            {
+                // Cancel any ongoing operations
+                cts.Cancel();
+
+                // Dispose
+                timer.Dispose();
+                cts.Dispose();
+                httpClient.Dispose();
+            }
         }
 
         private void SetTimer()
@@ -116,7 +138,8 @@ namespace Serilog.Sinks.Http.Private.Durable
                         ref nextLineBeginsAtOffset,
                         logEventLimitBytes,
                         logEventsInBatchLimit,
-                        batchSizeLimitBytes);
+                        batchSizeLimitBytes,
+                        cts.Token);
 
                     if (batch.LogEvents.Count > 0)
                     {
@@ -134,7 +157,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                                 continue;
 
                             response = await httpClient
-                                .PostAsync(requestUri, contentStream)
+                                .PostAsync(requestUri, contentStream, cts.Token)
                                 .ConfigureAwait(false);
                         }
 
@@ -179,7 +202,10 @@ namespace Serilog.Sinks.Http.Private.Durable
                             System.IO.File.Delete(fileSet[0]);
                         }
                     }
-                } while (batch != null && batch.HasReachedLimit);
+                } while (batch is { HasReachedLimit: true });
+            }
+            catch (OperationCanceledException)
+            {
             }
             catch (Exception e)
             {
@@ -205,7 +231,7 @@ namespace Serilog.Sinks.Http.Private.Durable
                 using var fileStream = System.IO.File.Open(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
                 return fileStream.Length <= maxLength;
             }
-#if HRESULTS
+#if NET462
             catch (IOException e)
             {
                 var errorCode = Marshal.GetHRForException(e) & ((1 << 16) - 1);

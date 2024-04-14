@@ -14,6 +14,7 @@
 
 using System.IO;
 using System.Text;
+using System.Threading;
 using Serilog.Debugging;
 
 namespace Serilog.Sinks.Http.Private.Durable;
@@ -31,10 +32,11 @@ public static class BufferFileReader
         ref long nextLineBeginsAtOffset,
         long? logEventLimitBytes,
         int? logEventsInBatchLimit,
-        long? batchSizeLimitBytes)
+        long? batchSizeLimitBytes,
+        CancellationToken cancellationToken)
     {
         using var stream = System.IO.File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-        return Read(stream, ref nextLineBeginsAtOffset, logEventLimitBytes, logEventsInBatchLimit, batchSizeLimitBytes);
+        return Read(stream, ref nextLineBeginsAtOffset, logEventLimitBytes, logEventsInBatchLimit, batchSizeLimitBytes, cancellationToken);
     }
 
     public static Batch Read(
@@ -42,12 +44,13 @@ public static class BufferFileReader
         ref long nextLineBeginsAtOffset,
         long? logEventLimitBytes,
         int? logEventsInBatchLimit,
-        long? batchSizeLimitBytes)
+        long? batchSizeLimitBytes,
+        CancellationToken cancellationToken)
     {
         var batch = new Batch();
         long batchSizeBytes = 0;
 
-        while (true)
+        while (!cancellationToken.IsCancellationRequested)
         {
             if (stream.Length <= nextLineBeginsAtOffset)
             {

@@ -46,11 +46,12 @@ public static class LoggerSinkConfigurationExtensions
     /// <param name="requestUri">The URI the request is sent to.</param>
     /// <param name="queueLimitBytes">
     /// The maximum size, in bytes, of events stored in memory, waiting to be sent over the
-    /// network. Specify null for no limit.
+    /// network. Specify <see langword="null"/> for no limit.
     /// </param>
     /// <param name="logEventLimitBytes">
     /// The maximum size, in bytes, for a serialized representation of a log event. Log events
-    /// exceeding this size will be dropped. Specify null for no limit. Default value is null.
+    /// exceeding this size will be dropped. Specify <see langword="null"/> for no limit. Default
+    /// value is <see langword="null"/>.
     /// </param>
     /// <param name="logEventsInBatchLimit">
     /// The maximum number of log events sent as a single batch over the network. Default
@@ -70,10 +71,15 @@ public static class LoggerSinkConfigurationExtensions
     /// significantly smaller depending on the compression algorithm and the repetitiveness of
     /// the log events.
     /// <para />
-    /// Default value is null.
+    /// Default value is <see langword="null"/>.
     /// </param>
     /// <param name="period">
     /// The time to wait between checking for event batches. Default value is 2 seconds.
+    /// </param>
+    /// <param name="flushOnClose">
+    /// Whether to send the log events stored in memory during the sink's disposal, thus ensuring
+    /// that all generated log event are sent to the log server before sink closes. Default value
+    /// is <see langword="true"/>.
     /// </param>
     /// <param name="textFormatter">
     /// The formatter rendering individual log events into text, for example JSON. Default
@@ -110,6 +116,7 @@ public static class LoggerSinkConfigurationExtensions
         int? logEventsInBatchLimit = 1000,
         long? batchSizeLimitBytes = null,
         TimeSpan? period = null,
+        bool flushOnClose = true,
         ITextFormatter? textFormatter = null,
         IBatchFormatter? batchFormatter = null,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
@@ -138,6 +145,7 @@ public static class LoggerSinkConfigurationExtensions
             logEventsInBatchLimit: logEventsInBatchLimit,
             batchSizeLimitBytes: batchSizeLimitBytes,
             period: period.Value,
+            flushOnClose: flushOnClose,
             textFormatter: textFormatter,
             batchFormatter: batchFormatter,
             httpClient: httpClient);
@@ -167,23 +175,25 @@ public static class LoggerSinkConfigurationExtensions
     /// </param>
     /// <param name="bufferFileSizeLimitBytes">
     /// The approximate maximum size, in bytes, to which a buffer file will be allowed to grow.
-    /// For unrestricted growth, pass null. The default is 1 GB. To avoid writing partial
-    /// events, the last event within the limit will be written in full even if it exceeds the
-    /// limit.
+    /// For unrestricted growth, pass <see langword="null"/>. The default is 1 GB. To avoid writing
+    /// partial events, the last event within the limit will be written in full even if it exceeds
+    /// the limit.
     /// </param>
     /// <param name="bufferFileShared">
-    /// Allow the buffer file to be shared by multiple processes. Default value is false.
+    /// Allow the buffer file to be shared by multiple processes. Default value is
+    /// <see langword="false"/>.
     /// </param>
     /// <param name="retainedBufferFileCountLimit">
     /// The maximum number of buffer files that will be retained, including the current buffer
     /// file. Under normal operation only 2 files will be kept, however if the log server is
     /// unreachable, the number of files specified by
     /// <paramref name="retainedBufferFileCountLimit"/> will be kept on the file system. For
-    /// unlimited retention, pass null. Default value is 31.
+    /// unlimited retention, pass <see langword="null"/>. Default value is 31.
     /// </param>
     /// <param name="logEventLimitBytes">
     /// The maximum size, in bytes, for a serialized representation of a log event. Log events
-    /// exceeding this size will be dropped. Specify null for no limit. Default value is null.
+    /// exceeding this size will be dropped. Specify <see langword="null"/> for no limit. Default
+    /// value is <see langword="null"/>.
     /// </param>
     /// <param name="logEventsInBatchLimit">
     /// The maximum number of log events sent as a single batch over the network. Default
@@ -203,10 +213,15 @@ public static class LoggerSinkConfigurationExtensions
     /// significantly smaller depending on the compression algorithm and the repetitiveness of
     /// the log events.
     /// <para />
-    /// Default value is null.
+    /// Default value is <see langword="null"/>.
     /// </param>
     /// <param name="period">
     /// The time to wait between checking for event batches. Default value is 2 seconds.
+    /// </param>
+    /// <param name="flushOnClose">
+    /// Whether to send the log events stored on disk during the sink's disposal, thus ensuring
+    /// that all generated log event are sent to the log server before sink closes. Default value
+    /// is <see langword="true"/>.
     /// </param>
     /// <param name="textFormatter">
     /// The formatter rendering individual log events into text, for example JSON. Default
@@ -246,6 +261,7 @@ public static class LoggerSinkConfigurationExtensions
         int? logEventsInBatchLimit = 1000,
         long? batchSizeLimitBytes = null,
         TimeSpan? period = null,
+        bool flushOnClose = true,
         ITextFormatter? textFormatter = null,
         IBatchFormatter? batchFormatter = null,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
@@ -276,6 +292,7 @@ public static class LoggerSinkConfigurationExtensions
             logEventsInBatchLimit: logEventsInBatchLimit,
             batchSizeLimitBytes: batchSizeLimitBytes,
             period: period.Value,
+            flushOnClose: flushOnClose,
             textFormatter: textFormatter,
             batchFormatter: batchFormatter,
             httpClient: httpClient);
@@ -311,18 +328,20 @@ public static class LoggerSinkConfigurationExtensions
     /// interval will be allowed to grow. By default no limit will be applied.
     /// </param>
     /// <param name="bufferFileShared">
-    /// Allow the buffer file to be shared by multiple processes. Default value is false.
+    /// Allow the buffer file to be shared by multiple processes. Default value is
+    /// <see langword="false"/>.
     /// </param>
     /// <param name="retainedBufferFileCountLimit">
     /// The maximum number of buffer files that will be retained, including the current buffer
     /// file. Under normal operation only 2 files will be kept, however if the log server is
     /// unreachable, the number of files specified by
     /// <paramref name="retainedBufferFileCountLimit"/> will be kept on the file system. For
-    /// unlimited retention, pass null. Default value is 31.
+    /// unlimited retention, pass <see langword="null"/>. Default value is 31.
     /// </param>
     /// <param name="logEventLimitBytes">
     /// The maximum size, in bytes, for a serialized representation of a log event. Log events
-    /// exceeding this size will be dropped. Specify null for no limit. Default value is null.
+    /// exceeding this size will be dropped. Specify <see langword="null"/> for no limit. Default
+    /// value is <see langword="null"/>.
     /// </param>
     /// <param name="logEventsInBatchLimit">
     /// The maximum number of log events sent as a single batch over the network. Default
@@ -342,10 +361,15 @@ public static class LoggerSinkConfigurationExtensions
     /// significantly smaller depending on the compression algorithm and the repetitiveness of
     /// the log events.
     /// <para />
-    /// Default value is null.
+    /// Default value is <see langword="null"/>.
     /// </param>
     /// <param name="period">
     /// The time to wait between checking for event batches. Default value is 2 seconds.
+    /// </param>
+    /// <param name="flushOnClose">
+    /// Whether to send the log events stored on disk during the sink's disposal, thus ensuring
+    /// that all generated log event are sent to the log server before sink closes. Default value
+    /// is <see langword="true"/>.
     /// </param>
     /// <param name="textFormatter">
     /// The formatter rendering individual log events into text, for example JSON. Default
@@ -386,6 +410,7 @@ public static class LoggerSinkConfigurationExtensions
         int? logEventsInBatchLimit = 1000,
         long? batchSizeLimitBytes = null,
         TimeSpan? period = null,
+        bool flushOnClose = true,
         ITextFormatter? textFormatter = null,
         IBatchFormatter? batchFormatter = null,
         LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
@@ -417,6 +442,7 @@ public static class LoggerSinkConfigurationExtensions
             logEventsInBatchLimit: logEventsInBatchLimit,
             batchSizeLimitBytes: batchSizeLimitBytes,
             period: period.Value,
+            flushOnClose: flushOnClose,
             textFormatter: textFormatter,
             batchFormatter: batchFormatter,
             httpClient: httpClient);

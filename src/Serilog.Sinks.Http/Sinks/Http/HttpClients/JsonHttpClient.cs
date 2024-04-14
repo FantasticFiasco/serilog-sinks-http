@@ -15,6 +15,7 @@
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
@@ -59,13 +60,16 @@ public class JsonHttpClient : IHttpClient
     }
 
     /// <inheritdoc />
-    public virtual async Task<HttpResponseMessage> PostAsync(string requestUri, Stream contentStream)
+    public virtual async Task<HttpResponseMessage> PostAsync(
+        string requestUri,
+        Stream contentStream,
+        CancellationToken cancellationToken)
     {
         using var content = new StreamContent(contentStream);
         content.Headers.Add("Content-Type", JsonContentType);
 
         var response = await httpClient
-            .PostAsync(requestUri, content)
+            .PostAsync(requestUri, content, cancellationToken)
             .ConfigureAwait(false);
 
         return response;

@@ -58,7 +58,7 @@
   </ItemGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net462'">
-    <DefineConstants>$(DefineConstants);HRESULTS</DefineConstants>
+    <DefineConstants>$(DefineConstants);NET462</DefineConstants>
   </PropertyGroup>
 
   <!-- PACKAGE REFERENCES -->
