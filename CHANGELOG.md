@@ -417,7 +417,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
   }
   ```
 
-- [#178](https://github.com/FantasticFiasco/serilog-sinks-http/issues/196) [BREAKING CHANGE] Batch formatter `DefaultBatchFormatter` was removed when `ArrayBatchFormatter` was promoted to default batch formatter.
+- [#178](https://github.com/FantasticFiasco/serilog-sinks-http/issues/178) [BREAKING CHANGE] Batch formatter `DefaultBatchFormatter` was removed when `ArrayBatchFormatter` was promoted to default batch formatter.
 
   **Migration guide**
 
