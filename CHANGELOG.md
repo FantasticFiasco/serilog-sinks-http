@@ -6,6 +6,35 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+## [9.0.0] - 2024-04-14
+
+### :zap: Added
+
+- [#311](https://github.com/FantasticFiasco/serilog-sinks-http/issues/311) [BREAKING CHANGE] Support specifying `levelSwitch` when creating the sink, thus adding the support to [dynamically change the log level at runtime](https://nblumhardt.com/2014/10/dynamically-changing-the-serilog-level/) (contribution by [@yuriy-millen](https://github.com/yuriy-millen))
+
+  **Migration guide**
+
+  The parameter `levelSwitch` has been introduced to the methods `Http`, `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers`. Please verify that the arguments pass by you to these methods still align with your intentions.
+
+  To automatically mitigate this kind of *new parameter issue* in the future, move from using positional arguments to named arguments.
+- [#262](https://github.com/FantasticFiasco/serilog-sinks-http/issues/262) [BREAKING CHANGE] Support specifying `flushOnClose` when creating the sink, thus adding the support to suppress sending unsent log events to the log server before closing the sink (proposed by [@murlidakhare](https://github.com/murlidakhare), [@julichan](https://github.com/julichan), [@janichirag11](https://github.com/janichirag11) & [@prasadpaul53](https://github.com/prasadpaul53))
+
+  **Migration guide**
+
+  The parameter `flushOnClose` has been introduced to the methods `Http`, `DurableHttpUsingFileSizeRolledBuffers` and `DurableHttpUsingTimeRolledBuffers`. Please verify that the arguments pass by you to these methods still align with your intentions.
+
+  To automatically mitigate this kind of *new parameter issue* in the future, move from using positional arguments to named arguments.
+- Support for .NET Framework 4.6.2
+
+### :dizzy: Changed
+
+- [#262](https://github.com/FantasticFiasco/serilog-sinks-http/issues/262) [BREAKING CHANGE] A new argument of type `CancellationToken` has been added to the `PostAsync` method of interface `IHttpClient`.
+
+### :skull: Removed
+
+- [#253](https://github.com/FantasticFiasco/serilog-sinks-http/issues/253) [BREAKING CHANGE] Remove support for .NET Framework 4.5, aligning with the [.NET Framework support policy](https://learn.microsoft.com/lifecycle/products/microsoft-net-framework)
+- [BREAKING CHANGE] Remove support for .NET Framework 4.6.1, aligning with the [.NET Framework support policy](https://learn.microsoft.com/lifecycle/products/microsoft-net-framework)
+
 ## [9.0.0-beta.2] - 2024-03-27
 
 ### :zap: Added
