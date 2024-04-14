@@ -13,10 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.HttpTests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Serilog.Sinks.HttpTests.LogServer", "test\Serilog.Sinks.HttpTests.LogServer\Serilog.Sinks.HttpTests.LogServer.csproj", "{85C26BFC-6563-4330-8B29-CAA5C4EF5393}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "locked-bookmark-file", "locked-bookmark-file", "{6340BAF6-039B-4589-A614-E6DECA729664}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "producer", "test\locked-bookmark-file\producer\producer.csproj", "{C1999944-6987-43B1-9E4B-2A1DC0B4D97C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,10 +31,6 @@ Global
 		{85C26BFC-6563-4330-8B29-CAA5C4EF5393}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{85C26BFC-6563-4330-8B29-CAA5C4EF5393}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{85C26BFC-6563-4330-8B29-CAA5C4EF5393}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C1999944-6987-43B1-9E4B-2A1DC0B4D97C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C1999944-6987-43B1-9E4B-2A1DC0B4D97C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C1999944-6987-43B1-9E4B-2A1DC0B4D97C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C1999944-6987-43B1-9E4B-2A1DC0B4D97C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -47,8 +39,6 @@ Global
 		{5E451D5E-FA01-47F0-9D6F-45C8D98D9D19} = {DB19D3CD-BF05-45EA-97D8-FC9F64BF0B7B}
 		{C61C3037-87DB-4756-BAE5-282944FC931C} = {9C45525E-C6CE-43B4-95A6-11198A27F4BE}
 		{85C26BFC-6563-4330-8B29-CAA5C4EF5393} = {9C45525E-C6CE-43B4-95A6-11198A27F4BE}
-		{6340BAF6-039B-4589-A614-E6DECA729664} = {9C45525E-C6CE-43B4-95A6-11198A27F4BE}
-		{C1999944-6987-43B1-9E4B-2A1DC0B4D97C} = {6340BAF6-039B-4589-A614-E6DECA729664}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F8A6D01E-9C56-4B8F-93B5-8A1D7F693340}
