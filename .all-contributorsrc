@@ -160,6 +160,42 @@
         "code",
         "ideas"
       ]
+    },
+    {
+      "login": "murlidakhare",
+      "name": "murlidakhare",
+      "avatar_url": "https://avatars.githubusercontent.com/u/28730670?v=4",
+      "profile": "https://github.com/murlidakhare",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "julichan",
+      "name": "julichan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/27727780?v=4",
+      "profile": "https://github.com/julichan",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "janichirag11",
+      "name": "janichirag11",
+      "avatar_url": "https://avatars.githubusercontent.com/u/45846228?v=4",
+      "profile": "https://github.com/janichirag11",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "prasadpaul53",
+      "name": "PaulP",
+      "avatar_url": "https://avatars.githubusercontent.com/u/78130718?v=4",
+      "profile": "https://github.com/prasadpaul53",
+      "contributions": [
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7

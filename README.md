@@ -170,6 +170,10 @@ The following users have made significant contributions to this project. Thank y
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/yuriy-millen"><img src="https://avatars.githubusercontent.com/u/90191982?v=4?s=100" width="100px;" alt="Yuriy Millen"/><br /><sub><b>Yuriy Millen</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/commits?author=yuriy-millen" title="Code">💻</a> <a href="#ideas-yuriy-millen" title="Ideas, Planning, & Feedback">🤔</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/murlidakhare"><img src="https://avatars.githubusercontent.com/u/28730670?v=4?s=100" width="100px;" alt="murlidakhare"/><br /><sub><b>murlidakhare</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/issues?q=author%3Amurlidakhare" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/julichan"><img src="https://avatars.githubusercontent.com/u/27727780?v=4?s=100" width="100px;" alt="julichan"/><br /><sub><b>julichan</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/issues?q=author%3Ajulichan" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/janichirag11"><img src="https://avatars.githubusercontent.com/u/45846228?v=4?s=100" width="100px;" alt="janichirag11"/><br /><sub><b>janichirag11</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/issues?q=author%3Ajanichirag11" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/prasadpaul53"><img src="https://avatars.githubusercontent.com/u/78130718?v=4?s=100" width="100px;" alt="PaulP"/><br /><sub><b>PaulP</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/issues?q=author%3Aprasadpaul53" title="Bug reports">🐛</a></td>
     </tr>
   </tbody>
 </table>
