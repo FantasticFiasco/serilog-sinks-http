@@ -155,7 +155,7 @@ public class NormalTextFormatter : ITextFormatter
                 fdelim = ",";
 
                 output.Write("{\"Format\":");
-                JsonValueFormatter.WriteQuotedJsonString(format.Format, output);
+                JsonValueFormatter.WriteQuotedJsonString(format.Format ?? "\"\"", output);
 
                 output.Write(",\"Rendering\":");
                 var sw = new StringWriter();
