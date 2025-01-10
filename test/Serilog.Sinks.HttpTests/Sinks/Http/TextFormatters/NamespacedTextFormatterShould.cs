@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json.Linq;
@@ -432,6 +433,44 @@ public class NamespacedTextFormatterShould
         logEvent["Properties"]["Foo"].Children().Count().ShouldBe(1);
         logEvent["Properties"]["Foo"]["Bar"].Children().Count().ShouldBe(1);
         logEvent["Properties"]["Foo"]["Bar"]["Property"].ShouldBe(42);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void WriteTraceIdAndSpanId(bool isRenderingMessage)
+    {
+        // Arrange
+        const string activitySourceName = "Serilog.Sinks.HttpTests";
+        Activity.DefaultIdFormat = ActivityIdFormat.W3C;
+
+        // at least one listener must exist in order to start activity
+        using var listener = new ActivityListener();
+        listener.ShouldListenTo = source => source.Name == activitySourceName;
+        listener.Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded;
+
+        ActivitySource.AddActivityListener(listener);
+
+        using var customActivitySource = new ActivitySource(activitySourceName);
+        using var activity = customActivitySource.StartActivity("WriteTraceIdAndSpanId", ActivityKind.Server);
+        activity.ShouldNotBeNull();
+
+        logger = CreateLogger(new Formatter("Foo", "Bar", isRenderingMessage));
+
+        // Act
+        logger.Information("No properties");
+
+        // Assert
+        var logEvent = GetEvent();
+
+        logEvent["Timestamp"].ShouldNotBeNull();
+        logEvent["Level"].ShouldBe("Information");
+        logEvent["TraceId"].ShouldBe(activity.TraceId.ToString());
+        logEvent["SpanId"].ShouldBe(activity.SpanId.ToString());
+        logEvent["MessageTemplate"].ShouldBe("No properties");
+        ((string)logEvent["RenderedMessage"]).ShouldBe(isRenderingMessage ? "No properties" : null);
+        logEvent["Exception"].ShouldBeNull();
+        logEvent["Properties"].ShouldBeNull();
     }
 
     [Theory]
