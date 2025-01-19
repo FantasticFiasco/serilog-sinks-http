@@ -438,7 +438,7 @@ public class NamespacedTextFormatterShould
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void WriteTraceIdAndSpanId(bool isRenderingMessage)
+    public void WriteTraceAndSpanId(bool isRenderingMessage)
     {
         // Arrange
         logger = CreateLogger(new Formatter("Foo", "Bar", isRenderingMessage));

@@ -282,7 +282,7 @@ public class NormalTextFormatterShould
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void WriteTraceIdAndSpanId(bool isRenderingMessage)
+    public void WriteTraceAndSpanId(bool isRenderingMessage)
     {
         // Arrange
         logger = CreateLogger(isRenderingMessage ?
