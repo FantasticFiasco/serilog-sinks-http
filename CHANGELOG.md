@@ -6,6 +6,10 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+### :zap: Added
+
+- [#409](https://github.com/FantasticFiasco/serilog-sinks-http/issues/409) Have `CompactTextFormatter`, `CompactRenderedTextFormatter`, `NamespacedTextFormatter`, `NormalTextFormatter` and `NormalRenderedTextFormatter` propagate the current trace and span id by writing the values into the JSON payload (contribution by [@consulting-dev](https://github.com/consulting-dev))
+
 ## [9.0.0] - 2024-04-14
 
 ### :zap: Added
