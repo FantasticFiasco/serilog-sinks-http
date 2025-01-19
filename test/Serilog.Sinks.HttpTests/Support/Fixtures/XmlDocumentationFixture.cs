@@ -13,6 +13,7 @@ public class XmlDocumentationFixture
     private readonly Regex seeEnumRegex;
     private readonly Regex seeHrefRegex;
     private readonly Regex seeAlsoRegex;
+    private readonly Regex langwordsRegex;
     private readonly Regex paramRefRegex;
 
     public XmlDocumentationFixture()
@@ -22,6 +23,7 @@ public class XmlDocumentationFixture
         seeEnumRegex = new Regex(@"<see cref=""F:(?<fullName>[\w.]+)""\s*/>");
         seeHrefRegex = new Regex(@"<see href=""(?<url>[\w.:/]+)""\s*>(?<link>[\w\s.]+)</see>");
         seeAlsoRegex = new Regex(@"<seealso cref=""T:(?<fullName>[\w.]+)""\s*/>");
+        langwordsRegex = new Regex(@"<see langword=""(?<name>[\w.]+)""\s*/>");
         paramRefRegex = new Regex(@"<paramref name=""(?<parameterName>\w+)""\s*/>");
     }
 
@@ -41,6 +43,7 @@ public class XmlDocumentationFixture
             .Select(RemoveSeeEnumLinks)
             .Select(RemoveSeeHrefLinks)
             .Select(RemoveSeeAlsoLinks)
+            .Select(RemoveSeeLangwordLinks)
             .Select(RemoveParamRefLinks)
             .Select(RemovePara)
             .Select(RemoveQuotationMarks)
@@ -122,6 +125,20 @@ public class XmlDocumentationFixture
             description = description.Replace(
                 match.Groups[0].Value,
                 type.Name);
+        }
+
+        return description;
+    }
+
+    private string RemoveSeeLangwordLinks(string description)
+    {
+        var matches = langwordsRegex.Matches(description);
+
+        foreach (Match match in matches)
+        {
+            description = description.Replace(
+                match.Groups[0].Value,
+                match.Groups["name"].Value);
         }
 
         return description;

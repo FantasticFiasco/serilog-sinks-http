@@ -19,7 +19,7 @@ public class WikiPageDocumentationShould
         this.xmlDocumentationFixture = xmlDocumentationFixture;
     }
 
-    [TheoryOnMainBranch(Skip = "Beta has been released")]
+    [TheoryOnMainBranch]
     [InlineData("HTTP-sink.md", "Http")]
     [InlineData("Durable-file-size-rolled-HTTP-sink.md", "DurableHttpUsingFileSizeRolledBuffers")]
     [InlineData("Durable-time-rolled-HTTP-sink.md", "DurableHttpUsingTimeRolledBuffers")]
