@@ -76,6 +76,8 @@ The sink is batching multiple log events into a single request, and the followin
     "Level": "Information",
     "MessageTemplate": "Logging {@Heartbeat} from {Computer}",
     "RenderedMessage": "Logging { UserName: \"Mike\", UserDomainName: \"Home\" } from \"Workstation\"",
+    "TraceId": "8feaddac8f663113b19488ef2824b416",
+    "SpanId": "0caf323920535f7d",
     "Properties": {
       "Heartbeat": {
         "UserName": "Mike",
@@ -89,6 +91,8 @@ The sink is batching multiple log events into a single request, and the followin
     "Level": "Information",
     "MessageTemplate": "Logging {@Heartbeat} from {Computer}",
     "RenderedMessage": "Logging { UserName: \"Mike\", UserDomainName: \"Home\" } from \"Workstation\"",
+    "TraceId": "ded4fb3d962c6e06498bf74ba3b44312",
+    "SpanId": "5a7d2de54a0b083e",
     "Properties": {
       "Heartbeat": {
         "UserName": "Mike",
@@ -174,6 +178,7 @@ The following users have made significant contributions to this project. Thank y
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/julichan"><img src="https://avatars.githubusercontent.com/u/27727780?v=4?s=100" width="100px;" alt="julichan"/><br /><sub><b>julichan</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/issues?q=author%3Ajulichan" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/janichirag11"><img src="https://avatars.githubusercontent.com/u/45846228?v=4?s=100" width="100px;" alt="janichirag11"/><br /><sub><b>janichirag11</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/issues?q=author%3Ajanichirag11" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/prasadpaul53"><img src="https://avatars.githubusercontent.com/u/78130718?v=4?s=100" width="100px;" alt="PaulP"/><br /><sub><b>PaulP</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/issues?q=author%3Aprasadpaul53" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/consulting-dev"><img src="https://avatars.githubusercontent.com/u/155075432?v=4?s=100" width="100px;" alt="consulting-dev"/><br /><sub><b>consulting-dev</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/commits?author=consulting-dev" title="Code">💻</a> <a href="#ideas-consulting-dev" title="Ideas, Planning, & Feedback">🤔</a></td>
     </tr>
   </tbody>
 </table>

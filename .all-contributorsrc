@@ -196,6 +196,16 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "consulting-dev",
+      "name": "consulting-dev",
+      "avatar_url": "https://avatars.githubusercontent.com/u/155075432?v=4",
+      "profile": "https://github.com/consulting-dev",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7
