@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json.Linq;
@@ -262,6 +263,37 @@ public class CompactTextFormatterShould
 
         // Assert
         output.ToString().ShouldBeEmpty();
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void WriteTraceAndSpanId(bool isRenderingMessage)
+    {
+        // Arrange
+        logger = CreateLogger(isRenderingMessage ?
+            new CompactRenderedTextFormatter() :
+            new CompactTextFormatter());
+
+        var traceId = ActivityTraceId.CreateRandom();
+        var spanId = ActivitySpanId.CreateRandom();
+
+        // Act
+        logger.Write(
+            new LogEvent(
+                DateTimeOffset.Now,
+                LogEventLevel.Information,
+                null,
+                MessageTemplate.Empty,
+                [],
+                traceId,
+                spanId));
+
+        // Assert
+        var logEvent = GetEvent();
+
+        logEvent["@tr"].ShouldBe(traceId.ToHexString());
+        logEvent["@sp"].ShouldBe(spanId.ToHexString());
     }
 
     private ILogger CreateLogger(ITextFormatter formatter)

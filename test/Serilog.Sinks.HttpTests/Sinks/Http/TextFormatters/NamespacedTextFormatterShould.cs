@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json.Linq;
@@ -432,6 +433,35 @@ public class NamespacedTextFormatterShould
         logEvent["Properties"]["Foo"].Children().Count().ShouldBe(1);
         logEvent["Properties"]["Foo"]["Bar"].Children().Count().ShouldBe(1);
         logEvent["Properties"]["Foo"]["Bar"]["Property"].ShouldBe(42);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void WriteTraceAndSpanId(bool isRenderingMessage)
+    {
+        // Arrange
+        logger = CreateLogger(new Formatter("Foo", "Bar", isRenderingMessage));
+
+        var traceId = ActivityTraceId.CreateRandom();
+        var spanId = ActivitySpanId.CreateRandom();
+
+        // Act
+        logger.Write(
+            new LogEvent(
+                DateTimeOffset.Now,
+                LogEventLevel.Information,
+                null,
+                MessageTemplate.Empty,
+                [],
+                traceId,
+                spanId));
+
+        // Assert
+        var logEvent = GetEvent();
+
+        logEvent["TraceId"].ShouldBe(traceId.ToString());
+        logEvent["SpanId"].ShouldBe(spanId.ToString());
     }
 
     [Theory]

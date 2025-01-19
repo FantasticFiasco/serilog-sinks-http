@@ -91,6 +91,18 @@ public class NormalTextFormatter : ITextFormatter
             JsonValueFormatter.WriteQuotedJsonString(logEvent.Exception.ToString(), output);
         }
 
+        if (logEvent.TraceId != null)
+        {
+            output.Write(",\"TraceId\":");
+            JsonValueFormatter.WriteQuotedJsonString(logEvent.TraceId.ToString(), output);
+        }
+
+        if (logEvent.SpanId != null)
+        {
+            output.Write(",\"SpanId\":");
+            JsonValueFormatter.WriteQuotedJsonString(logEvent.SpanId.ToString(), output);
+        }
+
         if (logEvent.Properties.Count != 0)
         {
             WriteProperties(logEvent.Properties, output);
