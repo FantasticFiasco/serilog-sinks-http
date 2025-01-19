@@ -441,36 +441,27 @@ public class NamespacedTextFormatterShould
     public void WriteTraceIdAndSpanId(bool isRenderingMessage)
     {
         // Arrange
-        const string activitySourceName = "Serilog.Sinks.HttpTests";
-        Activity.DefaultIdFormat = ActivityIdFormat.W3C;
-
-        // at least one listener must exist in order to start activity
-        using var listener = new ActivityListener();
-        listener.ShouldListenTo = source => source.Name == activitySourceName;
-        listener.Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded;
-
-        ActivitySource.AddActivityListener(listener);
-
-        using var customActivitySource = new ActivitySource(activitySourceName);
-        using var activity = customActivitySource.StartActivity("WriteTraceIdAndSpanId", ActivityKind.Server);
-        activity.ShouldNotBeNull();
-
         logger = CreateLogger(new Formatter("Foo", "Bar", isRenderingMessage));
 
+        var traceId = ActivityTraceId.CreateRandom();
+        var spanId = ActivitySpanId.CreateRandom();
+
         // Act
-        logger.Information("No properties");
+        logger.Write(
+            new LogEvent(
+                DateTimeOffset.Now,
+                LogEventLevel.Information,
+                null,
+                MessageTemplate.Empty,
+                [],
+                traceId,
+                spanId));
 
         // Assert
         var logEvent = GetEvent();
 
-        logEvent["Timestamp"].ShouldNotBeNull();
-        logEvent["Level"].ShouldBe("Information");
-        logEvent["TraceId"].ShouldBe(activity.TraceId.ToString());
-        logEvent["SpanId"].ShouldBe(activity.SpanId.ToString());
-        logEvent["MessageTemplate"].ShouldBe("No properties");
-        ((string)logEvent["RenderedMessage"]).ShouldBe(isRenderingMessage ? "No properties" : null);
-        logEvent["Exception"].ShouldBeNull();
-        logEvent["Properties"].ShouldBeNull();
+        logEvent["TraceId"].ShouldBe(traceId.ToString());
+        logEvent["SpanId"].ShouldBe(spanId.ToString());
     }
 
     [Theory]

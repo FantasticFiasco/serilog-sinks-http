@@ -101,18 +101,6 @@ public abstract class NamespacedTextFormatter : ITextFormatter
         output.Write("\",\"MessageTemplate\":");
         JsonValueFormatter.WriteQuotedJsonString(logEvent.MessageTemplate.Text, output);
 
-        if (logEvent.TraceId != null)
-        {
-            output.Write(",\"TraceId\":");
-            JsonValueFormatter.WriteQuotedJsonString(logEvent.TraceId.ToString()!, output);
-        }
-
-        if (logEvent.SpanId != null)
-        {
-            output.Write(",\"SpanId\":");
-            JsonValueFormatter.WriteQuotedJsonString(logEvent.SpanId.ToString()!, output);
-        }
-
         if (IsRenderingMessage)
         {
             output.Write(",\"RenderedMessage\":");
@@ -125,6 +113,18 @@ public abstract class NamespacedTextFormatter : ITextFormatter
         {
             output.Write(",\"Exception\":");
             JsonValueFormatter.WriteQuotedJsonString(logEvent.Exception.ToString(), output);
+        }
+
+        if (logEvent.TraceId != null)
+        {
+            output.Write(",\"TraceId\":");
+            JsonValueFormatter.WriteQuotedJsonString(logEvent.TraceId.ToString()!, output);
+        }
+
+        if (logEvent.SpanId != null)
+        {
+            output.Write(",\"SpanId\":");
+            JsonValueFormatter.WriteQuotedJsonString(logEvent.SpanId.ToString()!, output);
         }
 
         if (logEvent.Properties.Count != 0)
