@@ -43,6 +43,31 @@ public class NormalTextFormatter : ITextFormatter
     protected bool IsRenderingMessage { get; set; }
 
     /// <summary>
+    /// Used to determine if any items have been added to the JSON, yet.
+    /// </summary>
+    private bool hasTags = false;
+
+    /// <summary>
+    /// Writes the tag and value to the output.
+    /// </summary>
+    /// <param name="tag">The JSON Tag.</param>
+    /// <param name="value">The Tag's value.</param>
+    /// <param name="output">The output.</param>
+    protected void Write(string tag, string value, TextWriter output)
+    {
+        if (hasTags)
+        {
+            output.Write(',');
+        }
+
+        JsonValueFormatter.WriteQuotedJsonString(tag, output);
+        output.Write(":");
+        JsonValueFormatter.WriteQuotedJsonString(value, output);
+
+        hasTags = true;
+    }
+
+    /// <summary>
     /// Format the log event into the output.
     /// </summary>
     /// <param name="logEvent">The event to format.</param>
@@ -51,6 +76,8 @@ public class NormalTextFormatter : ITextFormatter
     {
         try
         {
+            hasTags = false; // force reset
+
             var buffer = new StringWriter();
             FormatContent(logEvent, buffer);
 
@@ -68,39 +95,30 @@ public class NormalTextFormatter : ITextFormatter
         if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
         if (output == null) throw new ArgumentNullException(nameof(output));
 
-        output.Write("{\"Timestamp\":\"");
-        output.Write(logEvent.Timestamp.UtcDateTime.ToString("o"));
+        output.Write("{");
 
-        output.Write("\",\"Level\":\"");
-        output.Write(logEvent.Level);
-
-        output.Write("\",\"MessageTemplate\":");
-        JsonValueFormatter.WriteQuotedJsonString(logEvent.MessageTemplate.Text, output);
+        WriteTimestamp(logEvent, output);
+        WriteLogLevel(logEvent, output);
+        WriteMessageTemplate(logEvent, output);
 
         if (IsRenderingMessage)
         {
-            output.Write(",\"RenderedMessage\":");
-
-            var message = logEvent.MessageTemplate.Render(logEvent.Properties);
-            JsonValueFormatter.WriteQuotedJsonString(message, output);
+            WriteRenderedMessage(logEvent, output);
         }
 
         if (logEvent.Exception != null)
         {
-            output.Write(",\"Exception\":");
-            JsonValueFormatter.WriteQuotedJsonString(logEvent.Exception.ToString(), output);
+            WriteException(logEvent, output);
         }
 
         if (logEvent.TraceId != null)
         {
-            output.Write(",\"TraceId\":");
-            JsonValueFormatter.WriteQuotedJsonString(logEvent.TraceId.ToString(), output);
+            WriteTraceId(logEvent, output);
         }
 
         if (logEvent.SpanId != null)
         {
-            output.Write(",\"SpanId\":");
-            JsonValueFormatter.WriteQuotedJsonString(logEvent.SpanId.ToString(), output);
+            WriteSpanId(logEvent, output);
         }
 
         if (logEvent.Properties.Count != 0)
@@ -122,6 +140,62 @@ public class NormalTextFormatter : ITextFormatter
 
         output.Write('}');
     }
+
+    /// <summary>
+    /// Writes the timestamp in UTC format to the output.
+    /// </summary>
+    /// <param name="logEvent">The event to format.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteTimestamp(LogEvent logEvent, TextWriter output) =>
+        Write("Timestamp", logEvent.Timestamp.UtcDateTime.ToString("O"), output);
+
+    /// <summary>
+    /// Writes the log level to the output.
+    /// </summary>
+    /// <param name="logEvent">The event to format.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteLogLevel(LogEvent logEvent, TextWriter output) =>
+        Write("Level", logEvent.Level.ToString(), output);
+
+    /// <summary>
+    /// Writes the message template to the output.
+    /// </summary>
+    /// <param name="logEvent">The event to format.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteMessageTemplate(LogEvent logEvent, TextWriter output) =>
+        Write("MessageTemplate", logEvent.MessageTemplate.Text, output);
+
+    /// <summary>
+    /// Writes the rendered message to the output.
+    /// </summary>
+    /// <param name="logEvent">The event to format.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteRenderedMessage(LogEvent logEvent, TextWriter output) =>
+        Write("RenderedMessage", logEvent.MessageTemplate.Render(logEvent.Properties), output);
+
+    /// <summary>
+    /// Writes the exception to the output.
+    /// </summary>
+    /// <param name="logEvent">The event to format.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteException(LogEvent logEvent, TextWriter output) =>
+        Write("Exception", logEvent.Exception?.ToString() ?? "", output);
+
+    /// <summary>
+    /// Writes the Trace ID to the output.
+    /// </summary>
+    /// <param name="logEvent">The event to format.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteTraceId(LogEvent logEvent, TextWriter output) =>
+        Write("TraceId", logEvent.TraceId?.ToString() ?? "", output);
+
+    /// <summary>
+    /// Writes the Span ID to the output.
+    /// </summary>
+    /// <param name="logEvent">The event to format.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteSpanId(LogEvent logEvent, TextWriter output) =>
+        Write("SpanId", logEvent.SpanId?.ToString() ?? "", output);
 
     /// <summary>
     /// Writes the collection of properties to the output.
