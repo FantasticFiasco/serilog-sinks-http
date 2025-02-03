@@ -1,4 +1,4 @@
-﻿// Copyright 2015-2025 Serilog Contributors
+// Copyright 2015-2025 Serilog Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -178,7 +178,7 @@ public class NormalTextFormatter : ITextFormatter
 
         if (logEvent.Properties.Count != 0)
         {
-            WriteProperties(logEvent.Properties, output);
+            WriteProperties(logEvent, output);
         }
 
         // Better not to allocate an array in the 99.9% of cases where this is false
