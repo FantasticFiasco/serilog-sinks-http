@@ -305,9 +305,20 @@ public class NormalTextFormatter : ITextFormatter
     protected virtual void WriteRenderings(
         IEnumerable<PropertyToken> tokensWithFormat,
         IReadOnlyDictionary<string, LogEventPropertyValue> properties,
+        TextWriter output) =>
+            WriteRenderings(tokensWithFormat.GroupBy(pt => pt.PropertyName), properties, output);
+
+    /// <summary>
+    /// Writes the items with rendering formats to the output.
+    /// </summary>
+    /// <param name="tokensGrouped">The collection of tokens that have formats, grouped by property name.</param>
+    /// <param name="properties">The collection of properties to fill the tokens.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteRenderings(
+        IEnumerable<IGrouping<string, PropertyToken>> tokensGrouped,
+        IReadOnlyDictionary<string, LogEventPropertyValue> properties,
         TextWriter output)
     {
-        var tokensGrouped = tokensWithFormat.GroupBy(pt => pt.PropertyName);
         output.Write(",\"");
         output.Write(RenderingsTag);
         output.Write("\":{");
