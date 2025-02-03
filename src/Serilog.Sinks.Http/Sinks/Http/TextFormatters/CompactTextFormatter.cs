@@ -50,27 +50,24 @@ public class CompactTextFormatter : NormalTextFormatter
         RenderingsTag = "@r";
     }
 
-    /// <summary>
-    /// Writes the Trace ID to the output.
-    /// </summary>
-    /// <param name="logEvent">The event to format.</param>
-    /// <param name="output">The output.</param>
+    /// <inheritdoc />
+    protected override void WriteLogLevel(LogEvent logEvent, TextWriter output)
+    {
+        if (logEvent.Level != LogEventLevel.Information)
+        {
+            base.WriteLogLevel(logEvent, output);
+        }
+    }
+
+    /// <inheritdoc />
     protected override void WriteTraceId(LogEvent logEvent, TextWriter output) =>
         Write(TraceIdTag, logEvent.TraceId?.ToHexString() ?? "", output);
 
-    /// <summary>
-    /// Writes the Span ID to the output.
-    /// </summary>
-    /// <param name="logEvent">The event to format.</param>
-    /// <param name="output">The output.</param>
+    /// <inheritdoc />
     protected override void WriteSpanId(LogEvent logEvent, TextWriter output) =>
         Write(SpanIdTag, logEvent.SpanId?.ToHexString() ?? "", output);
 
-    /// <summary>
-    /// Writes the collection of properties to the output.
-    /// </summary>
-    /// <param name="properties">The collection of log properties.</param>
-    /// <param name="output">The output.</param>
+    /// <inheritdoc />
     protected override void WriteProperties(
         IReadOnlyDictionary<string, LogEventPropertyValue> properties,
         TextWriter output)
@@ -91,12 +88,7 @@ public class CompactTextFormatter : NormalTextFormatter
         }
     }
 
-    /// <summary>
-    /// Writes the items with rendering formats to the output.
-    /// </summary>
-    /// <param name="tokensWithFormat">The collection of tokens that have formats.</param>
-    /// <param name="properties">The collection of properties to fill the tokens.</param>
-    /// <param name="output">The output.</param>
+    /// <inheritdoc />
     protected override void WriteRenderings(
         IEnumerable<PropertyToken> tokensWithFormat,
         IReadOnlyDictionary<string, LogEventPropertyValue> properties,
