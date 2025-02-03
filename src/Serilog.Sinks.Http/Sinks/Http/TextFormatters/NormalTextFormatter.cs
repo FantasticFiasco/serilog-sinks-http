@@ -190,7 +190,7 @@ public class NormalTextFormatter : ITextFormatter
         if (tokensWithFormat.Any())
         {
             // ReSharper disable once PossibleMultipleEnumeration
-            WriteRenderings(tokensWithFormat.GroupBy(pt => pt.PropertyName), logEvent.Properties, output);
+            WriteRenderings(tokensWithFormat, logEvent.Properties, output);
         }
 
         output.Write('}');
@@ -287,16 +287,17 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="properties">The collection of properties to fill the tokens.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteRenderings(
-        IEnumerable<IGrouping<string, PropertyToken>> tokensWithFormat,
+        IEnumerable<PropertyToken> tokensWithFormat,
         IReadOnlyDictionary<string, LogEventPropertyValue> properties,
         TextWriter output)
     {
+        var tokensGrouped = tokensWithFormat.GroupBy(pt => pt.PropertyName);
         output.Write(",\"");
         output.Write(RenderingsTag);
         output.Write("\":{");
 
         var rdelim = string.Empty;
-        foreach (var ptoken in tokensWithFormat)
+        foreach (var ptoken in tokensGrouped)
         {
             output.Write(rdelim);
             rdelim = ",";
