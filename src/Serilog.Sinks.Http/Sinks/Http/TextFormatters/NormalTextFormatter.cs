@@ -1,4 +1,4 @@
-// Copyright 2015-2025 Serilog Contributors
+﻿// Copyright 2015-2025 Serilog Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -281,6 +281,20 @@ public class NormalTextFormatter : ITextFormatter
         output.Write(PropertiesTag);
         output.Write("\":{");
 
+        WritePropertiesValues(properties, output);
+
+        output.Write('}');
+    }
+
+    /// <summary>
+    /// Writes the collection of properties to the output without the wrapped tag.
+    /// </summary>
+    /// <param name="properties">The collection of log properties.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WritePropertiesValues(
+        IReadOnlyDictionary<string, LogEventPropertyValue> properties,
+        TextWriter output)
+    {
         var precedingDelimiter = string.Empty;
 
         foreach (var property in properties)
@@ -292,8 +306,6 @@ public class NormalTextFormatter : ITextFormatter
             output.Write(':');
             ValueFormatter.Instance.Format(property.Value, output);
         }
-
-        output.Write('}');
     }
 
     /// <summary>
