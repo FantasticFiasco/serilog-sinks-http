@@ -48,6 +48,61 @@ public class NormalTextFormatter : ITextFormatter
     private bool hasTags = false;
 
     /// <summary>
+    /// The output for the Timestamp Tag.
+    /// </summary>
+    protected string TimestampTag { get; set; } = "Timestamp";
+
+    /// <summary>
+    /// The output for the Log Level Tag.
+    /// </summary>
+    protected string LogLevelTag { get; set; } = "Level";
+
+    /// <summary>
+    /// The output for the Message Template Tag.
+    /// </summary>
+    protected string MessageTemplateTag { get; set; } = "MessageTemplate";
+
+    /// <summary>
+    /// The output for the Rendered Message Tag.
+    /// </summary>
+    protected string RenderedMessageTag { get; set; } = "RenderedMessage";
+
+    /// <summary>
+    /// The output for the Exception Tag.
+    /// </summary>
+    protected string ExceptionTag { get; set; } = "Exception";
+
+    /// <summary>
+    /// The output for the Trace ID Tag.
+    /// </summary>
+    protected string TraceIdTag { get; set; } = "TraceId";
+
+    /// <summary>
+    /// The output for the Span ID Tag.
+    /// </summary>
+    protected string SpanIdTag { get; set; } = "SpanId";
+
+    /// <summary>
+    /// The output for the Properties Tag.
+    /// </summary>
+    protected string PropertiesTag { get; set; } = "Properties";
+
+    /// <summary>
+    /// The output for the Renderings Tag.
+    /// </summary>
+    protected string RenderingsTag { get; set; } = "Renderings";
+
+    /// <summary>
+    /// The output for the Renderings Format Tag.
+    /// </summary>
+    protected string RenderingsFormatTag { get; set; } = "Format";
+
+    /// <summary>
+    /// The output for the Renderings Rendering Tag.
+    /// </summary>
+    protected string RenderingsRenderingTag { get; set; } = "Rendering";
+
+    /// <summary>
     /// Writes the tag and value to the output.
     /// </summary>
     /// <param name="tag">The JSON Tag.</param>
@@ -147,7 +202,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteTimestamp(LogEvent logEvent, TextWriter output) =>
-        Write("Timestamp", logEvent.Timestamp.UtcDateTime.ToString("O"), output);
+        Write(TimestampTag, logEvent.Timestamp.UtcDateTime.ToString("O"), output);
 
     /// <summary>
     /// Writes the log level to the output.
@@ -155,7 +210,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteLogLevel(LogEvent logEvent, TextWriter output) =>
-        Write("Level", logEvent.Level.ToString(), output);
+        Write(LogLevelTag, logEvent.Level.ToString(), output);
 
     /// <summary>
     /// Writes the message template to the output.
@@ -163,7 +218,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteMessageTemplate(LogEvent logEvent, TextWriter output) =>
-        Write("MessageTemplate", logEvent.MessageTemplate.Text, output);
+        Write(MessageTemplateTag, logEvent.MessageTemplate.Text, output);
 
     /// <summary>
     /// Writes the rendered message to the output.
@@ -171,7 +226,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteRenderedMessage(LogEvent logEvent, TextWriter output) =>
-        Write("RenderedMessage", logEvent.MessageTemplate.Render(logEvent.Properties), output);
+        Write(RenderedMessageTag, logEvent.MessageTemplate.Render(logEvent.Properties), output);
 
     /// <summary>
     /// Writes the exception to the output.
@@ -179,7 +234,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteException(LogEvent logEvent, TextWriter output) =>
-        Write("Exception", logEvent.Exception?.ToString() ?? "", output);
+        Write(ExceptionTag, logEvent.Exception?.ToString() ?? "", output);
 
     /// <summary>
     /// Writes the Trace ID to the output.
@@ -187,7 +242,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteTraceId(LogEvent logEvent, TextWriter output) =>
-        Write("TraceId", logEvent.TraceId?.ToString() ?? "", output);
+        Write(TraceIdTag, logEvent.TraceId?.ToString() ?? "", output);
 
     /// <summary>
     /// Writes the Span ID to the output.
@@ -195,7 +250,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteSpanId(LogEvent logEvent, TextWriter output) =>
-        Write("SpanId", logEvent.SpanId?.ToString() ?? "", output);
+        Write(SpanIdTag, logEvent.SpanId?.ToString() ?? "", output);
 
     /// <summary>
     /// Writes the collection of properties to the output.
@@ -206,7 +261,9 @@ public class NormalTextFormatter : ITextFormatter
         IReadOnlyDictionary<string, LogEventPropertyValue> properties,
         TextWriter output)
     {
-        output.Write(",\"Properties\":{");
+        output.Write(",\"");
+        output.Write(PropertiesTag);
+        output.Write("\":{");
 
         var precedingDelimiter = string.Empty;
 
@@ -234,7 +291,9 @@ public class NormalTextFormatter : ITextFormatter
         IReadOnlyDictionary<string, LogEventPropertyValue> properties,
         TextWriter output)
     {
-        output.Write(",\"Renderings\":{");
+        output.Write(",\"");
+        output.Write(RenderingsTag);
+        output.Write("\":{");
 
         var rdelim = string.Empty;
         foreach (var ptoken in tokensWithFormat)
@@ -251,10 +310,14 @@ public class NormalTextFormatter : ITextFormatter
                 output.Write(fdelim);
                 fdelim = ",";
 
-                output.Write("{\"Format\":");
+                output.Write("{\"");
+                output.Write(RenderingsFormatTag);
+                output.Write("\":");
                 JsonValueFormatter.WriteQuotedJsonString(format.Format ?? "\"\"", output);
 
-                output.Write(",\"Rendering\":");
+                output.Write(",\"");
+                output.Write(RenderingsRenderingTag);
+                output.Write("\":");
                 var sw = new StringWriter();
                 format.Render(properties, sw);
                 JsonValueFormatter.WriteQuotedJsonString(sw.ToString(), output);
