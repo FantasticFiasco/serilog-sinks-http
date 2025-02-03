@@ -182,9 +182,7 @@ public class NormalTextFormatter : ITextFormatter
         }
 
         // Better not to allocate an array in the 99.9% of cases where this is false
-        var tokensWithFormat = logEvent.MessageTemplate.Tokens
-            .OfType<PropertyToken>()
-            .Where(pt => pt.Format != null);
+        var tokensWithFormat = GetTokensWithFormat(logEvent);
 
         // ReSharper disable once PossibleMultipleEnumeration
         if (tokensWithFormat.Any())
@@ -195,6 +193,16 @@ public class NormalTextFormatter : ITextFormatter
 
         output.Write('}');
     }
+
+    /// <summary>
+    /// Gets the collection of tokens with formatting.
+    /// </summary>
+    /// <param name="logEvent">The log event.</param>
+    /// <returns>The collection of found tokens.</returns>
+    protected virtual IEnumerable<PropertyToken> GetTokensWithFormat(LogEvent logEvent) =>
+        logEvent.MessageTemplate.Tokens
+            .OfType<PropertyToken>()
+            .Where(pt => pt.Format != null);
 
     /// <summary>
     /// Writes the timestamp in UTC format to the output.
@@ -251,6 +259,14 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="output">The output.</param>
     protected virtual void WriteSpanId(LogEvent logEvent, TextWriter output) =>
         Write(SpanIdTag, logEvent.SpanId?.ToString() ?? "", output);
+
+    /// <summary>
+    /// Writes the collection of properties to the output.
+    /// </summary>
+    /// <param name="logEvent">The event to format.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteProperties(LogEvent logEvent, TextWriter output) =>
+        WriteProperties(logEvent.Properties, output);
 
     /// <summary>
     /// Writes the collection of properties to the output.
