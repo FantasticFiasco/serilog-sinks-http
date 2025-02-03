@@ -123,7 +123,12 @@ public class NormalTextFormatter : ITextFormatter
         output.Write('}');
     }
 
-    private static void WriteProperties(
+    /// <summary>
+    /// Writes the collection of properties to the output.
+    /// </summary>
+    /// <param name="properties">The collection of log properties.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteProperties(
         IReadOnlyDictionary<string, LogEventPropertyValue> properties,
         TextWriter output)
     {
@@ -144,7 +149,13 @@ public class NormalTextFormatter : ITextFormatter
         output.Write('}');
     }
 
-    private static void WriteRenderings(
+    /// <summary>
+    /// Writes the items with rendering formats to the output.
+    /// </summary>
+    /// <param name="tokensWithFormat">The collection of tokens that have formats.</param>
+    /// <param name="properties">The collection of properties to fill the tokens.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteRenderings(
         IEnumerable<IGrouping<string, PropertyToken>> tokensWithFormat,
         IReadOnlyDictionary<string, LogEventPropertyValue> properties,
         TextWriter output)
