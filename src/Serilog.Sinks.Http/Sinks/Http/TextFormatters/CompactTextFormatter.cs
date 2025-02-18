@@ -40,14 +40,14 @@ public class CompactTextFormatter : NormalTextFormatter
     /// </summary>
     public CompactTextFormatter()
     {
-        TimestampTag = "@t";
-        MessageTemplateTag = "@mt";
-        RenderedMessageTag = "@m";
-        LogLevelTag = "@l";
-        ExceptionTag = "@x";
-        TraceIdTag = "@tr";
-        SpanIdTag = "@sp";
-        RenderingsTag = "@r";
+        TimestampKey = "@t";
+        MessageTemplateKey = "@mt";
+        RenderedMessageKey = "@m";
+        LevelKey = "@l";
+        ExceptionKey = "@x";
+        TraceIdKey = "@tr";
+        SpanIdKey = "@sp";
+        RenderingsKey = "@r";
     }
 
     /// <inheritdoc />
@@ -61,11 +61,11 @@ public class CompactTextFormatter : NormalTextFormatter
 
     /// <inheritdoc />
     protected override void WriteTraceId(LogEvent logEvent, TextWriter output) =>
-        Write(TraceIdTag, logEvent.TraceId?.ToHexString() ?? "", output);
+        Write(TraceIdKey, logEvent.TraceId?.ToHexString() ?? "", output);
 
     /// <inheritdoc />
     protected override void WriteSpanId(LogEvent logEvent, TextWriter output) =>
-        Write(SpanIdTag, logEvent.SpanId?.ToHexString() ?? "", output);
+        Write(SpanIdKey, logEvent.SpanId?.ToHexString() ?? "", output);
 
     /// <inheritdoc />
     protected override void WriteProperties(
@@ -95,7 +95,7 @@ public class CompactTextFormatter : NormalTextFormatter
         TextWriter output)
     {
         output.Write(",\"");
-        output.Write(RenderingsTag);
+        output.Write(RenderingsKey);
         output.Write("\":[");
         var delim = string.Empty;
         foreach (var r in tokensWithFormat)

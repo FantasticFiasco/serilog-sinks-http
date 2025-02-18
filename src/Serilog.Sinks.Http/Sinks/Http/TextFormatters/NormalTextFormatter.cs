@@ -38,89 +38,69 @@ namespace Serilog.Sinks.Http.TextFormatters;
 public class NormalTextFormatter : ITextFormatter
 {
     /// <summary>
+    /// Used to determine if any items have been added to the JSON, yet.
+    /// </summary>
+    private bool hasTags;
+
+    /// <summary>
     /// Gets or sets a value indicating whether the message is rendered into JSON.
     /// </summary>
     protected bool IsRenderingMessage { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the key describing the timestamp in JSON.
+    /// </summary>
+    protected string TimestampKey { get; set; } = "Timestamp";
 
     /// <summary>
-    /// Used to determine if any items have been added to the JSON, yet.
+    /// Gets or sets the key describing the level in JSON.
     /// </summary>
-    private bool hasTags = false;
+    protected string LevelKey { get; set; } = "Level";
 
     /// <summary>
-    /// The output for the Timestamp Tag.
+    /// Gets or sets the key describing the message template in JSON.
     /// </summary>
-    protected string TimestampTag { get; set; } = "Timestamp";
+    protected string MessageTemplateKey { get; set; } = "MessageTemplate";
 
     /// <summary>
-    /// The output for the Log Level Tag.
+    /// Gets or sets the key describing the rendered message in JSON.
     /// </summary>
-    protected string LogLevelTag { get; set; } = "Level";
+    protected string RenderedMessageKey { get; set; } = "RenderedMessage";
 
     /// <summary>
-    /// The output for the Message Template Tag.
+    /// Gets or sets the key describing the exception in JSON.
     /// </summary>
-    protected string MessageTemplateTag { get; set; } = "MessageTemplate";
+    protected string ExceptionKey { get; set; } = "Exception";
 
     /// <summary>
-    /// The output for the Rendered Message Tag.
+    /// Gets or sets the key describing the trace id in JSON.
     /// </summary>
-    protected string RenderedMessageTag { get; set; } = "RenderedMessage";
+    protected string TraceIdKey { get; set; } = "TraceId";
 
     /// <summary>
-    /// The output for the Exception Tag.
+    /// Gets or sets the key describing the span id in JSON.
     /// </summary>
-    protected string ExceptionTag { get; set; } = "Exception";
+    protected string SpanIdKey { get; set; } = "SpanId";
 
     /// <summary>
-    /// The output for the Trace ID Tag.
+    /// Gets or sets the key describing the properties in JSON.
     /// </summary>
-    protected string TraceIdTag { get; set; } = "TraceId";
+    protected string PropertiesKey { get; set; } = "Properties";
 
     /// <summary>
-    /// The output for the Span ID Tag.
+    /// Gets or sets the key describing the renderings in JSON.
     /// </summary>
-    protected string SpanIdTag { get; set; } = "SpanId";
+    protected string RenderingsKey { get; set; } = "Renderings";
 
     /// <summary>
-    /// The output for the Properties Tag.
+    /// Gets or sets the key describing a rendering format in JSON.
     /// </summary>
-    protected string PropertiesTag { get; set; } = "Properties";
+    protected string RenderingsFormatKey { get; set; } = "Format";
 
     /// <summary>
-    /// The output for the Renderings Tag.
+    /// Gets or sets the key describing a rendering in JSON.
     /// </summary>
-    protected string RenderingsTag { get; set; } = "Renderings";
-
-    /// <summary>
-    /// The output for the Renderings Format Tag.
-    /// </summary>
-    protected string RenderingsFormatTag { get; set; } = "Format";
-
-    /// <summary>
-    /// The output for the Renderings Rendering Tag.
-    /// </summary>
-    protected string RenderingsRenderingTag { get; set; } = "Rendering";
-
-    /// <summary>
-    /// Writes the tag and value to the output.
-    /// </summary>
-    /// <param name="tag">The JSON Tag.</param>
-    /// <param name="value">The Tag's value.</param>
-    /// <param name="output">The output.</param>
-    protected void Write(string tag, string value, TextWriter output)
-    {
-        if (hasTags)
-        {
-            output.Write(',');
-        }
-
-        JsonValueFormatter.WriteQuotedJsonString(tag, output);
-        output.Write(":");
-        JsonValueFormatter.WriteQuotedJsonString(value, output);
-
-        hasTags = true;
-    }
+    protected string RenderingsRenderingKey { get; set; } = "Rendering";
 
     /// <summary>
     /// Format the log event into the output.
@@ -143,6 +123,26 @@ public class NormalTextFormatter : ITextFormatter
         {
             LogNonFormattableEvent(logEvent, e);
         }
+    }
+
+    /// <summary>
+    /// Writes the key and value to the output.
+    /// </summary>
+    /// <param name="key">The JSON key.</param>
+    /// <param name="value">The JSON value.</param>
+    /// <param name="output">The output.</param>
+    protected void Write(string key, string value, TextWriter output)
+    {
+        if (hasTags)
+        {
+            output.Write(',');
+        }
+
+        JsonValueFormatter.WriteQuotedJsonString(key, output);
+        output.Write(":");
+        JsonValueFormatter.WriteQuotedJsonString(value, output);
+
+        hasTags = true;
     }
 
     private void FormatContent(LogEvent logEvent, TextWriter output)
@@ -195,22 +195,12 @@ public class NormalTextFormatter : ITextFormatter
     }
 
     /// <summary>
-    /// Gets the collection of tokens with formatting.
-    /// </summary>
-    /// <param name="logEvent">The log event.</param>
-    /// <returns>The collection of found tokens.</returns>
-    protected virtual IEnumerable<PropertyToken> GetTokensWithFormat(LogEvent logEvent) =>
-        logEvent.MessageTemplate.Tokens
-            .OfType<PropertyToken>()
-            .Where(pt => pt.Format != null);
-
-    /// <summary>
     /// Writes the timestamp in UTC format to the output.
     /// </summary>
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteTimestamp(LogEvent logEvent, TextWriter output) =>
-        Write(TimestampTag, logEvent.Timestamp.UtcDateTime.ToString("O"), output);
+        Write(TimestampKey, logEvent.Timestamp.UtcDateTime.ToString("O"), output);
 
     /// <summary>
     /// Writes the log level to the output.
@@ -218,7 +208,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteLogLevel(LogEvent logEvent, TextWriter output) =>
-        Write(LogLevelTag, logEvent.Level.ToString(), output);
+        Write(LevelKey, logEvent.Level.ToString(), output);
 
     /// <summary>
     /// Writes the message template to the output.
@@ -226,7 +216,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteMessageTemplate(LogEvent logEvent, TextWriter output) =>
-        Write(MessageTemplateTag, logEvent.MessageTemplate.Text, output);
+        Write(MessageTemplateKey, logEvent.MessageTemplate.Text, output);
 
     /// <summary>
     /// Writes the rendered message to the output.
@@ -234,7 +224,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteRenderedMessage(LogEvent logEvent, TextWriter output) =>
-        Write(RenderedMessageTag, logEvent.MessageTemplate.Render(logEvent.Properties), output);
+        Write(RenderedMessageKey, logEvent.MessageTemplate.Render(logEvent.Properties), output);
 
     /// <summary>
     /// Writes the exception to the output.
@@ -242,7 +232,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteException(LogEvent logEvent, TextWriter output) =>
-        Write(ExceptionTag, logEvent.Exception?.ToString() ?? "", output);
+        Write(ExceptionKey, logEvent.Exception?.ToString() ?? "", output);
 
     /// <summary>
     /// Writes the Trace ID to the output.
@@ -250,7 +240,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteTraceId(LogEvent logEvent, TextWriter output) =>
-        Write(TraceIdTag, logEvent.TraceId?.ToString() ?? "", output);
+        Write(TraceIdKey, logEvent.TraceId?.ToString() ?? "", output);
 
     /// <summary>
     /// Writes the Span ID to the output.
@@ -258,7 +248,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteSpanId(LogEvent logEvent, TextWriter output) =>
-        Write(SpanIdTag, logEvent.SpanId?.ToString() ?? "", output);
+        Write(SpanIdKey, logEvent.SpanId?.ToString() ?? "", output);
 
     /// <summary>
     /// Writes the collection of properties to the output.
@@ -278,13 +268,14 @@ public class NormalTextFormatter : ITextFormatter
         TextWriter output)
     {
         output.Write(",\"");
-        output.Write(PropertiesTag);
+        output.Write(PropertiesKey);
         output.Write("\":{");
 
         WritePropertiesValues(properties, output);
 
         output.Write('}');
     }
+
 
     /// <summary>
     /// Writes the collection of properties to the output without the wrapped tag.
@@ -307,6 +298,16 @@ public class NormalTextFormatter : ITextFormatter
             ValueFormatter.Instance.Format(property.Value, output);
         }
     }
+
+    /// <summary>
+    /// Gets the collection of tokens with formatting.
+    /// </summary>
+    /// <param name="logEvent">The log event.</param>
+    /// <returns>The collection of found tokens.</returns>
+    protected virtual IEnumerable<PropertyToken> GetTokensWithFormat(LogEvent logEvent) =>
+        logEvent.MessageTemplate.Tokens
+            .OfType<PropertyToken>()
+            .Where(pt => pt.Format != null);
 
     /// <summary>
     /// Writes the items with rendering formats to the output.
@@ -332,7 +333,7 @@ public class NormalTextFormatter : ITextFormatter
         TextWriter output)
     {
         output.Write(",\"");
-        output.Write(RenderingsTag);
+        output.Write(RenderingsKey);
         output.Write("\":{");
 
         var rdelim = string.Empty;
@@ -351,12 +352,12 @@ public class NormalTextFormatter : ITextFormatter
                 fdelim = ",";
 
                 output.Write("{\"");
-                output.Write(RenderingsFormatTag);
+                output.Write(RenderingsFormatKey);
                 output.Write("\":");
                 JsonValueFormatter.WriteQuotedJsonString(format.Format ?? "\"\"", output);
 
                 output.Write(",\"");
-                output.Write(RenderingsRenderingTag);
+                output.Write(RenderingsRenderingKey);
                 output.Write("\":");
                 var sw = new StringWriter();
                 format.Render(properties, sw);
