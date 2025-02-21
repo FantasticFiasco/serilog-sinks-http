@@ -46,7 +46,7 @@ public class NormalTextFormatter : ITextFormatter
     /// Gets or sets a value indicating whether the message is rendered into JSON.
     /// </summary>
     protected bool IsRenderingMessage { get; set; }
-    
+
     /// <summary>
     /// Gets or sets the key describing the timestamp in JSON.
     /// </summary>
@@ -293,10 +293,24 @@ public class NormalTextFormatter : ITextFormatter
             output.Write(precedingDelimiter);
             precedingDelimiter = ",";
 
-            JsonValueFormatter.WriteQuotedJsonString(property.Key, output);
-            output.Write(':');
-            ValueFormatter.Instance.Format(property.Value, output);
+            WritePropertyValue(property.Key, property.Value, output);
         }
+    }
+
+    /// <summary>
+    /// Writes the individual property and its values
+    /// </summary>
+    /// <param name="key">The property name/key.</param>
+    /// <param name="value">The property value.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WritePropertyValue(
+        string key,
+        LogEventPropertyValue value,
+        TextWriter output)
+    {
+        JsonValueFormatter.WriteQuotedJsonString(key, output);
+        output.Write(':');
+        ValueFormatter.Instance.Format(value, output);
     }
 
     /// <summary>
