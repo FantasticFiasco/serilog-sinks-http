@@ -117,7 +117,7 @@ public class NormalTextFormatter : ITextFormatter
             FormatContent(logEvent, buffer);
 
             // If formatting was successful, write to output
-            output.WriteLine(buffer.ToString());
+            output.Write(buffer.ToString());
         }
         catch (Exception e)
         {
