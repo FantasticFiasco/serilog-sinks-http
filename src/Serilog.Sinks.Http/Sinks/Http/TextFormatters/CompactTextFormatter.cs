@@ -68,24 +68,18 @@ public class CompactTextFormatter : NormalTextFormatter
         Write(SpanIdKey, logEvent.SpanId?.ToHexString() ?? "", output);
 
     /// <inheritdoc />
-    protected override void WriteProperties(
-        IReadOnlyDictionary<string, LogEventPropertyValue> properties,
+    protected override void WritePropertyValue(
+        string key,
+        LogEventPropertyValue value,
         TextWriter output)
     {
-        foreach (var property in properties)
+        if (key.Length > 0 && key[0] == '@')
         {
-            var name = property.Key;
-            if (name.Length > 0 && name[0] == '@')
-            {
-                // Escape first '@' by doubling
-                name = '@' + name;
-            }
-
-            output.Write(',');
-            JsonValueFormatter.WriteQuotedJsonString(name, output);
-            output.Write(':');
-            ValueFormatter.Instance.Format(property.Value, output);
+            // Escape first '@' by doubling
+            key = '@' + key;
         }
+
+        base.WritePropertyValue(key, value, output);
     }
 
     /// <inheritdoc />
