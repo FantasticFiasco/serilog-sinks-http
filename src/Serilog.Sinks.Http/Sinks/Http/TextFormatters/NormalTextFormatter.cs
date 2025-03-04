@@ -111,8 +111,6 @@ public class NormalTextFormatter : ITextFormatter
     {
         try
         {
-            delimStart = string.Empty; // force reset
-
             var buffer = new StringWriter();
             FormatContent(logEvent, buffer);
 
@@ -147,6 +145,7 @@ public class NormalTextFormatter : ITextFormatter
         if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
         if (output == null) throw new ArgumentNullException(nameof(output));
 
+        delimStart = string.Empty; // force reset
         output.Write("{");
 
         WriteTimestamp(logEvent, output);
