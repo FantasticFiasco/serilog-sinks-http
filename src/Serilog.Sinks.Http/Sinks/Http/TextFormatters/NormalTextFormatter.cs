@@ -38,9 +38,9 @@ namespace Serilog.Sinks.Http.TextFormatters;
 public class NormalTextFormatter : ITextFormatter
 {
     /// <summary>
-    /// Used to determine if any items have been added to the JSON, yet.
+    /// The delimiter used to start events 2+.
     /// </summary>
-    private bool hasTags;
+    private string delimStart = string.Empty;
 
     /// <summary>
     /// Gets or sets a value indicating whether the message is rendered into JSON.
@@ -111,7 +111,7 @@ public class NormalTextFormatter : ITextFormatter
     {
         try
         {
-            hasTags = false; // force reset
+            delimStart = string.Empty; // force reset
 
             var buffer = new StringWriter();
             FormatContent(logEvent, buffer);
@@ -133,16 +133,13 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="output">The output.</param>
     protected void Write(string key, string value, TextWriter output)
     {
-        if (hasTags)
-        {
-            output.Write(',');
-        }
+        output.Write(delimStart);
 
         JsonValueFormatter.WriteQuotedJsonString(key, output);
         output.Write(":");
         JsonValueFormatter.WriteQuotedJsonString(value, output);
 
-        hasTags = true;
+        delimStart = ",";
     }
 
     private void FormatContent(LogEvent logEvent, TextWriter output)
