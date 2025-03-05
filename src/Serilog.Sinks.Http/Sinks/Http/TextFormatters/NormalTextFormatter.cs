@@ -38,11 +38,6 @@ namespace Serilog.Sinks.Http.TextFormatters;
 public class NormalTextFormatter : ITextFormatter
 {
     /// <summary>
-    /// The delimiter used to start events 2+.
-    /// </summary>
-    private string delimStart = string.Empty;
-
-    /// <summary>
     /// Gets or sets a value indicating whether the message is rendered into JSON.
     /// </summary>
     protected bool IsRenderingMessage { get; set; }
@@ -129,15 +124,14 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="key">The JSON key.</param>
     /// <param name="value">The JSON value.</param>
     /// <param name="output">The output.</param>
-    protected void Write(string key, string value, TextWriter output)
+    /// <param name="delimStart">The preceding delimiter</param>
+    protected static void Write(string key, string value, TextWriter output, string delimStart = ",")
     {
         output.Write(delimStart);
 
         JsonValueFormatter.WriteQuotedJsonString(key, output);
         output.Write(":");
         JsonValueFormatter.WriteQuotedJsonString(value, output);
-
-        delimStart = ",";
     }
 
     private void FormatContent(LogEvent logEvent, TextWriter output)
@@ -145,9 +139,9 @@ public class NormalTextFormatter : ITextFormatter
         if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
         if (output == null) throw new ArgumentNullException(nameof(output));
 
-        delimStart = string.Empty; // force reset
         output.Write("{");
 
+        // Timestamp must be first as it does not have a preceding delimiter
         WriteTimestamp(logEvent, output);
         WriteLogLevel(logEvent, output);
         WriteMessageTemplate(logEvent, output);
