@@ -38,9 +38,74 @@ namespace Serilog.Sinks.Http.TextFormatters;
 public class NormalTextFormatter : ITextFormatter
 {
     /// <summary>
+    /// The delimiter used between fields.
+    /// </summary>
+    public const string DELIMITER = ",";
+
+    /// <summary>
+    /// The separator between keys and values.
+    /// </summary>
+    public const string SEPARATOR = ":";
+
+    /// <summary>
     /// Gets or sets a value indicating whether the message is rendered into JSON.
     /// </summary>
     protected bool IsRenderingMessage { get; set; }
+
+    /// <summary>
+    /// Gets or sets the key describing the timestamp in JSON.
+    /// </summary>
+    protected string TimestampKey { get; set; } = "Timestamp";
+
+    /// <summary>
+    /// Gets or sets the key describing the level in JSON.
+    /// </summary>
+    protected string LevelKey { get; set; } = "Level";
+
+    /// <summary>
+    /// Gets or sets the key describing the message template in JSON.
+    /// </summary>
+    protected string MessageTemplateKey { get; set; } = "MessageTemplate";
+
+    /// <summary>
+    /// Gets or sets the key describing the rendered message in JSON.
+    /// </summary>
+    protected string RenderedMessageKey { get; set; } = "RenderedMessage";
+
+    /// <summary>
+    /// Gets or sets the key describing the exception in JSON.
+    /// </summary>
+    protected string ExceptionKey { get; set; } = "Exception";
+
+    /// <summary>
+    /// Gets or sets the key describing the trace id in JSON.
+    /// </summary>
+    protected string TraceIdKey { get; set; } = "TraceId";
+
+    /// <summary>
+    /// Gets or sets the key describing the span id in JSON.
+    /// </summary>
+    protected string SpanIdKey { get; set; } = "SpanId";
+
+    /// <summary>
+    /// Gets or sets the key describing the properties in JSON.
+    /// </summary>
+    protected string PropertiesKey { get; set; } = "Properties";
+
+    /// <summary>
+    /// Gets or sets the key describing the renderings in JSON.
+    /// </summary>
+    protected string RenderingsKey { get; set; } = "Renderings";
+
+    /// <summary>
+    /// Gets or sets the key describing a rendering format in JSON.
+    /// </summary>
+    protected string RenderingsFormatKey { get; set; } = "Format";
+
+    /// <summary>
+    /// Gets or sets the key describing a rendering in JSON.
+    /// </summary>
+    protected string RenderingsRenderingKey { get; set; } = "Rendering";
 
     /// <summary>
     /// Format the log event into the output.
@@ -55,7 +120,7 @@ public class NormalTextFormatter : ITextFormatter
             FormatContent(logEvent, buffer);
 
             // If formatting was successful, write to output
-            output.WriteLine(buffer.ToString());
+            output.Write(buffer.ToString());
         }
         catch (Exception e)
         {
@@ -63,116 +128,254 @@ public class NormalTextFormatter : ITextFormatter
         }
     }
 
+    /// <summary>
+    /// Writes the key and value to the output.
+    /// </summary>
+    /// <param name="key">The JSON key.</param>
+    /// <param name="value">The JSON value.</param>
+    /// <param name="output">The output.</param>
+    /// <param name="delimStart">The preceding delimiter.</param>
+    protected static void Write(string key, string value, TextWriter output, string delimStart = DELIMITER)
+    {
+        output.Write(delimStart);
+
+        JsonValueFormatter.WriteQuotedJsonString(key, output);
+        output.Write(SEPARATOR);
+        JsonValueFormatter.WriteQuotedJsonString(value, output);
+    }
+
     private void FormatContent(LogEvent logEvent, TextWriter output)
     {
         if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
         if (output == null) throw new ArgumentNullException(nameof(output));
 
-        output.Write("{\"Timestamp\":\"");
-        output.Write(logEvent.Timestamp.UtcDateTime.ToString("o"));
+        output.Write("{");
 
-        output.Write("\",\"Level\":\"");
-        output.Write(logEvent.Level);
-
-        output.Write("\",\"MessageTemplate\":");
-        JsonValueFormatter.WriteQuotedJsonString(logEvent.MessageTemplate.Text, output);
+        // Timestamp must be first as it does not have a preceding delimiter
+        WriteTimestamp(logEvent, output);
+        WriteLogLevel(logEvent, output);
+        WriteMessageTemplate(logEvent, output);
 
         if (IsRenderingMessage)
         {
-            output.Write(",\"RenderedMessage\":");
-
-            var message = logEvent.MessageTemplate.Render(logEvent.Properties);
-            JsonValueFormatter.WriteQuotedJsonString(message, output);
+            WriteRenderedMessage(logEvent, output);
         }
 
         if (logEvent.Exception != null)
         {
-            output.Write(",\"Exception\":");
-            JsonValueFormatter.WriteQuotedJsonString(logEvent.Exception.ToString(), output);
+            WriteException(logEvent, output);
         }
 
         if (logEvent.TraceId != null)
         {
-            output.Write(",\"TraceId\":");
-            JsonValueFormatter.WriteQuotedJsonString(logEvent.TraceId.ToString(), output);
+            WriteTraceId(logEvent, output);
         }
 
         if (logEvent.SpanId != null)
         {
-            output.Write(",\"SpanId\":");
-            JsonValueFormatter.WriteQuotedJsonString(logEvent.SpanId.ToString(), output);
+            WriteSpanId(logEvent, output);
         }
 
         if (logEvent.Properties.Count != 0)
         {
-            WriteProperties(logEvent.Properties, output);
+            WriteProperties(logEvent, output);
         }
 
         // Better not to allocate an array in the 99.9% of cases where this is false
-        var tokensWithFormat = logEvent.MessageTemplate.Tokens
-            .OfType<PropertyToken>()
-            .Where(pt => pt.Format != null);
+        var tokensWithFormat = GetTokensWithFormat(logEvent);
 
         // ReSharper disable once PossibleMultipleEnumeration
         if (tokensWithFormat.Any())
         {
             // ReSharper disable once PossibleMultipleEnumeration
-            WriteRenderings(tokensWithFormat.GroupBy(pt => pt.PropertyName), logEvent.Properties, output);
+            WriteRenderings(tokensWithFormat, logEvent.Properties, output);
         }
 
         output.Write('}');
     }
 
-    private static void WriteProperties(
+    /// <summary>
+    /// Writes the timestamp in UTC format to the output.
+    /// </summary>
+    /// <param name="logEvent">The event to format.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteTimestamp(LogEvent logEvent, TextWriter output) =>
+        Write(TimestampKey, logEvent.Timestamp.UtcDateTime.ToString("O"), output, string.Empty);
+
+    /// <summary>
+    /// Writes the log level to the output.
+    /// </summary>
+    /// <param name="logEvent">The event to format.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteLogLevel(LogEvent logEvent, TextWriter output) =>
+        Write(LevelKey, logEvent.Level.ToString(), output);
+
+    /// <summary>
+    /// Writes the message template to the output.
+    /// </summary>
+    /// <param name="logEvent">The event to format.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteMessageTemplate(LogEvent logEvent, TextWriter output) =>
+        Write(MessageTemplateKey, logEvent.MessageTemplate.Text, output);
+
+    /// <summary>
+    /// Writes the rendered message to the output.
+    /// </summary>
+    /// <param name="logEvent">The event to format.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteRenderedMessage(LogEvent logEvent, TextWriter output) =>
+        Write(RenderedMessageKey, logEvent.MessageTemplate.Render(logEvent.Properties), output);
+
+    /// <summary>
+    /// Writes the exception to the output.
+    /// </summary>
+    /// <param name="logEvent">The event to format.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteException(LogEvent logEvent, TextWriter output) =>
+        Write(ExceptionKey, logEvent.Exception?.ToString() ?? "", output);
+
+    /// <summary>
+    /// Writes the Trace ID to the output.
+    /// </summary>
+    /// <param name="logEvent">The event to format.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteTraceId(LogEvent logEvent, TextWriter output) =>
+        Write(TraceIdKey, logEvent.TraceId?.ToString() ?? "", output);
+
+    /// <summary>
+    /// Writes the Span ID to the output.
+    /// </summary>
+    /// <param name="logEvent">The event to format.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteSpanId(LogEvent logEvent, TextWriter output) =>
+        Write(SpanIdKey, logEvent.SpanId?.ToString() ?? "", output);
+
+    /// <summary>
+    /// Writes the collection of properties to the output.
+    /// </summary>
+    /// <param name="logEvent">The event to format.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteProperties(LogEvent logEvent, TextWriter output) =>
+        WriteProperties(logEvent.Properties, output);
+
+    /// <summary>
+    /// Writes the collection of properties to the output.
+    /// </summary>
+    /// <param name="properties">The collection of log properties.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteProperties(
         IReadOnlyDictionary<string, LogEventPropertyValue> properties,
         TextWriter output)
     {
-        output.Write(",\"Properties\":{");
+        output.Write(DELIMITER);
+        JsonValueFormatter.WriteQuotedJsonString(PropertiesKey, output);
+        output.Write(SEPARATOR);
+        output.Write("{");
 
+        WritePropertiesValues(properties, output);
+
+        output.Write('}');
+    }
+
+
+    /// <summary>
+    /// Writes the collection of properties to the output without the wrapped tag.
+    /// </summary>
+    /// <param name="properties">The collection of log properties.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WritePropertiesValues(
+        IReadOnlyDictionary<string, LogEventPropertyValue> properties,
+        TextWriter output)
+    {
         var precedingDelimiter = string.Empty;
 
         foreach (var property in properties)
         {
             output.Write(precedingDelimiter);
-            precedingDelimiter = ",";
+            precedingDelimiter = DELIMITER;
 
-            JsonValueFormatter.WriteQuotedJsonString(property.Key, output);
-            output.Write(':');
-            ValueFormatter.Instance.Format(property.Value, output);
+            WritePropertyValue(property.Key, property.Value, output);
         }
-
-        output.Write('}');
     }
 
-    private static void WriteRenderings(
-        IEnumerable<IGrouping<string, PropertyToken>> tokensWithFormat,
+    /// <summary>
+    /// Writes the individual property and its values
+    /// </summary>
+    /// <param name="key">The property name/key.</param>
+    /// <param name="value">The property value.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WritePropertyValue(
+        string key,
+        LogEventPropertyValue value,
+        TextWriter output)
+    {
+        JsonValueFormatter.WriteQuotedJsonString(key, output);
+        output.Write(SEPARATOR);
+        ValueFormatter.Instance.Format(value, output);
+    }
+
+    /// <summary>
+    /// Gets the collection of tokens with formatting.
+    /// </summary>
+    /// <param name="logEvent">The log event.</param>
+    /// <returns>The collection of found tokens.</returns>
+    protected virtual IEnumerable<PropertyToken> GetTokensWithFormat(LogEvent logEvent) =>
+        logEvent.MessageTemplate.Tokens
+            .OfType<PropertyToken>()
+            .Where(pt => pt.Format != null);
+
+    /// <summary>
+    /// Writes the items with rendering formats to the output.
+    /// </summary>
+    /// <param name="tokensWithFormat">The collection of tokens that have formats.</param>
+    /// <param name="properties">The collection of properties to fill the tokens.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteRenderings(
+        IEnumerable<PropertyToken> tokensWithFormat,
+        IReadOnlyDictionary<string, LogEventPropertyValue> properties,
+        TextWriter output) =>
+            WriteRenderings(tokensWithFormat.GroupBy(pt => pt.PropertyName), properties, output);
+
+    /// <summary>
+    /// Writes the items with rendering formats to the output.
+    /// </summary>
+    /// <param name="tokensGrouped">The collection of tokens that have formats, grouped by property name.</param>
+    /// <param name="properties">The collection of properties to fill the tokens.</param>
+    /// <param name="output">The output.</param>
+    protected virtual void WriteRenderings(
+        IEnumerable<IGrouping<string, PropertyToken>> tokensGrouped,
         IReadOnlyDictionary<string, LogEventPropertyValue> properties,
         TextWriter output)
     {
-        output.Write(",\"Renderings\":{");
+        output.Write(DELIMITER);
+        JsonValueFormatter.WriteQuotedJsonString(RenderingsKey, output);
+        output.Write(SEPARATOR);
+        output.Write("{");
 
         var rdelim = string.Empty;
-        foreach (var ptoken in tokensWithFormat)
+        foreach (var ptoken in tokensGrouped)
         {
             output.Write(rdelim);
-            rdelim = ",";
+            rdelim = DELIMITER;
 
             JsonValueFormatter.WriteQuotedJsonString(ptoken.Key, output);
-            output.Write(":[");
+            output.Write(SEPARATOR);
+            output.Write("[");
 
             var fdelim = string.Empty;
             foreach (var format in ptoken)
             {
                 output.Write(fdelim);
-                fdelim = ",";
+                fdelim = DELIMITER;
 
-                output.Write("{\"Format\":");
-                JsonValueFormatter.WriteQuotedJsonString(format.Format ?? "\"\"", output);
-
-                output.Write(",\"Rendering\":");
                 var sw = new StringWriter();
                 format.Render(properties, sw);
-                JsonValueFormatter.WriteQuotedJsonString(sw.ToString(), output);
+
+                output.Write("{");
+
+                Write(RenderingsFormatKey, format.Format ?? "\"\"", output, delimStart: string.Empty);
+                Write(RenderingsRenderingKey, sw.ToString(), output);
+
                 output.Write('}');
             }
 

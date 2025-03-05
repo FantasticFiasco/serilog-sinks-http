@@ -2,12 +2,12 @@
 
 [![CI/CD](https://github.com/FantasticFiasco/serilog-sinks-http/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/FantasticFiasco/serilog-sinks-http/actions/workflows/ci-cd.yml)
 [![codecov](https://codecov.io/gh/FantasticFiasco/serilog-sinks-http/branch/main/graph/badge.svg?token=cw6OYeQmdH)](https://codecov.io/gh/FantasticFiasco/serilog-sinks-http)
-[![NuGet Version](http://img.shields.io/nuget/v/Serilog.Sinks.Http.svg?style=flat)](https://www.nuget.org/packages/Serilog.Sinks.Http/)
+[![NuGet Version](https://img.shields.io/nuget/v/Serilog.Sinks.Http.svg?style=flat)](https://www.nuget.org/packages/Serilog.Sinks.Http/)
 [![SemVer compatible](https://img.shields.io/badge/%E2%9C%85-SemVer%20compatible-blue)](https://semver.org/)
 [![NuGet](https://img.shields.io/nuget/dt/Serilog.Sinks.Http.svg)](https://www.nuget.org/packages/Serilog.Sinks.Http/)
 [![Documentation](https://img.shields.io/badge/docs-wiki-yellow.svg)](https://github.com/serilog/serilog/wiki)
 [![Join the chat at https://gitter.im/serilog/serilog](https://img.shields.io/gitter/room/serilog/serilog.svg)](https://gitter.im/serilog/serilog)
-[![Help](https://img.shields.io/badge/stackoverflow-serilog-orange.svg)](http://stackoverflow.com/questions/tagged/serilog)
+[![Help](https://img.shields.io/badge/stackoverflow-serilog-orange.svg)](https://stackoverflow.com/questions/tagged/serilog)
 
 **Package** - [Serilog.Sinks.Http](https://www.nuget.org/packages/serilog.sinks.http) | **Platforms** - .NET 4.5/4.6.1, .NET Standard 2.0/2.1
 
@@ -35,7 +35,7 @@ And here we are today. I hope you'll find the sink useful. If not, don't hesitat
 
 ## Super simple to use
 
-In the following example, the sink will POST log events to `http://www.mylogs.com` over HTTP. We configure the sink using **[named arguments](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/named-and-optional-arguments#named-arguments) instead of positional** because historically we've seen that most breaking changes where the result of a new parameter describing a new feature. Using named arguments means that you more often than not can migrate to new major versions without any changes to your code.
+In the following example, the sink will POST log events to `https://www.mylogs.com` over HTTP. We configure the sink using **[named arguments](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/named-and-optional-arguments#named-arguments) instead of positional** because historically we've seen that most breaking changes where the result of a new parameter describing a new feature. Using named arguments means that you more often than not can migrate to new major versions without any changes to your code.
 
 ```csharp
 ILogger log = new LoggerConfiguration()
@@ -179,6 +179,7 @@ The following users have made significant contributions to this project. Thank y
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/janichirag11"><img src="https://avatars.githubusercontent.com/u/45846228?v=4?s=100" width="100px;" alt="janichirag11"/><br /><sub><b>janichirag11</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/issues?q=author%3Ajanichirag11" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/prasadpaul53"><img src="https://avatars.githubusercontent.com/u/78130718?v=4?s=100" width="100px;" alt="PaulP"/><br /><sub><b>PaulP</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/issues?q=author%3Aprasadpaul53" title="Bug reports">🐛</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/consulting-dev"><img src="https://avatars.githubusercontent.com/u/155075432?v=4?s=100" width="100px;" alt="consulting-dev"/><br /><sub><b>consulting-dev</b></sub></a><br /><a href="https://github.com/FantasticFiasco/serilog-sinks-http/commits?author=consulting-dev" title="Code">💻</a> <a href="#ideas-consulting-dev" title="Ideas, Planning, & Feedback">🤔</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/josephcappellino"><img src="https://avatars.githubusercontent.com/u/354186?v=4?s=100" width="100px;" alt="josephcappellino"/><br /><sub><b>josephcappellino</b></sub></a><br /><a href="https://github.com/josephcappellino/serilog-sinks-http/commits?author=josephcappellino" title="Code">💻</a> <a href="#ideas-josephcappellino" title="Ideas, Planning, & Feedback">🤔</a></td>
     </tr>
   </tbody>
 </table>

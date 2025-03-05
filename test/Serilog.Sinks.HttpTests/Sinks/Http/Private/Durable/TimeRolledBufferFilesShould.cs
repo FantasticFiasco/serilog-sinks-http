@@ -18,14 +18,7 @@ public class TimeRolledBufferFilesShould
     }
 
     [Theory]
-    [InlineData("SomeBuffer", @"{CurrentDirectory}\SomeBuffer.bookmark")]
-    [InlineData(@".\SomeBuffer", @"{CurrentDirectory}\SomeBuffer.bookmark")]
-    [InlineData(@"Folder\SomeBuffer", @"{CurrentDirectory}\Folder\SomeBuffer.bookmark")]
-    [InlineData(@".\Folder\SomeBuffer", @"{CurrentDirectory}\Folder\SomeBuffer.bookmark")]
-    [InlineData(@"..\Folder\SomeBuffer", @"{CurrentDirectory}\..\Folder\SomeBuffer.bookmark")]
-    [InlineData(@".\..\Folder\SomeBuffer", @"{CurrentDirectory}\..\Folder\SomeBuffer.bookmark")]
-    [InlineData(@"C:\SomeBuffer", @"C:\SomeBuffer.bookmark")]
-    [InlineData(@"C:\Folder\SomeBuffer", @"C:\Folder\SomeBuffer.bookmark")]
+    [ClassData(typeof(BookmarkFileNameData))]
     public void HaveBookmarkFileName(string bufferBaseFilePath, string want)
     {
         // Arrange
