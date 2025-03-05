@@ -89,7 +89,7 @@ public class CompactTextFormatter : NormalTextFormatter
     {
         foreach (var property in properties)
         {
-            output.Write(",");
+            output.Write(DELIMITER);
             WritePropertyValue(property.Key, property.Value, output);
         }
     }
@@ -100,14 +100,15 @@ public class CompactTextFormatter : NormalTextFormatter
         IReadOnlyDictionary<string, LogEventPropertyValue> properties,
         TextWriter output)
     {
-        output.Write(",\"");
-        output.Write(RenderingsKey);
-        output.Write("\":[");
+        output.Write(DELIMITER);
+        JsonValueFormatter.WriteQuotedJsonString(RenderingsKey, output);
+        output.Write(SEPARATOR);
+        output.Write("[");
         var delim = string.Empty;
         foreach (var r in tokensWithFormat)
         {
             output.Write(delim);
-            delim = ",";
+            delim = DELIMITER;
             var space = new StringWriter();
             r.Render(properties, space);
             JsonValueFormatter.WriteQuotedJsonString(space.ToString(), output);

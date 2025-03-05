@@ -1,4 +1,4 @@
-// Copyright 2015-2025 Serilog Contributors
+﻿// Copyright 2015-2025 Serilog Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -267,9 +267,10 @@ public class NormalTextFormatter : ITextFormatter
         IReadOnlyDictionary<string, LogEventPropertyValue> properties,
         TextWriter output)
     {
-        output.Write(",\"");
-        output.Write(PropertiesKey);
-        output.Write("\":{");
+        output.Write(DELIMITER);
+        JsonValueFormatter.WriteQuotedJsonString(PropertiesKey, output);
+        output.Write(SEPARATOR);
+        output.Write("{");
 
         WritePropertiesValues(properties, output);
 
@@ -291,7 +292,7 @@ public class NormalTextFormatter : ITextFormatter
         foreach (var property in properties)
         {
             output.Write(precedingDelimiter);
-            precedingDelimiter = ",";
+            precedingDelimiter = DELIMITER;
 
             WritePropertyValue(property.Key, property.Value, output);
         }
@@ -309,7 +310,7 @@ public class NormalTextFormatter : ITextFormatter
         TextWriter output)
     {
         JsonValueFormatter.WriteQuotedJsonString(key, output);
-        output.Write(':');
+        output.Write(SEPARATOR);
         ValueFormatter.Instance.Format(value, output);
     }
 
@@ -346,36 +347,35 @@ public class NormalTextFormatter : ITextFormatter
         IReadOnlyDictionary<string, LogEventPropertyValue> properties,
         TextWriter output)
     {
-        output.Write(",\"");
-        output.Write(RenderingsKey);
-        output.Write("\":{");
+        output.Write(DELIMITER);
+        JsonValueFormatter.WriteQuotedJsonString(RenderingsKey, output);
+        output.Write(SEPARATOR);
+        output.Write("{");
 
         var rdelim = string.Empty;
         foreach (var ptoken in tokensGrouped)
         {
             output.Write(rdelim);
-            rdelim = ",";
+            rdelim = DELIMITER;
 
             JsonValueFormatter.WriteQuotedJsonString(ptoken.Key, output);
-            output.Write(":[");
+            output.Write(SEPARATOR);
+            output.Write("[");
 
             var fdelim = string.Empty;
             foreach (var format in ptoken)
             {
                 output.Write(fdelim);
-                fdelim = ",";
+                fdelim = DELIMITER;
 
-                output.Write("{\"");
-                output.Write(RenderingsFormatKey);
-                output.Write("\":");
-                JsonValueFormatter.WriteQuotedJsonString(format.Format ?? "\"\"", output);
-
-                output.Write(",\"");
-                output.Write(RenderingsRenderingKey);
-                output.Write("\":");
                 var sw = new StringWriter();
                 format.Render(properties, sw);
-                JsonValueFormatter.WriteQuotedJsonString(sw.ToString(), output);
+
+                output.Write("{");
+
+                Write(RenderingsFormatKey, format.Format ?? "\"\"", output, delimStart: string.Empty);
+                Write(RenderingsRenderingKey, sw.ToString(), output);
+
                 output.Write('}');
             }
 

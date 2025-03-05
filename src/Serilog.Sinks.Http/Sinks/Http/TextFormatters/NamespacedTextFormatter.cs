@@ -18,6 +18,7 @@ using System.IO;
 using System.Linq;
 using Serilog.Events;
 using Serilog.Formatting;
+using Serilog.Formatting.Json;
 using Serilog.Parsing;
 
 namespace Serilog.Sinks.Http.TextFormatters;
@@ -65,13 +66,14 @@ public abstract class NamespacedTextFormatter : NormalTextFormatter
     protected override void WriteProperties(LogEvent logEvent, TextWriter output)
     {
         isWritingProperties = true;
-        output.Write(",\"Properties\":{");
+        output.Write(DELIMITER);
+        JsonValueFormatter.WriteQuotedJsonString(PropertiesKey, output);
+        output.Write(SEPARATOR);
+        output.Write("{");
 
         var messageTemplateProperties = logEvent.Properties
             .Where(property => logEvent.MessageTemplate.Tokens
-                .Where(token => token is PropertyToken namedToken && namedToken.PropertyName == property.Key)
-                .Any()
-            )
+                .Any(token => token is PropertyToken namedToken && namedToken.PropertyName == property.Key)            )
             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
         if (messageTemplateProperties.Count > 0)
@@ -101,7 +103,7 @@ public abstract class NamespacedTextFormatter : NormalTextFormatter
         {
             if (messageTemplateProperties.Count > 0)
             {
-                output.Write(",");
+                output.Write(DELIMITER);
             }
 
             WritePropertiesValues(enrichedProperties, output);
@@ -113,16 +115,24 @@ public abstract class NamespacedTextFormatter : NormalTextFormatter
 
     private void WriteOpenNamespace(TextWriter output)
     {
-        output.Write(subComponent != null
-            ? $"\"{component}\":{{\"{subComponent}\":{{"
-            : $"\"{component}\":{{");
+        JsonValueFormatter.WriteQuotedJsonString(component, output);
+        output.Write(SEPARATOR);
+        output.Write("{");
+        if (subComponent != null)
+        {
+            JsonValueFormatter.WriteQuotedJsonString(subComponent, output);
+            output.Write(SEPARATOR);
+            output.Write("{");
+        }
     }
 
     private void WriteCloseNamespace(TextWriter output)
     {
-        output.Write(subComponent != null
-            ? "}}"
-            : "}");
+        output.Write("}");
+        if (subComponent != null)
+        {
+            output.Write("}");
+        }
     }
 
     /// <inheritdoc />
