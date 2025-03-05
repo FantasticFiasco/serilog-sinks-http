@@ -1,4 +1,4 @@
-﻿// Copyright 2015-2025 Serilog Contributors
+// Copyright 2015-2025 Serilog Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.Http.Private.IO;
+using Serilog.Sinks.Http.TextFormatters;
 
 namespace Serilog.Sinks.Http.Private.Durable;
 
@@ -56,7 +57,7 @@ public class FileSizeRolledDurableHttpSink : ILogEventSink, IDisposable
             bufferFileSizeLimitBytes,
             bufferFileShared,
             retainedBufferFileCountLimit,
-            textFormatter);
+            new FileTextFormatter(textFormatter));
     }
 
     public void Emit(LogEvent logEvent)
