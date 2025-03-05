@@ -1,4 +1,4 @@
-﻿// Copyright 2015-2025 Serilog Contributors
+// Copyright 2015-2025 Serilog Contributors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,16 @@ namespace Serilog.Sinks.Http.TextFormatters;
 /// <seealso cref="ITextFormatter" />
 public class NormalTextFormatter : ITextFormatter
 {
+    /// <summary>
+    /// The delimiter used between fields.
+    /// </summary>
+    public const string DELIMITER = ",";
+
+    /// <summary>
+    /// The separator between keys and values.
+    /// </summary>
+    public const string SEPARATOR = ":";
+
     /// <summary>
     /// Gets or sets a value indicating whether the message is rendered into JSON.
     /// </summary>
@@ -124,13 +134,13 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="key">The JSON key.</param>
     /// <param name="value">The JSON value.</param>
     /// <param name="output">The output.</param>
-    /// <param name="delimStart">The preceding delimiter</param>
-    protected static void Write(string key, string value, TextWriter output, string delimStart = ",")
+    /// <param name="delimStart">The preceding delimiter.</param>
+    protected static void Write(string key, string value, TextWriter output, string delimStart = DELIMITER)
     {
         output.Write(delimStart);
 
         JsonValueFormatter.WriteQuotedJsonString(key, output);
-        output.Write(":");
+        output.Write(SEPARATOR);
         JsonValueFormatter.WriteQuotedJsonString(value, output);
     }
 
@@ -190,7 +200,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteTimestamp(LogEvent logEvent, TextWriter output) =>
-        Write(TimestampKey, logEvent.Timestamp.UtcDateTime.ToString("O"), output);
+        Write(TimestampKey, logEvent.Timestamp.UtcDateTime.ToString("O"), output, string.Empty);
 
     /// <summary>
     /// Writes the log level to the output.
