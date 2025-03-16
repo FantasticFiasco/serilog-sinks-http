@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and is followi
 
 ## Unreleased
 
+## [9.1.1] - 2025-03-16
+
 ### :dizzy: Changed
 
 - [#421](https://github.com/FantasticFiasco/serilog-sinks-http/issues/421) Update dependency [Microsoft.Extensions.Configuration.Abstractions](https://www.nuget.org/packages/Microsoft.Extensions.Configuration.Abstractions/) to v9.
