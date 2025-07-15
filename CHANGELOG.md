@@ -2,9 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-This project adheres to [Semantic Versioning](http://semver.org/) and is following the [change log format](http://keepachangelog.com/).
+This project adheres to [Semantic Versioning](https://semver.org/) and is following the [change log format](https://keepachangelog.com/).
 
 ## Unreleased
+
+### :zap: Added
+
+- [#416](https://github.com/FantasticFiasco/serilog-sinks-http/pull/416) Updates `NormalTextFormatter` to have virtual methods for each field so child implementations can override specific fields instead of requiring the duplication of the entire class. Additionally, `CompactTextFormatter` and `NamespacedTextFormatter` now extend `NormalTextFormatter` to provide a common framework for the text formatters, as well as default logic for most fields. (contribution by [@josephcappellino](https://github.com/josephcappellino))
 
 ## [9.1.1] - 2025-03-16
 
