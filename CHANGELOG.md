@@ -10,6 +10,12 @@ This project adheres to [Semantic Versioning](https://semver.org/) and is follow
 
 - [#416](https://github.com/FantasticFiasco/serilog-sinks-http/pull/416) Updates `NormalTextFormatter` to have virtual methods for each field so child implementations can override specific fields instead of requiring the duplication of the entire class. Additionally, `CompactTextFormatter` and `NamespacedTextFormatter` now extend `NormalTextFormatter` to provide a common framework for the text formatters, as well as default logic for most fields. (contribution by [@josephcappellino](https://github.com/josephcappellino))
 
+## [9.1.1] - 2025-03-16
+
+### :dizzy: Changed
+
+- [#421](https://github.com/FantasticFiasco/serilog-sinks-http/issues/421) Update dependency [Microsoft.Extensions.Configuration.Abstractions](https://www.nuget.org/packages/Microsoft.Extensions.Configuration.Abstractions/) to v9.
+
 ## [9.1.0] - 2025-01-19
 
 ### :zap: Added

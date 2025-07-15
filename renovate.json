@@ -1,4 +1,3 @@
 {
-  "extends": ["github>FantasticFiasco/renovate-config"],
-  "ignoreDeps": ["Microsoft.Extensions.Configuration.Abstractions"]
+  "extends": ["github>FantasticFiasco/renovate-config"]
 }
