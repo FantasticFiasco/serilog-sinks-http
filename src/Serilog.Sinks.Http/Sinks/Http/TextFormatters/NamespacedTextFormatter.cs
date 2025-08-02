@@ -16,7 +16,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Formatting.Json;
@@ -35,10 +34,12 @@ namespace Serilog.Sinks.Http.TextFormatters;
 /// <seealso cref="CompactTextFormatter" />
 /// <seealso cref="CompactRenderedTextFormatter" />
 /// <seealso cref="ITextFormatter" />
-public abstract class NamespacedTextFormatter : ITextFormatter
+public abstract class NamespacedTextFormatter : NormalTextFormatter
 {
     private readonly string component;
     private readonly string? subComponent;
+
+    private bool isWritingProperties = false;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NamespacedTextFormatter"/> class.
@@ -58,107 +59,36 @@ public abstract class NamespacedTextFormatter : ITextFormatter
     {
         this.component = component ?? throw new ArgumentNullException(nameof(component));
         this.subComponent = subComponent;
+        IsRenderingMessage = true;
     }
 
-    /// <summary>
-    /// Gets or sets a value indicating whether the message is rendered into JSON. Default
-    /// value is <see langword="true"/>.
-    /// </summary>
-    protected bool IsRenderingMessage { get; set; } = true;
-
-    /// <summary>
-    /// Format the log event into the output.
-    /// </summary>
-    /// <param name="logEvent">The event to format.</param>
-    /// <param name="output">The output.</param>
-    public void Format(LogEvent logEvent, TextWriter output)
+    /// <inheritdoc />
+    protected override void WriteProperties(LogEvent logEvent, TextWriter output)
     {
-        try
-        {
-            var buffer = new StringWriter();
-            FormatContent(logEvent, buffer);
-
-            // If formatting was successful, write to output
-            output.WriteLine(buffer.ToString());
-        }
-        catch (Exception e)
-        {
-            LogNonFormattableEvent(logEvent, e);
-        }
-    }
-
-    private void FormatContent(LogEvent logEvent, TextWriter output)
-    {
-        if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
-        if (output == null) throw new ArgumentNullException(nameof(output));
-
-        output.Write("{\"Timestamp\":\"");
-        output.Write(logEvent.Timestamp.UtcDateTime.ToString("o"));
-
-        output.Write("\",\"Level\":\"");
-        output.Write(logEvent.Level);
-
-        output.Write("\",\"MessageTemplate\":");
-        JsonValueFormatter.WriteQuotedJsonString(logEvent.MessageTemplate.Text, output);
-
-        if (IsRenderingMessage)
-        {
-            output.Write(",\"RenderedMessage\":");
-
-            var message = logEvent.MessageTemplate.Render(logEvent.Properties);
-            JsonValueFormatter.WriteQuotedJsonString(message, output);
-        }
-
-        if (logEvent.Exception != null)
-        {
-            output.Write(",\"Exception\":");
-            JsonValueFormatter.WriteQuotedJsonString(logEvent.Exception.ToString(), output);
-        }
-
-        if (logEvent.TraceId != null)
-        {
-            output.Write(",\"TraceId\":");
-            JsonValueFormatter.WriteQuotedJsonString(logEvent.TraceId.ToString()!, output);
-        }
-
-        if (logEvent.SpanId != null)
-        {
-            output.Write(",\"SpanId\":");
-            JsonValueFormatter.WriteQuotedJsonString(logEvent.SpanId.ToString()!, output);
-        }
-
-        if (logEvent.Properties.Count != 0)
-        {
-            WriteProperties(logEvent, output);
-        }
-
-        output.Write('}');
-    }
-
-    private void WriteProperties(LogEvent logEvent, TextWriter output)
-    {
-        output.Write(",\"Properties\":{");
+        isWritingProperties = true;
+        output.Write(DELIMITER);
+        JsonValueFormatter.WriteQuotedJsonString(PropertiesKey, output);
+        output.Write(SEPARATOR);
+        output.Write("{");
 
         var messageTemplateProperties = logEvent.Properties
-            .Where(property => TemplateContainsPropertyName(logEvent.MessageTemplate, property.Key))
-            .ToArray();
+            .Where(property => logEvent.MessageTemplate.Tokens
+                .Any(token => token is PropertyToken namedToken && namedToken.PropertyName == property.Key)            )
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-        if (messageTemplateProperties.Length > 0)
+        if (messageTemplateProperties.Count > 0)
         {
             WriteOpenNamespace(output);
 
-            WriteProperties(messageTemplateProperties, output);
+            WritePropertiesValues(messageTemplateProperties, output);
 
-            // Better not to allocate an array in the 99.9% of cases where this is false
-            var tokensWithFormat = logEvent.MessageTemplate.Tokens
-                .OfType<PropertyToken>()
-                .Where(propertyToken => propertyToken.Format != null);
+            var tokensWithFormat = GetTokensWithFormat(logEvent);
 
             // ReSharper disable once PossibleMultipleEnumeration
             if (tokensWithFormat.Any())
             {
                 // ReSharper disable once PossibleMultipleEnumeration
-                WriteRenderings(tokensWithFormat.GroupBy(pt => pt.PropertyName), logEvent.Properties, output);
+                WriteRenderings(tokensWithFormat, logEvent.Properties, output);
             }
 
             WriteCloseNamespace(output);
@@ -166,108 +96,55 @@ public abstract class NamespacedTextFormatter : ITextFormatter
 
         var enrichedProperties = logEvent.Properties
             .Except(messageTemplateProperties)
-            .ToArray();
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-        if (enrichedProperties.Length > 0)
+        if (enrichedProperties.Count > 0)
         {
-            if (messageTemplateProperties.Length > 0)
+            if (messageTemplateProperties.Count > 0)
             {
-                output.Write(",");
+                output.Write(DELIMITER);
             }
 
-            WriteProperties(enrichedProperties, output);
+            WritePropertiesValues(enrichedProperties, output);
         }
 
         output.Write('}');
+        isWritingProperties = false;
     }
 
     private void WriteOpenNamespace(TextWriter output)
     {
-        output.Write(subComponent != null
-            ? $"\"{component}\":{{\"{subComponent}\":{{"
-            : $"\"{component}\":{{");
+        JsonValueFormatter.WriteQuotedJsonString(component, output);
+        output.Write(SEPARATOR);
+        output.Write("{");
+        if (subComponent != null)
+        {
+            JsonValueFormatter.WriteQuotedJsonString(subComponent, output);
+            output.Write(SEPARATOR);
+            output.Write("{");
+        }
     }
 
     private void WriteCloseNamespace(TextWriter output)
     {
-        output.Write(subComponent != null
-            ? "}}"
-            : "}");
-    }
-
-    private static void WriteProperties(IEnumerable<KeyValuePair<string, LogEventPropertyValue>> properties, TextWriter output)
-    {
-        var precedingDelimiter = string.Empty;
-
-        foreach (var property in properties)
+        output.Write("}");
+        if (subComponent != null)
         {
-            output.Write(precedingDelimiter);
-            precedingDelimiter = ",";
-
-            JsonValueFormatter.WriteQuotedJsonString(property.Key, output);
-            output.Write(':');
-            ValueFormatter.Instance.Format(property.Value, output);
+            output.Write("}");
         }
     }
 
-    private static bool TemplateContainsPropertyName(MessageTemplate template, string propertyName)
-    {
-        foreach (var token in template.Tokens)
-        {
-            if (token is PropertyToken namedProperty
-                && namedProperty.PropertyName == propertyName)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static void WriteRenderings(
-        IEnumerable<IGrouping<string, PropertyToken>> tokensWithFormat,
+    /// <inheritdoc />
+    protected override void WriteRenderings(
+        IEnumerable<IGrouping<string, PropertyToken>> tokensGrouped,
         IReadOnlyDictionary<string, LogEventPropertyValue> properties,
         TextWriter output)
     {
-        output.Write(",\"Renderings\":{");
-
-        var rdelim = string.Empty;
-        foreach (var ptoken in tokensWithFormat)
+        // Only write the renderings during the properties phase as they need to be
+        // encapsulated with the namespace
+        if (isWritingProperties)
         {
-            output.Write(rdelim);
-            rdelim = ",";
-
-            JsonValueFormatter.WriteQuotedJsonString(ptoken.Key, output);
-            output.Write(":[");
-
-            var fdelim = string.Empty;
-            foreach (var format in ptoken)
-            {
-                output.Write(fdelim);
-                fdelim = ",";
-
-                output.Write("{\"Format\":");
-                JsonValueFormatter.WriteQuotedJsonString(format.Format ?? "\"\"", output);
-
-                output.Write(",\"Rendering\":");
-                var sw = new StringWriter();
-                format.Render(properties, sw);
-                JsonValueFormatter.WriteQuotedJsonString(sw.ToString(), output);
-                output.Write('}');
-            }
-
-            output.Write(']');
+            base.WriteRenderings(tokensGrouped, properties, output);
         }
-
-        output.Write('}');
-    }
-
-    private static void LogNonFormattableEvent(LogEvent logEvent, Exception e)
-    {
-        SelfLog.WriteLine(
-            "Event at {0} with message template {1} could not be formatted into JSON and will be dropped: {2}",
-            logEvent.Timestamp.ToString("o"),
-            logEvent.MessageTemplate.Text,
-            e);
     }
 }

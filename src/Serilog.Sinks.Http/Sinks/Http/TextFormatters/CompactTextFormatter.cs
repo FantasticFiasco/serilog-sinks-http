@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using Serilog.Debugging;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Formatting.Json;
@@ -35,124 +33,84 @@ namespace Serilog.Sinks.Http.TextFormatters;
 /// <seealso cref="CompactRenderedTextFormatter" />
 /// <seealso cref="NamespacedTextFormatter" />
 /// <seealso cref="ITextFormatter" />
-public class CompactTextFormatter : ITextFormatter
+public class CompactTextFormatter : NormalTextFormatter
 {
     /// <summary>
-    /// Gets or sets a value indicating whether the message is rendered into JSON.
+    /// Default Constructor used to setup tag names
     /// </summary>
-    protected bool IsRenderingMessage { get; set; }
-
-    /// <summary>
-    /// Format the log event into the output.
-    /// </summary>
-    /// <param name="logEvent">The event to format.</param>
-    /// <param name="output">The output.</param>
-    public void Format(LogEvent logEvent, TextWriter output)
+    public CompactTextFormatter()
     {
-        try
-        {
-            var buffer = new StringWriter();
-            FormatContent(logEvent, buffer);
-
-            // If formatting was successful, write to output
-            output.WriteLine(buffer.ToString());
-        }
-        catch (Exception e)
-        {
-            LogNonFormattableEvent(logEvent, e);
-        }
+        TimestampKey = "@t";
+        MessageTemplateKey = "@mt";
+        RenderedMessageKey = "@m";
+        LevelKey = "@l";
+        ExceptionKey = "@x";
+        TraceIdKey = "@tr";
+        SpanIdKey = "@sp";
+        RenderingsKey = "@r";
     }
 
-    private void FormatContent(LogEvent logEvent, TextWriter output)
+    /// <inheritdoc />
+    protected override void WriteLogLevel(LogEvent logEvent, TextWriter output)
     {
-        if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
-        if (output == null) throw new ArgumentNullException(nameof(output));
-
-        output.Write("{\"@t\":\"");
-        output.Write(logEvent.Timestamp.UtcDateTime.ToString("o"));
-
-        output.Write("\",\"@mt\":");
-        JsonValueFormatter.WriteQuotedJsonString(logEvent.MessageTemplate.Text, output);
-
-        if (IsRenderingMessage)
-        {
-            output.Write(",\"@m\":");
-            var message = logEvent.MessageTemplate.Render(logEvent.Properties);
-            JsonValueFormatter.WriteQuotedJsonString(message, output);
-        }
-
-        var tokensWithFormat = logEvent.MessageTemplate.Tokens
-            .OfType<PropertyToken>()
-            .Where(pt => pt.Format != null);
-
-        // Better not to allocate an array in the 99.9% of cases where this is false
-        // ReSharper disable once PossibleMultipleEnumeration
-        if (tokensWithFormat.Any())
-        {
-            output.Write(",\"@r\":[");
-            var delim = string.Empty;
-            foreach (var r in tokensWithFormat)
-            {
-                output.Write(delim);
-                delim = ",";
-                var space = new StringWriter();
-                r.Render(logEvent.Properties, space);
-                JsonValueFormatter.WriteQuotedJsonString(space.ToString(), output);
-            }
-            output.Write(']');
-        }
-
         if (logEvent.Level != LogEventLevel.Information)
         {
-            output.Write(",\"@l\":\"");
-            output.Write(logEvent.Level);
-            output.Write('\"');
+            base.WriteLogLevel(logEvent, output);
         }
-
-        if (logEvent.Exception != null)
-        {
-            output.Write(",\"@x\":");
-            JsonValueFormatter.WriteQuotedJsonString(logEvent.Exception.ToString(), output);
-        }
-
-        if (logEvent.TraceId != null)
-        {
-            output.Write(",\"@tr\":\"");
-            output.Write(logEvent.TraceId.Value.ToHexString());
-            output.Write('\"');
-        }
-
-        if (logEvent.SpanId != null)
-        {
-            output.Write(",\"@sp\":\"");
-            output.Write(logEvent.SpanId.Value.ToHexString());
-            output.Write('\"');
-        }
-
-        foreach (var property in logEvent.Properties)
-        {
-            var name = property.Key;
-            if (name.Length > 0 && name[0] == '@')
-            {
-                // Escape first '@' by doubling
-                name = '@' + name;
-            }
-
-            output.Write(',');
-            JsonValueFormatter.WriteQuotedJsonString(name, output);
-            output.Write(':');
-            ValueFormatter.Instance.Format(property.Value, output);
-        }
-
-        output.Write('}');
     }
 
-    private static void LogNonFormattableEvent(LogEvent logEvent, Exception e)
+    /// <inheritdoc />
+    protected override void WriteTraceId(LogEvent logEvent, TextWriter output) =>
+        WriteProperty(TraceIdKey, logEvent.TraceId?.ToHexString() ?? "", output);
+
+    /// <inheritdoc />
+    protected override void WriteSpanId(LogEvent logEvent, TextWriter output) =>
+        WriteProperty(SpanIdKey, logEvent.SpanId?.ToHexString() ?? "", output);
+
+    /// <inheritdoc />
+    protected override void WritePropertyValue(
+        string key,
+        LogEventPropertyValue value,
+        TextWriter output)
     {
-        SelfLog.WriteLine(
-            "Event at {0} with message template {1} could not be formatted into JSON and will be dropped: {2}",
-            logEvent.Timestamp.ToString("o"),
-            logEvent.MessageTemplate.Text,
-            e);
+        if (key.Length > 0 && key[0] == '@')
+        {
+            // Escape first '@' by doubling
+            key = '@' + key;
+        }
+
+        base.WritePropertyValue(key, value, output);
+    }
+
+    /// <inheritdoc />
+    protected override void WriteProperties(LogEvent logEvent, TextWriter output)
+    {
+        foreach (var property in logEvent.Properties)
+        {
+            output.Write(DELIMITER);
+            WritePropertyValue(property.Key, property.Value, output);
+        }
+    }
+
+    /// <inheritdoc />
+    protected override void WriteRenderings(
+        IEnumerable<PropertyToken> tokensWithFormat,
+        IReadOnlyDictionary<string, LogEventPropertyValue> properties,
+        TextWriter output)
+    {
+        output.Write(DELIMITER);
+        JsonValueFormatter.WriteQuotedJsonString(RenderingsKey, output);
+        output.Write(SEPARATOR);
+        output.Write("[");
+        var delim = string.Empty;
+        foreach (var r in tokensWithFormat)
+        {
+            output.Write(delim);
+            delim = DELIMITER;
+            var space = new StringWriter();
+            r.Render(properties, space);
+            JsonValueFormatter.WriteQuotedJsonString(space.ToString(), output);
+        }
+        output.Write(']');
     }
 }
