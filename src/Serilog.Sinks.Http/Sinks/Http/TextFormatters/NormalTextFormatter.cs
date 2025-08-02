@@ -201,7 +201,8 @@ public class NormalTextFormatter : ITextFormatter
         WriteProperty(SpanIdKey, logEvent.SpanId?.ToString() ?? "", output);
 
     /// <summary>
-    /// Writes the collection of properties to the output.
+    /// Writes the properties key and the collection of properties to the output. Is internally
+    /// calling <see cref="WritePropertiesValues"/> to write the collection.
     /// </summary>
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
@@ -218,7 +219,8 @@ public class NormalTextFormatter : ITextFormatter
     }
 
     /// <summary>
-    /// Writes the collection of properties to the output without the wrapped tag.
+    /// Is called by <see cref="WriteProperties"/> to write the collection of properties to the
+    /// output. Is internally calling <see cref="WritePropertyValue"/> to write the property.
     /// </summary>
     /// <param name="properties">The collection of log properties.</param>
     /// <param name="output">The output.</param>
@@ -238,7 +240,8 @@ public class NormalTextFormatter : ITextFormatter
     }
 
     /// <summary>
-    /// Writes the individual property and its values
+    /// Is called by <see cref="WritePropertiesValues"/> to write the individual property and its
+    /// value.
     /// </summary>
     /// <param name="key">The property name/key.</param>
     /// <param name="value">The property value.</param>
