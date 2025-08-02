@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Serilog.Sinks.Http.Private.IO;
@@ -9,24 +7,6 @@ using Shouldly;
 using Xunit;
 
 namespace Serilog.Sinks.Http.Private.Durable;
-
-public class BookmarkFileNameData : IEnumerable<object[]>
-{
-    private readonly List<object[]> _data =
-    [
-        ["SomeBuffer", Path.Combine("{CurrentDirectory}", "SomeBuffer.bookmark")],
-        [Path.Combine(".", "SomeBuffer"), Path.Combine("{CurrentDirectory}", "SomeBuffer.bookmark")],
-        [Path.Combine("Folder", "SomeBuffer"), Path.Combine("{CurrentDirectory}", "Folder", "SomeBuffer.bookmark")],
-        [Path.Combine(".", "Folder", "SomeBuffer"), Path.Combine("{CurrentDirectory}", "Folder", "SomeBuffer.bookmark")],
-        [Path.Combine("..", "Folder", "SomeBuffer"), Path.Combine("{CurrentDirectory}", "..", "Folder", "SomeBuffer.bookmark")],
-        [Path.Combine(".", "..", "Folder", "SomeBuffer"), Path.Combine("{CurrentDirectory}", "..", "Folder", "SomeBuffer.bookmark")],
-        [Path.Combine("C:", "SomeBuffer"), Path.Combine("C:", "SomeBuffer.bookmark")],
-        [Path.Combine("C:", "Folder", "SomeBuffer"), Path.Combine("C:", "Folder", "SomeBuffer.bookmark")],
-    ];
-
-    public IEnumerator<object[]> GetEnumerator() => _data.GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-}
 
 public class FileSizeRolledBufferFilesShould
 {
@@ -254,8 +234,7 @@ public class FileSizeRolledBufferFilesShould
         {
             // "json" extension was used < v8
             "SomeBuffer-20001020_9999.json",
-
-           "SomeBuffer-20001020_10000.json",
+            "SomeBuffer-20001020_10000.json",
             "SomeBuffer-20001020_10001.json",
             // "txt" is used from >= v8
             "SomeBuffer-20001020_001.txt",
