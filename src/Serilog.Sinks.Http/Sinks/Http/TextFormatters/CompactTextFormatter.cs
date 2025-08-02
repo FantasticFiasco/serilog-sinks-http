@@ -83,11 +83,9 @@ public class CompactTextFormatter : NormalTextFormatter
     }
 
     /// <inheritdoc />
-    protected override void WriteProperties(
-        IReadOnlyDictionary<string, LogEventPropertyValue> properties,
-        TextWriter output)
+    protected override void WriteProperties(LogEvent logEvent, TextWriter output)
     {
-        foreach (var property in properties)
+        foreach (var property in logEvent.Properties)
         {
             output.Write(DELIMITER);
             WritePropertyValue(property.Key, property.Value, output);

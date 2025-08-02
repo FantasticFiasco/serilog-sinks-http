@@ -205,24 +205,14 @@ public class NormalTextFormatter : ITextFormatter
     /// </summary>
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
-    protected virtual void WriteProperties(LogEvent logEvent, TextWriter output) =>
-        WriteProperties(logEvent.Properties, output);
-
-    /// <summary>
-    /// Writes the collection of properties to the output.
-    /// </summary>
-    /// <param name="properties">The collection of log properties.</param>
-    /// <param name="output">The output.</param>
-    protected virtual void WriteProperties(
-        IReadOnlyDictionary<string, LogEventPropertyValue> properties,
-        TextWriter output)
+    protected virtual void WriteProperties(LogEvent logEvent, TextWriter output)
     {
         output.Write(DELIMITER);
         JsonValueFormatter.WriteQuotedJsonString(PropertiesKey, output);
         output.Write(SEPARATOR);
         output.Write("{");
 
-        WritePropertiesValues(properties, output);
+        WritePropertiesValues(logEvent.Properties, output);
 
         output.Write('}');
     }
