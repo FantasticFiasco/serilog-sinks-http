@@ -145,6 +145,16 @@ public class NormalTextFormatter : ITextFormatter
     }
 
     /// <summary>
+    /// Gets the collection of tokens with formatting.
+    /// </summary>
+    /// <param name="logEvent">The log event.</param>
+    /// <returns>The collection of found tokens.</returns>
+    protected static IEnumerable<PropertyToken> GetTokensWithFormat(LogEvent logEvent) =>
+        logEvent.MessageTemplate.Tokens
+            .OfType<PropertyToken>()
+            .Where(pt => pt.Format != null);
+
+    /// <summary>
     /// Writes the timestamp in UTC format to the output.
     /// </summary>
     /// <param name="logEvent">The event to format.</param>
@@ -255,16 +265,6 @@ public class NormalTextFormatter : ITextFormatter
         output.Write(SEPARATOR);
         ValueFormatter.Instance.Format(value, output);
     }
-
-    /// <summary>
-    /// Gets the collection of tokens with formatting.
-    /// </summary>
-    /// <param name="logEvent">The log event.</param>
-    /// <returns>The collection of found tokens.</returns>
-    protected virtual IEnumerable<PropertyToken> GetTokensWithFormat(LogEvent logEvent) =>
-        logEvent.MessageTemplate.Tokens
-            .OfType<PropertyToken>()
-            .Where(pt => pt.Format != null);
 
     /// <summary>
     /// Writes the items with rendering formats to the output.
