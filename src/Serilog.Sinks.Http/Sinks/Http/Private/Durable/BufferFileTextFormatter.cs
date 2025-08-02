@@ -27,11 +27,11 @@ namespace Serilog.Sinks.Http.Private.Durable;
 /// <seealso cref="ITextFormatter" />
 public class BufferFileTextFormatter : ITextFormatter
 {
-    private readonly ITextFormatter _textFormatter;
+    private readonly ITextFormatter textFormatter;
 
     public BufferFileTextFormatter(ITextFormatter textFormatter)
     {
-        _textFormatter = textFormatter;
+        this.textFormatter = textFormatter;
     }
 
     /// <summary>
@@ -42,7 +42,7 @@ public class BufferFileTextFormatter : ITextFormatter
     public void Format(LogEvent logEvent, TextWriter output)
     {
         var buffer = new StringWriter();
-        _textFormatter.Format(logEvent, buffer);
+        textFormatter.Format(logEvent, buffer);
 
         var logEntry = buffer.ToString();
 

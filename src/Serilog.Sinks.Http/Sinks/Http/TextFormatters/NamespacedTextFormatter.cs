@@ -82,7 +82,6 @@ public abstract class NamespacedTextFormatter : NormalTextFormatter
 
             WritePropertiesValues(messageTemplateProperties, output);
 
-            // Better not to allocate an array in the 99.9% of cases where this is false
             var tokensWithFormat = GetTokensWithFormat(logEvent);
 
             // ReSharper disable once PossibleMultipleEnumeration
