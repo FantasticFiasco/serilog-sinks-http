@@ -61,11 +61,11 @@ public class CompactTextFormatter : NormalTextFormatter
 
     /// <inheritdoc />
     protected override void WriteTraceId(LogEvent logEvent, TextWriter output) =>
-        Write(TraceIdKey, logEvent.TraceId?.ToHexString() ?? "", output);
+        WriteProperty(TraceIdKey, logEvent.TraceId?.ToHexString() ?? "", output);
 
     /// <inheritdoc />
     protected override void WriteSpanId(LogEvent logEvent, TextWriter output) =>
-        Write(SpanIdKey, logEvent.SpanId?.ToHexString() ?? "", output);
+        WriteProperty(SpanIdKey, logEvent.SpanId?.ToHexString() ?? "", output);
 
     /// <inheritdoc />
     protected override void WritePropertyValue(

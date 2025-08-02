@@ -135,7 +135,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="value">The JSON value.</param>
     /// <param name="output">The output.</param>
     /// <param name="delimStart">The preceding delimiter.</param>
-    protected static void Write(string key, string value, TextWriter output, string delimStart = DELIMITER)
+    protected static void WriteProperty(string key, string value, TextWriter output, string delimStart = DELIMITER)
     {
         output.Write(delimStart);
 
@@ -144,63 +144,13 @@ public class NormalTextFormatter : ITextFormatter
         JsonValueFormatter.WriteQuotedJsonString(value, output);
     }
 
-    private void FormatContent(LogEvent logEvent, TextWriter output)
-    {
-        if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
-        if (output == null) throw new ArgumentNullException(nameof(output));
-
-        output.Write("{");
-
-        // Timestamp must be first as it does not have a preceding delimiter
-        WriteTimestamp(logEvent, output);
-        WriteLogLevel(logEvent, output);
-        WriteMessageTemplate(logEvent, output);
-
-        if (IsRenderingMessage)
-        {
-            WriteRenderedMessage(logEvent, output);
-        }
-
-        if (logEvent.Exception != null)
-        {
-            WriteException(logEvent, output);
-        }
-
-        if (logEvent.TraceId != null)
-        {
-            WriteTraceId(logEvent, output);
-        }
-
-        if (logEvent.SpanId != null)
-        {
-            WriteSpanId(logEvent, output);
-        }
-
-        if (logEvent.Properties.Count != 0)
-        {
-            WriteProperties(logEvent, output);
-        }
-
-        // Better not to allocate an array in the 99.9% of cases where this is false
-        var tokensWithFormat = GetTokensWithFormat(logEvent);
-
-        // ReSharper disable once PossibleMultipleEnumeration
-        if (tokensWithFormat.Any())
-        {
-            // ReSharper disable once PossibleMultipleEnumeration
-            WriteRenderings(tokensWithFormat, logEvent.Properties, output);
-        }
-
-        output.Write('}');
-    }
-
     /// <summary>
     /// Writes the timestamp in UTC format to the output.
     /// </summary>
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteTimestamp(LogEvent logEvent, TextWriter output) =>
-        Write(TimestampKey, logEvent.Timestamp.UtcDateTime.ToString("O"), output, string.Empty);
+        WriteProperty(TimestampKey, logEvent.Timestamp.UtcDateTime.ToString("O"), output, string.Empty);
 
     /// <summary>
     /// Writes the log level to the output.
@@ -208,7 +158,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteLogLevel(LogEvent logEvent, TextWriter output) =>
-        Write(LevelKey, logEvent.Level.ToString(), output);
+        WriteProperty(LevelKey, logEvent.Level.ToString(), output);
 
     /// <summary>
     /// Writes the message template to the output.
@@ -216,7 +166,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteMessageTemplate(LogEvent logEvent, TextWriter output) =>
-        Write(MessageTemplateKey, logEvent.MessageTemplate.Text, output);
+        WriteProperty(MessageTemplateKey, logEvent.MessageTemplate.Text, output);
 
     /// <summary>
     /// Writes the rendered message to the output.
@@ -224,7 +174,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteRenderedMessage(LogEvent logEvent, TextWriter output) =>
-        Write(RenderedMessageKey, logEvent.MessageTemplate.Render(logEvent.Properties), output);
+        WriteProperty(RenderedMessageKey, logEvent.MessageTemplate.Render(logEvent.Properties), output);
 
     /// <summary>
     /// Writes the exception to the output.
@@ -232,7 +182,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteException(LogEvent logEvent, TextWriter output) =>
-        Write(ExceptionKey, logEvent.Exception?.ToString() ?? "", output);
+        WriteProperty(ExceptionKey, logEvent.Exception?.ToString() ?? "", output);
 
     /// <summary>
     /// Writes the Trace ID to the output.
@@ -240,7 +190,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteTraceId(LogEvent logEvent, TextWriter output) =>
-        Write(TraceIdKey, logEvent.TraceId?.ToString() ?? "", output);
+        WriteProperty(TraceIdKey, logEvent.TraceId?.ToString() ?? "", output);
 
     /// <summary>
     /// Writes the Span ID to the output.
@@ -248,7 +198,7 @@ public class NormalTextFormatter : ITextFormatter
     /// <param name="logEvent">The event to format.</param>
     /// <param name="output">The output.</param>
     protected virtual void WriteSpanId(LogEvent logEvent, TextWriter output) =>
-        Write(SpanIdKey, logEvent.SpanId?.ToString() ?? "", output);
+        WriteProperty(SpanIdKey, logEvent.SpanId?.ToString() ?? "", output);
 
     /// <summary>
     /// Writes the collection of properties to the output.
@@ -276,7 +226,6 @@ public class NormalTextFormatter : ITextFormatter
 
         output.Write('}');
     }
-
 
     /// <summary>
     /// Writes the collection of properties to the output without the wrapped tag.
@@ -373,8 +322,8 @@ public class NormalTextFormatter : ITextFormatter
 
                 output.Write("{");
 
-                Write(RenderingsFormatKey, format.Format ?? "\"\"", output, delimStart: string.Empty);
-                Write(RenderingsRenderingKey, sw.ToString(), output);
+                WriteProperty(RenderingsFormatKey, format.Format ?? "\"\"", output, delimStart: string.Empty);
+                WriteProperty(RenderingsRenderingKey, sw.ToString(), output);
 
                 output.Write('}');
             }
@@ -392,5 +341,55 @@ public class NormalTextFormatter : ITextFormatter
             logEvent.Timestamp.ToString("o"),
             logEvent.MessageTemplate.Text,
             e);
+    }
+
+    private void FormatContent(LogEvent logEvent, TextWriter output)
+    {
+        if (logEvent == null) throw new ArgumentNullException(nameof(logEvent));
+        if (output == null) throw new ArgumentNullException(nameof(output));
+
+        output.Write("{");
+
+        // Timestamp must be first as it does not have a preceding delimiter
+        WriteTimestamp(logEvent, output);
+        WriteLogLevel(logEvent, output);
+        WriteMessageTemplate(logEvent, output);
+
+        if (IsRenderingMessage)
+        {
+            WriteRenderedMessage(logEvent, output);
+        }
+
+        if (logEvent.Exception != null)
+        {
+            WriteException(logEvent, output);
+        }
+
+        if (logEvent.TraceId != null)
+        {
+            WriteTraceId(logEvent, output);
+        }
+
+        if (logEvent.SpanId != null)
+        {
+            WriteSpanId(logEvent, output);
+        }
+
+        if (logEvent.Properties.Count != 0)
+        {
+            WriteProperties(logEvent, output);
+        }
+
+        // Better not to allocate an array in the 99.9% of cases where this is false
+        var tokensWithFormat = GetTokensWithFormat(logEvent);
+
+        // ReSharper disable once PossibleMultipleEnumeration
+        if (tokensWithFormat.Any())
+        {
+            // ReSharper disable once PossibleMultipleEnumeration
+            WriteRenderings(tokensWithFormat, logEvent.Properties, output);
+        }
+
+        output.Write('}');
     }
 }
