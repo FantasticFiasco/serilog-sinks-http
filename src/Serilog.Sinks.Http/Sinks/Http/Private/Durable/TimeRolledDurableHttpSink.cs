@@ -17,7 +17,6 @@ using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
 using Serilog.Sinks.Http.Private.IO;
-using Serilog.Sinks.Http.TextFormatters;
 
 namespace Serilog.Sinks.Http.Private.Durable;
 
@@ -59,7 +58,7 @@ public class TimeRolledDurableHttpSink : ILogEventSink, IDisposable
             bufferFileSizeLimitBytes,
             bufferFileShared,
             retainedBufferFileCountLimit,
-            new FileTextFormatter(textFormatter));
+            new BufferFileTextFormatter(textFormatter));
     }
 
     public void Emit(LogEvent logEvent)

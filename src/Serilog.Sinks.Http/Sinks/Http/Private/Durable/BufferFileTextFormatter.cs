@@ -17,7 +17,7 @@ using System.IO;
 using Serilog.Events;
 using Serilog.Formatting;
 
-namespace Serilog.Sinks.Http.TextFormatters;
+namespace Serilog.Sinks.Http.Private.Durable;
 
 /// <summary>
 /// This is a wrapper around the passed in <see cref="ITextFormatter"/>. This will ensure
@@ -25,15 +25,11 @@ namespace Serilog.Sinks.Http.TextFormatters;
 /// The main point here is that each entry is written to the output on a new line.
 /// </summary>
 /// <seealso cref="ITextFormatter" />
-public class FileTextFormatter : ITextFormatter
+public class BufferFileTextFormatter : ITextFormatter
 {
     private readonly ITextFormatter _textFormatter;
 
-    /// <summary>
-    /// Default Constructor used to setup the file formatter.
-    /// </summary>
-    /// <param name="textFormatter"></param>
-    public FileTextFormatter(ITextFormatter textFormatter)
+    public BufferFileTextFormatter(ITextFormatter textFormatter)
     {
         _textFormatter = textFormatter;
     }
