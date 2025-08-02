@@ -58,7 +58,7 @@ public class TimeRolledDurableHttpSink : ILogEventSink, IDisposable
             bufferFileSizeLimitBytes,
             bufferFileShared,
             retainedBufferFileCountLimit,
-            textFormatter);
+            new BufferFileTextFormatter(textFormatter));
     }
 
     public void Emit(LogEvent logEvent)
@@ -68,8 +68,17 @@ public class TimeRolledDurableHttpSink : ILogEventSink, IDisposable
 
     public void Dispose()
     {
-        (sink as IDisposable)?.Dispose();
-        shipper.Dispose();
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            (sink as IDisposable)?.Dispose();
+            shipper.Dispose();
+        }
     }
 
     private static ILogEventSink CreateFileSink(
