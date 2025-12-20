@@ -36,7 +36,7 @@ jobs:
           name: nuget
           path: artifacts
       - run: dotnet nuget push .\artifacts\*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@v8
         with:
           script: |
             const script = require('./scripts/create-release.js')
