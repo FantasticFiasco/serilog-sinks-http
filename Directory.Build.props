@@ -4,7 +4,7 @@
     <VersionPrefix>9.2.0</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <Authors>Mattias Kindborg</Authors>
-    <Copyright>Copyright 2015-2025 Serilog Contributors</Copyright>
+    <Copyright>Copyright 2015-2026 Serilog Contributors</Copyright>
     <Company />
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <NoWarn>1591;NU5105</NoWarn>
